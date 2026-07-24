@@ -1,0 +1,6 @@
+{
+  "name": "ViralToolAI",
+  "description": "ViralToolAI - From Products to Popularity. Premium AI Shopping & Creator Studio",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

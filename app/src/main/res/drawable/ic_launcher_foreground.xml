@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer Ambient Emerald Halo Glow -->
+    <path
+        android:pathData="M 28,28 C 28,18 36,10 46,10 L 62,10 C 72,10 80,18 80,28 L 80,80 C 80,90 72,98 62,98 L 46,98 C 36,98 28,90 28,80 Z"
+        android:fillColor="#2210B981" />
+
+    <!-- Shopping Bag Handle -->
+    <path
+        android:pathData="M44,32 C44,22 49,18 54,18 C59,18 64,22 64,32"
+        android:strokeWidth="4"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+    <!-- Dark Glassmorphic Shopping Bag Body -->
+    <path
+        android:pathData="M34,32 L74,32 L80,84 C80,88 76,92 72,92 L36,92 C32,92 28,88 28,84 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="34"
+                android:startY="32"
+                android:endX="80"
+                android:endY="92"
+                android:type="linear">
+                <item android:color="#FF16221B" android:offset="0.0" />
+                <item android:color="#FF0B120D" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Emerald Outline Accent -->
+    <path
+        android:pathData="M34,32 L74,32 L80,84 C80,88 76,92 72,92 L36,92 C32,92 28,88 28,84 Z"
+        android:strokeWidth="1.8"
+        android:strokeColor="#10B981"/>
+
+    <!-- Neon Green Play Triangle Center -->
+    <path
+        android:pathData="M48,46 L64,56 L48,66 Z"
+        android:fillColor="#10B981"/>
+
+    <!-- Growth Chart Bars & Orbit -->
+    <path
+        android:pathData="M36,78 L36,73 M41,78 L41,68 M46,78 L46,62"
+        android:strokeWidth="2.8"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+    <path
+        android:pathData="M26,82 Q 54,100 82,70"
+        android:strokeWidth="3.2"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+</vector>

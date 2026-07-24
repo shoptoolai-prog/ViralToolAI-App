@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Dark Glassmorphic Base Container -->
+    <path
+        android:pathData="M20,24 C20,12.95 28.95,4 40,4 L80,4 C91.05,4 100,12.95 100,24 L100,96 C100,107.05 91.05,116 80,116 L40,116 C28.95,116 20,107.05 20,96 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="20"
+                android:startY="4"
+                android:endX="100"
+                android:endY="116"
+                android:type="linear">
+                <item android:color="#FF161E1A" android:offset="0.0" />
+                <item android:color="#FF080C09" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Outer Green Glow Border -->
+    <path
+        android:pathData="M20,24 C20,12.95 28.95,4 40,4 L80,4 C91.05,4 100,12.95 100,24 L100,96 C100,107.05 91.05,116 80,116 L40,116 C28.95,116 20,107.05 20,96 Z"
+        android:strokeWidth="2.5"
+        android:strokeColor="#10B981"/>
+
+    <!-- Shopping Bag Handle -->
+    <path
+        android:pathData="M46,36 C46,26 52,20 60,20 C68,20 74,26 74,36"
+        android:strokeWidth="5"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+    <!-- Shopping Bag Body Contour -->
+    <path
+        android:pathData="M34,36 L86,36 L92,94 C92,98 88,102 84,102 L36,102 C32,102 28,98 28,94 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="34"
+                android:startY="36"
+                android:endX="92"
+                android:endY="102"
+                android:type="linear">
+                <item android:color="#FF111B15" android:offset="0.0" />
+                <item android:color="#FF070C09" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Neon Play Triangle in Center -->
+    <path
+        android:pathData="M52,50 L76,64 L52,78 Z"
+        android:fillColor="#10B981"/>
+
+    <!-- Growth Chart Bars & Curved Accent -->
+    <path
+        android:pathData="M38,82 L38,76 M44,82 L44,70 M50,82 L50,64"
+        android:strokeWidth="3.5"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+    <path
+        android:pathData="M28,88 Q 60,108 92,72"
+        android:strokeWidth="4"
+        android:strokeColor="#10B981"
+        android:strokeLineCap="round"/>
+
+</vector>

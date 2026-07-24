@@ -1,0 +1,2085 @@
+package com.example.ui.screens
+
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.example.creatoracademy.AiMentorEngine
+import com.example.creatoracademy.AiMentorTask
+import com.example.creatoracademy.CreatorAcademyPrefs
+import com.example.creatoracademy.CreatorLevel
+import com.example.creatoracademy.TaskState
+import com.example.creatoracademy.ViralMemoryEngine
+import com.example.ui.components.GlassCard
+import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.EmeraldPrimary
+import com.example.ui.theme.TextGray
+import com.example.ui.theme.TextWhite
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+/**
+ * MASTER PHASE 15B — AI Mentor Engine v1
+ * Transforms Creator Academy into an interactive AI Mentor:
+ * - Dynamic Mentor Dashboard (Today's Mission, Level, XP, Streak, % Progress, Est. Time)
+ * - Personalized Task Engine (Platform, Skill Level, Goal, Available Time)
+ * - 4-State Task Engine (Locked, Current, Completed, Skipped)
+ * - Interactive Task Verification (YES / NOT YET -> Explain, Example, Skip)
+ * - Conversational AI Coach Mode
+ * - Example Library (Good, Bad, Pro Tip, Common Mistake)
+ * - Progress System with Creator Levels (Bronze, Silver, Gold, Diamond, Legend)
+ * - Smart Welcome Back Reminders & Session Memory
+ * - Premium Micro-Animations under 1 second
+ */
+@Composable
+fun CreatorAcademyScreen(
+    onSwitchExperience: () -> Unit,
+    onResetSetup: () -> Unit
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val setupData = remember { CreatorAcademyPrefs.getSetupData(context) }
+    var selectedPlatform by remember { mutableStateOf("INSTAGRAM") } // INSTAGRAM, YOUTUBE, VIDEO_EDITING
+    var showVideoEditingLockedDialog by remember { mutableStateOf(false) }
+    var showBrandCollabDialog by remember { mutableStateOf(false) }
+    var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
+
+    var activeToolDialog by remember { mutableStateOf<String?>(null) }
+    var activeLinkDialog by remember { mutableStateOf<String?>(null) }
+    var showContentStudioDialog by remember { mutableStateOf(false) }
+    var showBusinessHubDialog by remember { mutableStateOf(false) }
+
+    var xpPoints by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.getXpPoints(context, selectedPlatform)) }
+    var currentTaskIndex by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.getCurrentTaskIndex(context, selectedPlatform)) }
+    var streakDays by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.getStreakDays(context, selectedPlatform)) }
+    var isReminderDismissed by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.isReminderDismissed(context, selectedPlatform)) }
+
+    var completedTaskIds by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.getCompletedTasks(context, selectedPlatform)) }
+    var skippedTaskIds by remember(selectedPlatform) { mutableStateOf(CreatorAcademyPrefs.getSkippedTasks(context, selectedPlatform)) }
+
+    var showWelcomeBackDialog by remember {
+        mutableStateOf(ViralMemoryEngine.hasPreviousSession(context) && !ViralMemoryEngine.isRememberWelcomeChoice(context))
+    }
+
+    // Dynamic tasks generated by AI Mentor Engine based on user profile & path
+    val mentorTasks = remember(selectedPlatform, setupData, currentTaskIndex, completedTaskIds, skippedTaskIds) {
+        AiMentorEngine.generatePersonalizedTasks(
+            platform = selectedPlatform,
+            setupData = setupData,
+            currentTaskIndex = currentTaskIndex,
+            completedTaskIds = completedTaskIds,
+            skippedTaskIds = skippedTaskIds
+        )
+    }
+
+    val activeTask = mentorTasks.firstOrNull { it.state == TaskState.CURRENT }
+        ?: mentorTasks.lastOrNull()
+
+    // Micro animation trigger for task verification
+    var showCelebration by remember { mutableStateOf(false) }
+    val celebrationScale = remember { Animatable(0.8f) }
+
+    fun triggerVerificationCelebration() {
+        coroutineScope.launch {
+            showCelebration = true
+            celebrationScale.snapTo(0.7f)
+            celebrationScale.animateTo(
+                targetValue = 1.15f,
+                animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessHigh)
+            )
+            celebrationScale.animateTo(
+                targetValue = 1.0f,
+                animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)
+            )
+            delay(800) // Under 1 second micro celebration
+            showCelebration = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AmoledBlack)
+            .statusBarsPadding()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 110.dp)
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ==================================================
+            // 1. TOP HEADER & BRANDING BAR
+            // ==================================================
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x2210B981))
+                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.School,
+                                contentDescription = "Academy",
+                                tint = EmeraldPrimary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Creator Academy AI",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite,
+                            letterSpacing = (-0.5).sp
+                        )
+                    }
+                    Text(
+                        text = "Learn. Create. Grow.",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = EmeraldPrimary,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(start = 40.dp)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Switch Experience Button
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x15FFFFFF))
+                            .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(12.dp))
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onSwitchExperience()
+                            }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.SwapHoriz,
+                                contentDescription = "Switch",
+                                tint = TextWhite,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Switch",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                        }
+                    }
+
+                    // Re-setup Settings Button
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x15FFFFFF))
+                            .border(BorderStroke(1.dp, Color(0x22FFFFFF)), CircleShape)
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onResetSetup()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Setup",
+                            tint = TextWhite.copy(alpha = 0.8f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==================================================
+            // 2. SMART REMINDER BANNER (SESSION MEMORY)
+            // ==================================================
+            if (!isReminderDismissed && activeTask != null && activeTask.state == TaskState.CURRENT) {
+                SmartReminderCard(
+                    taskNumber = activeTask.stepNumber,
+                    taskTitle = activeTask.title,
+                    platform = selectedPlatform,
+                    onContinue = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        CreatorAcademyPrefs.setReminderDismissed(context, selectedPlatform, true)
+                        isReminderDismissed = true
+                        Toast.makeText(context, "🎯 Continuing Lesson #${activeTask.stepNumber}", Toast.LENGTH_SHORT).show()
+                    },
+                    onDismiss = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        CreatorAcademyPrefs.setReminderDismissed(context, selectedPlatform, true)
+                        isReminderDismissed = true
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // ==================================================
+            // 3. DYNAMIC AI MENTOR DASHBOARD
+            // ==================================================
+            MentorDashboardCard(
+                xpPoints = xpPoints,
+                streakDays = streakDays,
+                setupData = setupData,
+                selectedPlatform = selectedPlatform,
+                currentTaskIndex = currentTaskIndex,
+                totalTasks = mentorTasks.size,
+                currentTask = activeTask
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==================================================
+            // 3B. VIRAL AI MEMORY ENGINE CARD (MASTER PHASE 16)
+            // ==================================================
+            com.example.ui.components.AiMemoryCard(
+                xpPoints = xpPoints,
+                streakDays = streakDays,
+                setupData = setupData,
+                completedTasksCount = completedTaskIds.size,
+                onXpGained = {
+                    xpPoints = CreatorAcademyPrefs.getXpPoints(context, selectedPlatform)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ==================================================
+            // 4. CHOOSE LEARNING PATH
+            // ==================================================
+            Text(
+                text = "CHOOSE LEARNING PATH",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextWhite.copy(alpha = 0.5f),
+                letterSpacing = 1.5.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Instagram Creator
+                PlatformOptionCard(
+                    title = "Instagram Creator",
+                    subtitle = "Reels, Bio, Hashtags & Growth Secrets",
+                    badge = "ACTIVE PATH",
+                    isSelected = selectedPlatform == "INSTAGRAM",
+                    isLocked = false,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedPlatform = "INSTAGRAM"
+                    }
+                )
+
+                // YouTube Creator
+                PlatformOptionCard(
+                    title = "YouTube Creator",
+                    subtitle = "Shorts, Long-form SEO & Channel Monetization",
+                    badge = "ACTIVE PATH",
+                    isSelected = selectedPlatform == "YOUTUBE",
+                    isLocked = false,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedPlatform = "YOUTUBE"
+                    }
+                )
+
+                // Brand Collaboration AI Mentor
+                PlatformOptionCard(
+                    title = "Brand Collaboration AI",
+                    subtitle = "Sponsorship Deals, Pitching, Media Kit & Contracts",
+                    badge = "🔒 COMING SOON",
+                    isSelected = false,
+                    isLocked = true,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "brand_collab_ai" }
+                    }
+                )
+
+                // Affiliate Master AI (LOCKED)
+                PlatformOptionCard(
+                    title = "Affiliate Master AI",
+                    subtitle = "Meesho & E-Commerce Affiliate Creator Journey",
+                    badge = "🔒 COMING SOON",
+                    isSelected = false,
+                    isLocked = true,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "affiliate_master_ai" }
+                    }
+                )
+
+                // Video Editing Academy (LOCKED)
+                PlatformOptionCard(
+                    title = "Video Editing Academy",
+                    subtitle = "CapCut, VN, Sound Design & Freelancing",
+                    badge = "🔒 COMING SOON",
+                    isSelected = false,
+                    isLocked = true,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "video_editing_academy" }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 5. AI COACH MODE — CURRENT TASK & VERIFICATION ENGINE
+            // ==================================================
+            if (activeTask != null) {
+                AiCoachTaskCard(
+                    task = activeTask,
+                    totalTasks = mentorTasks.size,
+                    onVerifyYes = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        triggerVerificationCelebration()
+
+                        // Update state
+                        xpPoints = CreatorAcademyPrefs.addXpPoints(context, activeTask.xpReward, selectedPlatform)
+                        streakDays = CreatorAcademyPrefs.incrementStreak(context, selectedPlatform)
+                        CreatorAcademyPrefs.markTaskCompleted(context, activeTask.id, selectedPlatform)
+                        CreatorAcademyPrefs.advanceTaskIndex(context, selectedPlatform)
+
+                        // Save lesson progress in Viral Memory Engine (MASTER PHASE 16)
+                        val nextTask = mentorTasks.getOrNull(currentTaskIndex + 1)
+                        ViralMemoryEngine.saveLessonProgress(
+                            context = context,
+                            lastCompleted = activeTask.title,
+                            nextLesson = nextTask?.title ?: "Mastery Complete!"
+                        )
+
+                        completedTaskIds = CreatorAcademyPrefs.getCompletedTasks(context, selectedPlatform)
+                        currentTaskIndex++
+                    },
+                    onSkipTask = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        CreatorAcademyPrefs.markTaskSkipped(context, activeTask.id, selectedPlatform)
+                        CreatorAcademyPrefs.advanceTaskIndex(context, selectedPlatform)
+
+                        skippedTaskIds = CreatorAcademyPrefs.getSkippedTasks(context, selectedPlatform)
+                        currentTaskIndex++
+                        Toast.makeText(context, "⏩ Task Skipped. Moving to next lesson.", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                MasteryCompletedCard(selectedPlatform = selectedPlatform)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 6. PERSONALIZED CREATOR ROADMAP (TASKS & STATES)
+            // ==================================================
+            PersonalizedRoadmapSection(
+                mentorTasks = mentorTasks,
+                selectedPlatform = selectedPlatform,
+                currentTaskIndex = currentTaskIndex
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 6B. MASTER PHASE 17 — AI CONTENT STUDIO CARD
+            // ==================================================
+            com.example.ui.components.AiContentStudioCard(
+                onLaunchStudio = {
+                    showContentStudioDialog = true
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 6C. MASTER PHASE 18 — CREATOR BUSINESS HUB CARD
+            // ==================================================
+            com.example.ui.components.CreatorBusinessHubCard(
+                onLaunchHub = {
+                    showBusinessHubDialog = true
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 7. AI CREATOR TOOLKIT (CONTEXT-AWARE)
+            // ==================================================
+            AiCreatorToolsSection(
+                setupData = setupData,
+                onOpenTool = { toolName ->
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    activeToolDialog = toolName
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // 8. FUTURE READY LINK ANALYSIS
+            // ==================================================
+            FutureReadySection(
+                onOpenLinkAnalysis = { type ->
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    activeLinkDialog = type
+                }
+            )
+        }
+
+        // Active Tool Dialogs
+        when (activeToolDialog) {
+            "Caption Generator" -> CaptionGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
+            "Hashtag Generator" -> HashtagGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
+            "Hook Generator" -> HookGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
+            "Content Planner" -> ContentPlannerDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
+            "Posting Checklist" -> PostingChecklistDialog(onDismiss = { activeToolDialog = null })
+            "Brand Pitch Guide" -> BrandPitchGuideDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
+        }
+
+        // Active Link Analysis Dialogs
+        if (activeLinkDialog != null) {
+            LinkAnalysisDialog(type = activeLinkDialog!!, onDismiss = { activeLinkDialog = null })
+        }
+
+        // MASTER PHASE 17 — AI Content Studio Dialog
+        if (showContentStudioDialog) {
+            com.example.ui.components.AiContentStudioDialog(
+                setupData = setupData,
+                onDismiss = { showContentStudioDialog = false }
+            )
+        }
+
+        // MASTER PHASE 18 — Creator Business Hub Dialog
+        if (showBusinessHubDialog) {
+            com.example.ui.components.CreatorBusinessHubDialog(
+                setupData = setupData,
+                onDismiss = { showBusinessHubDialog = false }
+            )
+        }
+
+        // ==================================================
+        // MICRO-CELEBRATION ANIMATION OVERLAY (<1s Apple-inspired)
+        // ==================================================
+        if (showCelebration) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x88000000)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .scale(celebrationScale.value)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(
+                            Brush.radialGradient(
+                                listOf(EmeraldPrimary, Color(0xFF0F382A), Color(0xFF13131E))
+                            )
+                        )
+                        .border(BorderStroke(2.dp, EmeraldPrimary), RoundedCornerShape(24.dp))
+                        .padding(horizontal = 32.dp, vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Success",
+                                tint = EmeraldPrimary,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "+100 XP EARNED!",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite,
+                            letterSpacing = 1.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "🎯 Lesson Unlocked • Streak Active!",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+        }
+
+        // ==================================================
+        // LOCKED PREMIUM POPUP DIALOG
+        // ==================================================
+        if (showVideoEditingLockedDialog) {
+            VideoEditingLockedDialog(
+                onDismiss = { showVideoEditingLockedDialog = false }
+            )
+        }
+
+        if (showBrandCollabDialog) {
+            com.example.creatoracademy.BrandCollaborationAiDialog(
+                onDismiss = { showBrandCollabDialog = false }
+            )
+        }
+
+        selectedPremiumTool?.let { tool ->
+            com.example.ui.components.CommonPremiumToolPopupDialog(
+                tool = tool,
+                onDismiss = { selectedPremiumTool = null }
+            )
+        }
+
+        // Welcome Back Experience Dialog (MASTER PHASE 16)
+        if (showWelcomeBackDialog) {
+            com.example.ui.components.WelcomeBackDialog(
+                onContinue = {
+                    showWelcomeBackDialog = false
+                },
+                onStartFresh = {
+                    showWelcomeBackDialog = false
+                    onResetSetup()
+                },
+                onDismiss = {
+                    showWelcomeBackDialog = false
+                }
+            )
+        }
+    }
+}
+
+// ====================================================================
+// SMART REMINDER CARD
+// ====================================================================
+@Composable
+private fun SmartReminderCard(
+    taskNumber: Int,
+    taskTitle: String,
+    platform: String,
+    onContinue: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(18.dp), spotColor = EmeraldPrimary)
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(Color(0xFF0A2E23), Color(0xFF131322))
+                )
+            )
+            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(18.dp))
+            .padding(14.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(EmeraldPrimary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Welcome Back",
+                            tint = AmoledBlack,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "WELCOME BACK, CREATOR!",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = EmeraldPrimary,
+                        letterSpacing = 1.sp
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = TextWhite.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable { onDismiss() }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Ready to continue Lesson #$taskNumber ($platform)?",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextWhite
+            )
+
+            Text(
+                text = taskTitle,
+                fontSize = 12.sp,
+                color = TextWhite.copy(alpha = 0.7f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(EmeraldPrimary)
+                        .clickable { onContinue() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "CONTINUE LESSON",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = AmoledBlack
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            tint = AmoledBlack,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(Color(0x15FFFFFF))
+                        .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(18.dp))
+                        .clickable { onDismiss() }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "LATER",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ====================================================================
+// DYNAMIC AI MENTOR DASHBOARD CARD
+// ====================================================================
+@Composable
+private fun MentorDashboardCard(
+    xpPoints: Int,
+    streakDays: Int,
+    setupData: com.example.creatoracademy.CreatorSetupData,
+    selectedPlatform: String,
+    currentTaskIndex: Int,
+    totalTasks: Int,
+    currentTask: AiMentorTask?
+) {
+    val creatorLevel = CreatorLevel.getLevelForXp(xpPoints)
+    val levelProgress = ((xpPoints - creatorLevel.minXp).toFloat() / (creatorLevel.maxXp - creatorLevel.minXp).toFloat())
+        .coerceIn(0f, 1f)
+
+    val overallProgressPercent = if (totalTasks > 0) {
+        ((currentTaskIndex.toFloat() / totalTasks.toFloat()) * 100).toInt().coerceAtMost(100)
+    } else 0
+
+    val remainingTasks = (totalTasks - currentTaskIndex).coerceAtLeast(0)
+    val estCompletionText = if (remainingTasks > 0) "$remainingTasks lessons left (~${remainingTasks * 5} mins)" else "All lessons completed!"
+
+    GlassCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = creatorLevel.color.copy(alpha = 0.5f),
+        backgroundColor = Color(0x1210B981)
+    ) {
+        Column(modifier = Modifier.padding(6.dp)) {
+            // Header Row: Level Badge & XP
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(creatorLevel.color),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = creatorLevel.icon,
+                            contentDescription = creatorLevel.name,
+                            tint = AmoledBlack,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = creatorLevel.name,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${creatorLevel.badgeName} • ${setupData.skillLevel}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = creatorLevel.color,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Streak Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0x22FF9800))
+                            .border(BorderStroke(1.dp, Color(0x66FF9800)), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.LocalFireDepartment,
+                                contentDescription = "Streak",
+                                tint = Color(0xFFFF9800),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = "$streakDays Days",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFF9800)
+                            )
+                        }
+                    }
+
+                    // XP Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0x2210B981))
+                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "$xpPoints XP",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = EmeraldPrimary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Mentor Dashboard Metrics Grid
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Today's Mission & Current Skill
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "TODAY'S MISSION",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite.copy(alpha = 0.5f),
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = currentTask?.title ?: "Mastery Achieved",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "CURRENT SKILL",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite.copy(alpha = 0.5f),
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = currentTask?.skillCategory ?: "Advanced Strategy",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldPrimary,
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                // Goal & Est Completion
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Goal: ${setupData.primaryGoal}",
+                        fontSize = 11.sp,
+                        color = TextWhite.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Text(
+                        text = estCompletionText,
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextWhite.copy(alpha = 0.5f)
+                    )
+                }
+
+                // Overall Roadmap Progress Bar
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Roadmap Progress ($selectedPlatform)",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextWhite.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = "$overallProgressPercent%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = EmeraldPrimary
+                    )
+                }
+
+                LinearProgressIndicator(
+                    progress = { overallProgressPercent / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(CircleShape),
+                    color = EmeraldPrimary,
+                    trackColor = Color(0x22FFFFFF)
+                )
+            }
+        }
+    }
+}
+
+// ====================================================================
+// PLATFORM OPTION CARD
+// ====================================================================
+@Composable
+private fun PlatformOptionCard(
+    title: String,
+    subtitle: String,
+    badge: String,
+    isSelected: Boolean,
+    isLocked: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
+        label = "platformOptScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (isSelected) Color(0x2210B981) else Color(0x0AFFFFFF))
+            .border(
+                BorderStroke(if (isSelected) 1.5.dp else 1.dp, if (isSelected) EmeraldPrimary else Color(0x1AFFFFFF)),
+                RoundedCornerShape(18.dp)
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.foundation.LocalIndication.current,
+                onClick = onClick
+            )
+            .padding(14.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(if (isLocked) Color(0x11FFFFFF) else if (isSelected) EmeraldPrimary else Color(0x1AFFFFFF)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isLocked) Icons.Default.Lock else if (isSelected) Icons.Default.Check else Icons.Default.Videocam,
+                    contentDescription = title,
+                    tint = if (isLocked) TextWhite.copy(alpha = 0.5f) else if (isSelected) AmoledBlack else TextWhite,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isLocked) TextWhite.copy(alpha = 0.7f) else TextWhite
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isLocked) Color(0x22FF5252) else if (isSelected) Color(0x3310B981) else Color(0x1AFFFFFF))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = badge,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isLocked) Color(0xFFFF5252) else if (isSelected) EmeraldPrimary else TextWhite.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = TextWhite.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+// ====================================================================
+// AI COACH TASK & VERIFICATION ENGINE CARD
+// ====================================================================
+@Composable
+private fun AiCoachTaskCard(
+    task: AiMentorTask,
+    totalTasks: Int,
+    onVerifyYes: () -> Unit,
+    onSkipTask: () -> Unit
+) {
+    var showNotYetOptions by remember(task.id) { mutableStateOf(false) }
+    var showDetailedExplanation by remember(task.id) { mutableStateOf(false) }
+    var showExampleLibrary by remember(task.id) { mutableStateOf(true) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 12.dp, shape = RoundedCornerShape(22.dp), spotColor = EmeraldPrimary)
+            .clip(RoundedCornerShape(22.dp))
+            .background(Color(0xFF13131E))
+            .border(
+                BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary.copy(alpha = 0.6f), Color(0x1AFFFFFF)))),
+                RoundedCornerShape(22.dp)
+            )
+            .padding(18.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Header Bar: AI Coach Mode
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x2210B981)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Psychology,
+                            contentDescription = "AI Coach",
+                            tint = EmeraldPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "AI Mentor Coach",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
+                        )
+                        Text(
+                            text = "Step ${task.stepNumber} of $totalTasks • ${task.skillCategory}",
+                            fontSize = 10.5.sp,
+                            color = TextWhite.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0x2210B981))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = "CURRENT LESSON",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = EmeraldPrimary,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Conversational Mentor Speech Bubble
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0x0DFFFFFF))
+                    .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)), RoundedCornerShape(16.dp))
+                    .padding(14.dp)
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = EmeraldPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = task.title,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = task.coachMessage,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextWhite.copy(alpha = 0.9f),
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+
+            // Detailed Explanation Accordion (if expanded by Explain Again)
+            AnimatedVisibility(
+                visible = showDetailedExplanation,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(modifier = Modifier.padding(top = 10.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0x1800E5FF))
+                            .border(BorderStroke(1.dp, Color(0x4400E5FF)), RoundedCornerShape(14.dp))
+                            .padding(12.dp)
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.MenuBook,
+                                    contentDescription = null,
+                                    tint = Color(0xFF00E5FF),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Deep-Dive Mentor Explanation",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF00E5FF)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = task.detailExplanation,
+                                fontSize = 12.sp,
+                                color = TextWhite.copy(alpha = 0.85f),
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ==================================================
+            // EXAMPLE LIBRARY (GOOD vs BAD, PRO TIP, COMMON MISTAKE)
+            // ==================================================
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showExampleLibrary = !showExampleLibrary },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = "Example Library",
+                        tint = EmeraldPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "EXAMPLE LIBRARY & PRO TIPS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = EmeraldPrimary,
+                        letterSpacing = 0.8.sp
+                    )
+                }
+
+                Icon(
+                    imageVector = if (showExampleLibrary) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = EmeraldPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            AnimatedVisibility(
+                visible = showExampleLibrary,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Good Example Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x1510B981))
+                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.ThumbUp,
+                                    contentDescription = "Good Example",
+                                    tint = EmeraldPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "GOOD EXAMPLE",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = EmeraldPrimary
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = task.goodExample,
+                                fontSize = 11.5.sp,
+                                color = TextWhite,
+                                lineHeight = 15.sp
+                            )
+                        }
+                    }
+
+                    // Bad Example Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x15FF5252))
+                            .border(BorderStroke(1.dp, Color(0x44FF5252)), RoundedCornerShape(12.dp))
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.ThumbDown,
+                                    contentDescription = "Bad Example",
+                                    tint = Color(0xFFFF5252),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "BAD EXAMPLE",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFFFF5252)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = task.badExample,
+                                fontSize = 11.5.sp,
+                                color = TextWhite.copy(alpha = 0.85f),
+                                lineHeight = 15.sp
+                            )
+                        }
+                    }
+
+                    // Pro Tip & Common Mistake Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Pro Tip
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x10FFD700))
+                                .border(BorderStroke(1.dp, Color(0x33FFD700)), RoundedCornerShape(12.dp))
+                                .padding(8.dp)
+                        ) {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "Pro Tip",
+                                        tint = Color(0xFFFFD700),
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "PRO TIP",
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color(0xFFFFD700)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = task.proTip,
+                                    fontSize = 10.5.sp,
+                                    color = TextWhite.copy(alpha = 0.9f),
+                                    lineHeight = 14.sp
+                                )
+                            }
+                        }
+
+                        // Common Mistake
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x10FF9800))
+                                .border(BorderStroke(1.dp, Color(0x33FF9800)), RoundedCornerShape(12.dp))
+                                .padding(8.dp)
+                        ) {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = "Common Mistake",
+                                        tint = Color(0xFFFF9800),
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "PITFALL TO AVOID",
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color(0xFFFF9800)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = task.commonMistake,
+                                    fontSize = 10.5.sp,
+                                    color = TextWhite.copy(alpha = 0.9f),
+                                    lineHeight = 14.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // ==================================================
+            // TASK VERIFICATION PROMPT
+            // ==================================================
+            Text(
+                text = "HAVE YOU COMPLETED THIS TASK?",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = TextWhite.copy(alpha = 0.8f),
+                letterSpacing = 1.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // YES DONE BUTTON (+100 XP)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(46.dp)
+                        .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = EmeraldPrimary)
+                        .clip(RoundedCornerShape(23.dp))
+                        .background(EmeraldPrimary)
+                        .clickable { onVerifyYes() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Done",
+                            tint = AmoledBlack,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "YES, DONE! (+100 XP)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = AmoledBlack
+                        )
+                    }
+                }
+
+                // NOT YET BUTTON
+                Box(
+                    modifier = Modifier
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(23.dp))
+                        .background(Color(0x15FFFFFF))
+                        .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(23.dp))
+                        .clickable { showNotYetOptions = !showNotYetOptions }
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (showNotYetOptions) "HIDE OPTIONS" else "NOT YET",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            // Expanded NOT YET options: Explain Again, Show Example, Skip
+            AnimatedVisibility(
+                visible = showNotYetOptions,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Need help or want to skip?",
+                        fontSize = 11.sp,
+                        color = TextWhite.copy(alpha = 0.6f)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Option 1: Explain Again
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x1A00E5FF))
+                                .border(BorderStroke(1.dp, Color(0x4400E5FF)), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    showDetailedExplanation = true
+                                    showNotYetOptions = false
+                                }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.HelpOutline,
+                                    contentDescription = null,
+                                    tint = Color(0xFF00E5FF),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Explain Again",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF00E5FF)
+                                )
+                            }
+                        }
+
+                        // Option 2: Show Example
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x1A10B981))
+                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    showExampleLibrary = true
+                                    showNotYetOptions = false
+                                }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Lightbulb,
+                                    contentDescription = null,
+                                    tint = EmeraldPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Show Example",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EmeraldPrimary
+                                )
+                            }
+                        }
+
+                        // Option 3: Skip Task
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x1AFFFFFF))
+                                .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    showNotYetOptions = false
+                                    onSkipTask()
+                                }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.FastForward,
+                                    contentDescription = null,
+                                    tint = TextWhite.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Skip Task",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ====================================================================
+// MASTERY COMPLETED CARD
+// ====================================================================
+@Composable
+private fun MasteryCompletedCard(selectedPlatform: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(Color(0x1510B981))
+            .border(BorderStroke(1.5.dp, EmeraldPrimary), RoundedCornerShape(22.dp))
+            .padding(20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(EmeraldPrimary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = "Trophy",
+                    tint = AmoledBlack,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "🏆 MASTERY CLASS COMPLETED!",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
+                color = EmeraldPrimary,
+                letterSpacing = 1.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "You have completed all foundational $selectedPlatform mentor lessons! Check back for advanced growth modules.",
+                fontSize = 12.sp,
+                color = TextWhite.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center,
+                lineHeight = 16.sp
+            )
+        }
+    }
+}
+
+// ====================================================================
+// PERSONALIZED CREATOR ROADMAP SECTION (WITH TASK STATES)
+// ====================================================================
+@Composable
+private fun PersonalizedRoadmapSection(
+    mentorTasks: List<AiMentorTask>,
+    selectedPlatform: String,
+    currentTaskIndex: Int
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "PERSONALIZED MENTOR ROADMAP ($selectedPlatform)",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextWhite.copy(alpha = 0.5f),
+            letterSpacing = 1.5.sp
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Map tasks into 4 weeks
+        val weeks = listOf(
+            Triple("Week 1: Profile & Bio Positioning", "Foundation, High-converting Bio & Niche Focus", mentorTasks.take(2)),
+            Triple("Week 2: Content Strategy & Viral Hooks", "Pillars, 3-sec Hook Formulas & Scripts", mentorTasks.drop(2).take(2)),
+            Triple("Week 3: Algorithm & Research", "Competitor Audits, Audio Trends & Schedules", mentorTasks.drop(4).take(2)),
+            Triple("Week 4: SEO, Captions & Growth Pushes", "Metadata Stacks, Hashtags & Algorithm Mastery", mentorTasks.drop(6))
+        )
+
+        weeks.forEachIndexed { weekIndex, (weekTitle, weekDesc, weekTasks) ->
+            var isExpanded by remember { mutableStateOf(weekIndex == 0 || weekTasks.any { it.state == TaskState.CURRENT }) }
+            val isWeekCompleted = weekTasks.isNotEmpty() && weekTasks.all { it.state == TaskState.COMPLETED || it.state == TaskState.SKIPPED }
+
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                borderColor = if (isWeekCompleted) Color(0x4410B981) else Color(0x1F2C2C2C),
+                backgroundColor = if (isWeekCompleted) Color(0x1210B981) else Color(0x08FFFFFF),
+                onClick = { isExpanded = !isExpanded }
+            ) {
+                Column(modifier = Modifier.padding(4.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isWeekCompleted) EmeraldPrimary else Color(0x15FFFFFF)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isWeekCompleted) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Done",
+                                        tint = AmoledBlack,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = "${weekIndex + 1}",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = weekTitle,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                                Text(
+                                    text = weekDesc,
+                                    fontSize = 10.5.sp,
+                                    color = TextWhite.copy(alpha = 0.5f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = "Expand",
+                            tint = TextWhite.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    AnimatedVisibility(visible = isExpanded) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
+
+                            weekTasks.forEach { task ->
+                                TaskItemStateRow(task = task)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ====================================================================
+// TASK ITEM STATE ROW (SHOWS LOCKED, CURRENT, COMPLETED, SKIPPED)
+// ====================================================================
+@Composable
+private fun TaskItemStateRow(task: AiMentorTask) {
+    val (bgColor, borderColor, textColor, icon, stateLabel) = when (task.state) {
+        TaskState.COMPLETED -> Tuple5(
+            Color(0x1510B981), Color(0x3310B981), EmeraldPrimary, Icons.Default.Check, "COMPLETED"
+        )
+        TaskState.SKIPPED -> Tuple5(
+            Color(0x0AFFFFFF), Color(0x1AFFFFFF), TextWhite.copy(alpha = 0.5f), Icons.Default.FastForward, "SKIPPED"
+        )
+        TaskState.CURRENT -> Tuple5(
+            Color(0x2210B981), EmeraldPrimary, TextWhite, Icons.Default.AutoAwesome, "ACTIVE LESSON"
+        )
+        TaskState.LOCKED -> Tuple5(
+            Color(0x05FFFFFF), Color(0x10FFFFFF), TextWhite.copy(alpha = 0.4f), Icons.Default.Lock, "LOCKED"
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor)
+            .border(BorderStroke(1.dp, borderColor), RoundedCornerShape(12.dp))
+            .padding(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(borderColor.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = stateLabel,
+                    tint = if (task.state == TaskState.CURRENT) EmeraldPrimary else textColor,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Lesson #${task.stepNumber}: ${task.title}",
+                    fontSize = 12.sp,
+                    fontWeight = if (task.state == TaskState.CURRENT) FontWeight.Bold else FontWeight.Medium,
+                    color = textColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${task.skillCategory} • +${task.xpReward} XP",
+                    fontSize = 10.sp,
+                    color = textColor.copy(alpha = 0.6f)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(borderColor.copy(alpha = 0.2f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = stateLabel,
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+            }
+        }
+    }
+}
+
+private data class Tuple5<A, B, C, D, E>(
+    val a: A, val b: B, val c: C, val d: D, val e: E
+)
+
+@Composable
+fun VideoEditingLockedDialog(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    var selectedTab by remember { mutableStateOf("FEATURES") } // FEATURES, TERMS, PRIVACY, REFUND
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = Color(0xFF141420),
+            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFFFF5252), EmeraldPrimary))),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x22FF5252)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Locked",
+                        tint = Color(0xFFFF5252),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Mobile Video Editing AI",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    color = TextWhite,
+                    textAlign = TextAlign.Center
+                )
+
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0x2210B981))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "🔒 Premium • Coming Soon",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = EmeraldPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x10FFFFFF))
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Early Access Price Placeholder: ₹99 / Lifetime Pass",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD700)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Tabs for Terms, Privacy, Refund
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val tabs = listOf("FEATURES", "TERMS", "PRIVACY", "REFUND")
+                    tabs.forEach { tab ->
+                        Text(
+                            text = tab,
+                            fontSize = 10.sp,
+                            fontWeight = if (selectedTab == tab) FontWeight.Black else FontWeight.Medium,
+                            color = if (selectedTab == tab) EmeraldPrimary else TextWhite.copy(alpha = 0.5f),
+                            modifier = Modifier
+                                .clickable { selectedTab = tab }
+                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x0AFFFFFF))
+                        .padding(10.dp)
+                ) {
+                    val infoText = when (selectedTab) {
+                        "TERMS" -> "Terms of Service: Premium features will activate upon official release. Lifetime access covers all future AI mobile video updates."
+                        "PRIVACY" -> "Privacy Guarantee: No video recordings or personal media files are ever transmitted to third parties without permission."
+                        "REFUND" -> "100% 7-Day Money Back Refund Guarantee applies automatically upon release if unsatisfied with the tool."
+                        else -> "Features Preview: Pro CapCut Templates, AI Auto-Captioning Generator, Premiere LUTs, VN Speed Curves & One-tap Auto Cut."
+                    }
+                    Text(
+                        text = infoText,
+                        fontSize = 11.sp,
+                        color = TextWhite.copy(alpha = 0.8f),
+                        lineHeight = 15.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(EmeraldPrimary)
+                        .clickable {
+                            Toast.makeText(context, "🎉 Registered for Early Access Notification!", Toast.LENGTH_SHORT).show()
+                            onDismiss()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Notify Me On Release",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AmoledBlack
+                    )
+                }
+            }
+        }
+    }
+}
