@@ -53,6 +53,11 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
+
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+
   buildFeatures {
     compose = true
     buildConfig = true
@@ -133,10 +138,4 @@ dependencies {
   debugImplementation(libs.androidx.compose.ui.tooling)
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
-}
-
-kotlin {
-  compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-  }
 }
