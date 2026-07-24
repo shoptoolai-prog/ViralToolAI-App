@@ -47,7 +47,8 @@ jobs:
 
       - name: 4. Ensure Gradle Wrapper
         run: |
-          chmod +x gradlew
+          ls -la
+          find . -name "gradlew"
 
       - name: 5. Build Debug APK
         run: |
