@@ -45,14 +45,9 @@ jobs:
         with:
           cache-disabled: false
 
-        
-  - name: 4. Ensure Gradle Wrapper
-  run: |
-    if [ ! -f gradlew ]; then
-      echo "Gradle wrapper not found. Generating wrapper..."
-      gradle wrapper --gradle-version 8.2
-    fi
-    chmod +x gradlew
+      - name: 4. Ensure Gradle Wrapper
+        run: |
+          chmod +x gradlew
 
       - name: 5. Build Debug APK
         run: |
