@@ -113,19 +113,22 @@ object ViralMemoryEngine {
             .apply()
     }
 
-    fun getLastCompletedLesson(context: Context): String {
+    fun getLastCompletedLesson(context: Context): String? {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_LAST_COMPLETED_LESSON, "Hook Writing") ?: "Hook Writing"
+        return prefs.getString(KEY_LAST_COMPLETED_LESSON, null)
     }
 
     fun getNextLesson(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_NEXT_LESSON, "Thumbnail Strategy") ?: "Thumbnail Strategy"
+        return prefs.getString(KEY_NEXT_LESSON, "Lesson #1: High-Converting Bio Setup") ?: "Lesson #1: High-Converting Bio Setup"
     }
 
     fun hasPreviousSession(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.contains(KEY_LAST_COMPLETED_LESSON) || CreatorAcademyPrefs.isSetupCompleted(context)
+        val hasCompletedLessonKey = prefs.contains(KEY_LAST_COMPLETED_LESSON)
+        val completedIg = CreatorAcademyPrefs.getCompletedTasks(context, "INSTAGRAM").isNotEmpty()
+        val completedYt = CreatorAcademyPrefs.getCompletedTasks(context, "YOUTUBE").isNotEmpty()
+        return hasCompletedLessonKey || completedIg || completedYt
     }
 
     fun isRememberWelcomeChoice(context: Context): Boolean {

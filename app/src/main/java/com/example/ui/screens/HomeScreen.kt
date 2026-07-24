@@ -50,6 +50,8 @@ import com.example.ui.components.GlassCard
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -1849,16 +1851,23 @@ fun AnalysisScreen(
         }
         else -> {
             when {
-                progressPercentage < 20 -> "Validating Link..."
-                progressPercentage < 40 -> "Reading Product..."
-                progressPercentage < 60 -> "Finding Similar Products..."
-                progressPercentage < 80 -> "Comparing Prices..."
-                progressPercentage < 100 -> "Generating Shopping Report..."
-                else -> "Report Completed"
+                progressPercentage < 25 -> "Reading product link..."
+                progressPercentage < 50 -> "Analyzing product details..."
+                progressPercentage < 75 -> "Finding price information..."
+                progressPercentage < 100 -> "Generating shopping insights..."
+                else -> "Analysis Complete"
             }
         }
     }
     
+    LaunchedEffect(analyzedLink) {
+        if (analyzedLink.isNotBlank()) {
+            withContext(Dispatchers.IO) {
+                com.example.data.integration.RealDataIntegrationLayer.getProductData(analyzedLink)
+            }
+        }
+    }
+
     LaunchedEffect(analyzedLink, isScanningStarted) {
         if (isInstagram && !isScanningStarted) {
             return@LaunchedEffect
@@ -1873,7 +1882,7 @@ fun AnalysisScreen(
         val steps = if (isInstagram) {
             listOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
         } else {
-            listOf(0, 20, 40, 60, 80, 100)
+            listOf(0, 25, 50, 75, 100)
         }
         
         for (i in 0 until steps.size) {
@@ -1882,7 +1891,7 @@ fun AnalysisScreen(
             activeProgressCache[analyzedLink] = targetProgress
             
             if (targetProgress < 100) {
-                val delayMs = if (isInstagram) 350L else 700L
+                val delayMs = if (isInstagram) 350L else 400L
                 delay(delayMs)
             }
         }
@@ -2021,87 +2030,53 @@ fun AnalysisScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 GlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    borderColor = Color(0x12FFFFFF),
-                    backgroundColor = Color(0x06FFFFFF)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                    borderColor = Color(0x18FFFFFF),
+                    backgroundColor = Color(0x0AFFFFFF)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 18.dp, horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        val stages = if (isInstagram) {
-                            listOf(
-                                "Loading Reel" to 15,
-                                "Extracting Video Frames" to 40,
-                                "Detecting Products" to 60,
-                                "Comparing Prices" to 80,
-                                "Generating Shopping Report" to 100
-                            )
-                        } else {
-                            listOf(
-                                "Validating Link" to 20,
-                                "Reading Product" to 40,
-                                "Finding Similar Products" to 60,
-                                "Comparing Prices" to 80,
-                                "Generating Shopping Report" to 100
-                            )
-                        }
-                        
-                        stages.forEachIndexed { index, pair ->
-                            val stageName = pair.first
-                            val targetProg = pair.second
-                            
-                            val isCompleted = progressPercentage >= targetProg
-                            val isActive = !isCompleted && (
-                                (index == 0 && progressPercentage < targetProg) ||
-                                (index > 0 && progressPercentage >= stages[index-1].second && progressPercentage < targetProg)
-                            )
-                            
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                AnimatedContent(
-                                    targetState = if (isCompleted) "done" else if (isActive) "active" else "pending",
-                                    transitionSpec = {
-                                        fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150))
-                                    },
-                                    label = "StageAnim"
-                                ) { state ->
-                                    when (state) {
-                                        "done" -> {
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = "Completed",
-                                                tint = Color(0xFF4CAF50),
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                        "active" -> {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(16.dp),
-                                                strokeWidth = 2.dp,
-                                                color = if (isInstagram) Color(0xFFE1306C) else CrimsonLight,
-                                                trackColor = Color(0x12FFFFFF)
-                                            )
-                                        }
-                                        else -> {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(16.dp)
-                                                    .border(BorderStroke(1.2.dp, TextGray), CircleShape)
-                                            )
-                                        }
-                                    }
-                                }
-                                
-                                Spacer(modifier = Modifier.width(12.dp))
-                                
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (progressPercentage < 100) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.5.dp,
+                                    color = if (isInstagram) Color(0xFFE1306C) else CrimsonLight,
+                                    trackColor = Color(0x1AFFFFFF)
+                                )
+                                Spacer(modifier = Modifier.width(14.dp))
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Complete",
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(14.dp))
+                            }
+
+                            AnimatedContent(
+                                targetState = currentStatus,
+                                transitionSpec = {
+                                    (fadeIn(animationSpec = tween(220)) + slideInVertically(initialOffsetY = { 16 })) with
+                                    (fadeOut(animationSpec = tween(180)) + slideOutVertically(targetOffsetY = { -16 }))
+                                },
+                                label = "CompactStatusText"
+                            ) { status ->
                                 Text(
-                                    text = stageName + if (isCompleted) " Completed" else if (isActive) "..." else " Pending",
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isCompleted) Color(0xFF4CAF50) else if (isActive) TextWhite else TextGray
+                                    text = status,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite,
+                                    textAlign = TextAlign.Start
                                 )
                             }
                         }

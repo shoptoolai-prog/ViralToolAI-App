@@ -457,7 +457,8 @@ fun AiContentStudioDialog(
                                                     platform = selectedPlatform,
                                                     contentType = selectedContentType,
                                                     topic = topicInput,
-                                                    userNiche = setupData.niche
+                                                    userNiche = setupData.niche,
+                                                    lang = com.example.core.LanguageEngine.currentLanguageState.value
                                                 )
                                                 generatedPlan = plan
                                                 isGenerating = false

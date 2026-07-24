@@ -69,7 +69,259 @@ data class AiMentorTask(
     val recommendedTool: String? = null,
     val xpReward: Int = 100,
     val state: TaskState = TaskState.LOCKED
-)
+) {
+    fun getLocalized(lang: com.example.reports.ReportLanguage): AiMentorTask {
+        return when (lang) {
+            com.example.reports.ReportLanguage.ENGLISH -> this
+            com.example.reports.ReportLanguage.HINGLISH -> when (id) {
+                "ig_adaptive_1" -> copy(
+                    title = "High-Converting Bio Banayein with CTA",
+                    skillCategory = "Profile & Bio Optimization",
+                    goalStatement = "2 seconds ke andar profile visitors ko followers me convert karein.",
+                    coachMessage = "Welcome! Aaiye aapka Instagram bio specially optimize karein. Bio me hona chahiye ki aap kaun hain, kya value de rahe hain, aur kahan click karna hai.",
+                    detailExplanation = "Line 1: Aapka main focus. Line 2: Audience ka main benefit. Line 3: Direct Call-To-Action link.",
+                    whyItMatters = "80% se zyada visitors bina follow kiye chale jaate hain agar bio clear na ho.",
+                    goodExample = "⚡ Daily Insights & Tips\n🎯 60s me sikhiye\n👇 Free guide neeche download karein",
+                    badExample = "Bas aise hi post kar raha hoon ✨ DM for collab",
+                    proTip = "Bullet points aur emoji spacing use karein mobile screen par easily padhne ke liye.",
+                    commonMistake = "CTA link bhool jana ya tough words use karna.",
+                    actionTask = "Apne bio ke liye 3 lines likhein aur active link add karein.",
+                    simplerExplanation = "Bio ko ek shop ke board ki tarah samjhein. Line 1: Aap kya karte hain? Line 2: Viewer ka kya fayda hai? Line 3: Kahan click karna hai?",
+                    extraRealExample = "Example: '💡 Top Tips | 🚀 Daily Reels | 👇 Get free template'"
+                )
+                "ig_adaptive_2" -> copy(
+                    title = "3 Core Content Pillars Set Karein",
+                    skillCategory = "Content Strategy",
+                    goalStatement = "Content feed ko aise structure karein ki algorithm aapka account sahi categorize kare.",
+                    coachMessage = "Awesome! Ab 3 tight content pillars chunein. Pillars aapko burnout se bachate hain aur audience ko aane ka reason dete hain.",
+                    detailExplanation = "Pillar 1: Educational Tips. Pillar 2: Common Myths / Mistakes. Pillar 3: Personal Journey.",
+                    whyItMatters = "Algorithm aapke content ko target audience tak pahunchane ke liye pillars ka use karta hai.",
+                    goodExample = "Pillar A: 30s Hacks\nPillar B: Tool Reviews\nPillar C: Behind-the-scenes",
+                    badExample = "Ek din food, agle din crypto aur phir gym clips post karna.",
+                    proTip = "Account authority banane ke liye 30 days tak in 3 pillars par bane rahein.",
+                    commonMistake = "Ek sath bahut saare unrelated topics cover karne ki koshish karna.",
+                    actionTask = "Apne 3 content pillars ke 3 titles likhein.",
+                    simplerExplanation = "Content pillars TV channels ki tarah hain. Agar sports channel par cooking dikhe toh log chale jayenge. Focus rahein!",
+                    extraRealExample = "Example: 1) Quick Tutorials, 2) Myth Busting, 3) Tool Reviews."
+                )
+                "ig_adaptive_3" -> copy(
+                    title = "3-Second Viral Hook Formula Sikhein",
+                    skillCategory = "Reels Scripting",
+                    goalStatement = "Pehle 3 seconds me >80% watch time achieve karein.",
+                    coachMessage = "Hooks decide karte hain ki Reel viral hogi ya 200 views par ruk jayegi. Aaiye ek zabardast 3-second hook likhein!",
+                    detailExplanation = "Screen par bold text overlay ke sath energetic movement combine karein.",
+                    whyItMatters = "Instagram 3-second retention ko strictly measure karta hai.",
+                    goodExample = "Text: '2026 me yeh mistake bilkul mat karna!' with energetic visual.",
+                    badExample = "'Hey guys welcome back today I want to talk about...'",
+                    proTip = "Text overlay ko screen ke upper 30% area me rakhein.",
+                    commonMistake = "Slow intro ya silent pauses se start karna.",
+                    actionTask = "Apne next Reel concept ke liye 3 hook variations script karein.",
+                    simplerExplanation = "Hook book cover ki tarah hai. Agar 3 seconds me excite na kare toh log swipe kar denge!",
+                    extraRealExample = "Hook idea: '3 tools jo aapko zaroor pata hone chahiye!'"
+                )
+                "ig_adaptive_4" -> copy(
+                    title = "3-Tier SEO Hashtag Stack Banayein",
+                    skillCategory = "SEO & Hashtags",
+                    goalStatement = "Instagram Search results me top keywords par rank karein.",
+                    coachMessage = "Aaiye targeted 3-tier hashtag stack organize karein jisse aapki posts search me top par aayein.",
+                    detailExplanation = "Tier 1: Broad tags (100k+ posts). Tier 2: Specific Niche tags. Tier 3: Micro Community tags.",
+                    whyItMatters = "Instagram ab Search Engine ki tarah kaam karta hai. Relevant hashtags post ko index karte hain.",
+                    goodExample = "#creator #reelsgrowth #creatortips #creatorhacks",
+                    badExample = "#viral #fyp #love #explorepage",
+                    proTip = "Audio aur captions me bhi main keywords include karein.",
+                    commonMistake = "30 generic hashtags use karna jo seconds me gayab ho jaate hain.",
+                    actionTask = "5-hashtag stack create karke save karein.",
+                    simplerExplanation = "Hashtags library categories ki tarah hain. Sahi category me rakhne se log aapko easily dhoond paayenge!",
+                    extraRealExample = "Stack: Broad + Specific + Micro Community."
+                )
+                "ig_adaptive_5" -> copy(
+                    title = "Pre-Publishing Quality Check & Audio Selection",
+                    skillCategory = "Publishing Check",
+                    goalStatement = "Publish karne se pehle 100% quality ensure karein.",
+                    coachMessage = "Next Reel post karne se pehle 7-point quality checklist run karein!",
+                    detailExplanation = "Audio levels check karein, trending arrow ↗️ verify karein, clear cover image set karein.",
+                    whyItMatters = "Low contrast ya low audio jaisi choti mistakes reach kill kar deti hain.",
+                    goodExample = "Trending audio + Auto-captions + Strong cover thumbnail.",
+                    badExample = "Andhere room me bina captions ke post karna.",
+                    proTip = "Trending arrow icon ↗️ wale audio use karein extra algorithm boost ke liye.",
+                    commonMistake = "Good cover photo select kiye bina publish kar dena.",
+                    actionTask = "Interactive posting checklist run karein.",
+                    simplerExplanation = "Yeh pilot ki pre-flight checklist jaisa hai. Takeoff se pehle lighting, captions, audio verify karein!",
+                    extraRealExample = "Checklist: 1) Audio clear? 2) Hook visible? 3) Captions added? 4) Cover picked?"
+                )
+                "yt_adaptive_1" -> copy(
+                    title = "Channel Banner aur Description Optimize Karein",
+                    skillCategory = "Channel Branding",
+                    goalStatement = "Visitors ko instant subscribers me convert karein.",
+                    coachMessage = "Welcome YouTube Creator! Aaiye aapka channel header aur About section optimize karein.",
+                    detailExplanation = "Banner par upload schedule aur channel value clear dikhni chahiye.",
+                    whyItMatters = "YouTube description padhkar samajhta hai ki aapki videos kinko recommend karni hain.",
+                    goodExample = "Banner: 'Weekly Guides & Shorts Every Tuesday' + High contrast design.",
+                    badExample = "Default background banner with no info.",
+                    proTip = "Key text ko mobile safe area (1546x423) me rakhein.",
+                    commonMistake = "About box ko khaali chhodna.",
+                    actionTask = "150-word search-friendly description likhein.",
+                    simplerExplanation = "Channel home page billboard ki tarah hai. 5 seconds me bataiye ki channel kis baare me hai!",
+                    extraRealExample = "Description: 'Welcome! Is channel par hum top strategies aur honest reviews share karte hain.'"
+                )
+                "yt_adaptive_2" -> copy(
+                    title = "YouTube Shorts 3-Sec Retention Hook Sikhein",
+                    skillCategory = "Shorts Optimization",
+                    goalStatement = "Shorts feed me >75% Viewed vs Swiped metric achieve karein.",
+                    coachMessage = "Retention YouTube ka #1 factor hai! Aaiye Shorts hook banayein jo viewers ko roke rakhe.",
+                    detailExplanation = "YouTube Shorts me 'Swiped Away %' sabse important hai. Bold statement ya action se start karein.",
+                    whyItMatters = "Agar 'Swiped Away' 35% se zyada hua toh algorithm push stop kar deta hai.",
+                    goodExample = "High energy start: 'Yeh mistake karne se pehle yeh video zaroor dekhein!'",
+                    badExample = "'Hey everyone welcome back to another video...'",
+                    proTip = "Ending sentence ko opening hook me seamlessly loop karein.",
+                    commonMistake = "Slow intro ya boring opening frame.",
+                    actionTask = "15-second Short record karein instant hook ke sath.",
+                    simplerExplanation = "Shorts feed super fast chalta hai. Aapko turant kuch exciting bolna hoga!",
+                    extraRealExample = "Hook idea: 'Yeh #1 hack koi nahi bata raha!'"
+                )
+                "yt_adaptive_3" -> copy(
+                    title = "High-CTR Thumbnail & Title Combination Banayein",
+                    skillCategory = "CTR Optimization",
+                    goalStatement = "Search aur Impressions par >8% Click-Through Rate achieve karein.",
+                    coachMessage = "Thumbnail + Title = Click Rate! Aaiye high-contrast visual aur exciting title pair karein.",
+                    detailExplanation = "Thumbnail title ka text repeat na kare. Max 3 words rakhein.",
+                    whyItMatters = "High CTR YouTube ko signal deta hai ki video engaging hai, jisse extra impressions milte hain.",
+                    goodExample = "Title: 'How I Scaled My Workflow' | Thumbnail text: '10x Faster!'",
+                    badExample = "Title aur thumbnail dono me exact same long sentence.",
+                    proTip = "Dark background par high-contrast text aur face expressions use karein.",
+                    commonMistake = "Chota text use karna jo mobile par padha na ja sake.",
+                    actionTask = "3 distinct Thumbnail + Title concepts outline karein.",
+                    simplerExplanation = "Thumbnail picture hai, Title label hai. Dono milkar logon ko click karne par majboor karte hain!",
+                    extraRealExample = "Title: 'Strategy EXPOSED' | Thumbnail: 'DO NOT SKIP!'"
+                )
+                else -> this
+            }
+            com.example.reports.ReportLanguage.HINDI -> when (id) {
+                "ig_adaptive_1" -> copy(
+                    title = "उच्च-रूपांतरण बायो बनाएँ (CTA के साथ)",
+                    skillCategory = "प्रोफ़ाइल और बायो ऑप्टिमाइजेशन",
+                    goalStatement = "2 सेकंड के भीतर विज़िटर्स को वफादार फ़ॉलोअर्स में बदलें।",
+                    coachMessage = "नमस्ते! आइए आपका बायो विशेष रूप से तैयार करें। बायो में बताएं कि आप कौन हैं, क्या मूल्य प्रदान करते हैं, और कहां क्लिक करना है।",
+                    detailExplanation = "लाइन 1: आपका फ़ोकस। लाइन 2: मुख्य लाभ। लाइन 3: डायरेक्ट कॉल-टू-एक्शन लिंक।",
+                    whyItMatters = "यदि आपका बायो स्पष्ट नहीं है तो 80% से अधिक विज़िटर्स बिना फ़ॉलो किए चले जाते हैं।",
+                    goodExample = "⚡ इनसाइट्स और टिप्स\n🎯 60 सेकंड में सीखें\n👇 मुफ़्त गाइड नीचे डाउनलोड करें",
+                    badExample = "बस ऐसे ही पोस्ट कर रहा हूँ ✨ DM करें",
+                    proTip = "पढ़ने में आसानी के लिए बुलेट पॉइंट्स या इमोजी का उपयोग करें।",
+                    commonMistake = "CTA लिंक भूल जाना या कठिन शब्दों का उपयोग करना।",
+                    actionTask = "अपने बायो के लिए 3 पंक्तियाँ लिखें और एक एक्टिव लिंक जोड़ें।",
+                    simplerExplanation = "बायो को दुकान के बोर्ड की तरह समझें। लाइन 1: आप क्या करते हैं? लाइन 2: क्यों देखें? लाइन 3: कहाँ क्लिक करें?",
+                    extraRealExample = "उदाहरण: '💡 टॉप टिप्स | 🚀 दैनिक रील्स | 👇 टेम्पलेट प्राप्त करें'"
+                )
+                "ig_adaptive_2" -> copy(
+                    title = "3 मुख्य कंटेंट पिलर बनाएं",
+                    skillCategory = "कंटेंट रणनीति",
+                    goalStatement = "अपने कंटेंट फ़ीड को इस प्रकार व्यवस्थित करें कि एल्गोरिदम आपके खाते को सही ढंग से वर्गीकृत करे।",
+                    coachMessage = "शानदार! अब 3 स्पष्ट कंटेंट पिलर चुनें। ये आपको निरंतरता और ऑडियंस बनाए रखने में मदद करते हैं।",
+                    detailExplanation = "पिलर 1: शिक्षा और टिप्स। पिलर 2: गलतफ़हमियाँ। पिलर 3: व्यक्तिगत यात्रा।",
+                    whyItMatters = "एल्गोरिदम आपके वीडियो को सही दर्शकों तक पहुँचाने के लिए कंटेंट पिलर्स का उपयोग करता है।",
+                    goodExample = "पिलर A: 30s हैक्स\nपिलर B: टूल रिव्यू\nपिलर C: पर्दे के पीछे की बातें",
+                    badExample = "एक दिन खाना, अगले दिन क्रिप्टो और फिर जिम के वीडियो डालना।",
+                    proTip = "अकाउंट अथॉरिटी बनाने के लिए 30 दिनों तक इन 3 पिलर्स पर टिके रहें।",
+                    commonMistake = "एक साथ बहुत सारे असंबंधित विषयों को कवर करने की कोशिश करना।",
+                    actionTask = "अपने 3 पिलर्स में से प्रत्येक के लिए 3 विशिष्ट शीर्षक लिखें।",
+                    simplerExplanation = "कंटेंट पिलर टीवी चैनल की तरह हैं। यदि स्पोर्ट्स चैनल अचानक खाना पकाने लगे, तो दर्शक चले जाते हैं। फ़ोकस रखें!",
+                    extraRealExample = "उदा: 1) त्वरित ट्यूटोरियल, 2) मिथक, 3) उत्पाद सिफ़ारिशें।"
+                )
+                "ig_adaptive_3" -> copy(
+                    title = "3-सेकंड वायरल हुक फॉर्मूला सीखें",
+                    skillCategory = "रील्स स्क्रिप्टिंग",
+                    goalStatement = "प्रत्येक रील के पहले 3 सेकंड में 80% से अधिक वॉच टाइम प्राप्त करें।",
+                    coachMessage = "हुक तय करता है कि आपका वीडियो वायरल होगा या 200 व्यूज पर रुक जाएगा। आइए एक ज़बरदस्त हुक लिखें!",
+                    detailExplanation = "स्क्रीन पर बोल्ड, डायनामिक टेक्स्ट ओवरले के साथ मूवमेंट को मिलाएं।",
+                    whyItMatters = "इंस्टाग्राम 3-सेकंड रिटेंशन को सख्ती से मापता है।",
+                    goodExample = "स्क्रीन टेक्स्ट: '2026 में यह गलती न करें!' गति के साथ।",
+                    badExample = "'हेलो दोस्तों आज मैं बात करना चाहता हूँ...'",
+                    proTip = "टेक्स्ट ओवरले को स्क्रीन के ऊपरी 30% हिस्से में रखें।",
+                    commonMistake = "धीमी शुरुआत या शांत रुकने के साथ वीडियो शुरू करना।",
+                    actionTask = "अपने अगले रील विचार के लिए 3 अलग-अलग हुक लिखें।",
+                    simplerExplanation = "हुक किताब के कवर की तरह है। यदि यह 3 सेकंड में लोगों को आकर्षित नहीं करता, तो वे स्वाइप कर देते हैं!",
+                    extraRealExample = "हुक विचार: '3 टूल जो कमाल के हैं!'"
+                )
+                "ig_adaptive_4" -> copy(
+                    title = "3-स्तरीय SEO हैशटैग स्टैक बनाएं",
+                    skillCategory = "SEO और हैशटैग रणनीति",
+                    goalStatement = "उच्च-इरादे वाले कीवर्ड्स के लिए इंस्टाग्राम सर्च परिणामों में रैंक करें।",
+                    coachMessage = "आइए खोज की दृश्यता को अधिकतम करने के लिए एक लक्षित 3-स्तरीय हैशटैग स्टैक व्यवस्थित करें।",
+                    detailExplanation = "स्तर 1: ब्रॉड इंडस्ट्री टैग। स्तर 2: विशिष्ट निश टैग। स्तर 3: माइक्रो कम्युनिटी टैग।",
+                    whyItMatters = "इंस्टाग्राम अब सर्च इंजन की तरह काम करता है। प्रासंगिक हैशटैग आपकी रील को सही श्रेणी में दिखाते हैं।",
+                    goodExample = "#creator #reelsgrowth #creatortips #creatorhacks",
+                    badExample = "#viral #fyp #love #explorepage",
+                    proTip = "अधिकतम इंडेक्सिंग के लिए ऑडियो और कैप्शन में भी कीवर्ड शामिल करें।",
+                    commonMistake = "30 विशाल सामान्य हैशटैग का उपयोग करना।",
+                    actionTask = "अपने विषय के लिए 5-हैशटैग स्टैक बनाएं।",
+                    simplerExplanation = "हैशटैग लाइब्रेरी श्रेणियों की तरह हैं। सही श्रेणी खोजना आसान बनाता है!",
+                    extraRealExample = "स्टैक: ब्रॉड + विशिष्ट + कम्युनिटी।"
+                )
+                "ig_adaptive_5" -> copy(
+                    title = "प्री-पब्लिशिंग क्वालिटी कंट्रोल और ऑडियो सिलेक्शन",
+                    skillCategory = "पब्लिशिंग और सत्यापन",
+                    goalStatement = "पब्लिश करने से पहले 100% तकनीकी और एल्गोरिदम गुणवत्ता सुनिश्चित करें।",
+                    coachMessage = "अपनी अगली रील पोस्ट करने से पहले, रीच को अधिकतम करने के लिए 7-पॉइंट चेकलिस्ट चलाएं!",
+                    detailExplanation = "ऑडियो स्तर जांचें, ट्रेंडिंग ऑडियो तीर ↗️ सूचक सत्यापित करें, उच्च-विपरीत कवर छवि और ऑन-स्क्रीन कैप्शन सुनिश्चित करें।",
+                    whyItMatters = "कम कंट्रास्ट या धीमी आवाज़ जैसी छोटी तकनीकी अनदेखी वीडियो रिटेंशन को नुकसान पहुँचाती है।",
+                    goodExample = "ट्रेंडिंग ऑडियो + स्पष्ट ऑटो-कैप्शन + मजबूत कवर फ़्रेम।",
+                    badExample = "बिना टेक्स्ट कैप्शन या ऑडियो सामान्यीकरण के अंधेरे कमरे में पोस्ट करना।",
+                    proTip = "अल्गोरिदम सर्च का लाभ उठाने के लिए तिरछे तीर आइकन ↗️ वाले ट्रेंडिंग ऑडियो का उपयोग करें।",
+                    commonMistake = "फ़ीड पूर्वावलोकन के लिए आकर्षक कवर फोटो चुने बिना प्रकाशित करना।",
+                    actionTask = "अपनी आगामी रील के लिए इंटरैक्टिव चेकलिस्ट के सभी आइटम चलाएं।",
+                    simplerExplanation = "इसे टेकऑफ़ से पहले की पायलट चेकलिस्ट समझें। लाइटिंग, कैप्शन और ऑडियो डबल-चेक करें!",
+                    extraRealExample = "चेकलिस्ट: 1) ऑडियो साफ़? 2) हुक दृश्यमान? 3) कैप्शन जोड़े गए? 4) कवर चुना गया?"
+                )
+                "yt_adaptive_1" -> copy(
+                    title = "चैनल बैनर और विवरण अनुकूलित करें",
+                    skillCategory = "चैनल ब्रांडिंग",
+                    goalStatement = "विज़िटर्स को तुरंत सब्सक्राइबर में बदलें।",
+                    coachMessage = "यूट्यूब क्रिएटर का स्वागत है! आइए आपका चैनल हेडर और अबाउट सेक्शन अनुकूलित करें।",
+                    detailExplanation = "आपके बैनर पर अपलोड शेड्यूल और वैल्यू स्पष्ट होनी चाहिए।",
+                    whyItMatters = "यूट्यूब विवरण पढ़कर समझता है कि आपकी वीडियो किसे दिखानी है।",
+                    goodExample = "बैनर: 'साप्ताहिक गाइड और शॉर्ट्स' + उच्च कंट्रास्ट डिजाइन।",
+                    badExample = "बिना किसी जानकारी के डिफ़ॉल्ट बैनर।",
+                    proTip = "मुख्य टेक्स्ट को मोबाइल सेफ़ एरिया में रखें।",
+                    commonMistake = "अबाउट बॉक्स को खाली छोड़ना।",
+                    actionTask = "150 शब्दों का खोज-अनुकूल विवरण लिखें।",
+                    simplerExplanation = "चैनल होम पेज एक होर्डिंग की तरह है। 5 सेकंड में बताएं कि चैनल किस बारे में है!",
+                    extraRealExample = "विवरण: 'स्वागत है! इस चैनल पर हम बेहतरीन रणनीतियाँ साझा करते हैं।'"
+                )
+                "yt_adaptive_2" -> copy(
+                    title = "यूट्यूब शॉर्ट्स 3-सेकंड रिटेंशन हुक सीखें",
+                    skillCategory = "शॉर्ट्स अनुकूलन",
+                    goalStatement = "शॉर्ट्स फ़ीड में >75% Viewed बनाम Swiped का स्कोर प्राप्त करें।",
+                    coachMessage = "रिटेंशन यूट्यूब का #1 कारक है! आइए एक ऐसा हुक बनाएं जो दर्शकों को रोके रखे।",
+                    detailExplanation = "यूट्यूब शॉर्ट्स में 'Swiped Away %' सबसे महत्वपूर्ण है। एक साहसी बयान या एक्शन से शुरुआत करें।",
+                    whyItMatters = "यदि 'Swiped Away' 35% से अधिक होता है तो एल्गोरिदम रुक जाता है।",
+                    goodExample = "उच्च ऊर्जा के साथ शुरुआत: 'यह गलती करने से पहले यह वीडियो अवश्य देखें!'",
+                    badExample = "'हेलो दोस्तों आज मैं बात करना चाहता हूँ...'",
+                    proTip = "अंतिम वाक्य को शुरुआती हुक में आसानी से लूप करें।",
+                    commonMistake = "धीमी शुरुआत या उबाऊ पहला फ़्रेम।",
+                    actionTask = "इंस्टेंट हुक के साथ 15-सेकंड का शॉर्ट रिकॉर्ड करें।",
+                    simplerExplanation = "शॉर्ट्स फ़ीड बहुत तेज़ी से चलता है। आपको तुरंत कुछ रोमांचक बोलना होगा!",
+                    extraRealExample = "हुक विचार: 'यह #1 हैक कोई नहीं बता रहा!'"
+                )
+                "yt_adaptive_3" -> copy(
+                    title = "उच्च-CTR थंबनेल और शीर्षक संयोजन बनाएं",
+                    skillCategory = "CTR अनुकूलन",
+                    goalStatement = "सर्च और इंप्रेशन पर 8% से अधिक क्लिक-थ्रू रेट प्राप्त करें।",
+                    coachMessage = "थंबनेल + शीर्षक = आपकी क्लिक दर! आइए आकर्षक विज़ुअल और शीर्षक का जोड़ा बनाएं।",
+                    detailExplanation = "थंबनेल शीर्षक का टेक्स्ट दोहराए नहीं। अधिकतम 3 शब्द रखें।",
+                    whyItMatters = "उच्च CTR यूट्यूब को संकेत देता है कि दर्शक आपके वीडियो को आकर्षक पाते हैं।",
+                    goodExample = "शीर्षक: 'कार्यप्रवाह कैसे बढ़ाया' | थंबनेल टेक्स्ट: '10 गुना तेज़!'",
+                    badExample = "शीर्षक और थंबनेल दोनों में एक ही लंबा वाक्य।",
+                    proTip = "डार्क बैकग्राउंड पर उच्च-विपरीत चेहरे के भाव का उपयोग करें।",
+                    commonMistake = "छोटा टेक्स्ट जो मोबाइल पर न पढ़ा जा सके।",
+                    actionTask = "अपने अगले विषय के लिए 3 थंबनेल + शीर्षक अवधारणाएँ तैयार करें।",
+                    simplerExplanation = "थंबनेल डिब्बे पर चित्र है, शीर्षक लेबल है। दोनों मिलकर लोगों को क्लिक करने के लिए प्रेरित करते हैं!",
+                    extraRealExample = "शीर्षक: 'रणनीति का पर्दाफाश' | थंबनेल: 'छोड़ें नहीं!'"
+                )
+                else -> this
+            }
+        }
+    }
+}
 
 object AiMentorEngine {
 

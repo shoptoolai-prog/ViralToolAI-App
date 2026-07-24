@@ -465,7 +465,7 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ================= 3. LANGUAGE SECTION =================
-            var selectedLanguage by remember { mutableStateOf(AiSessionMemory.currentLanguage) }
+            val selectedLanguage = com.example.core.LanguageEngine.currentLanguageState.value
 
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -484,7 +484,7 @@ fun ProfileScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "LANGUAGE",
+                            text = com.example.core.LanguageEngine.get("profile_language"),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
@@ -509,7 +509,6 @@ fun ProfileScreen(
                                 .background(if (isSelected) Color(0x2210B981) else Color.Transparent)
                                 .clickable {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    selectedLanguage = lang
                                     com.example.core.LanguageEngine.setLanguage(context, lang)
                                     Toast.makeText(context, "Language set to ${lang.displayName}", Toast.LENGTH_SHORT).show()
                                 }

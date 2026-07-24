@@ -143,7 +143,7 @@ fun WelcomeBackDialog(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "Welcome Back",
+                        text = if (lastCompleted != null) "Welcome Back" else "Welcome to Creator Academy",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
                         color = TextWhite,
@@ -153,7 +153,7 @@ fun WelcomeBackDialog(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Continue your Creator Journey?",
+                        text = if (lastCompleted != null) "Continue your Creator Journey?" else "Start your first lesson",
                         fontSize = 13.sp,
                         color = EmeraldPrimary,
                         fontWeight = FontWeight.SemiBold,
@@ -172,29 +172,57 @@ fun WelcomeBackDialog(
                             .padding(14.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            // Completed Yesterday
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Completed",
-                                    tint = EmeraldPrimary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Column {
-                                    Text(
-                                        text = "Yesterday you completed:",
-                                        fontSize = 11.sp,
-                                        color = TextWhite.copy(alpha = 0.6f)
+                            if (lastCompleted != null) {
+                                // Completed Previously
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Completed",
+                                        tint = EmeraldPrimary,
+                                        modifier = Modifier.size(16.dp)
                                     )
-                                    Text(
-                                        text = lastCompleted,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextWhite
+                                    Column {
+                                        Text(
+                                            text = "Previously completed:",
+                                            fontSize = 11.sp,
+                                            color = TextWhite.copy(alpha = 0.6f)
+                                        )
+                                        Text(
+                                            text = lastCompleted,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextWhite
+                                        )
+                                    }
+                                }
+                            } else {
+                                // New Creator Status
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Status",
+                                        tint = EmeraldPrimary,
+                                        modifier = Modifier.size(16.dp)
                                     )
+                                    Column {
+                                        Text(
+                                            text = "Learning Status:",
+                                            fontSize = 11.sp,
+                                            color = TextWhite.copy(alpha = 0.6f)
+                                        )
+                                        Text(
+                                            text = "Ready to start first lesson",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextWhite
+                                        )
+                                    }
                                 }
                             }
 
@@ -211,7 +239,7 @@ fun WelcomeBackDialog(
                                 )
                                 Column {
                                     Text(
-                                        text = "Today's lesson:",
+                                        text = if (lastCompleted != null) "Today's lesson:" else "Your First Lesson:",
                                         fontSize = 11.sp,
                                         color = TextWhite.copy(alpha = 0.6f)
                                     )
@@ -338,7 +366,7 @@ fun WelcomeBackDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Continue",
+                                    text = if (lastCompleted != null) "Continue" else "Start First Lesson",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Black,
                                     color = AmoledBlack

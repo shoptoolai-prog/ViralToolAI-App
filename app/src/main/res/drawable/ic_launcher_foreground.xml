@@ -6,56 +6,91 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Outer Ambient Emerald Halo Glow -->
+    <!-- Ambient Emerald Core Shadow & Glow -->
     <path
-        android:pathData="M 28,28 C 28,18 36,10 46,10 L 62,10 C 72,10 80,18 80,28 L 80,80 C 80,90 72,98 62,98 L 46,98 C 36,98 28,90 28,80 Z"
-        android:fillColor="#2210B981" />
+        android:pathData="M 54,20 L 78,56 L 54,88 L 30,56 Z"
+        android:fillColor="#3500FF87" />
 
-    <!-- Shopping Bag Handle -->
+    <!-- Outer Quantum Ring Orbit -->
     <path
-        android:pathData="M44,32 C44,22 49,18 54,18 C59,18 64,22 64,32"
-        android:strokeWidth="4"
-        android:strokeColor="#10B981"
-        android:strokeLineCap="round"/>
+        android:pathData="M 54,22 C 70,22 83,35 83,51 C 83,67 70,80 54,80 C 38,80 25,67 25,51 C 25,35 38,22 54,22 Z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#3010B981"/>
 
-    <!-- Dark Glassmorphic Shopping Bag Body -->
+    <!-- Glassmorphic Hexagonal Shield Frame -->
     <path
-        android:pathData="M34,32 L74,32 L80,84 C80,88 76,92 72,92 L36,92 C32,92 28,88 28,84 Z">
+        android:pathData="M 54,18 L 84,35 L 84,71 L 54,88 L 24,71 L 24,35 Z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:startX="34"
-                android:startY="32"
-                android:endX="80"
-                android:endY="92"
+                android:startX="24"
+                android:startY="18"
+                android:endX="84"
+                android:endY="88"
                 android:type="linear">
-                <item android:color="#FF16221B" android:offset="0.0" />
-                <item android:color="#FF0B120D" android:offset="1.0" />
+                <item android:color="#F2121E17" android:offset="0.0" />
+                <item android:color="#F2080D0A" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- Emerald Outline Accent -->
+    <!-- Shield Emerald Border Highlight -->
     <path
-        android:pathData="M34,32 L74,32 L80,84 C80,88 76,92 72,92 L36,92 C32,92 28,88 28,84 Z"
+        android:pathData="M 54,18 L 84,35 L 84,71 L 54,88 L 24,71 L 24,35 Z"
         android:strokeWidth="1.8"
         android:strokeColor="#10B981"/>
 
-    <!-- Neon Green Play Triangle Center -->
+    <!-- Primary "V" Wing (Left Wing - Intelligence Stream) -->
     <path
-        android:pathData="M48,46 L64,56 L48,66 Z"
-        android:fillColor="#10B981"/>
+        android:pathData="M 32,36 L 44,36 L 54,72 L 42,72 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="32"
+                android:startY="36"
+                android:endX="54"
+                android:endY="72"
+                android:type="linear">
+                <item android:color="#FF00FF87" android:offset="0.0" />
+                <item android:color="#FF10B981" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
-    <!-- Growth Chart Bars & Orbit -->
+    <!-- Primary "V" Wing (Right Wing - Upward Virality Momentum Arrow) -->
     <path
-        android:pathData="M36,78 L36,73 M41,78 L41,68 M46,78 L46,62"
-        android:strokeWidth="2.8"
-        android:strokeColor="#10B981"
-        android:strokeLineCap="round"/>
+        android:pathData="M 54,72 L 66,36 L 78,36 L 60,78 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="54"
+                android:startY="72"
+                android:endX="78"
+                android:endY="36"
+                android:type="linear">
+                <item android:color="#FF10B981" android:offset="0.0" />
+                <item android:color="#FF00FF87" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
+    <!-- Upward Growth Arrowhead Cap on Right Wing -->
     <path
-        android:pathData="M26,82 Q 54,100 82,70"
-        android:strokeWidth="3.2"
-        android:strokeColor="#10B981"
+        android:pathData="M 64,30 L 78,30 L 78,44 Z"
+        android:fillColor="#00FF87"/>
+
+    <!-- Central AI Quantum Core Sparkle (4-point Diamond) -->
+    <path
+        android:pathData="M 54,40 Q 54,49 63,49 Q 54,49 54,58 Q 54,49 45,49 Q 54,49 54,40 Z"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- AI Sparkle Inner Glow -->
+    <path
+        android:pathData="M 54,43 Q 54,49 60,49 Q 54,49 54,55 Q 54,49 48,49 Q 54,49 54,43 Z"
+        android:fillColor="#00FF87"/>
+
+    <!-- Neural Data Connection Nodes -->
+    <path
+        android:pathData="M 32,36 C 32,36 32,36 32,36 M 78,30 C 78,30 78,30 78,30 M 54,78 C 54,78 54,78 54,78"
+        android:strokeWidth="4"
+        android:strokeColor="#00FF87"
         android:strokeLineCap="round"/>
 
 </vector>

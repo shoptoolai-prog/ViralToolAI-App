@@ -50,13 +50,10 @@ object RealDataIntegrationLayer {
             // 3. Extract Metadata from Live Sources (HTML, JSON-LD, OpenGraph, Meta Tags)
             val rawExtracted = ShoppingMetadataExtractor.fetchAndExtractMetadata(resolvedCleanUrl)
 
-            // 4. Validate Fields & Process via Reliability Engine
-            val verifiedReport = DataReliabilityEngine.processAndVerify(rawExtracted, resolvedCleanUrl)
+            // 4. Process via ViralToolAI Shopping Intelligence Engine (Gemini AI REST + Local Fallback)
+            val shoppingResult = com.example.engine.AiProductAnalysisEngine.analyzeProduct(resolvedCleanUrl, rawExtracted)
 
-            // 5. Build Safe Report (Hides unverified fields, shows Unavailable)
-            val shoppingResult = SafeReportBuilder.buildResultFromVerifiedReport(verifiedReport, resolvedCleanUrl)
-
-            // 6. Cache Verified Results
+            // 5. Cache Verified Results
             if (shoppingResult.isReliable) {
                 LocalShoppingCache.cacheProductResult(shoppingResult)
                 LocalShoppingCache.addRecentSearch(resolvedCleanUrl)
@@ -64,9 +61,9 @@ object RealDataIntegrationLayer {
 
             shoppingResult
         } catch (e: Exception) {
-            // Error Recovery: Return safe unverified state with friendly error message instead of crashing
-            val fallbackReport = DataReliabilityEngine.processAndVerify(RawExtractedMetadata(), trimmedInput)
-            SafeReportBuilder.buildResultFromVerifiedReport(fallbackReport, trimmedInput)
+            // Error Recovery: Analyze link via AI fallback engine instead of crashing
+            val fallbackResult = com.example.engine.AiProductAnalysisEngine.analyzeProduct(trimmedInput)
+            fallbackResult
         }
     }
 
@@ -74,13 +71,25 @@ object RealDataIntegrationLayer {
      * Synchronous caller wrapper for legacy callers.
      */
     fun getProductDataSync(rawUrl: String): ShoppingResult {
-        return try {
-            runBlocking(Dispatchers.IO) {
-                getProductData(rawUrl)
-            }
-        } catch (e: Exception) {
-            val fallbackReport = DataReliabilityEngine.processAndVerify(RawExtractedMetadata(), rawUrl)
-            SafeReportBuilder.buildResultFromVerifiedReport(fallbackReport, rawUrl)
+        val cleanUrl = rawUrl.trim()
+        if (cleanUrl.isBlank()) {
+            return com.example.data.getProductByUrl(cleanUrl, "E-Commerce", 0xFF6C5CE7)
         }
+
+        val cached = LocalShoppingCache.getCachedProductResult(cleanUrl)
+        if (cached != null) {
+            return cached
+        }
+
+        val urlAnalysis = com.example.data.MerchantDetector.analyzeUrl(cleanUrl)
+        val merchantInfo = urlAnalysis.merchantInfo
+        val merchantName = merchantInfo.merchantName
+
+        val extracted = com.example.data.extractRealProductFromUrl(cleanUrl, merchantName, merchantInfo.primaryColor)
+        if (extracted != null && extracted.productName.isNotBlank()) {
+            return extracted
+        }
+
+        return com.example.data.getProductByUrl(cleanUrl, merchantName, merchantInfo.primaryColor)
     }
 }

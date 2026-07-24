@@ -40,6 +40,8 @@ import com.example.data.ProductSpecification
 import com.example.data.generateResultData
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import coil.compose.SubcomposeAsyncImage
 
 // Beautiful custom Shimmer modifier
@@ -99,7 +101,22 @@ fun ResultScreen(
     var toastMessage by remember { mutableStateOf<String?>(null) }
     var reloadTrigger by remember { mutableStateOf(0) }
     
-    val resultData = remember(analyzedLink, reloadTrigger) { generateResultData(analyzedLink) }
+    val resultDataState = produceState<ShoppingResult>(
+        initialValue = generateResultData(analyzedLink),
+        key1 = analyzedLink,
+        key2 = reloadTrigger
+    ) {
+        val cached = com.example.cache.LocalShoppingCache.getCachedProductResult(analyzedLink)
+        if (cached != null) {
+            value = cached
+        } else {
+            val asyncResult = withContext(Dispatchers.IO) {
+                com.example.data.integration.RealDataIntegrationLayer.getProductData(analyzedLink)
+            }
+            value = asyncResult
+        }
+    }
+    val resultData = resultDataState.value
     var showAiPopup by remember { mutableStateOf(false) }
     var showSuccessCheckmark by remember { mutableStateOf(false) }
     

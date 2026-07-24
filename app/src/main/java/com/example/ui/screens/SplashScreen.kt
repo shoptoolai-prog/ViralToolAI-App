@@ -68,66 +68,55 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
     LaunchedEffect(Unit) {
         StartupSoundPlayer.playStartupChimeIfEnabled(context)
 
-        // 0.0s: Black Screen
-        
-        // 0.3s: Custom ViralToolAI icon slowly fades in
-        delay(300)
+        // 0.1s: Custom ViralToolAI icon & scale fade in
+        delay(100)
         launch {
-            logoAlpha.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+            logoAlpha.animateTo(1f, tween(350, easing = FastOutSlowInEasing))
         }
         launch {
-            logoScale.animateTo(1f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium))
+            logoScale.animateTo(1f, spring(dampingRatio = 0.65f, stiffness = Spring.StiffnessMediumLow))
         }
 
-        // 0.7s: Spotify Green ambient glow appears
-        delay(400)
+        // 0.2s: Spotify Green ambient glow & particles appear
+        delay(100)
         launch {
-            ambientGlow.animateTo(0.85f, tween(500, easing = LinearOutSlowInEasing))
+            ambientGlow.animateTo(0.9f, tween(400, easing = LinearOutSlowInEasing))
+        }
+        launch {
+            particleProgress.animateTo(1f, tween(500, easing = FastOutSlowInEasing))
         }
 
-        // 1.0s: Soft glass reflection sweeps across icon
-        delay(300)
+        // 0.35s: Soft glass reflection sweeps across icon + haptic tick
+        delay(150)
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         launch {
-            glassSweepProgress.animateTo(1f, tween(450, easing = FastOutSlowInEasing))
+            glassSweepProgress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
         }
 
-        // 1.3s: Tiny breathing animation
-        delay(300)
+        // 0.5s: Title, Tagline, & Developer credits reveal in parallel
+        delay(150)
         launch {
-            logoPulse.animateTo(1.06f, tween(200, easing = FastOutSlowInEasing))
-            logoPulse.animateTo(1.00f, tween(200, easing = LinearOutSlowInEasing))
-        }
-
-        // 1.6s: Very minimal premium particles appear
-        delay(300)
-        launch {
-            particleProgress.animateTo(1f, tween(600, easing = FastOutSlowInEasing))
-        }
-
-        // 2.0s: Tagline fades in ("From Products to Popularity")
-        delay(400)
-        launch {
-            titleAlpha.animateTo(1f, tween(300))
+            logoPulse.animateTo(1.05f, tween(150, easing = FastOutSlowInEasing))
+            logoPulse.animateTo(1.00f, tween(150, easing = LinearOutSlowInEasing))
         }
         launch {
-            taglineAlpha.animateTo(1f, tween(350))
+            titleAlpha.animateTo(1f, tween(250))
         }
-
-        // 2.3s: Developer credit appears ("Created by Asit")
-        delay(300)
+        launch {
+            taglineAlpha.animateTo(1f, tween(300))
+        }
         launch {
             developerAlpha.animateTo(1f, tween(300))
         }
 
-        // 2.6s: Display "Designed & Built Entirely on Mobile" (Small typography, ~40% opacity)
-        delay(300)
+        // 0.75s: Mobile notice appears (~40% opacity)
+        delay(250)
         launch {
-            mobileNoticeAlpha.animateTo(0.40f, tween(300))
+            mobileNoticeAlpha.animateTo(0.40f, tween(250))
         }
 
-        // 3.0s: Fade everything smoothly -> Home Screen opens
-        delay(400)
+        // 1.8s: Complete splash smoothly -> Open Home Screen
+        delay(1050)
         onSplashComplete()
     }
 

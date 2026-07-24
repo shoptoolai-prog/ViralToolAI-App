@@ -35,6 +35,17 @@ object CreatorAcademyPrefs {
     private const val KEY_CURRENT_TASK_INDEX = "current_task_index"
     private const val KEY_STREAK_DAYS = "streak_days"
     private const val KEY_REMINDER_DISMISSED = "reminder_dismissed"
+    private const val KEY_LANG_SELECTED = "academy_lang_selected"
+
+    fun isLanguageSelected(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_LANG_SELECTED, false)
+    }
+
+    fun setLanguageSelected(context: Context, selected: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_LANG_SELECTED, selected).apply()
+    }
 
     // Experience Selection
     fun getExperienceChoice(context: Context): String {
@@ -93,7 +104,7 @@ object CreatorAcademyPrefs {
     // Gamification (XP & Tasks) — Path-Specific Data Isolation
     fun getXpPoints(context: Context, path: String = "INSTAGRAM"): Int {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getInt("${KEY_XP_POINTS}_$path", if (path == "YOUTUBE") 180 else 250)
+        return prefs.getInt("${KEY_XP_POINTS}_$path", 0)
     }
 
     fun addXpPoints(context: Context, pts: Int, path: String = "INSTAGRAM"): Int {
@@ -140,7 +151,7 @@ object CreatorAcademyPrefs {
 
     fun getStreakDays(context: Context, path: String = "INSTAGRAM"): Int {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getInt("${KEY_STREAK_DAYS}_$path", if (path == "YOUTUBE") 3 else 5)
+        return prefs.getInt("${KEY_STREAK_DAYS}_$path", 0)
     }
 
     fun incrementStreak(context: Context, path: String = "INSTAGRAM"): Int {

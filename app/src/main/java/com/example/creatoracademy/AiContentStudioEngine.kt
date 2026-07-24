@@ -77,7 +77,8 @@ object AiContentStudioEngine {
         platform: String,
         contentType: String,
         topic: String,
-        userNiche: String = "General Creator"
+        userNiche: String = "General Creator",
+        lang: com.example.reports.ReportLanguage = com.example.reports.ReportLanguage.ENGLISH
     ): ContentStudioResult {
         val cleanTopic = topic.trim().ifEmpty { "Viral Content Strategy" }
         val cleanPlatform = if (platform.isBlank()) "Instagram" else platform
@@ -103,32 +104,89 @@ object AiContentStudioEngine {
             engagementScore = ScoreItem("Engagement Potential", engageVal, "Relatable problem-solving format boosts share rate.")
         )
 
-        // Viral Hooks tailored to Content Type
-        val mainHook = when (cleanType) {
-            "Product Review" -> "Stop buying expensive gear until you see this $cleanTopic hack!"
-            "UGC" -> "I tried $cleanTopic for 7 days so you don't have to."
-            "Tutorial" -> "The exact 3-step formula to master $cleanTopic in under 30 seconds."
-            "Educational" -> "99% of creators get $cleanTopic wrong. Here is what actually works."
-            "Storytelling" -> "How one simple change in $cleanTopic generated 10x results."
-            "Comedy" -> "When you try to explain $cleanTopic to your friends for the 10th time..."
-            "Tech" -> "This $cleanTopic feature feels completely illegal to know!"
-            "Fashion", "Beauty" -> "The hidden secret to elevating your $cleanTopic look effortlessly."
-            else -> "If you care about $cleanTopic, you need to save this reel immediately!"
+        // Viral Hooks tailored to Content Type and Language
+        val mainHook = when (lang) {
+            com.example.reports.ReportLanguage.HINDI -> when (cleanType) {
+                "Product Review" -> "यह $cleanTopic खरीदने से पहले यह 15-सेकंड का वीडियो जरूर देखें!"
+                "Tutorial" -> "30 सेकंड में $cleanTopic सीखने का सबसे आसान तरीका।"
+                "Educational" -> "99% लोग $cleanTopic में यह गलती करते हैं। जानिए सही तरीका।"
+                else -> "यदि आप $cleanTopic में रुचि रखते हैं, तो इस वीडियो को तुरंत सेव करें!"
+            }
+            com.example.reports.ReportLanguage.HINGLISH -> when (cleanType) {
+                "Product Review" -> "Yeh $cleanTopic buy karne se pehle yeh 15-second video zaroor dekhein!"
+                "Tutorial" -> "30 seconds me $cleanTopic sikhne ka sabse easy formula."
+                "Educational" -> "99% log $cleanTopic me yeh mistake karte hain. Jaaniye sahi tarika."
+                else -> "Agar aap $cleanTopic me interested hain, toh is reel ko turant save karein!"
+            }
+            else -> when (cleanType) {
+                "Product Review" -> "Stop buying expensive gear until you see this $cleanTopic hack!"
+                "UGC" -> "I tried $cleanTopic for 7 days so you don't have to."
+                "Tutorial" -> "The exact 3-step formula to master $cleanTopic in under 30 seconds."
+                "Educational" -> "99% of creators get $cleanTopic wrong. Here is what actually works."
+                "Storytelling" -> "How one simple change in $cleanTopic generated 10x results."
+                "Comedy" -> "When you try to explain $cleanTopic to your friends for the 10th time..."
+                "Tech" -> "This $cleanTopic feature feels completely illegal to know!"
+                "Fashion", "Beauty" -> "The hidden secret to elevating your $cleanTopic look effortlessly."
+                else -> "If you care about $cleanTopic, you need to save this reel immediately!"
+            }
         }
 
-        val altHooks = listOf(
-            "Here is the secret $cleanTopic trick nobody is talking about...",
-            "Before you do anything with $cleanTopic, watch this 15-second breakdown.",
-            "The biggest mistake people make with $cleanTopic (and how to fix it)."
-        )
+        val altHooks = when (lang) {
+            com.example.reports.ReportLanguage.HINDI -> listOf(
+                "यहाँ $cleanTopic की वह सीक्रेट ट्रिक है जो कोई नहीं बताता...",
+                "अगला वीडियो बनाने से पहले यह 15-सेकंड की गाइड देखें।",
+                "$cleanTopic में सबसे बड़ी गलती और उसका समाधान।"
+            )
+            com.example.reports.ReportLanguage.HINGLISH -> listOf(
+                "Yahan $cleanTopic ki woh secret trick hai jo koi nahi batata...",
+                "Next video banane se pehle yeh 15-second guide zaroor dekhein.",
+                "$cleanTopic me sabse badi galti aur uska easy solution."
+            )
+            else -> listOf(
+                "Here is the secret $cleanTopic trick nobody is talking about...",
+                "Before you do anything with $cleanTopic, watch this 15-second breakdown.",
+                "The biggest mistake people make with $cleanTopic (and how to fix it)."
+            )
+        }
 
-        val videoStructure = VideoStructure(
-            openingLine = "0-3s: \"$mainHook\" (Show fast visual transformation or close-up action)",
-            middleFlow = "3-20s: Point 1: Key problem with $cleanTopic → Point 2: Unmatched benefit → Point 3: Live proof/demo",
-            endingCta = "20-30s: \"Comment 'PLAN' below and I'll send you the exact breakdown! Save this for later.\""
-        )
+        val videoStructure = when (lang) {
+            com.example.reports.ReportLanguage.HINDI -> VideoStructure(
+                openingLine = "0-3s: \"$mainHook\" (शुरुआत में बोल्ड विजुअल या एक्शन दिखाएं)",
+                middleFlow = "3-20s: बिंदु 1: मुख्य समस्या → बिंदु 2: समाधान → बिंदु 3: लाइव डेमो",
+                endingCta = "20-30s: \"नीचे कमेंट में 'PLAN' लिखें और इस वीडियो को सेव करें!\""
+            )
+            com.example.reports.ReportLanguage.HINGLISH -> VideoStructure(
+                openingLine = "0-3s: \"$mainHook\" (Start me bold text overlay dikhayein)",
+                middleFlow = "3-20s: Point 1: Main problem → Point 2: Easy solution → Point 3: Live proof",
+                endingCta = "20-30s: \"Comment me 'PLAN' likhein aur is reel ko save karein!\""
+            )
+            else -> VideoStructure(
+                openingLine = "0-3s: \"$mainHook\" (Show fast visual transformation or close-up action)",
+                middleFlow = "3-20s: Point 1: Key problem with $cleanTopic → Point 2: Unmatched benefit → Point 3: Live proof/demo",
+                endingCta = "20-30s: \"Comment 'PLAN' below and I'll send you the exact breakdown! Save this for later.\""
+            )
+        }
 
-        val caption = """
+        val caption = when (lang) {
+            com.example.reports.ReportLanguage.HINDI -> """
+🚀 $cleanPlatform पर $cleanTopic में महारत हासिल करें ($cleanType)
+
+1️⃣ पहले 3 सेकंड में मुख्य वैल्यू दें।
+2️⃣ विजुअल कट्स 1.5-सेकंड पर रखें।
+3️⃣ अंत में एक स्पष्ट कॉल टू एक्शन दें।
+
+👇 कमेंट में अपनी राय बताएं और इस पोस्ट को सेव करें!
+            """.trimIndent()
+            com.example.reports.ReportLanguage.HINGLISH -> """
+🚀 $cleanPlatform par $cleanTopic master karein ($cleanType Edition)
+
+1️⃣ Pehle 3 seconds me main value dein.
+2️⃣ Snappy 1.5-second visual cuts rakhein.
+3️⃣ Ending me clear Call To Action dein.
+
+👇 Comment me apni rai batayein aur is reel ko save karein!
+            """.trimIndent()
+            else -> """
 🚀 Master $cleanTopic on $cleanPlatform ($cleanType Edition)
 
 Struggling with $cleanTopic? Here are 3 proven principles used by top creators:
@@ -140,7 +198,8 @@ Struggling with $cleanTopic? Here are 3 proven principles used by top creators:
 👇 Which tip are you applying today? Drop a comment below!
 
 💾 Save this post for your next content batching session!
-        """.trimIndent()
+            """.trimIndent()
+        }
 
         val seoKeywords = listOf(
             cleanTopic.lowercase(),

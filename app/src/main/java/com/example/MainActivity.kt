@@ -389,7 +389,7 @@ fun FloatingBottomNavigation(
         NavigationTabItem(
             screen = Screen.Home,
             icon = Icons.Default.Home,
-            label = "Home",
+            label = com.example.core.LanguageEngine.get("tab_home"),
             isSelected = currentScreen == Screen.Home,
             onClick = { onScreenSelected(Screen.Home) },
             testTag = "tab_home"
@@ -399,7 +399,7 @@ fun FloatingBottomNavigation(
         NavigationTabItem(
             screen = Screen.CreatorAcademy,
             icon = Icons.Default.School,
-            label = "Academy",
+            label = com.example.core.LanguageEngine.get("tab_academy"),
             isSelected = currentScreen == Screen.CreatorAcademy || currentScreen == Screen.CreatorAcademySetup,
             onClick = { onScreenSelected(Screen.CreatorAcademy) },
             testTag = "tab_academy"
@@ -409,7 +409,7 @@ fun FloatingBottomNavigation(
         NavigationTabItem(
             screen = Screen.History,
             icon = Icons.Default.History,
-            label = "History",
+            label = com.example.core.LanguageEngine.get("tab_history"),
             isSelected = currentScreen == Screen.History,
             onClick = { onScreenSelected(Screen.History) },
             testTag = "tab_history"
@@ -419,7 +419,7 @@ fun FloatingBottomNavigation(
         NavigationTabItem(
             screen = Screen.Profile,
             icon = Icons.Default.Person,
-            label = "Profile",
+            label = com.example.core.LanguageEngine.get("tab_profile"),
             isSelected = currentScreen == Screen.Profile,
             onClick = { onScreenSelected(Screen.Profile) },
             testTag = "tab_profile"

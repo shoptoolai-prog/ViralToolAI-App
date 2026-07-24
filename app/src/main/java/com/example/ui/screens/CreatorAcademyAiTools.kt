@@ -57,7 +57,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.core.LanguageEngine
+import com.example.creatoracademy.CreatorAiGeneratorEngine
 import com.example.creatoracademy.CreatorSetupData
+import com.example.reports.ReportLanguage
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
@@ -231,6 +234,7 @@ fun FutureReadySection(
 fun CaptionGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val currentLang = LanguageEngine.currentLanguageState.value
     var topicText by remember { mutableStateOf("") }
     var generatedCaption by remember { mutableStateOf<String?>(null) }
 
@@ -269,13 +273,12 @@ fun CaptionGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
                         .clip(RoundedCornerShape(22.dp))
                         .background(EmeraldPrimary)
                         .clickable {
-                            val topic = topicText.ifBlank { "${setupData.niche} Growth Strategy" }
-                            generatedCaption = "🚀 Stop scrolling! Here is the #1 mistake most ${setupData.niche} creators make when trying to grow on ${setupData.targetPlatform}.\n\n" +
-                                    "1️⃣ Focus on retention in the first 3 seconds.\n" +
-                                    "2️⃣ Use clear text overlays for silent viewers.\n" +
-                                    "3️⃣ Always end with a direct Call to Action!\n\n" +
-                                    "👇 Save this reel & comment 'GROWTH' for the full breakdown!\n\n" +
-                                    "#${setupData.niche.lowercase()} #creatortips #${setupData.targetPlatform.lowercase()}growth #contentstrategy"
+                            generatedCaption = CreatorAiGeneratorEngine.generateCaption(
+                                context = context,
+                                setupData = setupData,
+                                topic = topicText,
+                                lang = currentLang
+                            )
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -322,6 +325,7 @@ fun CaptionGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
 fun HashtagGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val currentLang = LanguageEngine.currentLanguageState.value
     var hashtagResult by remember { mutableStateOf<String?>(null) }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -349,10 +353,11 @@ fun HashtagGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
                         .clip(RoundedCornerShape(22.dp))
                         .background(EmeraldPrimary)
                         .clickable {
-                            val nicheTag = setupData.niche.lowercase().replace(" ", "")
-                            hashtagResult = "🌐 BROAD TIER (100k+):\n#contentcreator #reels #${setupData.targetPlatform.lowercase()}tips\n\n" +
-                                    "🎯 NICHE TIER (10k - 100k):\n#${nicheTag}tips #${nicheTag}life #${nicheTag}creator\n\n" +
-                                    "⚡ MICRO TIER (<10k):\n#${nicheTag}hacks #${nicheTag}community #learnon${setupData.targetPlatform.lowercase()}"
+                            hashtagResult = CreatorAiGeneratorEngine.generateHashtags(
+                                context = context,
+                                setupData = setupData,
+                                lang = currentLang
+                            )
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -396,6 +401,9 @@ fun HashtagGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
 
 @Composable
 fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val currentLang = LanguageEngine.currentLanguageState.value
+    var topicText by remember { mutableStateOf("") }
     var hooks by remember { mutableStateOf<List<String>>(emptyList()) }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -412,6 +420,20 @@ fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
+                OutlinedTextField(
+                    value = topicText,
+                    onValueChange = { topicText = it },
+                    label = { Text("Topic Focus (Optional)", color = TextWhite.copy(alpha = 0.6f)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = EmeraldPrimary, unfocusedBorderColor = Color(0x33FFFFFF),
+                        focusedTextColor = TextWhite, unfocusedTextColor = TextWhite
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -419,18 +441,16 @@ fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
                         .clip(RoundedCornerShape(22.dp))
                         .background(EmeraldPrimary)
                         .clickable {
-                            val n = setupData.niche
-                            hooks = listOf(
-                                "1. 'Stop making this $1,000 $n mistake in 2026!'",
-                                "2. 'The secret strategy top $n creators aren't telling you...'",
-                                "3. 'If I had to restart as a $n creator from 0 followers, I'd do this.'",
-                                "4. '3 free tools that feel illegal for $n creators to know.'",
-                                "5. 'This 15-second tweak doubled my $n post engagement!'"
+                            hooks = CreatorAiGeneratorEngine.generateViralHooks(
+                                context = context,
+                                setupData = setupData,
+                                topic = topicText,
+                                lang = currentLang
                             )
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Generate Viral Hooks 🔥", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                    Text(text = "Generate Fresh Viral Hooks 🔥", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
                 }
 
                 if (hooks.isNotEmpty()) {
@@ -455,6 +475,18 @@ fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
 
 @Composable
 fun ContentPlannerDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val currentLang = LanguageEngine.currentLanguageState.value
+    var plan by remember {
+        mutableStateOf(
+            CreatorAiGeneratorEngine.generateContentPlan(
+                context = context,
+                setupData = setupData,
+                lang = currentLang
+            )
+        )
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
@@ -473,15 +505,25 @@ fun ContentPlannerDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val plan = listOf(
-                    "Mon: Educational How-To Reel (${setupData.niche} Tip)",
-                    "Tue: Common Industry Mistake Breakdown",
-                    "Wed: Behind-The-Scenes / Setup Reel",
-                    "Thu: Quick Viral Hook & Answer FAQ",
-                    "Fri: Product / Tool Review in ${setupData.niche}",
-                    "Sat: Relatable Meme / Trend Audio Reel",
-                    "Sun: Weekly Recap & Call to Action Story"
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(EmeraldPrimary)
+                        .clickable {
+                            plan = CreatorAiGeneratorEngine.generateContentPlan(
+                                context = context,
+                                setupData = setupData,
+                                lang = currentLang
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Regenerate Plan ✨", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 plan.forEach { item ->
                     Box(
@@ -558,14 +600,15 @@ fun PostingChecklistDialog(onDismiss: () -> Unit) {
 fun BrandPitchGuideDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val currentLang = LanguageEngine.currentLanguageState.value
 
-    val pitchText = "Subject: Partnership Inquiry: ${setupData.niche} Creator Collaboration\n\n" +
-            "Hi [Brand Team],\n\n" +
-            "I'm a digital creator in the ${setupData.niche} space on ${setupData.targetPlatform} with ${setupData.currentFollowers} highly engaged followers.\n\n" +
-            "I love [Brand Name] and would love to collaborate on a dedicated Reel/Short showcasing how [Product] solves [Key Problem].\n\n" +
-            "Here is a quick overview of my audience demographics & recent performance metrics.\n\n" +
-            "Let me know if you'd be open to reviewing my Media Kit & pitch deck!\n\n" +
-            "Best,\n[Your Name]"
+    val pitchText = remember(setupData, currentLang) {
+        CreatorAiGeneratorEngine.generateBrandPitch(
+            context = context,
+            setupData = setupData,
+            lang = currentLang
+        )
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
