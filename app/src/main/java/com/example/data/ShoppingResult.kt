@@ -235,7 +235,8 @@ class MeeshoProvider : ShoppingProvider {
 
 data class PriceTrendPoint(
     val date: String,
-    val price: Double
+    val price: Double,
+    val daysAgo: Int = 0
 )
 
 data class InstagramProduct(
@@ -289,6 +290,9 @@ data class ShoppingResult(
     val productImageWebUrl: String? = null,
     val instagramProducts: List<InstagramProduct>? = null,
     val detectionConfidence: Int = 95,
+    val confidenceScoreLevel: String = "High",
+    val shoppingSummary: String? = null,
+    val hiddenReasoning: String? = null,
     val isCloudVerificationRequired: Boolean = false,
     val isReliable: Boolean = true,
     val isPreviewResult: Boolean = true,
@@ -369,7 +373,9 @@ data class ShoppingResult(
         "Watch out for seasonal festival price drops.",
         "Check return policy and brand warranty terms carefully."
     )
-)
+) {
+    val inStock: Boolean get() = availability.contains("in stock", ignoreCase = true) || (!availability.contains("out of stock", ignoreCase = true) && availability.isNotBlank())
+}
 
 data class PriceHistoryPoint(
     val dateLabel: String,
@@ -810,40 +816,16 @@ fun extractRealProductFromUrl(url: String, detectedStore: String, accentColorVal
         )
     }
 
-    val finalBestPrice = comparisonItems.minOfOrNull { it.price } ?: currentPriceVal
-    val highestSellerPriceVal = comparisonItems.maxOfOrNull { it.price } ?: (currentPriceVal * 1.15)
-    val bestSellerStore = comparisonItems.firstOrNull { it.isBest }?.store ?: detectedStore
+    val finalBestPrice = currentPriceVal
+    val highestSellerPriceVal = currentPriceVal
+    val bestSellerStore = detectedStore
 
-    val aiRecText = "Recommended on $bestSellerStore because it is ₹${String.format("%,.0f", (highestSellerPriceVal - finalBestPrice).coerceAtLeast(350.0))} cheaper and delivers tomorrow with full brand warranty."
+    val aiRecText = "Product details verified directly from $bestSellerStore catalog."
 
-    val priceTrend = listOf(
-        PriceTrendPoint("May 2026", originalPriceVal),
-        PriceTrendPoint("Jun 2026", currentPriceVal + (originalPriceVal - currentPriceVal) / 2.0),
-        PriceTrendPoint("Jul 2026", currentPriceVal)
-    )
-
-    val similarList = when (detectedCategory) {
-        "Shoes" -> listOf(
-            SimilarProduct("Adidas Originals NMD_R1", "Myntra", currentPriceVal * 1.1, 4.4, 'M', 0xFFFC2779),
-            SimilarProduct("Puma RS-X Geek", "AJIO", currentPriceVal * 0.8, 4.3, 'A', 0xFF2C3E50)
-        )
-        "Smartphone" -> listOf(
-            SimilarProduct("Samsung Galaxy S24 Ultra", "Amazon", currentPriceVal * 1.05, 4.6, 'A', 0xFFFF9900),
-            SimilarProduct("Google Pixel 8 Pro", "Flipkart", currentPriceVal * 0.85, 4.4, 'F', 0xFF2874F0)
-        )
-        "Watch" -> listOf(
-            SimilarProduct("Fossil Machine Chronograph", "Myntra", currentPriceVal * 0.9, 4.3, 'M', 0xFFFC2779),
-            SimilarProduct("Casio Edifice Premium Watch", "Flipkart", currentPriceVal * 1.1, 4.5, 'F', 0xFF2874F0)
-        )
-        "Clothing" -> listOf(
-            SimilarProduct("H&M Oversized Cotton Shirt", "H&M", currentPriceVal * 0.8, 4.2, 'H', 0xFFE5001C),
-            SimilarProduct("Snitch Premium Casual Shirt", "Snitch", currentPriceVal * 1.2, 4.3, 'S', 0xFF111111)
-        )
-        else -> listOf(
-            SimilarProduct("Anker PowerWave Pad", "Amazon", 1999.0, 4.5, 'A', 0xFFFF9900),
-            SimilarProduct("Spigen Essential Charger", "Flipkart", 1599.0, 4.4, 'F', 0xFF2874F0)
-        )
-    }
+    val priceTrend = emptyList<PriceTrendPoint>()
+    val similarList = emptyList<SimilarProduct>()
+    // Hide unverified cross-store comparisons
+    val verifiedComparisonItems = emptyList<PriceCompareItem>()
 
     return ShoppingResult(
         url = url,
@@ -860,39 +842,39 @@ fun extractRealProductFromUrl(url: String, detectedStore: String, accentColorVal
         reviewsCount = detectedReviewsCount,
         priceTrend = priceTrend,
         similarProducts = similarList,
-        priceComparison = comparisonItems,
+        priceComparison = verifiedComparisonItems,
         aiRecommendation = aiRecText,
         productImageWebUrl = primaryProductImage,
         instagramProducts = null,
-        detectionConfidence = 95 + (ratingSeed % 5),
+        detectionConfidence = 95,
         isCloudVerificationRequired = false,
         isReliable = true,
         isPreviewResult = false,
         category = detectedCategory,
-        estimatedMatch = "Exact Product Match (100%)",
+        estimatedMatch = "Exact Product Match",
         status = "Live Verified",
         color = detectedColor,
         variant = detectedVariant,
         originalPrice = originalPriceVal,
         discountPercent = discountPercentVal,
         productImages = galleryList,
-        modelNumber = "SKU-${(ratingSeed % 9000) + 1000}",
+        modelNumber = null,
         specifications = specsList,
         highlights = highlightsList,
         warranty = "1 Year Official Brand Warranty",
-        material = if (detectedCategory == "Clothing") "100% Premium Organic Cotton" else null,
+        material = null,
         size = detectedVariant,
         capacity = if (detectedCategory == "Smartphone") detectedVariant else null,
         trustScorePercent = 96,
         trustScoreLevel = "Excellent",
         priceLowest = finalBestPrice,
         priceHighest = originalPriceVal,
-        priceAverage = (currentPriceVal + finalBestPrice) / 2.0,
-        priceTrendDirection = "Falling",
-        coupons = couponsList,
+        priceAverage = currentPriceVal,
+        priceTrendDirection = "Stable",
+        coupons = emptyList(),
         highestSellerPrice = highestSellerPriceVal,
-        savingsAmount = (highestSellerPriceVal - finalBestPrice).coerceAtLeast(0.0),
-        savingsPercent = if (highestSellerPriceVal > 0) (((highestSellerPriceVal - finalBestPrice) / highestSellerPriceVal) * 100).toInt() else 0
+        savingsAmount = (originalPriceVal - currentPriceVal).coerceAtLeast(0.0),
+        savingsPercent = discountPercentVal
     )
 }
 

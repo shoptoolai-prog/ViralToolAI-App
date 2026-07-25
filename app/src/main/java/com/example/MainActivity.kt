@@ -469,6 +469,17 @@ fun NavigationTabItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .padding(end = 6.dp)
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(EmeraldGlow)
+                        .shadow(6.dp, CircleShape, spotColor = EmeraldGlow)
+                )
+            }
+
             Icon(
                 imageVector = icon,
                 contentDescription = label,

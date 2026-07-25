@@ -96,6 +96,14 @@ import com.example.creatoracademy.CreatorLevel
 import com.example.creatoracademy.TaskState
 import com.example.creatoracademy.ViralMemoryEngine
 import com.example.ui.components.GlassCard
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextGray
@@ -213,101 +221,342 @@ fun CreatorAcademyScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
-            // 1. TOP HEADER & BRANDING BAR
+            // 1. TOP HEADER & BRANDING BAR (PREMIUM HEADER REDESIGN V2)
             // ==================================================
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x2210B981))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.School,
-                                contentDescription = "Academy",
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Creator Academy AI",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite,
-                            letterSpacing = (-0.5).sp
+            // One-time entrance animation sequence (Logo -> Glow -> Title -> Tagline -> Switch -> Settings)
+            val headerAnimProgress = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                headerAnimProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
+                )
+            }
+            val animVal = headerAnimProgress.value
+
+            val logoScale = 0.75f + (0.25f * (animVal / 0.35f).coerceIn(0f, 1f))
+            val logoPulseGlow = if (animVal in 0.25f..0.65f) ((1f - Math.abs(animVal - 0.45f) / 0.2f) * 0.5f) else 0f
+            val titleAlpha = ((animVal - 0.2f) / 0.35f).coerceIn(0f, 1f)
+            val taglineAlpha = ((animVal - 0.35f) / 0.35f).coerceIn(0f, 1f)
+            val switchAlpha = ((animVal - 0.5f) / 0.3f).coerceIn(0f, 1f)
+            val switchScale = 0.85f + (0.15f * switchAlpha)
+            val settingsAlpha = ((animVal - 0.6f) / 0.3f).coerceIn(0f, 1f)
+            val settingsScale = 0.85f + (0.15f * settingsAlpha)
+
+            // Continuous 60 FPS micro-animations
+            val headerInfiniteTransition = rememberInfiniteTransition(label = "academyHeaderAnims")
+            val logoBreathingAlpha by headerInfiniteTransition.animateFloat(
+                initialValue = 0.35f,
+                targetValue = 0.85f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(2200, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "logoBreathingAlpha"
+            )
+            val headerShimmerOffset by headerInfiniteTransition.animateFloat(
+                initialValue = -300f,
+                targetValue = 900f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(3800, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "headerShimmerOffset"
+            )
+            val logoFloatY by headerInfiniteTransition.animateFloat(
+                initialValue = -1.5f,
+                targetValue = 1.5f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(2600, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "logoFloatY"
+            )
+
+            // Interactive press animations for Switch & Settings buttons
+            val switchInteractionSource = remember { MutableInteractionSource() }
+            val isSwitchPressed by switchInteractionSource.collectIsPressedAsState()
+            val switchPressedScale by animateFloatAsState(
+                targetValue = if (isSwitchPressed) 0.92f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                label = "switchPressedScale"
+            )
+
+            val settingsInteractionSource = remember { MutableInteractionSource() }
+            val isSettingsPressed by settingsInteractionSource.collectIsPressedAsState()
+            val settingsPressedScale by animateFloatAsState(
+                targetValue = if (isSettingsPressed) 0.90f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                label = "settingsPressedScale"
+            )
+            var settingsClickRotation by remember { mutableStateOf(0f) }
+            val settingsRotationAnimated by animateFloatAsState(
+                targetValue = settingsClickRotation,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+                label = "settingsRotationAnimated"
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 12.dp)
+                    .shadow(
+                        elevation = 14.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = EmeraldPrimary.copy(alpha = 0.35f),
+                        ambientColor = Color.Black
+                    )
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.linearGradient(
+                            listOf(Color(0xFF131A16), Color(0xFF0A0F0D))
                         )
-                    }
-                    Text(
-                        text = "Learn. Create. Grow.",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = EmeraldPrimary,
-                        letterSpacing = 1.sp,
-                        modifier = Modifier.padding(start = 40.dp)
+                    )
+                    .border(
+                        BorderStroke(
+                            1.2.dp,
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                    Color(0xFF10B981).copy(alpha = 0.45f),
+                                    EmeraldGlow.copy(alpha = logoBreathingAlpha)
+                                ),
+                                start = Offset(headerShimmerOffset, 0f),
+                                end = Offset(headerShimmerOffset + 400f, 250f)
+                            )
+                        ),
+                        RoundedCornerShape(24.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                // Glass reflection shimmer sweep line across container
+                Canvas(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
+                    val sweepX = headerShimmerOffset
+                    drawLine(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.03f),
+                                Color.White.copy(alpha = 0.12f),
+                                Color.White.copy(alpha = 0.03f),
+                                Color.Transparent
+                            )
+                        ),
+                        start = Offset(sweepX, 0f),
+                        end = Offset(sweepX + 180f, size.height),
+                        strokeWidth = 30.dp.toPx()
                     )
                 }
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Switch Experience Button
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x15FFFFFF))
-                            .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(12.dp))
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onSwitchExperience()
+                    // Left branding: Logo + Title + Tagline
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // CREATOR ACADEMY AI LOGO WITH GLASS MORPHISM & GREEN GLOW
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.graphicsLayer {
+                                translationY = logoFloatY.dp.toPx()
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.SwapHoriz,
-                                contentDescription = "Switch",
-                                tint = TextWhite,
-                                modifier = Modifier.size(16.dp)
+                        ) {
+                            // Soft outer green neon aura ring
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(
+                                                EmeraldPrimary.copy(alpha = (logoBreathingAlpha * 0.45f) + logoPulseGlow),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+
+                            // High-resolution Glassmorphism Icon Box
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .graphicsLayer {
+                                        scaleX = logoScale
+                                        scaleY = logoScale
+                                    }
+                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldPrimary)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(Color(0xFF1B2820), Color(0xFF0D1610))
+                                        )
+                                    )
+                                    .border(
+                                        BorderStroke(
+                                            1.2.dp,
+                                            Brush.linearGradient(
+                                                listOf(
+                                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                                    EmeraldGlow
+                                                )
+                                            )
+                                        ),
+                                        RoundedCornerShape(14.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = "Creator Academy AI Logo",
+                                    tint = EmeraldGlow,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        // CREATOR ACADEMY AI TITLE & TAGLINE
+                        Column {
                             Text(
-                                text = "Switch",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite
+                                text = "Creator Academy AI",
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Black,
+                                style = androidx.compose.ui.text.TextStyle(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(
+                                            TextWhite,
+                                            Color(0xFFE2F3EB),
+                                            EmeraldGlow
+                                        )
+                                    )
+                                ),
+                                letterSpacing = (-0.3).sp,
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = titleAlpha
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Learn. Create. Grow.",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = EmeraldPrimary,
+                                letterSpacing = 1.6.sp,
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = taglineAlpha
+                                }
                             )
                         }
                     }
 
-                    // Re-setup Settings Button
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x15FFFFFF))
-                            .border(BorderStroke(1.dp, Color(0x22FFFFFF)), CircleShape)
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onResetSetup()
-                            },
-                        contentAlignment = Alignment.Center
+                    // Right side action buttons: Switch & Settings
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Setup",
-                            tint = TextWhite.copy(alpha = 0.8f),
-                            modifier = Modifier.size(16.dp)
-                        )
+                        // SWITCH BUTTON (PREMIUM GLASS FLOATING ACTION CHIP)
+                        Box(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    alpha = switchAlpha
+                                    scaleX = switchScale * switchPressedScale
+                                    scaleY = switchScale * switchPressedScale
+                                }
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            Color(0x2BFFFFFF),
+                                            Color(0x1A10B981)
+                                        )
+                                    )
+                                )
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                                Color.White.copy(alpha = 0.25f)
+                                            )
+                                        )
+                                    ),
+                                    RoundedCornerShape(16.dp)
+                                )
+                                .clickable(
+                                    interactionSource = switchInteractionSource,
+                                    indication = null
+                                ) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onSwitchExperience()
+                                }
+                                .padding(horizontal = 11.dp, vertical = 7.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.SwapHoriz,
+                                    contentDescription = "Switch Experience",
+                                    tint = TextWhite,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Switch",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
+                        }
+
+                        // SETTINGS BUTTON (CIRCULAR GLASS BUTTON)
+                        Box(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    alpha = settingsAlpha
+                                    scaleX = settingsScale * settingsPressedScale
+                                    scaleY = settingsScale * settingsPressedScale
+                                    rotationZ = settingsRotationAnimated
+                                }
+                                .size(36.dp)
+                                .shadow(6.dp, CircleShape, spotColor = EmeraldPrimary.copy(alpha = 0.3f))
+                                .clip(CircleShape)
+                                .background(Color(0x22FFFFFF))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color.White.copy(alpha = 0.35f),
+                                                EmeraldPrimary.copy(alpha = 0.4f)
+                                            )
+                                        )
+                                    ),
+                                    CircleShape
+                                )
+                                .clickable(
+                                    interactionSource = settingsInteractionSource,
+                                    indication = null
+                                ) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    settingsClickRotation += 90f
+                                    onResetSetup()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Setup Settings",
+                                tint = TextWhite.copy(alpha = 0.95f),
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -417,32 +666,6 @@ fun CreatorAcademyScreen(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "brand_collab_ai" }
-                    }
-                )
-
-                // Affiliate Master AI (LOCKED)
-                PlatformOptionCard(
-                    title = "Affiliate Master AI",
-                    subtitle = "Meesho & E-Commerce Affiliate Creator Journey",
-                    badge = "🔒 COMING SOON",
-                    isSelected = false,
-                    isLocked = true,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "affiliate_master_ai" }
-                    }
-                )
-
-                // Video Editing Academy (LOCKED)
-                PlatformOptionCard(
-                    title = "Video Editing Academy",
-                    subtitle = "CapCut, VN, Sound Design & Freelancing",
-                    badge = "🔒 COMING SOON",
-                    isSelected = false,
-                    isLocked = true,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedPremiumTool = com.example.ui.components.PremiumCreatorMarketplaceData.tools.firstOrNull { it.id == "video_editing_academy" }
                     }
                 )
             }
@@ -659,10 +882,16 @@ fun CreatorAcademyScreen(
         }
 
         selectedPremiumTool?.let { tool ->
-            com.example.ui.components.CommonPremiumToolPopupDialog(
-                tool = tool,
-                onDismiss = { selectedPremiumTool = null }
-            )
+            if (tool.id == "brand_collab_ai") {
+                com.example.creatoracademy.BrandCollaborationAiDialog(
+                    onDismiss = { selectedPremiumTool = null }
+                )
+            } else {
+                com.example.ui.components.CommonPremiumToolPopupDialog(
+                    tool = tool,
+                    onDismiss = { selectedPremiumTool = null }
+                )
+            }
         }
 
         // First Time Language Selection Dialog

@@ -33,6 +33,8 @@ data class RawExtractedMetadata(
     val rating: Double? = null,
     val reviewsCount: Int? = null,
     val availability: String? = null,
+    val deliveryInfo: String? = null,
+    val category: String? = null,
     val canonicalUrl: String? = null,
     val faviconUrl: String? = null,
     val extractionSource: String = "HTML_METADATA"

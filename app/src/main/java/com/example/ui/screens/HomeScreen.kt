@@ -59,6 +59,7 @@ import java.util.Locale
 import com.example.data.MerchantDetector
 import com.example.data.MerchantRegistry
 import com.example.data.MerchantInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.scale
 import com.example.vision.*
 
@@ -95,6 +96,7 @@ fun HomeScreen(
     var showCreatorProfileScreen by remember { mutableStateOf(false) }
     var invalidUrlPopupResult by remember { mutableStateOf<com.example.data.ShoppingValidationResult?>(null) }
     var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
+    var showBrandCollabDialog by remember { mutableStateOf(false) }
     var showInstaAutoDmDialog by remember { mutableStateOf(false) }
     var showMeeshoCreatorDialog by remember { mutableStateOf(false) }
     var showSmartRedirectionDialog by remember { mutableStateOf(false) }
@@ -150,105 +152,245 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ==================================================
-            // FLAGSHIP HERO BANNER (App Name, Tagline & Creator Credit)
+            // FLAGSHIP HERO BANNER (APP HEADER PREMIUM REDESIGN V1)
             // ==================================================
-            val heroGradientTransition = rememberInfiniteTransition(label = "heroBorderGrad")
-            val heroGradOffset by heroGradientTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 1000f,
+            // One-time entrance animation sequence (Logo scale -> pulse -> title fade -> tagline fade)
+            val headerAnimProgress = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                headerAnimProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
+                )
+            }
+
+            val animVal = headerAnimProgress.value
+            val logoScale = 0.75f + (0.25f * (animVal / 0.4f).coerceIn(0f, 1f))
+            val logoPulseGlow = if (animVal in 0.3f..0.7f) ((1f - Math.abs(animVal - 0.5f) / 0.2f) * 0.5f) else 0f
+            val titleAlpha = ((animVal - 0.2f) / 0.4f).coerceIn(0f, 1f)
+            val taglineAlpha = ((animVal - 0.4f) / 0.4f).coerceIn(0f, 1f)
+
+            // Continuous subtle micro-animations for 60 FPS polish
+            val headerInfiniteTransition = rememberInfiniteTransition(label = "headerMicroAnims")
+            val logoBreathingAlpha by headerInfiniteTransition.animateFloat(
+                initialValue = 0.35f,
+                targetValue = 0.85f,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(12000, easing = LinearEasing),
+                    animation = tween(2200, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "logoBreathingAlpha"
+            )
+            val headerShimmerOffset by headerInfiniteTransition.animateFloat(
+                initialValue = -300f,
+                targetValue = 900f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(3800, easing = LinearEasing),
                     repeatMode = RepeatMode.Restart
                 ),
-                label = "heroGradOffset"
+                label = "headerShimmerOffset"
+            )
+            val logoFloatY by headerInfiniteTransition.animateFloat(
+                initialValue = -1.5f,
+                targetValue = 1.5f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(2600, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "logoFloatY"
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp, bottom = 12.dp)
+                    .padding(top = 8.dp, bottom = 12.dp)
+                    .shadow(
+                        elevation = 14.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = EmeraldPrimary.copy(alpha = 0.3f),
+                        ambientColor = Color.Black
+                    )
                     .clip(RoundedCornerShape(24.dp))
                     .background(
                         Brush.linearGradient(
-                            listOf(Color(0xFF0F0F1A), Color(0xFF090912))
+                            listOf(Color(0xFF131A16), Color(0xFF0A0F0D))
                         )
                     )
                     .border(
                         BorderStroke(
-                            1.dp,
+                            1.2.dp,
                             Brush.linearGradient(
                                 colors = listOf(
-                                    EmeraldPrimary.copy(alpha = 0.7f),
-                                    ElectricPurple.copy(alpha = 0.5f),
-                                    EmeraldGlow.copy(alpha = 0.7f)
+                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                    ElectricPurple.copy(alpha = 0.45f),
+                                    EmeraldGlow.copy(alpha = logoBreathingAlpha)
                                 ),
-                                start = Offset(heroGradOffset % 1000f, 0f),
-                                end = Offset((heroGradOffset % 1000f) + 400f, 300f)
+                                start = Offset(headerShimmerOffset, 0f),
+                                end = Offset(headerShimmerOffset + 400f, 250f)
                             )
                         ),
                         RoundedCornerShape(24.dp)
                     )
                     .padding(horizontal = 18.dp, vertical = 14.dp)
             ) {
+                // Glass shimmer sweep line across container
+                Canvas(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
+                    val sweepX = headerShimmerOffset
+                    drawLine(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.03f),
+                                Color.White.copy(alpha = 0.12f),
+                                Color.White.copy(alpha = 0.03f),
+                                Color.Transparent
+                            )
+                        ),
+                        start = Offset(sweepX, 0f),
+                        end = Offset(sweepX + 180f, size.height),
+                        strokeWidth = 30.dp.toPx()
+                    )
+                }
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        // APP LOGO (EXACT OFFICIAL LAUNCHER ICON LOGO)
                         Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .shadow(8.dp, RoundedCornerShape(12.dp), spotColor = EmeraldPrimary)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(EmeraldPrimary, EmeraldGlow)
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.graphicsLayer {
+                                translationY = logoFloatY.dp.toPx()
+                            }
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = "ViralToolAI Logo",
-                                tint = AmoledBlack,
-                                modifier = Modifier.size(22.dp)
+                            // Soft Outer Glow Ring
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(
+                                                EmeraldPrimary.copy(alpha = (logoBreathingAlpha * 0.4f) + logoPulseGlow),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
                             )
+
+                            // Official Icon Container Box
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .graphicsLayer {
+                                        scaleX = logoScale
+                                        scaleY = logoScale
+                                    }
+                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldPrimary)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(Color(0xFF1B2820), Color(0xFF0D1610))
+                                        )
+                                    )
+                                    .border(
+                                        BorderStroke(
+                                            1.2.dp,
+                                            Brush.linearGradient(
+                                                listOf(
+                                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                                    EmeraldGlow
+                                                )
+                                            )
+                                        ),
+                                        RoundedCornerShape(14.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.Image(
+                                    painter = painterResource(id = com.example.R.drawable.ic_viraltool_icon),
+                                    contentDescription = "ViralToolAI Logo",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .padding(2.dp)
+                                )
+                            }
                         }
+
                         Spacer(modifier = Modifier.width(12.dp))
+
+                        // APP TITLE & TAGLINE
                         Column {
                             Text(
                                 text = "ViralToolAI",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Black,
-                                color = TextWhite,
-                                letterSpacing = (-0.5).sp
+                                style = androidx.compose.ui.text.TextStyle(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(
+                                            TextWhite,
+                                            Color(0xFFE2F3EB),
+                                            EmeraldGlow
+                                        )
+                                    )
+                                ),
+                                letterSpacing = (-0.3).sp,
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = titleAlpha
+                                }
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = com.example.core.TaglineEngine.getTagline(com.example.core.AppModule.SHOPPING),
                                 fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = EmeraldPrimary,
-                                letterSpacing = 1.8.sp
+                                letterSpacing = 1.6.sp,
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = taglineAlpha
+                                }
                             )
                         }
                     }
 
-                    // Creator Credit Pill
+                    // CREATED BY ASIT BADGE (POLISHED GLASS PILL)
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(EmeraldPrimary.copy(alpha = 0.15f))
-                            .border(1.dp, EmeraldPrimary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        EmeraldPrimary.copy(alpha = 0.18f),
+                                        Color(0x1AFFFFFF)
+                                    )
+                                )
+                            )
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            EmeraldPrimary.copy(alpha = logoBreathingAlpha),
+                                            EmeraldGlow.copy(alpha = 0.6f),
+                                            Color.White.copy(alpha = 0.2f)
+                                        )
+                                    )
+                                ),
+                                RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 11.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = "Created by Asit",
-                            fontSize = 9.sp,
+                            fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.9f),
-                            letterSpacing = 0.8.sp
+                            color = TextWhite.copy(alpha = 0.95f),
+                            letterSpacing = 0.6.sp
                         )
                     }
                 }
@@ -256,7 +398,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
-            // UNIVERSAL SHOPPING ANALYZER (HERO SECTION - ALWAYS TOP)
+            // UNIVERSAL SHOPPING ANALYZER (COMPACT & MINIMAL - V4)
             // ==================================================
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -267,89 +409,54 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Header inside card
+                    // Header inside card with title & PREMIUM badge
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Universal Shopping Analyzer",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black,
-                            color = EmeraldGlow,
-                            letterSpacing = 0.5.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Paste a shopping product link or upload an image.",
-                            fontSize = 12.sp,
-                            color = TextWhite.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Glass Badge: Shopping Product URL Only
-                    val badgeTransition = rememberInfiniteTransition(label = "badgeFloating")
-                    val badgeOffsetY by badgeTransition.animateFloat(
-                        initialValue = -2f,
-                        targetValue = 2f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(2000, easing = LinearEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "badgeOffsetY"
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .graphicsLayer { translationY = badgeOffsetY }
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(EmeraldPrimary.copy(alpha = 0.2f), EmeraldGlow.copy(alpha = 0.15f))
-                                )
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    Brush.horizontalGradient(
-                                        listOf(EmeraldPrimary.copy(alpha = 0.6f), EmeraldGlow.copy(alpha = 0.4f))
-                                    )
-                                ),
-                                RoundedCornerShape(20.dp)
-                            )
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text("🛒", fontSize = 12.sp)
                             Text(
-                                text = "Shopping Product URL Only",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite,
-                                letterSpacing = 0.5.sp
+                                text = "🛒",
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = "Universal Shopping Analyzer",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                color = EmeraldGlow,
+                                letterSpacing = 0.3.sp
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(EmeraldPrimary, EmeraldGlow)
+                                    )
+                                )
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "PREMIUM AI",
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Black,
+                                color = AmoledBlack,
+                                letterSpacing = 0.6.sp
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Large Input Box
+                    // Compact Search Bar (Perplexity / ChatGPT style)
                     val inputGlowElevation by animateDpAsState(
-                        targetValue = if (isInputFocused) 12.dp else 0.dp,
+                        targetValue = if (isInputFocused) 8.dp else 0.dp,
                         label = "InputGlow"
                     )
                     
@@ -357,17 +464,11 @@ fun HomeScreen(
                         value = linkInput,
                         onValueChange = { linkInput = it },
                         placeholder = {
-                            Crossfade(
-                                targetState = placeholders[placeholderIndex],
-                                animationSpec = tween(durationMillis = 600),
-                                label = "PlaceholderCrossfade"
-                            ) { text ->
-                                Text(
-                                    text,
-                                    color = TextWhite.copy(alpha = 0.3f),
-                                    fontSize = 14.sp
-                                )
-                            }
+                            Text(
+                                text = "Paste Shopping Product URL",
+                                color = TextWhite.copy(alpha = 0.35f),
+                                fontSize = 13.5.sp
+                            )
                         },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -375,16 +476,17 @@ fun HomeScreen(
                             unfocusedBorderColor = Color(0x1AFFFFFF),
                             focusedLabelColor = EmeraldPrimary,
                             cursorColor = EmeraldGlow,
-                            focusedContainerColor = Color(0x99000000),
+                            focusedContainerColor = Color(0xAA000000),
                             unfocusedContainerColor = Color(0x66000000)
                         ),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(52.dp)
                             .onFocusChanged { isInputFocused = it.isFocused }
                             .shadow(
                                 elevation = inputGlowElevation,
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 clip = false,
                                 ambientColor = EmeraldPrimary,
                                 spotColor = EmeraldGlow
@@ -393,17 +495,65 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Link,
                                 contentDescription = "Link Icon",
-                                tint = EmeraldPrimary
+                                tint = EmeraldPrimary,
+                                modifier = Modifier.size(20.dp)
                             )
                         },
                         trailingIcon = {
-                            if (linkInput.isNotEmpty()) {
-                                IconButton(onClick = { linkInput = "" }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "Clear",
-                                        tint = TextGray
-                                    )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(end = 4.dp)
+                            ) {
+                                if (linkInput.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { linkInput = "" },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear",
+                                            tint = TextGray,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                } else {
+                                    // Quick Paste Button inside text field
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(Color(0x1FFFFFFF))
+                                            .clickable {
+                                                val clipText = clipboardManager.getText()?.text
+                                                if (!clipText.isNullOrBlank()) {
+                                                    linkInput = clipText
+                                                    val detectedName = detectMerchant(clipText).name
+                                                    toastMessage = "✔ $detectedName Link Pasted"
+                                                } else {
+                                                    toastMessage = "Clipboard is empty"
+                                                }
+                                            }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ContentPaste,
+                                                contentDescription = "Paste",
+                                                tint = EmeraldGlow,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            Text(
+                                                text = "Paste",
+                                                fontSize = 10.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextWhite
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -421,26 +571,21 @@ fun HomeScreen(
                                     .fillMaxWidth()
                                     .background(Color(0x1A2C2C2C), RoundedCornerShape(12.dp))
                                     .border(BorderStroke(1.dp, CrimsonRed.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
                             ) {
                                 Icon(
                                     imageVector = if (isGalleryImageSelected) Icons.Default.PhotoLibrary else Icons.Default.PhotoCamera,
                                     contentDescription = "Visual Input",
                                     tint = CrimsonLight,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = if (isGalleryImageSelected) "Gallery Image Loaded" else "Camera Image Captured",
                                         color = TextWhite,
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Ready for visual object analysis",
-                                        color = TextGray,
-                                        fontSize = 10.sp
                                     )
                                 }
                                 IconButton(
@@ -448,170 +593,15 @@ fun HomeScreen(
                                         isGalleryImageSelected = false
                                         isCameraImageCaptured = false
                                     },
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Remove",
                                         tint = TextGray,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
                                 }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Three Premium Action Buttons inside card
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Button 1: Paste Link
-                        val pasteInteractionSource = remember { MutableInteractionSource() }
-                        val isPastePressed by pasteInteractionSource.collectIsPressedAsState()
-                        val pasteScale by animateFloatAsState(
-                            targetValue = if (isPastePressed) 0.95f else 1.0f,
-                            label = "PasteScale"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
-                                .graphicsLayer {
-                                    scaleX = pasteScale
-                                    scaleY = pasteScale
-                                }
-                                .background(Color(0x0DFFFFFF), RoundedCornerShape(12.dp))
-                                .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(12.dp))
-                                .clickable(
-                                    interactionSource = pasteInteractionSource,
-                                    indication = androidx.compose.foundation.LocalIndication.current
-                                ) {
-                                    val clipText = clipboardManager.getText()?.text
-                                    if (!clipText.isNullOrBlank()) {
-                                        linkInput = clipText
-                                        val detectedName = detectMerchant(clipText).name
-                                        toastMessage = "✔ $detectedName Link Detected"
-                                    } else {
-                                        toastMessage = "Clipboard is empty"
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ContentPaste,
-                                    contentDescription = "Paste Link",
-                                    tint = CrimsonLight,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Paste Link",
-                                    color = TextWhite,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        // Button 2: Gallery
-                        val galleryInteractionSource = remember { MutableInteractionSource() }
-                        val isGalleryPressed by galleryInteractionSource.collectIsPressedAsState()
-                        val galleryScale by animateFloatAsState(
-                            targetValue = if (isGalleryPressed) 0.95f else 1.0f,
-                            label = "GalleryScale"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
-                                .graphicsLayer {
-                                    scaleX = galleryScale
-                                    scaleY = galleryScale
-                                }
-                                .background(Color(0x0DFFFFFF), RoundedCornerShape(12.dp))
-                                .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(12.dp))
-                                .clickable(
-                                    interactionSource = galleryInteractionSource,
-                                    indication = androidx.compose.foundation.LocalIndication.current
-                                ) {
-                                    isGalleryImageSelected = true
-                                    isCameraImageCaptured = false
-                                    toastMessage = "✔ Gallery Image Selected"
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PhotoLibrary,
-                                    contentDescription = "Gallery",
-                                    tint = CrimsonLight,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Gallery",
-                                    color = TextWhite,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        // Button 3: Camera
-                        val cameraInteractionSource = remember { MutableInteractionSource() }
-                        val isCameraPressed by cameraInteractionSource.collectIsPressedAsState()
-                        val cameraScale by animateFloatAsState(
-                            targetValue = if (isCameraPressed) 0.95f else 1.0f,
-                            label = "CameraScale"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
-                                .graphicsLayer {
-                                    scaleX = cameraScale
-                                    scaleY = cameraScale
-                                }
-                                .background(Color(0x0DFFFFFF), RoundedCornerShape(12.dp))
-                                .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(12.dp))
-                                .clickable(
-                                    interactionSource = cameraInteractionSource,
-                                    indication = androidx.compose.foundation.LocalIndication.current
-                                ) {
-                                    isCameraImageCaptured = true
-                                    isGalleryImageSelected = false
-                                    toastMessage = "✔ Image Captured"
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PhotoCamera,
-                                    contentDescription = "Camera",
-                                    tint = CrimsonLight,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Camera",
-                                    color = TextWhite,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
                             }
                         }
                     }
@@ -624,112 +614,60 @@ fun HomeScreen(
                             exit = fadeOut() + shrinkVertically()
                         ) {
                             Column {
-                                Spacer(modifier = Modifier.height(14.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
                                 MiniatureMerchantCard(merchant = merchant)
-                                Spacer(modifier = Modifier.height(14.dp))
                             }
                         }
-                    } else {
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    val isInputProvided = linkInput.isNotBlank() || isGalleryImageSelected || isCameraImageCaptured
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    if (!isInputProvided) {
-                        Text(
-                            text = "Paste a shopping link or choose an image.",
-                            color = EmeraldPrimary.copy(alpha = 0.8f),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        )
-                    }
+                    val isInputProvided = linkInput.isNotBlank()
 
-                    // Flagship Hero CTA Button (MASTER PHASE 4G)
+                    // Flagship Compact CTA Button (Perplexity / AI Search style)
                     val haptic = LocalHapticFeedback.current
-                    var ctaState by remember { mutableStateOf("IDLE") } // "IDLE", "ANALYZING", "COMPLETE"
+                    var ctaState by remember { mutableStateOf("IDLE") } // "IDLE", "ANALYZING"
                     val analyzeInteractionSource = remember { MutableInteractionSource() }
                     val isAnalyzePressed by analyzeInteractionSource.collectIsPressedAsState()
                     
                     val analyzeScale by animateFloatAsState(
-                        targetValue = when {
-                            isAnalyzePressed -> 0.94f
-                            ctaState == "ANALYZING" -> 0.98f
-                            else -> 1.0f
-                        },
+                        targetValue = if (isAnalyzePressed) 0.96f else 1.0f,
                         animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
                         label = "AnalyzeScaleSpring"
                     )
 
-                    val infiniteBtnTransition = rememberInfiniteTransition(label = "btnPulseGlow")
-                    val btnGlowPulse by infiniteBtnTransition.animateFloat(
-                        initialValue = 0.85f,
-                        targetValue = 1.25f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(1500, easing = LinearEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "btnGlowPulse"
-                    )
-
-                    val gradientOffset by infiniteBtnTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 1000f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(3000, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart
-                        ),
-                        label = "gradientOffset"
-                    )
-
                     val buttonBrush = if (isInputProvided) {
-                        Brush.linearGradient(
-                            colors = listOf(
-                                EmeraldPrimary,
-                                EmeraldGlow,
-                                EmeraldDark,
-                                EmeraldLight
-                            ),
-                            start = Offset(gradientOffset % 500f, 0f),
-                            end = Offset((gradientOffset % 500f) + 400f, 200f)
+                        Brush.horizontalGradient(
+                            colors = listOf(EmeraldPrimary, EmeraldGlow, EmeraldDark)
                         )
                     } else {
                         Brush.horizontalGradient(
-                            colors = listOf(EmeraldPrimary.copy(alpha = 0.2f), EmeraldGlow.copy(alpha = 0.15f))
+                            colors = listOf(EmeraldPrimary.copy(alpha = 0.25f), EmeraldGlow.copy(alpha = 0.15f))
                         )
                     }
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(60.dp)
+                            .height(48.dp)
                             .graphicsLayer {
                                 scaleX = analyzeScale
                                 scaleY = analyzeScale
                             }
                             .shadow(
-                                elevation = if (isInputProvided) (20.dp * btnGlowPulse) else 0.dp,
-                                shape = RoundedCornerShape(30.dp),
+                                elevation = if (isInputProvided) 10.dp else 0.dp,
+                                shape = RoundedCornerShape(14.dp),
                                 clip = false,
                                 ambientColor = EmeraldPrimary,
                                 spotColor = EmeraldGlow
                             )
-                            .background(buttonBrush, RoundedCornerShape(30.dp))
+                            .background(buttonBrush, RoundedCornerShape(14.dp))
                             .border(
                                 BorderStroke(
-                                    1.5.dp,
-                                    if (isInputProvided) {
-                                        Brush.horizontalGradient(
-                                            listOf(Color.White.copy(alpha = 0.8f), EmeraldGlow, Color.White.copy(alpha = 0.3f))
-                                        )
-                                    } else {
-                                        SolidColor(Color(0x1AFFFFFF))
-                                    }
+                                    1.dp,
+                                    if (isInputProvided) Color.White.copy(alpha = 0.4f) else Color(0x1AFFFFFF)
                                 ),
-                                RoundedCornerShape(30.dp)
+                                RoundedCornerShape(14.dp)
                             )
                             .clickable(
                                 enabled = isInputProvided && ctaState == "IDLE",
@@ -761,10 +699,6 @@ fun HomeScreen(
                                             ctaState = "IDLE"
                                         } else {
                                             ctaState = "ANALYZING"
-                                            delay(400)
-                                            ctaState = "COMPLETE"
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            delay(300)
                                             focusManager.clearFocus()
                                             onNavigateToAnalysis(targetInput)
                                             ctaState = "IDLE"
@@ -774,72 +708,39 @@ fun HomeScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        // Inner Glow Radial Highlights Canvas
-                        if (isInputProvided) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                drawCircle(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(Color.White.copy(alpha = 0.25f), Color.Transparent),
-                                        center = Offset(size.width * 0.3f, 0f),
-                                        radius = size.height * 1.5f
-                                    )
-                                )
-                            }
-                        }
-
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         ) {
-                            when (ctaState) {
-                                "ANALYZING" -> {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        color = TextWhite,
-                                        strokeWidth = 2.5.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = "Analyzing...",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = TextWhite,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
-                                "COMPLETE" -> {
-                                    Icon(
-                                        imageVector = Icons.Default.CheckCircle,
-                                        contentDescription = "Complete",
-                                        tint = Color(0xFF2ECC71),
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = "AI Complete ✓",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = TextWhite,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
-                                else -> {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = "Scan Icon",
-                                        tint = if (isInputProvided) TextWhite else TextWhite.copy(alpha = 0.35f),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = "Analyze Product",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = if (isInputProvided) TextWhite else TextWhite.copy(alpha = 0.35f),
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
+                            if (ctaState == "ANALYZING") {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    color = TextWhite,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Launching AI Analyzer...",
+                                    color = TextWhite,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "AI Analyze",
+                                    tint = if (isInputProvided) AmoledBlack else TextGray,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (isInputProvided) "Analyze Product" else "Paste Link to Analyze",
+                                    color = if (isInputProvided) AmoledBlack else TextGray,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.3.sp
+                                )
                             }
                         }
                     }
@@ -849,18 +750,22 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // INSTA AUTO DM AI CARD (MASTER PHASE 15E)
+            // 2. ⭐ PREMIUM CREATOR & AFFILIATE TOOLS MARKETPLACE
             // ==================================================
-            com.example.ui.components.InstaAutoDmAiCard(
-                onComingSoonClick = {
-                    showInstaAutoDmDialog = true
+            com.example.ui.components.PremiumCreatorToolsSection(
+                onToolSelected = { tool ->
+                    if (tool.id == "brand_collab_ai") {
+                        showBrandCollabDialog = true
+                    } else {
+                        selectedPremiumTool = tool
+                    }
                 }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // MEESHO CREATOR AI CARD (MASTER PHASE 15F)
+            // 3. MEESHO CREATOR AI CARD
             // ==================================================
             com.example.ui.components.MeeshoCreatorAiCard(
                 onComingSoonClick = {
@@ -871,7 +776,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // PREMIUM FEATURE HERO CARD (MASTER PATCH 4G.3) - INSTAGRAM SHOPPING AI
+            // 4. INSTAGRAM SHOPPING AI
             // ==================================================
             PremiumFeatureComingSoonCard(
                 onComingSoonClick = {
@@ -882,11 +787,11 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // ⭐ PREMIUM CREATOR & AFFILIATE TOOLS MARKETPLACE (MASTER PHASE 15D)
+            // 5. INSTA AUTO DM AI CARD
             // ==================================================
-            com.example.ui.components.PremiumCreatorToolsSection(
-                onToolSelected = { tool ->
-                    selectedPremiumTool = tool
+            com.example.ui.components.InstaAutoDmAiCard(
+                onComingSoonClick = {
+                    showInstaAutoDmDialog = true
                 }
             )
 
@@ -955,12 +860,7 @@ fun HomeScreen(
                                 .shadow(elevation = 12.dp, shape = CircleShape, spotColor = Color(0xFFFD1D1D)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Lock Icon",
-                                tint = TextWhite,
-                                modifier = Modifier.size(32.dp)
-                            )
+                            OfficialLogo(name = "instagram", modifier = Modifier.size(36.dp))
                         }
                         
                         Spacer(modifier = Modifier.height(18.dp))
@@ -1231,9 +1131,22 @@ fun HomeScreen(
 
     // Common Premium Tool Popup
     selectedPremiumTool?.let { tool ->
-        com.example.ui.components.CommonPremiumToolPopupDialog(
-            tool = tool,
-            onDismiss = { selectedPremiumTool = null }
+        if (tool.id == "brand_collab_ai") {
+            com.example.creatoracademy.BrandCollaborationAiDialog(
+                onDismiss = { selectedPremiumTool = null }
+            )
+        } else {
+            com.example.ui.components.CommonPremiumToolPopupDialog(
+                tool = tool,
+                onDismiss = { selectedPremiumTool = null }
+            )
+        }
+    }
+
+    // Brand Collaboration AI Mentor Dialog (MASTER PHASE V3)
+    if (showBrandCollabDialog) {
+        com.example.creatoracademy.BrandCollaborationAiDialog(
+            onDismiss = { showBrandCollabDialog = false }
         )
     }
 
@@ -1244,10 +1157,14 @@ fun HomeScreen(
         )
     }
 
-    // Meesho Creator AI Dialog (MASTER PHASE 15F)
+    // Meesho Creator AI Dialog (MEESHO CREATOR AI V3 - ZERO TO HERO)
     if (showMeeshoCreatorDialog) {
         com.example.ui.components.MeeshoCreatorAiDialog(
-            onDismiss = { showMeeshoCreatorDialog = false }
+            onDismiss = { showMeeshoCreatorDialog = false },
+            onNavigateToBrandCollab = {
+                showMeeshoCreatorDialog = false
+                showBrandCollabDialog = true
+            }
         )
     }
 
@@ -1487,7 +1404,7 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
     val cleanName = name.trim().lowercase()
     val merchant = remember(name) { detectMerchant(name) }
     
-    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales")
+    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales", "instagram", "google", "youtube")
     val hasCanvas = knownCanvasBrands.any { cleanName.contains(it) }
     
     if (hasCanvas) {
@@ -1498,6 +1415,57 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
             val radius = width / 2f
             
             when {
+                cleanName.contains("youtube") -> {
+                    drawCircle(color = Color(0xFFFF0000), radius = radius)
+                    val playPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.40f, height * 0.32f)
+                        lineTo(width * 0.68f, height * 0.50f)
+                        lineTo(width * 0.40f, height * 0.68f)
+                        close()
+                    }
+                    drawPath(path = playPath, color = Color.White)
+                }
+                cleanName.contains("instagram") -> {
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCB045))
+                        ),
+                        radius = radius
+                    )
+                    drawRoundRect(
+                        color = Color.White,
+                        topLeft = androidx.compose.ui.geometry.Offset(width * 0.3f, height * 0.3f),
+                        size = androidx.compose.ui.geometry.Size(width * 0.4f, height * 0.4f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = width * 0.1f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = width * 0.025f,
+                        center = androidx.compose.ui.geometry.Offset(width * 0.62f, height * 0.38f)
+                    )
+                }
+                cleanName.contains("google") -> {
+                    drawCircle(color = Color(0xFF4285F4), radius = radius)
+                    drawCircle(
+                        color = Color.White,
+                        radius = radius * 0.45f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                    )
+                    drawLine(
+                        color = Color.White,
+                        start = center,
+                        end = androidx.compose.ui.geometry.Offset(width * 0.72f, height * 0.5f),
+                        strokeWidth = 2.dp.toPx()
+                    )
+                }
                 cleanName.contains("amazon") -> {
                     drawCircle(color = Color(0xFF131921), radius = radius)
                     val smilePath = androidx.compose.ui.graphics.Path().apply {
@@ -1851,10 +1819,14 @@ fun AnalysisScreen(
         }
         else -> {
             when {
-                progressPercentage < 25 -> "Reading product link..."
-                progressPercentage < 50 -> "Analyzing product details..."
-                progressPercentage < 75 -> "Finding price information..."
-                progressPercentage < 100 -> "Generating shopping insights..."
+                progressPercentage < 12 -> "Detecting Store..."
+                progressPercentage < 25 -> "Extracting Product Page..."
+                progressPercentage < 38 -> "Gemini AI Verification..."
+                progressPercentage < 50 -> "Multi-Store Catalog Match..."
+                progressPercentage < 62 -> "Comparing Live Prices..."
+                progressPercentage < 75 -> "Analyzing Price History..."
+                progressPercentage < 88 -> "Calculating Delivery & Trust..."
+                progressPercentage < 100 -> "Synthesizing AI Buying Advice..."
                 else -> "Analysis Complete"
             }
         }
@@ -1882,7 +1854,7 @@ fun AnalysisScreen(
         val steps = if (isInstagram) {
             listOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
         } else {
-            listOf(0, 25, 50, 75, 100)
+            listOf(0, 12, 25, 38, 50, 62, 75, 88, 100)
         }
         
         for (i in 0 until steps.size) {
@@ -1891,7 +1863,7 @@ fun AnalysisScreen(
             activeProgressCache[analyzedLink] = targetProgress
             
             if (targetProgress < 100) {
-                val delayMs = if (isInstagram) 350L else 400L
+                val delayMs = if (isInstagram) 350L else 300L
                 delay(delayMs)
             }
         }
@@ -4070,16 +4042,7 @@ fun PremiumFeatureComingSoonCard(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Lock",
-                                tint = TextWhite,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .graphicsLayer {
-                                        rotationZ = lockRotation
-                                    }
-                            )
+                            OfficialLogo(name = "instagram", modifier = Modifier.size(26.dp))
                         }
 
                         // Sparkle Particle overlay
@@ -4163,12 +4126,33 @@ fun PremiumFeatureComingSoonCard(
                     .background(Color(0x0CFFFFFF))
                     .border(BorderStroke(1.dp, Color(0x15FFFFFF)), RoundedCornerShape(16.dp))
                     .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                PreviewFeatureRow(emoji = "📷", text = "Paste Instagram Reel Link")
-                PreviewFeatureRow(emoji = "🤖", text = "AI detects every product")
-                PreviewFeatureRow(emoji = "💰", text = "Compare prices instantly")
-                PreviewFeatureRow(emoji = "🛍️", text = "Buy from trusted stores")
+                PreviewFeatureRow(emoji = "✓", text = "Paste Instagram Reel Link")
+                Text(
+                    text = "↓",
+                    fontSize = 11.sp,
+                    color = EmeraldPrimary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 12.dp)
+                )
+                PreviewFeatureRow(emoji = "✓", text = "AI detects every product")
+                Text(
+                    text = "↓",
+                    fontSize = 11.sp,
+                    color = EmeraldPrimary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 12.dp)
+                )
+                PreviewFeatureRow(emoji = "✓", text = "Compare prices instantly")
+                Text(
+                    text = "↓",
+                    fontSize = 11.sp,
+                    color = EmeraldPrimary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 12.dp)
+                )
+                PreviewFeatureRow(emoji = "✓", text = "Buy from trusted stores")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -4252,7 +4236,11 @@ fun PreviewFeatureRow(emoji: String, text: String) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(text = emoji, fontSize = 14.sp)
+            if (emoji == "✓") {
+                Text(text = emoji, fontSize = 14.sp, color = EmeraldPrimary, fontWeight = FontWeight.Black)
+            } else {
+                Text(text = emoji, fontSize = 14.sp)
+            }
             Text(
                 text = text,
                 fontSize = 12.sp,
@@ -4988,7 +4976,7 @@ fun BrandCollaborationAiCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "🔒 Premium",
+                        text = "FREE",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = EmeraldPrimary,
@@ -5087,14 +5075,14 @@ fun BrandCollaborationAiCard(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Lock",
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = "Open AI Mentor",
                         tint = TextWhite,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Coming Soon",
+                        text = "Launch AI Mentor 🚀",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite,

@@ -123,47 +123,6 @@ object PremiumCreatorMarketplaceData {
                 "Collaboration Checklist"
             ),
             futurePricePreview = "Included in Pro Pass"
-        ),
-        PremiumToolData(
-            id = "affiliate_master_ai",
-            title = "Affiliate Master AI",
-            subtitle = "Complete Meesho & E-Commerce Affiliate Creator Journey",
-            icon = Icons.Default.Storefront,
-            overview = "Step-by-step master guide & AI coach to launch, optimize, and scale your Meesho & e-commerce affiliate earnings from scratch.",
-            features = listOf(
-                "Complete Meesho Creator Journey",
-                "Meesho Account Setup",
-                "Profile Optimization",
-                "Product Selection",
-                "Product Research",
-                "Review Video Planning",
-                "Camera Setup",
-                "Lighting Guide",
-                "Editing Guide",
-                "Upload Checklist",
-                "Affiliate Growth Roadmap"
-            ),
-            futurePricePreview = "₹299"
-        ),
-        PremiumToolData(
-            id = "video_editing_academy",
-            title = "Video Editing Academy",
-            subtitle = "CapCut, VN, Sound Design & Client Freelancing",
-            icon = Icons.Default.VideoLibrary,
-            overview = "Comprehensive video editing mentor covering mobile workflows, CapCut, VN, cinematic transitions, sound design, color grading, and client freelancing.",
-            features = listOf(
-                "Beginner Editing",
-                "Advanced Editing",
-                "Mobile Editing",
-                "CapCut Workflow",
-                "VN Workflow",
-                "Cinematic Transitions",
-                "Sound Design",
-                "Color Grading",
-                "Client Editing",
-                "Freelancing Guide"
-            ),
-            futurePricePreview = "₹499 / ₹999 / ₹1499 / ₹2499"
         )
     )
 }
@@ -207,7 +166,7 @@ fun PremiumCreatorToolsSection(
                     .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
                 Text(
-                    text = "2 LOCKED",
+                    text = "UNLOCKED",
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                     color = EmeraldPrimary,
@@ -220,7 +179,7 @@ fun PremiumCreatorToolsSection(
 
         // Tool Cards List
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            PremiumCreatorMarketplaceData.tools.filter { it.id == "brand_collab_ai" || it.id == "affiliate_master_ai" }.forEach { tool ->
+            PremiumCreatorMarketplaceData.tools.forEach { tool ->
                 PremiumToolGlassCard(
                     tool = tool,
                     onClick = {
@@ -304,12 +263,16 @@ fun PremiumToolGlassCard(
                             .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = tool.icon,
-                            contentDescription = tool.title,
-                            tint = EmeraldPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
+                        if (tool.id == "brand_collab_ai") {
+                            com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(26.dp))
+                        } else {
+                            Icon(
+                                imageVector = tool.icon,
+                                contentDescription = tool.title,
+                                tint = EmeraldPrimary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
 
                     Column {
@@ -340,7 +303,7 @@ fun PremiumToolGlassCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "🔒 COMING SOON",
+                        text = "FREE ACCESS",
                         fontSize = 9.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = EmeraldPrimary,
@@ -384,34 +347,26 @@ fun PremiumToolGlassCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (tool.futurePricePreview != null) {
-                    Text(
-                        text = "Future Price: ${tool.futurePricePreview}",
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = EmeraldPrimary.copy(alpha = 0.9f)
-                    )
-                } else {
-                    Text(
-                        text = "Early Access Waiting List",
-                        fontSize = 10.5.sp,
-                        color = TextWhite.copy(alpha = 0.5f)
-                    )
-                }
+                Text(
+                    text = "Unlocked • Free Access",
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = EmeraldPrimary.copy(alpha = 0.9f)
+                )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "View Roadmap",
+                        text = "Open Tool",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite
                     )
                     Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Lock",
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = "Open",
                         tint = EmeraldPrimary,
                         modifier = Modifier.size(12.dp)
                     )

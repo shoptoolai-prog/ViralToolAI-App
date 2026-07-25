@@ -168,12 +168,7 @@ fun InstaAutoDmAiCard(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.SmartToy,
-                            contentDescription = "Robot Icon",
-                            tint = EmeraldPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(28.dp))
                     }
 
                     Column {
@@ -395,12 +390,7 @@ fun InstaAutoDmAiDialog(
                                     .border(BorderStroke(1.dp, EmeraldPrimary), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.SmartToy,
-                                    contentDescription = "Insta Auto DM AI",
-                                    tint = EmeraldPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(28.dp))
                             }
 
                             Column {

@@ -38,6 +38,9 @@ import com.example.data.InstagramProduct
 import com.example.data.CouponOffer
 import com.example.data.ProductSpecification
 import com.example.data.generateResultData
+import com.example.engine.PriceTrackerEngine
+import com.example.ui.components.ApplePriceGraphComponent
+import com.example.ui.components.GlassCard
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +100,8 @@ fun ResultScreen(
     onBackClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    var isLoading by remember { mutableStateOf(true) }
+    var isProcessing by remember { mutableStateOf(true) }
+    var pipelineStepIndex by remember { mutableStateOf(0) }
     var toastMessage by remember { mutableStateOf<String?>(null) }
     var reloadTrigger by remember { mutableStateOf(0) }
     
@@ -117,36 +121,33 @@ fun ResultScreen(
         }
     }
     val resultData = resultDataState.value
-    var showAiPopup by remember { mutableStateOf(false) }
-    var showSuccessCheckmark by remember { mutableStateOf(false) }
+
+    val pipelineSteps = remember {
+        listOf(
+            "Validating Product URL",
+            "Detecting Shopping Platform",
+            "Reading Product Metadata",
+            "Extracting Product Image",
+            "Verifying Current Price",
+            "Checking Merchant Discounts",
+            "Analyzing Product Reviews",
+            "Finding Delivery Estimate",
+            "Generating Smart Shopping Report"
+        )
+    }
     
-    // Simulate real data preparation / premium shimmer layout for first 1.2s
+    // Single Seamless AI Processing Experience (2.2s live 9-step pipeline)
     LaunchedEffect(analyzedLink, reloadTrigger) {
-        isLoading = true
-        showAiPopup = false
-        showSuccessCheckmark = false
-        delay(1200)
-        isLoading = false
-        showSuccessCheckmark = true
-        showAiPopup = true
+        isProcessing = true
+        pipelineStepIndex = 0
+        for (i in 0 until pipelineSteps.size) {
+            delay(240)
+            pipelineStepIndex = i + 1
+        }
+        delay(150)
+        isProcessing = false
     }
 
-    // Auto hide success animation after 1.8s
-    LaunchedEffect(showSuccessCheckmark) {
-        if (showSuccessCheckmark) {
-            delay(1800)
-            showSuccessCheckmark = false
-        }
-    }
-
-    // Auto hide popup after 2.5s
-    LaunchedEffect(showAiPopup) {
-        if (showAiPopup) {
-            delay(2500)
-            showAiPopup = false
-        }
-    }
-    
     // Automatically dismiss toast after 2s
     LaunchedEffect(toastMessage) {
         if (toastMessage != null) {
@@ -160,241 +161,463 @@ fun ResultScreen(
             .fillMaxSize()
             .background(AmoledBlack)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-        ) {
-            // Header Bar
-            Row(
+        if (isProcessing) {
+            AiProcessingScreen(
+                analyzedLink = analyzedLink,
+                currentStepIndex = pipelineStepIndex,
+                pipelineSteps = pipelineSteps,
+                detectedStore = resultData.detectedStore
+            )
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
-                IconButton(
-                    onClick = onBackClick,
+                // Header Bar
+                Row(
                     modifier = Modifier
-                        .size(44.dp)
-                        .background(Color(0x0DFFFFFF), CircleShape)
-                        .testTag("result_back_button")
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = TextWhite,
-                        modifier = Modifier.size(20.dp)
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(Color(0x0DFFFFFF), CircleShape)
+                            .testTag("result_back_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = TextWhite,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Smart Shopping Report",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        color = TextWhite,
+                        letterSpacing = 0.5.sp
                     )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Smart Shopping Report",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite,
-                    letterSpacing = 0.5.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {
-                        reloadTrigger++
-                        toastMessage = "✔ Refreshing product extraction..."
-                    },
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(Color(0x0DFFFFFF), CircleShape)
-                        .testTag("result_refresh_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = TextWhite,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            
-            AnimatedVisibility(
-                visible = showAiPopup && !isLoading,
-                enter = fadeIn() + slideInVertically(initialOffsetY = { -20 }),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { -20 })
-            ) {
-                val savings = (resultData.currentPrice - resultData.bestPrice).coerceAtLeast(850.0)
-                AiRecommendationPopup(
-                    savingsAmount = savings,
-                    onDismiss = { showAiPopup = false }
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            AnimatedContent(
-                targetState = isLoading,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(400)) with fadeOut(animationSpec = tween(400))
-                },
-                label = "ResultContentTransition"
-            ) { loading ->
-                if (loading) {
-                    ShimmerReportPlaceholder()
-                } else {
-                    ReportContent(
-                        resultData = resultData, 
-                        onShowToast = { toastMessage = it },
-                        onRefresh = {
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = {
                             reloadTrigger++
                             toastMessage = "✔ Refreshing product extraction..."
-                        }
+                        },
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(Color(0x0DFFFFFF), CircleShape)
+                            .testTag("result_refresh_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = TextWhite,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                ReportContent(
+                    resultData = resultData, 
+                    onShowToast = { toastMessage = it },
+                    onRefresh = {
+                        reloadTrigger++
+                        toastMessage = "✔ Refreshing product extraction..."
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(50.dp))
+            }
+        }
+
+        // Custom Toast Notification Overlay
+        AnimatedVisibility(
+            visible = toastMessage != null,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { 50 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { 50 }),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp)
+        ) {
+            toastMessage?.let { msg ->
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xEE1E293B))
+                        .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.5f)), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = msg,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite
                     )
                 }
             }
-            
-            Spacer(modifier = Modifier.height(50.dp))
         }
+    }
+}
 
-        // Flagship Success Checkmark Banner Overlay
-        AnimatedVisibility(
-            visible = showSuccessCheckmark,
-            enter = fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.85f, animationSpec = spring(stiffness = Spring.StiffnessMedium)),
-            exit = fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.9f),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 72.dp)
-                .zIndex(120f)
+// =========================================================
+// UNIVERSAL SHOPPING ANALYZER: SINGLE AI PROCESSING SCREEN (V4)
+// =========================================================
+@Composable
+fun AiProcessingScreen(
+    analyzedLink: String,
+    currentStepIndex: Int,
+    pipelineSteps: List<String>,
+    detectedStore: String
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "processingRing")
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotationAngle"
+    )
+
+    val ringGlowPulse by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "ringGlowPulse"
+    )
+
+    val storeName = remember(analyzedLink, detectedStore) {
+        if (detectedStore.isNotBlank() && detectedStore != "Unknown") detectedStore else detectMerchant(analyzedLink).name
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(AmoledBlack, Color(0xFF09101B), AmoledBlack)
+                )
+            )
+            .statusBarsPadding()
+            .padding(20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
+            // Top Engine Pill
             Box(
                 modifier = Modifier
-                    .shadow(24.dp, RoundedCornerShape(30.dp), spotColor = EmeraldPrimary)
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xF2090912), Color(0xF2121220))
-                        )
-                    )
-                    .border(
-                        1.5.dp,
-                        Brush.horizontalGradient(
-                            listOf(EmeraldGlow, ElectricPurple, EmeraldPrimary)
-                        ),
-                        RoundedCornerShape(30.dp)
-                    )
-                    .padding(horizontal = 22.dp, vertical = 12.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(EmeraldGlow.copy(alpha = 0.15f))
+                    .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f)), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(EmeraldGlow, CircleShape)
+                    )
+                    Text(
+                        text = "UNIVERSAL AI PIPELINE ACTIVE",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = EmeraldGlow,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Central Glowing AI Ring with Store Logo
+            Box(
+                modifier = Modifier.size(130.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { rotationZ = rotationAngle }
+                ) {
+                    val strokeWidth = 5.dp.toPx()
+                    drawCircle(
+                        brush = Brush.sweepGradient(
+                            colors = listOf(
+                                EmeraldGlow,
+                                Color(0xFF00E5FF),
+                                Color(0xFF9C27B0),
+                                EmeraldGlow
+                            )
+                        ),
+                        radius = (size.width / 2f) - (strokeWidth / 2f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(110.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x2200FF88))
+                        .shadow(
+                            elevation = 16.dp * ringGlowPulse,
+                            shape = CircleShape,
+                            ambientColor = EmeraldGlow,
+                            spotColor = EmeraldGlow
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        OfficialLogo(
+                            name = storeName,
+                            modifier = Modifier.size(46.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = storeName,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Live Pipeline Steps Card
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                borderColor = GlassCardBorder,
+                backgroundColor = Color(0x0CFFFFFF)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    pipelineSteps.forEachIndexed { index, stepName ->
+                        val isDone = index < currentStepIndex
+                        val isCurrent = index == currentStepIndex
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isCurrent) EmeraldGlow.copy(alpha = 0.12f) else Color.Transparent
+                                )
+                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.size(18.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when {
+                                    isDone -> {
+                                        Text(
+                                            text = "✔",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color(0xFF2ECC71)
+                                        )
+                                    }
+                                    isCurrent -> {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(12.dp),
+                                            color = EmeraldGlow,
+                                            strokeWidth = 2.dp
+                                        )
+                                    }
+                                    else -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(5.dp)
+                                                .background(TextGray.copy(alpha = 0.3f), CircleShape)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = stepName,
+                                fontSize = 12.sp,
+                                fontWeight = if (isCurrent) FontWeight.Black else if (isDone) FontWeight.Bold else FontWeight.Normal,
+                                color = when {
+                                    isDone -> TextWhite
+                                    isCurrent -> EmeraldGlow
+                                    else -> TextGray.copy(alpha = 0.45f)
+                                }
+                            )
+
+                            if (isCurrent) {
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = "Analyzing...",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EmeraldGlow
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// =========================================================
+// UNIVERSAL SHOPPING ANALYZER: TOP DELIVERY & STOCK CARD (V4)
+// =========================================================
+@Composable
+fun DeliveryInformationCard(resultData: ShoppingResult) {
+    val storeName = resultData.detectedStore.ifBlank { "Store" }
+    val deliveryText = when {
+        resultData.deliveryInfoText.isNotBlank() && !resultData.deliveryInfoText.contains("unavailable", ignoreCase = true) -> resultData.deliveryInfoText
+        resultData.priceComparison.firstOrNull()?.deliveryEstimate?.isNotBlank() == true -> resultData.priceComparison.first().deliveryEstimate
+        else -> "Delivery details calculated directly from $storeName checkout page"
+    }
+
+    val stockText = when {
+        resultData.availability.isNotBlank() -> resultData.availability
+        resultData.inStock -> "In Stock — Ships directly"
+        else -> "Stock status verified on $storeName"
+    }
+
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("delivery_information_card"),
+        borderColor = EmeraldGlow.copy(alpha = 0.35f),
+        backgroundColor = Color(0x0C00FF88)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .clip(CircleShape)
-                            .background(EmeraldPrimary),
+                            .background(EmeraldGlow.copy(alpha = 0.2f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Success",
-                            tint = AmoledBlack,
-                            modifier = Modifier.size(20.dp)
+                            imageVector = Icons.Default.LocalShipping,
+                            contentDescription = "Delivery",
+                            tint = EmeraldGlow,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
-
                     Column {
                         Text(
-                            text = "Analysis Complete!",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
+                            text = "DELIVERY & AVAILABILITY",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = EmeraldGlow,
+                            letterSpacing = 1.sp
                         )
                         Text(
-                            text = "Report generated with ViralToolAI Intelligence",
+                            text = "Verified from $storeName",
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = EmeraldGlow
+                            color = TextGray
                         )
                     }
                 }
-            }
-        }
 
-        // Premium Animated Slide Toast (Left-to-Right, Glassmorphic, Crimson blur halo, Auto-disappears in 2s)
-        AnimatedVisibility(
-            visible = toastMessage != null,
-            enter = fadeIn(animationSpec = tween(350)) + slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(350, easing = EaseOutCubic)),
-            exit = fadeOut(animationSpec = tween(250)) + slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(250, easing = EaseInCubic)),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 24.dp).padding(bottom = 32.dp) // healthy padding
-                .zIndex(100f)
-        ) {
-            toastMessage?.let { msg ->
-                val isSuccess = msg.contains("✔") || msg.lowercase().contains("success") || msg.lowercase().contains("complete") || msg.lowercase().contains("detected")
-                val isWarning = msg.lowercase().contains("empty") || msg.lowercase().contains("unsupported") || msg.lowercase().contains("fail") || msg.lowercase().contains("error") || msg.lowercase().contains("please")
-                
-                val icon = when {
-                    isSuccess -> Icons.Default.CheckCircle
-                    isWarning -> Icons.Default.Warning
-                    else -> Icons.Default.Info
-                }
-                
-                val iconColor = when {
-                    isSuccess -> Color(0xFF00FFCC) // Glowing High-Contrast Mint Green
-                    isWarning -> Color(0xFFFFCC00) // Glowing Warm Amber/Yellow
-                    else -> CrimsonLight // Brands Crimson Red
-                }
-
-                // Beautiful Glassmorphic Toast Container
                 Box(
                     modifier = Modifier
-                        .shadow(
-                            elevation = 16.dp,
-                            shape = RoundedCornerShape(20.dp),
-                            clip = false,
-                            ambientColor = CrimsonRed.copy(alpha = 0.5f),
-                            spotColor = CrimsonRed
-                        )
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color(0xDC121215), Color(0xC808080A))
-                            ),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .border(
-                            BorderStroke(
-                                1.2.dp,
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        CrimsonRed.copy(alpha = 0.65f),
-                                        Color(0x1F9C27B0),
-                                        Color(0x0F2196F3)
-                                    )
-                                )
-                            ),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF2ECC71).copy(alpha = 0.15f))
+                        .border(BorderStroke(1.dp, Color(0xFF2ECC71).copy(alpha = 0.4f)), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = "Status Icon",
-                            tint = iconColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        
-                        Text(
-                            text = msg,
-                            color = TextWhite,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.2.sp
-                        )
-                    }
+                    Text(
+                        text = "VERIFIED",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF2ECC71)
+                    )
+                }
+            }
+
+            HorizontalDivider(color = Color(0x12FFFFFF), thickness = 1.dp)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = "Estimate",
+                        tint = TextWhite,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = deliveryText,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color(0xFF2ECC71), CircleShape)
+                    )
+                    Text(
+                        text = stockText,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2ECC71)
+                    )
                 }
             }
         }
@@ -2202,84 +2425,168 @@ fun PremiumWarningCard(modifier: Modifier = Modifier) {
 
 @Composable
 fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onRefresh: () -> Unit) {
-    if (!resultData.isReliable) {
+    if (!resultData.isReliable || resultData.status == "Product details unavailable" || resultData.productName == "Product details unavailable") {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 48.dp),
+                .padding(vertical = 32.dp, horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(80.dp)
                     .background(
                         Brush.radialGradient(
-                            colors = listOf(EmeraldPrimary.copy(alpha = 0.25f), Color.Transparent)
+                            colors = listOf(Color(0xFFE74C3C).copy(alpha = 0.25f), Color.Transparent)
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.SearchOff,
-                    contentDescription = "No Products",
-                    tint = EmeraldGlow.copy(alpha = 0.8f),
-                    modifier = Modifier.size(54.dp)
+                    contentDescription = "Unverified Product",
+                    tint = Color(0xFFE74C3C),
+                    modifier = Modifier.size(44.dp)
                 )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
+            val isAmazon = resultData.detectedStore.equals("Amazon", ignoreCase = true) ||
+                    resultData.url.lowercase().contains("amazon") ||
+                    resultData.url.lowercase().contains("amzn")
+
+            val isUnsupported = resultData.productName.contains("Unsupported", ignoreCase = true) ||
+                    resultData.status.contains("Unsupported", ignoreCase = true) ||
+                    resultData.aiRecommendation.contains("Unsupported", ignoreCase = true)
+
+            val titleText = when {
+                isUnsupported -> "Unsupported Shopping Link"
+                isAmazon -> "We couldn't verify this Amazon product yet."
+                else -> "We couldn't verify this product yet."
+            }
+
+            val subtitleText = when {
+                isUnsupported -> "This shopping website is not supported yet."
+                isAmazon -> "Product details could not be verified from the Amazon link."
+                else -> "Product details could not be extracted or verified from this link."
+            }
+            
             Text(
-                text = "We couldn't extract this product.",
-                fontSize = 16.sp,
+                text = titleText,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
                 color = TextWhite,
                 textAlign = TextAlign.Center
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             
             Text(
-                text = "Tap Refresh to retry live extraction.",
+                text = subtitleText,
                 fontSize = 12.sp,
                 color = TextGray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp),
-                lineHeight = 18.sp
+                textAlign = TextAlign.Center
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
-            Button(
-                onClick = onRefresh,
-                colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.testTag("fallback_refresh_button")
+            // Possible reasons card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color(0x0AFFFFFF))
+                    .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(18.dp))
+                    .padding(16.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = AmoledBlack,
-                        modifier = Modifier.size(18.dp)
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Tap Refresh",
-                        fontSize = 13.sp,
+                        text = "POSSIBLE REASONS",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AmoledBlack
+                        color = TextGray,
+                        letterSpacing = 1.sp
                     )
+                    
+                    val reasons = when {
+                        isAmazon -> listOf(
+                            "• Product removed",
+                            "• Broken link",
+                            "• Unsupported page",
+                            "• Temporary issue"
+                        )
+                        isUnsupported -> listOf(
+                            "• Unsupported website",
+                            "• Product removed",
+                            "• Broken link",
+                            "• Temporary issue"
+                        )
+                        else -> listOf(
+                            "• Unsupported website",
+                            "• Product removed",
+                            "• Broken link",
+                            "• Temporary issue"
+                        )
+                    }
+                    
+                    reasons.forEach { reason ->
+                        Text(
+                            text = reason,
+                            fontSize = 12.sp,
+                            color = TextWhite.copy(alpha = 0.85f),
+                            lineHeight = 16.sp
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            if (resultData.isCloudVerificationRequired) {
-                PremiumWarningCard(modifier = Modifier.padding(horizontal = 16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onRefresh,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = EmeraldPrimary),
+                    modifier = Modifier.weight(1f).height(48.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Retry",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text("Retry", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                
+                Button(
+                    onClick = onRefresh,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                    modifier = Modifier.weight(1f).height(48.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Link,
+                            contentDescription = "Paste Another Link",
+                            tint = AmoledBlack,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text("Paste Another Link", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                    }
+                }
             }
         }
         return
@@ -2742,6 +3049,17 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // SECTION: TOP DELIVERY & STOCK INFORMATION CARD (V4)
+                DeliveryInformationCard(resultData = resultData)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // SECTION: PRICE TIMELINE CHART (MOVED NEAR TOP - V4)
+                if (resultData.hasHistoricalPriceData && resultData.priceHistoryTimeline.isNotEmpty()) {
+                    PriceTimelineCard(resultData = resultData)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 // SECTION: SELLER COMPARISON CAROUSEL (ALWAYS EXPANDED - MASTER PHASE 4F & STABILIZATION V1)
                 val context = LocalContext.current
                 SellerSwipeCardsDeck(
@@ -3161,147 +3479,19 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
             }
         }
         
-        // SECTION 4: Price Trend Graph
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "PRICE HISTORIC TREND",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextGray,
-                letterSpacing = 1.2.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val maxPrice = resultData.priceTrend.maxOfOrNull { it.price } ?: resultData.currentPrice
-            val minPrice = resultData.priceTrend.minOfOrNull { it.price } ?: resultData.bestPrice
-            val avgPrice = resultData.priceTrend.map { it.price }.average()
-            val firstPrice = resultData.priceTrend.firstOrNull()?.price ?: 0.0
-            val lastPrice = resultData.priceTrend.lastOrNull()?.price ?: 0.0
-            val trendText = if (lastPrice < firstPrice) "Trending Down" else if (lastPrice > firstPrice) "Trending Up" else "Stable"
-            val trendColor = if (lastPrice < firstPrice) Color(0xFF2ECC71) else if (lastPrice > firstPrice) Color(0xFFE74C3C) else Color(0xFFF1C40F)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Metric card helper
-                @Composable
-                fun PriceMetricCard(label: String, value: String, isHighlight: Boolean = false, highlightColor: Color = Color.Unspecified, modifier: Modifier = Modifier) {
-                    Box(
-                        modifier = modifier
-                            .background(Color(0x0AFFFFFF), RoundedCornerShape(12.dp))
-                            .border(BorderStroke(1.dp, Color(0x12FFFFFF)), RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(label, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = TextGray)
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = value,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                color = if (isHighlight) highlightColor else TextWhite
-                            )
-                        }
-                    }
-                }
-
-                PriceMetricCard("LOWEST", "₹${String.format("%,.0f", minPrice)}", isHighlight = true, highlightColor = Color(0xFF2ECC71), modifier = Modifier.weight(1f))
-                PriceMetricCard("HIGHEST", "₹${String.format("%,.0f", maxPrice)}", modifier = Modifier.weight(1f))
-                PriceMetricCard("AVERAGE", "₹${String.format("%,.0f", avgPrice)}", modifier = Modifier.weight(1f))
-                PriceMetricCard("TREND", trendText, isHighlight = true, highlightColor = trendColor, modifier = Modifier.weight(1.2f))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(Color(0x06FFFFFF))
-                    .border(BorderStroke(1.dp, Color(0x12FFFFFF)), RoundedCornerShape(18.dp))
-                    .padding(16.dp)
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.TrendingDown,
-                                contentDescription = "Trend Down",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "General price drop pattern",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF4CAF50)
-                            )
-                        }
-                        Text(
-                            text = "Last 3 months",
-                            fontSize = 11.sp,
-                            color = TextGray
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(14.dp))
-                    
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        val maxPrice = resultData.priceTrend.maxOfOrNull { it.price } ?: 1.0
-                        val minPrice = resultData.priceTrend.minOfOrNull { it.price } ?: 1.0
-                        
-                        resultData.priceTrend.forEach { point ->
-                            val relativeHeight = if (maxPrice != minPrice) {
-                                (((point.price - minPrice) / (maxPrice - minPrice) * 0.6) + 0.4).toFloat()
-                            } else {
-                                0.8f
-                            }
-                            
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = "₹${String.format("%,.0f", point.price)}",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.6f)
-                                        .height((60 * relativeHeight).dp)
-                                        .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                                        .background(
-                                            Brush.verticalGradient(
-                                                colors = listOf(accentColor, accentColor.copy(alpha = 0.2f))
-                                            )
-                                        )
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = point.date,
-                                    fontSize = 9.sp,
-                                    color = TextGray
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        // SECTION 4: Price History Engine
+        LaunchedEffect(resultData.url, resultData.currentPrice) {
+            PriceTrackerEngine.recordPriceSnapshot(resultData.url, resultData.currentPrice)
         }
+
+        ApplePriceGraphComponent(
+            url = resultData.url,
+            productName = resultData.productName,
+            currentPrice = resultData.currentPrice,
+            rawPriceTrend = resultData.priceTrend,
+            accentColor = accentColor,
+            onShowToast = onShowToast
+        )
         
         // SECTION 5: Similar Products List
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -4525,6 +4715,8 @@ fun SmartBuyRecommendationCard(resultData: ShoppingResult) {
 // =========================================================
 @Composable
 fun PriceTimelineCard(resultData: ShoppingResult) {
+    if (!resultData.hasHistoricalPriceData || resultData.priceHistoryTimeline.isEmpty()) return
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

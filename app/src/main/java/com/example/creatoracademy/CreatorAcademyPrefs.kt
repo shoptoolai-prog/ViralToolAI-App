@@ -36,6 +36,50 @@ object CreatorAcademyPrefs {
     private const val KEY_STREAK_DAYS = "streak_days"
     private const val KEY_REMINDER_DISMISSED = "reminder_dismissed"
     private const val KEY_LANG_SELECTED = "academy_lang_selected"
+    private const val KEY_BRAND_COLLAB_LANG = "brand_collab_language"
+    private const val KEY_BRAND_COLLAB_STEP_INDEX = "brand_collab_step_index"
+    private const val KEY_MEESHO_CREATOR_LANG = "meesho_creator_language"
+    private const val KEY_MEESHO_CREATOR_STEP_INDEX = "meesho_creator_step_index"
+
+    fun getBrandCollabLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_BRAND_COLLAB_LANG, "") ?: ""
+    }
+
+    fun setBrandCollabLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_BRAND_COLLAB_LANG, lang).apply()
+    }
+
+    fun getBrandCollabStepIndex(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_BRAND_COLLAB_STEP_INDEX, 0)
+    }
+
+    fun setBrandCollabStepIndex(context: Context, stepIndex: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_BRAND_COLLAB_STEP_INDEX, stepIndex).apply()
+    }
+
+    fun getMeeshoLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_MEESHO_CREATOR_LANG, "") ?: ""
+    }
+
+    fun setMeeshoLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_MEESHO_CREATOR_LANG, lang).apply()
+    }
+
+    fun getMeeshoStepIndex(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_MEESHO_CREATOR_STEP_INDEX, 0)
+    }
+
+    fun setMeeshoStepIndex(context: Context, stepIndex: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_MEESHO_CREATOR_STEP_INDEX, stepIndex).apply()
+    }
 
     fun isLanguageSelected(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
