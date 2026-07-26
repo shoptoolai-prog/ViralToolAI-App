@@ -26,8 +26,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -46,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,14 +58,19 @@ import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextGray
 import com.example.ui.theme.TextWhite
 import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class OnboardingPageData(
     val pageNumber: Int,
     val title: String,
+    val titleHighlight: String,
     val subtitle: String,
     val description: String,
     val icon: ImageVector,
-    val badgeText: String
+    val badgeText: String,
+    val primaryAccent: Color,
+    val secondaryAccent: Color
 )
 
 object OnboardingPrefs {
@@ -90,32 +94,42 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+    val isPreviewMode = LocalInspectionMode.current
 
     val pages = remember {
         listOf(
             OnboardingPageData(
                 pageNumber = 1,
-                title = "Discover Products",
-                subtitle = "Shopping & Deal Intelligence",
-                description = "Paste links from Amazon, Flipkart, Myntra, and AJIO. AI analyzes price history, detects verified discounts, and finds the best store.",
+                title = "Discover Deals with",
+                titleHighlight = "AI Intelligence",
+                subtitle = "SHOPPING & PRICE COMPARE",
+                description = "Instantly analyze links from Amazon, Flipkart, Myntra & AJIO. AI detects verified price drops, fake discounts, and best merchant stores.",
                 icon = Icons.Default.ShoppingBag,
-                badgeText = "SMART SHOPPING"
+                badgeText = "SHOPPING ENGINE",
+                primaryAccent = EmeraldPrimary,
+                secondaryAccent = Color(0xFF00E5FF)
             ),
             OnboardingPageData(
                 pageNumber = 2,
-                title = "Grow as Creator",
-                subtitle = "Viral Creator Studio",
-                description = "Turn any product into viral Instagram Reels & YouTube Shorts. Generate AI hooks, Hinglish captions, and high-conversion hashtag sets.",
+                title = "Build & Monetize your",
+                titleHighlight = "Creator Brand",
+                subtitle = "VIRAL CREATOR STUDIO",
+                description = "Turn products into viral Instagram Reels & Shorts. Generate AI Hinglish hooks, trending captions, and high-converting affiliate links.",
                 icon = Icons.Default.Movie,
-                badgeText = "CREATOR STUDIO"
+                badgeText = "CREATOR ACADEMY",
+                primaryAccent = Color(0xFF8B5CF6),
+                secondaryAccent = Color(0xFFEC4899)
             ),
             OnboardingPageData(
                 pageNumber = 3,
-                title = "AI Powered Everything",
-                subtitle = "Deep Gemini Intelligence",
-                description = "Get instant Deal Scores, profile growth audits, smart campaign planners, and real-time shopping guidance in one flagship experience.",
+                title = "Supercharged by",
+                titleHighlight = "Gemini Core AI",
+                subtitle = "FLAGSHIP AI WORKSPACE",
+                description = "Get real-time deal scoring, creator profile audits, smart campaign planners, and instant affiliate link generation in one place.",
                 icon = Icons.Default.AutoAwesome,
-                badgeText = "FLAGSHIP CORE"
+                badgeText = "FLAGSHIP AI V1.0",
+                primaryAccent = EmeraldGlow,
+                secondaryAccent = Color(0xFF3B82F6)
             )
         )
     }
@@ -133,7 +147,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing),
+            animation = tween(14000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "auroraOffset"
@@ -143,11 +157,13 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
         initialValue = 0.85f,
         targetValue = 1.25f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = FastOutSlowInEasing),
+            animation = tween(2800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseGlow"
     )
+
+    val currentPageData = pages[pagerState.currentPage]
 
     Box(
         modifier = Modifier
@@ -155,10 +171,10 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFF060B08),
-                        Color(0xFF0B1711),
-                        Color(0xFF09121B),
-                        Color(0xFF05080A)
+                        Color(0xFF040806),
+                        Color(0xFF09140E),
+                        Color(0xFF0A1119),
+                        Color(0xFF030608)
                     ),
                     start = Offset(auroraOffset % 800f, 0f),
                     end = Offset((auroraOffset % 800f) + 600f, 1200f)
@@ -167,50 +183,77 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // Soft Ambient Floating Aurora Orbs
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        EmeraldPrimary.copy(alpha = 0.28f * pulseGlow),
-                        ElectricPurple.copy(alpha = 0.12f),
-                        Color.Transparent
+        // Soft Ambient Floating Aurora Orbs & Particles
+        if (!isPreviewMode) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            currentPageData.primaryAccent.copy(alpha = 0.22f * pulseGlow),
+                            currentPageData.secondaryAccent.copy(alpha = 0.10f),
+                            Color.Transparent
+                        )
+                    ),
+                    radius = size.width * 0.70f,
+                    center = Offset(size.width * 0.5f, size.height * 0.28f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF00E5FF).copy(alpha = 0.12f * pulseGlow),
+                            Color.Transparent
+                        )
+                    ),
+                    radius = size.width * 0.55f,
+                    center = Offset(size.width * 0.82f, size.height * 0.72f)
+                )
+
+                // Tiny ambient twinkling particles
+                val numParticles = 20
+                for (i in 0 until numParticles) {
+                    val px = (sin((i * 1.5f + auroraOffset * 0.005f)) * 0.45f + 0.5f) * size.width
+                    val py = (cos((i * 2.1f + auroraOffset * 0.004f)) * 0.45f + 0.5f) * size.height
+                    val radius = (1.8f + (i % 3) * 1.5f).dp.toPx()
+                    drawCircle(
+                        color = currentPageData.primaryAccent.copy(
+                            alpha = (0.20f + 0.30f * sin(i + pulseGlow))
+                        ),
+                        radius = radius,
+                        center = Offset(px, py)
                     )
-                ),
-                radius = size.width * 0.65f,
-                center = Offset(size.width * 0.5f, size.height * 0.25f)
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF00E5FF).copy(alpha = 0.18f * pulseGlow),
-                        Color.Transparent
-                    )
-                ),
-                radius = size.width * 0.5f,
-                center = Offset(size.width * 0.8f, size.height * 0.65f)
-            )
+                }
+            }
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header Bar with Brand Capsule & Glass Skip Button
+            // Premium Header Bar with Glass Brand Capsule & Glass Skip Button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 22.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Glass Mini Brand Capsule
+                // Glass Mini Brand Capsule with Pulsing Icon
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0x1810B981))
+                        .shadow(12.dp, RoundedCornerShape(22.dp), spotColor = EmeraldGlow)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(Color(0xBB0A1811))
                         .border(
-                            BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.5f)),
-                            RoundedCornerShape(20.dp)
+                            BorderStroke(
+                                1.2.dp,
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        EmeraldGlow.copy(alpha = 0.8f),
+                                        Color(0xFF00E5FF).copy(alpha = 0.4f),
+                                        EmeraldGlow.copy(alpha = 0.8f)
+                                    )
+                                )
+                            ),
+                            RoundedCornerShape(22.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -218,7 +261,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(26.dp)
                                 .clip(CircleShape)
                                 .background(
                                     Brush.linearGradient(
@@ -231,7 +274,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 imageVector = Icons.Default.AutoAwesome,
                                 contentDescription = null,
                                 tint = AmoledBlack,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(15.dp)
                             )
                         }
                         Text(
@@ -239,18 +282,18 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
-                            letterSpacing = 0.5.sp
+                            letterSpacing = 0.6.sp
                         )
                     }
                 }
 
-                // Glass Skip Button Capsule
+                // Premium Glass Skip Capsule
                 if (pagerState.currentPage < pages.size - 1) {
                     val skipInteractionSource = remember { MutableInteractionSource() }
                     val isSkipPressed by skipInteractionSource.collectIsPressedAsState()
                     val skipScale by animateFloatAsState(
-                        targetValue = if (isSkipPressed) 0.92f else 1f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        targetValue = if (isSkipPressed) 0.90f else 1f,
+                        animationSpec = spring(stiffness = Spring.StiffnessHigh),
                         label = "skipScale"
                     )
 
@@ -260,10 +303,11 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 scaleX = skipScale
                                 scaleY = skipScale
                             }
+                            .shadow(10.dp, RoundedCornerShape(20.dp), spotColor = Color.White)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Color(0x1EFFFFFF))
+                            .background(Color(0x22FFFFFF))
                             .border(
-                                BorderStroke(1.dp, Color(0x33FFFFFF)),
+                                BorderStroke(1.2.dp, Color(0x44FFFFFF)),
                                 RoundedCornerShape(20.dp)
                             )
                             .clickable(
@@ -273,13 +317,14 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 finishOnboarding()
                             }
-                            .padding(horizontal = 16.dp, vertical = 7.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .testTag("skip_onboarding_button")
                     ) {
                         Text(
                             text = "Skip",
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.85f),
+                            color = TextWhite.copy(alpha = 0.9f),
                             letterSpacing = 0.3.sp
                         )
                     }
@@ -300,8 +345,8 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     (pagerState.currentPage - pageIdx) + pagerState.currentPageOffsetFraction
                 ).coerceIn(-1f, 1f)
 
-                val pageAlpha = (1f - kotlin.math.abs(pageOffset) * 0.5f).coerceIn(0f, 1f)
-                val pageScale = (1f - kotlin.math.abs(pageOffset) * 0.15f).coerceIn(0.85f, 1f)
+                val pageAlpha = (1f - kotlin.math.abs(pageOffset) * 0.55f).coerceIn(0f, 1f)
+                val pageScale = (1f - kotlin.math.abs(pageOffset) * 0.12f).coerceIn(0.88f, 1f)
 
                 Box(
                     modifier = Modifier
@@ -316,7 +361,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                 }
             }
 
-            // Bottom Navigation Controls
+            // Bottom Navigation Controls: Animated Progress Capsule & Continue Button
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -332,29 +377,29 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     repeat(pages.size) { index ->
                         val isSelected = pagerState.currentPage == index
                         val width by animateDpAsState(
-                            targetValue = if (isSelected) 36.dp else 9.dp,
+                            targetValue = if (isSelected) 38.dp else 10.dp,
                             animationSpec = spring(stiffness = Spring.StiffnessMedium)
                         )
                         val color by animateColorAsState(
-                            targetValue = if (isSelected) EmeraldGlow else Color(0x33FFFFFF),
+                            targetValue = if (isSelected) currentPageData.primaryAccent else Color(0x33FFFFFF),
                             animationSpec = tween(300)
                         )
 
                         Box(
                             modifier = Modifier
                                 .padding(horizontal = 4.dp)
-                                .height(9.dp)
+                                .height(10.dp)
                                 .width(width)
                                 .shadow(
-                                    elevation = if (isSelected) 8.dp else 0.dp,
+                                    elevation = if (isSelected) 10.dp else 0.dp,
                                     shape = CircleShape,
-                                    spotColor = EmeraldGlow
+                                    spotColor = currentPageData.primaryAccent
                                 )
                                 .clip(CircleShape)
                                 .background(
                                     if (isSelected) {
                                         Brush.horizontalGradient(
-                                            listOf(EmeraldPrimary, EmeraldGlow)
+                                            listOf(currentPageData.primaryAccent, currentPageData.secondaryAccent)
                                         )
                                     } else {
                                         androidx.compose.ui.graphics.SolidColor(color)
@@ -363,7 +408,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 .border(
                                     BorderStroke(
                                         1.dp,
-                                        if (isSelected) Color.White.copy(alpha = 0.6f) else Color.Transparent
+                                        if (isSelected) Color.White.copy(alpha = 0.7f) else Color.Transparent
                                     ),
                                     CircleShape
                                 )
@@ -385,7 +430,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     initialValue = -300f,
                     targetValue = 800f,
                     animationSpec = infiniteRepeatable(
-                        animation = tween(3000, easing = LinearEasing),
+                        animation = tween(2800, easing = LinearEasing),
                         repeatMode = RepeatMode.Restart
                     ),
                     label = "btnShimmerPos"
@@ -400,15 +445,15 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                             scaleY = buttonScale
                         }
                         .shadow(
-                            elevation = 16.dp,
+                            elevation = 20.dp,
                             shape = RoundedCornerShape(29.dp),
-                            spotColor = EmeraldGlow,
+                            spotColor = currentPageData.primaryAccent,
                             ambientColor = Color.Black
                         )
                         .clip(RoundedCornerShape(29.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(EmeraldPrimary, EmeraldGlow, Color(0xFF00E5FF))
+                                listOf(currentPageData.primaryAccent, EmeraldGlow, currentPageData.secondaryAccent)
                             )
                         )
                         .border(
@@ -416,9 +461,9 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 1.5.dp,
                                 Brush.linearGradient(
                                     colors = listOf(
-                                        Color.White.copy(alpha = 0.8f),
+                                        Color.White.copy(alpha = 0.9f),
                                         Color.White.copy(alpha = 0.2f),
-                                        Color.White.copy(alpha = 0.9f)
+                                        Color.White.copy(alpha = 0.95f)
                                     ),
                                     start = Offset(btnShimmerPos, 0f),
                                     end = Offset(btnShimmerPos + 250f, 100f)
@@ -479,6 +524,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
 
 @Composable
 fun OnboardingPageContent(pageData: OnboardingPageData) {
+    val isPreviewMode = LocalInspectionMode.current
     val infiniteTransition = rememberInfiniteTransition(label = "heroAnimation")
 
     // Sine-wave floating vertical bounce for hero icon
@@ -496,10 +542,20 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
         initialValue = -300f,
         targetValue = 800f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
+            animation = tween(3800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "cardShimmerPos"
+    )
+
+    val iconPulse by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iconPulse"
     )
 
     Column(
@@ -509,24 +565,24 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Floating Hero Glass Card with Aurora Border
+        // Floating 3D Hero Glass Card with Aurora Border & Depth Shadow
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
                 .shadow(
-                    elevation = 20.dp,
+                    elevation = 24.dp,
                     shape = RoundedCornerShape(32.dp),
-                    spotColor = EmeraldPrimary.copy(alpha = 0.4f),
+                    spotColor = pageData.primaryAccent.copy(alpha = 0.5f),
                     ambientColor = Color.Black
                 )
                 .clip(RoundedCornerShape(32.dp))
                 .background(
-                    Brush.linearGradient(
+                    Brush.verticalGradient(
                         listOf(
-                            Color(0xFF111A15),
-                            Color(0xFF0D1412),
-                            Color(0xFF0F1A1B)
+                            Color(0xEE0B1812),
+                            Color(0xF808110D),
+                            Color(0xFF040A07)
                         )
                     )
                 )
@@ -535,12 +591,12 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
                         1.5.dp,
                         Brush.linearGradient(
                             colors = listOf(
-                                EmeraldPrimary.copy(alpha = 0.8f),
-                                ElectricPurple.copy(alpha = 0.5f),
-                                Color(0xFF00E5FF).copy(alpha = 0.7f)
+                                pageData.primaryAccent.copy(alpha = 0.85f),
+                                pageData.secondaryAccent.copy(alpha = 0.6f),
+                                Color.White.copy(alpha = 0.8f)
                             ),
                             start = Offset(cardShimmerPos, 0f),
-                            end = Offset(cardShimmerPos + 300f, 200f)
+                            end = Offset(cardShimmerPos + 320f, 220f)
                         )
                     ),
                     RoundedCornerShape(32.dp)
@@ -550,10 +606,10 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
             // Radial Glow Behind Hero Icon
             Box(
                 modifier = Modifier
-                    .size(180.dp)
+                    .size(190.dp)
                     .background(
                         Brush.radialGradient(
-                            listOf(EmeraldPrimary.copy(alpha = 0.3f), Color.Transparent)
+                            listOf(pageData.primaryAccent.copy(alpha = 0.32f), Color.Transparent)
                         ),
                         CircleShape
                     )
@@ -567,37 +623,52 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(EmeraldGlow.copy(alpha = 0.18f))
+                        .background(pageData.primaryAccent.copy(alpha = 0.18f))
                         .border(
-                            BorderStroke(1.2.dp, EmeraldGlow.copy(alpha = 0.6f)),
+                            BorderStroke(1.2.dp, pageData.primaryAccent.copy(alpha = 0.65f)),
                             RoundedCornerShape(20.dp)
                         )
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text(
-                        text = pageData.badgeText,
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Black,
-                        color = EmeraldGlow,
-                        letterSpacing = 1.5.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = pageData.primaryAccent,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = pageData.badgeText,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = pageData.primaryAccent,
+                            letterSpacing = 1.5.sp
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Floating Icon Container with dual-layer glass circle
+                // Floating Glass Icon Container
                 Box(
                     modifier = Modifier
-                        .graphicsLayer { translationY = floatingOffsetY }
+                        .graphicsLayer {
+                            translationY = if (!isPreviewMode) floatingOffsetY else 0f
+                            scaleX = if (!isPreviewMode) iconPulse else 1f
+                            scaleY = if (!isPreviewMode) iconPulse else 1f
+                        }
                         .size(92.dp)
-                        .shadow(16.dp, CircleShape, spotColor = EmeraldGlow)
+                        .shadow(20.dp, CircleShape, spotColor = pageData.primaryAccent)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                listOf(EmeraldPrimary, Color(0xFF059669), Color(0xFF00E5FF))
+                                listOf(pageData.primaryAccent, pageData.secondaryAccent)
                             )
                         )
-                        .border(BorderStroke(2.dp, Color.White.copy(alpha = 0.8f)), CircleShape),
+                        .border(BorderStroke(2.dp, Color.White.copy(alpha = 0.85f)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -610,23 +681,33 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-        // Title with High Contrast & Letter Tracking
+        // Large Premium Title
         Text(
             text = pageData.title,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Black,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
             color = TextWhite,
             textAlign = TextAlign.Center,
-            letterSpacing = 0.3.sp
+            letterSpacing = 0.2.sp
+        )
+
+        // Gradient Highlighted Title Keyword
+        Text(
+            text = pageData.titleHighlight,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Black,
+            color = pageData.primaryAccent,
+            textAlign = TextAlign.Center,
+            letterSpacing = 0.5.sp
         )
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Subtitle / Category
+        // Subtitle / Category Pill
         Text(
-            text = pageData.subtitle.uppercase(),
+            text = pageData.subtitle,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
             color = EmeraldGlow,
@@ -636,12 +717,12 @@ fun OnboardingPageContent(pageData: OnboardingPageData) {
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Description
+        // High Impact Description
         Text(
             text = pageData.description,
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
-            color = TextWhite.copy(alpha = 0.75f),
+            color = TextWhite.copy(alpha = 0.80f),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
             modifier = Modifier.padding(horizontal = 8.dp)

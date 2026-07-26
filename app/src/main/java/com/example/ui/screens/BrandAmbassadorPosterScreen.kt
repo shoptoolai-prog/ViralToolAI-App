@@ -35,6 +35,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +70,7 @@ fun BrandAmbassadorPosterScreen(
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val isPreviewMode = LocalInspectionMode.current
 
     var isExiting by remember { mutableStateOf(false) }
 
@@ -113,6 +115,20 @@ fun BrandAmbassadorPosterScreen(
 
     // Timeline Animations & 3 Second Auto Timer
     LaunchedEffect(Unit) {
+        if (isPreviewMode) {
+            // Preview Safe Mode: Immediately reveal all elements without delay or countdown loop
+            screenAlpha.snapTo(1f)
+            cardOffsetY.snapTo(0f)
+            cardAlpha.snapTo(1f)
+            badgeAlpha.snapTo(1f)
+            titleAlpha.snapTo(1f)
+            subtitleAlpha.snapTo(1f)
+            buttonAlpha.snapTo(1f)
+            buttonScale.snapTo(1f)
+            chipsVisibleCount = featureList.size
+            return@LaunchedEffect
+        }
+
         // Soft Zoom over 3 seconds (1.0 -> 1.02 max)
         launch {
             posterZoomScale.animateTo(
@@ -203,15 +219,22 @@ fun BrandAmbassadorPosterScreen(
         label = "lightSweepPos"
     )
 
+    val baseModifier = Modifier
+        .fillMaxSize()
+        .graphicsLayer {
+            alpha = animatedExitAlpha
+            scaleX = animatedExitScale
+            scaleY = animatedExitScale
+        }
+
+    val blurModifier = if (animatedExitBlur > 0.5f && !isPreviewMode) {
+        baseModifier.blur(animatedExitBlur.dp)
+    } else {
+        baseModifier
+    }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                alpha = animatedExitAlpha
-                scaleX = animatedExitScale
-                scaleY = animatedExitScale
-            }
-            .blur(animatedExitBlur.dp)
+        modifier = blurModifier
             .background(Color(0xFF020704))
             .statusBarsPadding()
             .navigationBarsPadding()
@@ -233,17 +256,19 @@ fun BrandAmbassadorPosterScreen(
         )
 
         // Overlay Ambient Floating Particles & Light Reflections
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val numParticles = 30
-            for (i in 0 until numParticles) {
-                val px = (sin((i * 1.7f + ambientPulse * 3.5f)) * 0.48f + 0.5f) * size.width
-                val py = (cos((i * 2.3f + ambientPulse * 2.5f)) * 0.48f + 0.5f) * size.height
-                val radius = (2.5f + (i % 4) * 2f).dp.toPx()
-                drawCircle(
-                    color = EmeraldGlow.copy(alpha = (0.22f + 0.35f * sin(i + ambientPulse))),
-                    radius = radius,
-                    center = Offset(px, py)
-                )
+        if (!isPreviewMode) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val numParticles = 18
+                for (i in 0 until numParticles) {
+                    val px = (sin((i * 1.7f + ambientPulse * 3.5f)) * 0.48f + 0.5f) * size.width
+                    val py = (cos((i * 2.3f + ambientPulse * 2.5f)) * 0.48f + 0.5f) * size.height
+                    val radius = (2.5f + (i % 4) * 2f).dp.toPx()
+                    drawCircle(
+                        color = EmeraldGlow.copy(alpha = (0.22f + 0.35f * sin(i + ambientPulse))),
+                        radius = radius,
+                        center = Offset(px, py)
+                    )
+                }
             }
         }
 

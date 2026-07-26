@@ -129,19 +129,19 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
         // Spotify Green Ambient Glow (#000000 -> Ambient Glow)
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(320.dp)
                 .alpha(ambientGlow.value)
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            EmeraldPrimary.copy(alpha = 0.45f),
-                            Color(0xFF0D3320).copy(alpha = 0.2f),
+                            EmeraldPrimary.copy(alpha = 0.50f),
+                            EmeraldPrimary.copy(alpha = 0.20f),
+                            Color(0xFF0D3320).copy(alpha = 0.08f),
                             Color.Transparent
                         )
                     ),
                     CircleShape
                 )
-                .blur(80.dp)
         )
 
         // Minimal Premium Particles Canvas
