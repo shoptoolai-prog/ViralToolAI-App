@@ -124,15 +124,14 @@ fun ResultScreen(
 
     val pipelineSteps = remember {
         listOf(
-            "Validating Product URL",
-            "Detecting Shopping Platform",
-            "Reading Product Metadata",
-            "Extracting Product Image",
-            "Verifying Current Price",
-            "Checking Merchant Discounts",
-            "Analyzing Product Reviews",
-            "Finding Delivery Estimate",
-            "Generating Smart Shopping Report"
+            "Reading Product URL",
+            "Identifying Store",
+            "Detecting Product",
+            "Loading Product Image",
+            "Verifying Price",
+            "Comparing Stores",
+            "Checking Discounts",
+            "Generating Smart Report"
         )
     }
     
@@ -176,52 +175,133 @@ fun ResultScreen(
                     .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
-                // Header Bar
-                Row(
+                // Premium Header Capsule
+                val headerShimmerTransition = rememberInfiniteTransition(label = "headerShimmer")
+                val headerShimmerPos by headerShimmerTransition.animateFloat(
+                    initialValue = -300f,
+                    targetValue = 800f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(3500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    ),
+                    label = "headerShimmerPos"
+                )
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .shadow(
+                            elevation = 12.dp,
+                            shape = RoundedCornerShape(24.dp),
+                            spotColor = EmeraldPrimary.copy(alpha = 0.35f),
+                            ambientColor = Color.Black
+                        )
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFF131A16), Color(0xFF101C15), Color(0xFF131A16))
+                            )
+                        )
+                        .border(
+                            BorderStroke(
+                                1.2.dp,
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        EmeraldPrimary.copy(alpha = 0.8f),
+                                        EmeraldGlow.copy(alpha = 0.4f),
+                                        Color(0xFF00E5FF).copy(alpha = 0.6f)
+                                    ),
+                                    start = Offset(headerShimmerPos, 0f),
+                                    end = Offset(headerShimmerPos + 300f, 100f)
+                                )
+                            ),
+                            RoundedCornerShape(24.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
                 ) {
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(Color(0x0DFFFFFF), CircleShape)
-                            .testTag("result_back_button")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = TextWhite,
-                            modifier = Modifier.size(20.dp)
+                        IconButton(
+                            onClick = onBackClick,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x1AFFFFFF))
+                                .border(BorderStroke(1.dp, Color(0x33FFFFFF)), CircleShape)
+                                .testTag("result_back_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = TextWhite,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(EmeraldGlow.copy(alpha = 0.2f))
+                                    .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.6f)), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "AI Report",
+                                    tint = EmeraldGlow,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Text(
+                                text = "Smart Shopping Report",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Black,
+                                color = TextWhite,
+                                letterSpacing = 0.3.sp
+                            )
+                        }
+
+                        val refreshInteractionSource = remember { MutableInteractionSource() }
+                        val isRefreshPressed by refreshInteractionSource.collectIsPressedAsState()
+                        val refreshScale by animateFloatAsState(
+                            targetValue = if (isRefreshPressed) 0.90f else 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            label = "refreshScale"
                         )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Smart Shopping Report",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        color = TextWhite,
-                        letterSpacing = 0.5.sp
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(
-                        onClick = {
-                            reloadTrigger++
-                            toastMessage = "✔ Refreshing product extraction..."
-                        },
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(Color(0x0DFFFFFF), CircleShape)
-                            .testTag("result_refresh_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
-                            tint = TextWhite,
-                            modifier = Modifier.size(20.dp)
-                        )
+
+                        IconButton(
+                            onClick = {
+                                reloadTrigger++
+                                toastMessage = "✔ Refreshing product extraction..."
+                            },
+                            interactionSource = refreshInteractionSource,
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = refreshScale
+                                    scaleY = refreshScale
+                                }
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(EmeraldPrimary.copy(alpha = 0.2f))
+                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), CircleShape)
+                                .shadow(elevation = 6.dp, shape = CircleShape, spotColor = EmeraldGlow)
+                                .testTag("result_refresh_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Refresh",
+                                tint = EmeraldGlow,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
                 
@@ -284,17 +364,37 @@ fun AiProcessingScreen(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = LinearEasing),
+            animation = tween(2000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "rotationAngle"
     )
 
+    val counterRotationAngle by infiniteTransition.animateFloat(
+        initialValue = 360f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "counterRotationAngle"
+    )
+
+    val auroraOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(8000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "auroraOffset"
+    )
+
     val ringGlowPulse by infiniteTransition.animateFloat(
         initialValue = 0.85f,
-        targetValue = 1.25f,
+        targetValue = 1.35f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
+            animation = tween(1000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "ringGlowPulse"
@@ -304,12 +404,29 @@ fun AiProcessingScreen(
         if (detectedStore.isNotBlank() && detectedStore != "Unknown") detectedStore else detectMerchant(analyzedLink).name
     }
 
+    val progressPercent = remember(currentStepIndex, pipelineSteps.size) {
+        ((currentStepIndex.toFloat() / pipelineSteps.size) * 100).toInt().coerceIn(0, 100)
+    }
+
+    val animatedPercent by animateIntAsState(
+        targetValue = progressPercent,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "animatedPercent"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(AmoledBlack, Color(0xFF09101B), AmoledBlack)
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF09120C),
+                        Color(0xFF0B1B13),
+                        Color(0xFF0D141E),
+                        Color(0xFF0A0F0D)
+                    ),
+                    start = Offset(auroraOffset % 800f, 0f),
+                    end = Offset((auroraOffset % 800f) + 600f, 1000f)
                 )
             )
             .statusBarsPadding()
@@ -321,71 +438,119 @@ fun AiProcessingScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Top Engine Pill
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(EmeraldGlow.copy(alpha = 0.15f))
-                    .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f)), RoundedCornerShape(20.dp))
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
+            // Top Engine Pill + Glass Percentage Badge
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(EmeraldGlow.copy(alpha = 0.15f))
+                        .border(BorderStroke(1.2.dp, EmeraldGlow.copy(alpha = 0.5f)), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(EmeraldGlow, CircleShape)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(EmeraldGlow, CircleShape)
+                        )
+                        Text(
+                            text = "PREMIUM AI SCANNER ACTIVE",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = EmeraldGlow,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+
+                // Glass Percentage Badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0x2200E5FF))
+                        .border(BorderStroke(1.2.dp, Color(0xFF00E5FF)), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
                     Text(
-                        text = "UNIVERSAL AI PIPELINE ACTIVE",
-                        fontSize = 10.sp,
+                        text = "$animatedPercent%",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = EmeraldGlow,
-                        letterSpacing = 1.sp
+                        color = Color(0xFF00E5FF)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Central Glowing AI Ring with Store Logo
+            // Neon Circular AI Scanner with Particles and Glass Container
             Box(
-                modifier = Modifier.size(130.dp),
+                modifier = Modifier.size(140.dp),
                 contentAlignment = Alignment.Center
             ) {
+                // Outer Rotating Sweep Ring
                 Canvas(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer { rotationZ = rotationAngle }
                 ) {
-                    val strokeWidth = 5.dp.toPx()
+                    val strokeWidth = 4.dp.toPx()
                     drawCircle(
                         brush = Brush.sweepGradient(
                             colors = listOf(
                                 EmeraldGlow,
                                 Color(0xFF00E5FF),
-                                Color(0xFF9C27B0),
+                                Color(0xFFA855F7),
                                 EmeraldGlow
                             )
                         ),
-                        radius = (size.width / 2f) - (strokeWidth / 2f),
+                        radius = (size.width / 2f) - strokeWidth,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
                     )
                 }
 
+                // Inner Counter-Rotating Ring
+                Canvas(
+                    modifier = Modifier
+                        .size(118.dp)
+                        .graphicsLayer { rotationZ = counterRotationAngle }
+                ) {
+                    val strokeWidth = 2.5.dp.toPx()
+                    drawCircle(
+                        brush = Brush.sweepGradient(
+                            colors = listOf(
+                                Color(0xFF00E5FF),
+                                EmeraldPrimary,
+                                Color(0xFF00E5FF)
+                            )
+                        ),
+                        radius = (size.width / 2f) - strokeWidth,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
+                    )
+                }
+
+                // Central Store Logo in Glowing Glass Circle
                 Box(
                     modifier = Modifier
-                        .size(110.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x2200FF88))
+                        .size(102.dp)
                         .shadow(
-                            elevation = 16.dp * ringGlowPulse,
+                            elevation = 20.dp * ringGlowPulse,
                             shape = CircleShape,
-                            ambientColor = EmeraldGlow,
-                            spotColor = EmeraldGlow
-                        ),
+                            spotColor = EmeraldGlow,
+                            ambientColor = Color.Black
+                        )
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF131A16), Color(0xFF0D1812))
+                            )
+                        )
+                        .border(BorderStroke(1.5.dp, EmeraldGlow.copy(alpha = 0.7f)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -394,12 +559,12 @@ fun AiProcessingScreen(
                     ) {
                         OfficialLogo(
                             name = storeName,
-                            modifier = Modifier.size(46.dp)
+                            modifier = Modifier.size(44.dp)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = storeName,
-                            fontSize = 11.sp,
+                            fontSize = 10.5.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite
                         )
@@ -407,59 +572,102 @@ fun AiProcessingScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Live Pipeline Steps Card
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                borderColor = GlassCardBorder,
-                backgroundColor = Color(0x0CFFFFFF)
+            // Animated Progress Line
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .height(6.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x1AFFFFFF))
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    pipelineSteps.forEachIndexed { index, stepName ->
-                        val isDone = index < currentStepIndex
-                        val isCurrent = index == currentStepIndex
+                        .fillMaxWidth(animatedPercent / 100f)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(EmeraldPrimary, EmeraldGlow, Color(0xFF00E5FF))
+                            )
+                        )
+                )
+            }
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Live Pipeline Steps Card with Glass Chips & Glow
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                pipelineSteps.forEachIndexed { index, stepName ->
+                    val isDone = index < currentStepIndex
+                    val isCurrent = index == currentStepIndex
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                brush = if (isCurrent) {
+                                    Brush.horizontalGradient(
+                                        listOf(EmeraldGlow.copy(alpha = 0.20f), Color(0x10FFFFFF))
+                                    )
+                                } else if (isDone) {
+                                    androidx.compose.ui.graphics.SolidColor(Color(0x0EFFFFFF))
+                                } else {
+                                    androidx.compose.ui.graphics.SolidColor(Color(0x05FFFFFF))
+                                },
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .border(
+                                BorderStroke(
+                                    if (isCurrent) 1.2.dp else 1.dp,
+                                    if (isCurrent) EmeraldGlow else if (isDone) Color(0x222ECC71) else Color(0x10FFFFFF)
+                                ),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .padding(horizontal = 14.dp, vertical = 9.dp)
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    if (isCurrent) EmeraldGlow.copy(alpha = 0.12f) else Color.Transparent
-                                )
-                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Box(
-                                modifier = Modifier.size(18.dp),
+                                modifier = Modifier.size(20.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 when {
                                     isDone -> {
-                                        Text(
-                                            text = "✔",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Black,
-                                            color = Color(0xFF2ECC71)
-                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0x222ECC71)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = "Done",
+                                                tint = Color(0xFF2ECC71),
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                        }
                                     }
                                     isCurrent -> {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(12.dp),
+                                            modifier = Modifier.size(16.dp),
                                             color = EmeraldGlow,
-                                            strokeWidth = 2.dp
+                                            strokeWidth = 2.5.dp
                                         )
                                     }
                                     else -> {
                                         Box(
                                             modifier = Modifier
-                                                .size(5.dp)
+                                                .size(6.dp)
                                                 .background(TextGray.copy(alpha = 0.3f), CircleShape)
                                         )
                                     }
@@ -468,23 +676,31 @@ fun AiProcessingScreen(
 
                             Text(
                                 text = stepName,
-                                fontSize = 12.sp,
+                                fontSize = 12.5.sp,
                                 fontWeight = if (isCurrent) FontWeight.Black else if (isDone) FontWeight.Bold else FontWeight.Normal,
                                 color = when {
                                     isDone -> TextWhite
                                     isCurrent -> EmeraldGlow
                                     else -> TextGray.copy(alpha = 0.45f)
-                                }
+                                },
+                                letterSpacing = 0.2.sp
                             )
 
                             if (isCurrent) {
                                 Spacer(modifier = Modifier.weight(1f))
-                                Text(
-                                    text = "Analyzing...",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EmeraldGlow
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(EmeraldGlow.copy(alpha = 0.2f))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "IN PROGRESS",
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = EmeraldGlow
+                                    )
+                                }
                             }
                         }
                     }

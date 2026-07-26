@@ -114,7 +114,11 @@ fun CreatorAcademySetupScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFF060B08), Color(0xFF0A140F), Color(0xFF05080A))
+                )
+            )
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(20.dp)

@@ -41,6 +41,96 @@ object CreatorAcademyPrefs {
     private const val KEY_MEESHO_CREATOR_LANG = "meesho_creator_language"
     private const val KEY_MEESHO_CREATOR_STEP_INDEX = "meesho_creator_step_index"
 
+    private const val KEY_YOUTUBE_LANG = "youtube_creator_v2_language"
+    private const val KEY_YOUTUBE_CREATOR_TYPE = "youtube_creator_v2_type"
+    private const val KEY_YOUTUBE_CURRENT_STEP = "youtube_creator_v2_current_step"
+    private const val KEY_YOUTUBE_COMPLETED_STEPS = "youtube_creator_v2_completed_steps"
+
+    // Video Editing Mentor Tools (CapCut, VN, Instagram Edits) Data Isolation
+    fun getEditingToolLanguage(context: Context, toolKey: String): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString("video_editing_${toolKey}_lang", null)
+    }
+
+    fun saveEditingToolLanguage(context: Context, toolKey: String, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString("video_editing_${toolKey}_lang", lang).apply()
+    }
+
+    fun getEditingToolVideoType(context: Context, toolKey: String): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString("video_editing_${toolKey}_video_type", null)
+    }
+
+    fun saveEditingToolVideoType(context: Context, toolKey: String, type: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString("video_editing_${toolKey}_video_type", type).apply()
+    }
+
+    fun getEditingToolCurrentStep(context: Context, toolKey: String): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt("video_editing_${toolKey}_current_step", 1)
+    }
+
+    fun saveEditingToolCurrentStep(context: Context, toolKey: String, step: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt("video_editing_${toolKey}_current_step", step).apply()
+    }
+
+    fun getEditingToolCompletedSteps(context: Context, toolKey: String): List<Int> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = prefs.getStringSet("video_editing_${toolKey}_completed_steps", emptySet()) ?: emptySet()
+        return strSet.mapNotNull { it.toIntOrNull() }
+    }
+
+    fun saveEditingToolCompletedSteps(context: Context, toolKey: String, steps: Set<Int>) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = steps.map { it.toString() }.toSet()
+        prefs.edit().putStringSet("video_editing_${toolKey}_completed_steps", strSet).apply()
+    }
+
+    fun getYouTubeLanguage(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_LANG, null)
+    }
+
+    fun saveYouTubeLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_LANG, lang).apply()
+    }
+
+    fun getYouTubeCreatorType(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_CREATOR_TYPE, null)
+    }
+
+    fun saveYouTubeCreatorType(context: Context, type: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_CREATOR_TYPE, type).apply()
+    }
+
+    fun getYouTubeCurrentStep(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_YOUTUBE_CURRENT_STEP, 1)
+    }
+
+    fun saveYouTubeCurrentStep(context: Context, step: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_YOUTUBE_CURRENT_STEP, step).apply()
+    }
+
+    fun getYouTubeCompletedSteps(context: Context): List<Int> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = prefs.getStringSet(KEY_YOUTUBE_COMPLETED_STEPS, emptySet()) ?: emptySet()
+        return strSet.mapNotNull { it.toIntOrNull() }
+    }
+
+    fun saveYouTubeCompletedSteps(context: Context, steps: Set<Int>) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = steps.map { it.toString() }.toSet()
+        prefs.edit().putStringSet(KEY_YOUTUBE_COMPLETED_STEPS, strSet).apply()
+    }
+
     fun getBrandCollabLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_BRAND_COLLAB_LANG, "") ?: ""

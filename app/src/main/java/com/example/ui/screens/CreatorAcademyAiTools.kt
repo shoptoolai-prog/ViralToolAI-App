@@ -65,8 +65,17 @@ import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import com.example.ui.theme.EmeraldGlow
+
 /**
- * MASTER PHASE 15B.1 — Context-Aware AI Tools & Future Ready Link Analysis
+ * MASTER PHASE 15B.1 — Context-Aware AI Tools
  * Completely screenshot-free tools inside Creator Academy:
  * 1. Caption Generator
  * 2. Hashtag Generator
@@ -74,11 +83,6 @@ import com.example.ui.theme.TextWhite
  * 4. Content Planner
  * 5. Posting Checklist
  * 6. Brand Pitch Guide
- *
- * Future Ready:
- * - Profile Link Analysis
- * - Channel Link Analysis
- * - API Integrations
  */
 
 @Composable
@@ -87,15 +91,26 @@ fun AiCreatorToolsSection(
     onOpenTool: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "AI CREATOR TOOLKIT",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextWhite.copy(alpha = 0.5f),
-            letterSpacing = 1.5.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = EmeraldGlow,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = "AI CREATOR TOOLKIT",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = EmeraldGlow,
+                letterSpacing = 1.5.sp
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         val tools = listOf(
             Triple("Caption Generator", "Craft high-converting viral captions with CTAs", Icons.Default.FormatQuote),
@@ -106,63 +121,120 @@ fun AiCreatorToolsSection(
             Triple("Brand Pitch Guide", "Sponsorship & brand deal outreach templates", Icons.Default.Email)
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             tools.forEach { (name, desc, icon) ->
+                val toolInteractionSource = remember { MutableInteractionSource() }
+                val isToolPressed by toolInteractionSource.collectIsPressedAsState()
+                val toolScale by animateFloatAsState(
+                    targetValue = if (isToolPressed) 0.97f else 1f,
+                    animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
+                    label = "toolCardScale"
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0x0CFFFFFF))
-                        .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(16.dp))
-                        .clickable { onOpenTool(name) }
-                        .padding(14.dp)
+                        .graphicsLayer {
+                            scaleX = toolScale
+                            scaleY = toolScale
+                        }
+                        .shadow(
+                            elevation = 10.dp,
+                            shape = RoundedCornerShape(18.dp),
+                            spotColor = EmeraldPrimary.copy(alpha = 0.3f),
+                            ambientColor = Color.Black
+                        )
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF131A16), Color(0xFF0B120E))
+                            )
+                        )
+                        .border(
+                            BorderStroke(
+                                1.2.dp,
+                                Brush.linearGradient(
+                                    listOf(EmeraldPrimary.copy(alpha = 0.7f), EmeraldGlow.copy(alpha = 0.4f))
+                                )
+                            ),
+                            RoundedCornerShape(18.dp)
+                        )
+                        .clickable(
+                            interactionSource = toolInteractionSource,
+                            indication = androidx.compose.foundation.LocalIndication.current
+                        ) { onOpenTool(name) }
+                        .padding(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Mini Icon Container
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x2210B981)),
+                                .size(42.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(EmeraldPrimary.copy(alpha = 0.25f), Color(0xFF0F1A13))
+                                    )
+                                )
+                                .border(
+                                    BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.5f)),
+                                    RoundedCornerShape(12.dp)
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = name,
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(20.dp)
+                                tint = EmeraldGlow,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(14.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = name,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite
+                                fontSize = 14.5.sp,
+                                fontWeight = FontWeight.Black,
+                                color = TextWhite,
+                                letterSpacing = 0.2.sp
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = desc,
                                 fontSize = 11.sp,
-                                color = TextWhite.copy(alpha = 0.6f)
+                                color = TextWhite.copy(alpha = 0.7f),
+                                lineHeight = 15.sp
                             )
                         }
 
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Green Gradient "Use AI Tool" CTA Button
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(EmeraldPrimary.copy(alpha = 0.15f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(EmeraldPrimary, EmeraldGlow)
+                                    )
+                                )
+                                .border(
+                                    BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "Use AI Tool",
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldPrimary
+                                fontWeight = FontWeight.Black,
+                                color = AmoledBlack,
+                                letterSpacing = 0.3.sp
                             )
                         }
                     }
@@ -176,54 +248,7 @@ fun AiCreatorToolsSection(
 fun FutureReadySection(
     onOpenLinkAnalysis: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "FUTURE READY INTEGRATIONS",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextWhite.copy(alpha = 0.5f),
-            letterSpacing = 1.5.sp
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0x0CFFFFFF))
-                    .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(16.dp))
-                    .clickable { onOpenLinkAnalysis("PROFILE_LINK") }
-                    .padding(14.dp)
-            ) {
-                Column {
-                    Text(text = "🔗 Profile Link", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(text = "Analyze via instagram.com/handle", fontSize = 10.5.sp, color = TextWhite.copy(alpha = 0.5f))
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0x0CFFFFFF))
-                    .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(16.dp))
-                    .clickable { onOpenLinkAnalysis("CHANNEL_LINK") }
-                    .padding(14.dp)
-            ) {
-                Column {
-                    Text(text = "▶️ Channel Link", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(text = "Analyze via youtube.com/@channel", fontSize = 10.5.sp, color = TextWhite.copy(alpha = 0.5f))
-                }
-            }
-        }
-    }
+    // Section deleted as requested. Renders empty column for auto collapse layout.
 }
 
 // ====================================================================

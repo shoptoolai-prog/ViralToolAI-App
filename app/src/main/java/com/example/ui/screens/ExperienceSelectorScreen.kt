@@ -1,27 +1,14 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,15 +20,12 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -54,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
 
@@ -67,50 +52,102 @@ fun ExperienceSelectorScreen(
     var selectedChoice by remember { mutableStateOf("SHOPPING") }
     var rememberChoice by remember { mutableStateOf(CreatorAcademyPrefs.isRememberExperience(context)) }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "expBg")
+    val auroraOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "auroraOffset"
+    )
+
+    val iconFloatY by infiniteTransition.animateFloat(
+        initialValue = -6f,
+        targetValue = 6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iconFloatY"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF060B08),
+                        Color(0xFF0C1712),
+                        Color(0xFF09121B),
+                        Color(0xFF05080A)
+                    ),
+                    start = Offset(auroraOffset % 800f, 0f),
+                    end = Offset((auroraOffset % 800f) + 600f, 1200f)
+                )
+            )
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(20.dp)
     ) {
+        // Soft Ambient Aurora Glows
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        EmeraldPrimary.copy(alpha = 0.25f),
+                        Color.Transparent
+                    )
+                ),
+                radius = size.width * 0.6f,
+                center = Offset(size.width * 0.5f, size.height * 0.2f)
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header
+            // Header Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 24.dp)
+                modifier = Modifier.padding(top = 16.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
+                        .graphicsLayer { translationY = iconFloatY }
+                        .size(64.dp)
+                        .shadow(16.dp, CircleShape, spotColor = EmeraldGlow)
                         .clip(CircleShape)
-                        .background(Color(0x1110B981))
-                        .border(BorderStroke(1.5.dp, EmeraldPrimary.copy(alpha = 0.5f)), CircleShape),
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF132019), Color(0xFF0B1712))
+                            )
+                        )
+                        .border(BorderStroke(1.5.dp, EmeraldGlow), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.AutoAwesome,
                         contentDescription = "ViralToolAI",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(28.dp)
+                        tint = EmeraldGlow,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 Text(
                     text = "Choose Your Experience",
-                    fontSize = 24.sp,
+                    fontSize = 25.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite,
-                    letterSpacing = (-0.5).sp,
+                    letterSpacing = (-0.3).sp,
                     textAlign = TextAlign.Center
                 )
 
@@ -119,12 +156,13 @@ fun ExperienceSelectorScreen(
                 Text(
                     text = "Select your primary workspace in ViralToolAI v1.0",
                     fontSize = 13.sp,
-                    color = TextWhite.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Normal,
+                    color = TextWhite.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
                 )
             }
 
-            // Cards Options
+            // Interactive Glass Options
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -156,7 +194,7 @@ fun ExperienceSelectorScreen(
                 )
             }
 
-            // Bottom Confirm Section
+            // Bottom Confirm & Continue Section
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -164,15 +202,17 @@ fun ExperienceSelectorScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0x10FFFFFF))
+                        .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(14.dp))
                         .clickable { rememberChoice = !rememberChoice }
-                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Checkbox(
                         checked = rememberChoice,
                         onCheckedChange = { rememberChoice = it },
                         colors = CheckboxDefaults.colors(
-                            checkedColor = EmeraldPrimary,
+                            checkedColor = EmeraldGlow,
                             uncheckedColor = TextWhite.copy(alpha = 0.4f),
                             checkmarkColor = AmoledBlack
                         )
@@ -181,35 +221,60 @@ fun ExperienceSelectorScreen(
                     Text(
                         text = "Remember my choice",
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = TextWhite.copy(alpha = 0.8f)
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextWhite.copy(alpha = 0.85f)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 val buttonInteractionSource = remember { MutableInteractionSource() }
                 val isPressed by buttonInteractionSource.collectIsPressedAsState()
                 val scale by animateFloatAsState(
-                    targetValue = if (isPressed) 0.95f else 1f,
+                    targetValue = if (isPressed) 0.94f else 1f,
                     animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
                     label = "confirmBtnScale"
+                )
+
+                val btnShimmerPos by infiniteTransition.animateFloat(
+                    initialValue = -300f,
+                    targetValue = 800f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(3200, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    ),
+                    label = "btnShimmerPos"
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
+                        .height(56.dp)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
                         }
-                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(26.dp), spotColor = EmeraldPrimary)
-                        .clip(RoundedCornerShape(26.dp))
+                        .shadow(elevation = 16.dp, shape = RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
+                        .clip(RoundedCornerShape(28.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(Color(0xFF10B981), Color(0xFF059669))
+                                listOf(EmeraldPrimary, EmeraldGlow, Color(0xFF00E5FF))
                             )
+                        )
+                        .border(
+                            BorderStroke(
+                                1.5.dp,
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.8f),
+                                        Color.White.copy(alpha = 0.2f),
+                                        Color.White.copy(alpha = 0.9f)
+                                    ),
+                                    start = Offset(btnShimmerPos, 0f),
+                                    end = Offset(btnShimmerPos + 250f, 100f)
+                                )
+                            ),
+                            RoundedCornerShape(28.dp)
                         )
                         .clickable(
                             interactionSource = buttonInteractionSource,
@@ -224,9 +289,9 @@ fun ExperienceSelectorScreen(
                 ) {
                     Text(
                         text = "Continue to Experience",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmoledBlack,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -247,13 +312,10 @@ private fun ExperienceOptionCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
+        targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
         label = "optionScale"
     )
-
-    val borderColor = if (isSelected) EmeraldPrimary else Color(0x22FFFFFF)
-    val bgColor = if (isSelected) Color(0x1810B981) else Color(0x0AFFFFFF)
 
     Box(
         modifier = Modifier
@@ -263,13 +325,36 @@ private fun ExperienceOptionCard(
                 scaleY = scale
             }
             .shadow(
-                elevation = if (isSelected) 10.dp else 2.dp,
-                shape = RoundedCornerShape(20.dp),
-                spotColor = if (isSelected) EmeraldPrimary else Color.Transparent
+                elevation = if (isSelected) 16.dp else 4.dp,
+                shape = RoundedCornerShape(22.dp),
+                spotColor = if (isSelected) EmeraldGlow else Color.Transparent,
+                ambientColor = Color.Black
             )
-            .clip(RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .border(BorderStroke(if (isSelected) 1.8.dp else 1.dp, borderColor), RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
+            .background(
+                if (isSelected) {
+                    Brush.linearGradient(
+                        listOf(Color(0xFF132219), Color(0xFF0F1B14))
+                    )
+                } else {
+                    Brush.linearGradient(
+                        listOf(Color(0x12FFFFFF), Color(0x08FFFFFF))
+                    )
+                }
+            )
+            .border(
+                BorderStroke(
+                    if (isSelected) 1.8.dp else 1.dp,
+                    if (isSelected) {
+                        Brush.linearGradient(
+                            listOf(EmeraldGlow, Color(0xFF00E5FF))
+                        )
+                    } else {
+                        androidx.compose.ui.graphics.SolidColor(Color(0x22FFFFFF))
+                    }
+                ),
+                RoundedCornerShape(22.dp)
+            )
             .clickable(
                 interactionSource = interactionSource,
                 indication = androidx.compose.foundation.LocalIndication.current,
@@ -283,16 +368,29 @@ private fun ExperienceOptionCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(50.dp)
                     .clip(CircleShape)
-                    .background(if (isSelected) EmeraldPrimary else Color(0x15FFFFFF)),
+                    .background(
+                        if (isSelected) {
+                            Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))
+                        } else {
+                            androidx.compose.ui.graphics.SolidColor(Color(0x18FFFFFF))
+                        }
+                    )
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            if (isSelected) Color.White.copy(alpha = 0.8f) else Color(0x22FFFFFF)
+                        ),
+                        CircleShape
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
                     tint = if (isSelected) AmoledBlack else TextWhite,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(25.dp)
                 )
             }
 
@@ -314,14 +412,22 @@ private fun ExperienceOptionCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (isSelected) Color(0x3310B981) else Color(0x1AFFFFFF))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .background(if (isSelected) EmeraldGlow.copy(alpha = 0.22f) else Color(0x1AFFFFFF))
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    if (isSelected) EmeraldGlow.copy(alpha = 0.6f) else Color.Transparent
+                                ),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 7.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = badge,
                             fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) EmeraldPrimary else TextWhite.copy(alpha = 0.6f)
+                            fontWeight = FontWeight.Black,
+                            color = if (isSelected) EmeraldGlow else TextWhite.copy(alpha = 0.65f),
+                            letterSpacing = 0.8.sp
                         )
                     }
                 }
@@ -331,8 +437,8 @@ private fun ExperienceOptionCard(
                 Text(
                     text = subtitle,
                     fontSize = 11.5.sp,
-                    color = TextWhite.copy(alpha = 0.7f),
-                    lineHeight = 15.sp
+                    color = TextWhite.copy(alpha = 0.75f),
+                    lineHeight = 16.sp
                 )
             }
 
@@ -340,16 +446,17 @@ private fun ExperienceOptionCard(
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(26.dp)
+                        .shadow(8.dp, CircleShape, spotColor = EmeraldGlow)
                         .clip(CircleShape)
-                        .background(EmeraldPrimary),
+                        .background(EmeraldGlow),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Selected",
                         tint = AmoledBlack,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }

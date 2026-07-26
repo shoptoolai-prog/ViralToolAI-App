@@ -1404,7 +1404,7 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
     val cleanName = name.trim().lowercase()
     val merchant = remember(name) { detectMerchant(name) }
     
-    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales", "instagram", "google", "youtube")
+    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales", "instagram", "google", "youtube", "capcut", "vn", "snapchat", "telegram", "whatsapp", "chrome", "chatgpt", "gemini")
     val hasCanvas = knownCanvasBrands.any { cleanName.contains(it) }
     
     if (hasCanvas) {
@@ -1450,6 +1450,118 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
                         radius = width * 0.025f,
                         center = androidx.compose.ui.geometry.Offset(width * 0.62f, height * 0.38f)
                     )
+                }
+                cleanName.contains("capcut") -> {
+                    drawCircle(color = Color(0xFF111111), radius = radius)
+                    val leftPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.28f, height * 0.28f)
+                        lineTo(width * 0.48f, height * 0.50f)
+                        lineTo(width * 0.28f, height * 0.72f)
+                    }
+                    drawPath(
+                        path = leftPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5.dp.toPx())
+                    )
+                    val rightPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.72f, height * 0.28f)
+                        lineTo(width * 0.52f, height * 0.50f)
+                        lineTo(width * 0.72f, height * 0.72f)
+                    }
+                    drawPath(
+                        path = rightPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5.dp.toPx())
+                    )
+                    drawLine(
+                        color = Color.White,
+                        start = androidx.compose.ui.geometry.Offset(width * 0.38f, height * 0.50f),
+                        end = androidx.compose.ui.geometry.Offset(width * 0.62f, height * 0.50f),
+                        strokeWidth = 2.dp.toPx()
+                    )
+                }
+                cleanName.contains("vn") -> {
+                    drawCircle(color = Color(0xFF00B2FF), radius = radius)
+                    val vPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.25f, height * 0.32f)
+                        lineTo(width * 0.42f, height * 0.68f)
+                        lineTo(width * 0.55f, height * 0.32f)
+                    }
+                    drawPath(
+                        path = vPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5.dp.toPx())
+                    )
+                    val nPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.60f, height * 0.68f)
+                        lineTo(width * 0.60f, height * 0.32f)
+                        lineTo(width * 0.78f, height * 0.68f)
+                        lineTo(width * 0.78f, height * 0.32f)
+                    }
+                    drawPath(
+                        path = nPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5.dp.toPx())
+                    )
+                }
+                cleanName.contains("snapchat") -> {
+                    drawCircle(color = Color(0xFFFFFC00), radius = radius)
+                    drawCircle(
+                        color = Color.Black,
+                        radius = radius * 0.45f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                    )
+                }
+                cleanName.contains("telegram") -> {
+                    drawCircle(color = Color(0xFF229ED9), radius = radius)
+                    val paperPlane = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.25f, height * 0.50f)
+                        lineTo(width * 0.75f, height * 0.28f)
+                        lineTo(width * 0.60f, height * 0.72f)
+                        lineTo(width * 0.48f, height * 0.58f)
+                        close()
+                    }
+                    drawPath(path = paperPlane, color = Color.White)
+                }
+                cleanName.contains("whatsapp") -> {
+                    drawCircle(color = Color(0xFF25D366), radius = radius)
+                    drawCircle(
+                        color = Color.White,
+                        radius = radius * 0.45f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5.dp.toPx())
+                    )
+                }
+                cleanName.contains("chrome") -> {
+                    drawCircle(color = Color(0xFF4285F4), radius = radius)
+                    drawCircle(color = Color.White, radius = radius * 0.45f, center = center)
+                    drawCircle(color = Color(0xFF34A853), radius = radius * 0.25f, center = center)
+                }
+                cleanName.contains("chatgpt") -> {
+                    drawCircle(color = Color(0xFF10A37F), radius = radius)
+                    drawCircle(
+                        color = Color.White,
+                        radius = radius * 0.45f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                    )
+                }
+                cleanName.contains("gemini") -> {
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFF1E88E5), Color(0xFF8E24AA), Color(0xFF00ACC1))
+                        ),
+                        radius = radius
+                    )
+                    val starPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.5f, height * 0.25f)
+                        quadraticTo(width * 0.5f, height * 0.5f, width * 0.75f, height * 0.5f)
+                        quadraticTo(width * 0.5f, height * 0.5f, width * 0.5f, height * 0.75f)
+                        quadraticTo(width * 0.5f, height * 0.5f, width * 0.25f, height * 0.5f)
+                        quadraticTo(width * 0.5f, height * 0.5f, width * 0.5f, height * 0.25f)
+                    }
+                    drawPath(path = starPath, color = Color.White)
                 }
                 cleanName.contains("google") -> {
                     drawCircle(color = Color(0xFF4285F4), radius = radius)

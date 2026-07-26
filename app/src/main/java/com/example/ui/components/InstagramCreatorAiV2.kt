@@ -961,7 +961,7 @@ private fun LanguageSelectionOverlay(
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (isSelected) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                else Color(0x18FFFFFF)
+                                else SolidColor(Color(0x18FFFFFF))
                             )
                             .border(
                                 BorderStroke(
@@ -1066,7 +1066,7 @@ private fun CreatorTypeSelectionOverlay(
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(
                                     if (isSelected) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                    else Color(0x18FFFFFF)
+                                    else SolidColor(Color(0x18FFFFFF))
                                 )
                                 .border(
                                     BorderStroke(
@@ -1363,7 +1363,7 @@ private fun ActionPill(
             .clip(RoundedCornerShape(16.dp))
             .background(
                 if (isPrimary) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                else Color(0x2210B981)
+                else SolidColor(Color(0x2210B981))
             )
             .border(
                 BorderStroke(
@@ -1497,7 +1497,7 @@ private fun ScriptGeneratorDialog(
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
                                     if (isSel) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                    else Color(0x18FFFFFF)
+                                    else SolidColor(Color(0x18FFFFFF))
                                 )
                                 .clickable { selectedDuration = dur },
                             contentAlignment = Alignment.Center
@@ -1521,7 +1521,7 @@ private fun ScriptGeneratorDialog(
                         .clip(RoundedCornerShape(23.dp))
                         .background(
                             if (topic.isNotBlank()) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                            else Color.Gray
+                            else SolidColor(Color.Gray)
                         )
                         .clickable(enabled = topic.isNotBlank() && !isGenerating) {
                             isGenerating = true
@@ -1669,7 +1669,7 @@ private fun CaptionGeneratorDialog(
                         .clip(RoundedCornerShape(22.dp))
                         .background(
                             if (topic.isNotBlank()) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                            else Color.Gray
+                            else SolidColor(Color.Gray)
                         )
                         .clickable(enabled = topic.isNotBlank()) {
                             val cap = generateCaptionAndHashtags(topic, creatorType, language)

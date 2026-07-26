@@ -81,6 +81,8 @@ import com.example.ui.theme.TextWhite
 import com.example.data.ShareIntentHandler
 import android.content.Intent
 import androidx.compose.runtime.LaunchedEffect
+import com.example.ui.screens.BrandAmbassadorPosterScreen
+import com.example.ui.screens.BrandAmbassadorPrefs
 import com.example.ui.screens.OnboardingPrefs
 import com.example.ui.screens.OnboardingScreen
 import androidx.compose.ui.platform.LocalContext
@@ -125,6 +127,7 @@ class MainActivity : ComponentActivity() {
 
 enum class Screen {
     Splash,
+    BrandAmbassadorPoster,
     Onboarding,
     ExperienceSelector,
     Home,
@@ -215,21 +218,35 @@ fun MainAppLayout(sharedUrl: String? = null) {
                 when (screen) {
                     Screen.Splash -> {
                         SplashScreen(onSplashComplete = {
-                            if (!OnboardingPrefs.isOnboardingCompleted(context)) {
-                                currentScreen = Screen.Onboarding
-                            } else {
-                                if (CreatorAcademyPrefs.isRememberExperience(context)) {
-                                    val choice = CreatorAcademyPrefs.getExperienceChoice(context)
-                                    if (choice == "CREATOR_ACADEMY") {
-                                        currentScreen = Screen.CreatorAcademy
-                                    } else {
-                                        currentScreen = Screen.Home
-                                    }
+                            currentScreen = Screen.BrandAmbassadorPoster
+                        })
+                    }
+                    Screen.BrandAmbassadorPoster -> {
+                        BrandAmbassadorPosterScreen(
+                            onDismiss = {
+                                if (!OnboardingPrefs.isOnboardingCompleted(context)) {
+                                    currentScreen = Screen.Onboarding
                                 } else {
-                                    currentScreen = Screen.ExperienceSelector
+                                    if (CreatorAcademyPrefs.isRememberExperience(context)) {
+                                        val choice = CreatorAcademyPrefs.getExperienceChoice(context)
+                                        if (choice == "CREATOR_ACADEMY") {
+                                            currentScreen = Screen.CreatorAcademy
+                                        } else {
+                                            currentScreen = Screen.Home
+                                        }
+                                    } else {
+                                        currentScreen = Screen.ExperienceSelector
+                                    }
+                                }
+                            },
+                            onExploreClicked = {
+                                if (!OnboardingPrefs.isOnboardingCompleted(context)) {
+                                    currentScreen = Screen.Onboarding
+                                } else {
+                                    currentScreen = Screen.Home
                                 }
                             }
-                        })
+                        )
                     }
                     Screen.Onboarding -> {
                         OnboardingScreen(onOnboardingFinished = {

@@ -105,6 +105,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
 import com.example.ui.theme.EmeraldGlow
+import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextGray
@@ -144,6 +145,7 @@ fun CreatorAcademyScreen(
     var activeLinkDialog by remember { mutableStateOf<String?>(null) }
     var coursePlaceholderTitle by remember { mutableStateOf<String?>(null) }
     var showInstagramCreatorV2Dialog by remember { mutableStateOf(false) }
+    var showYouTubeCreatorV2Dialog by remember { mutableStateOf(false) }
 
     val entranceAnimProgress = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
@@ -181,6 +183,15 @@ fun CreatorAcademyScreen(
         }
     }
 
+    // One-time entrance animation sequence
+    val headerAnimProgress = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        headerAnimProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -193,30 +204,22 @@ fun CreatorAcademyScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 110.dp)
+                .graphicsLayer {
+                    alpha = headerAnimProgress.value
+                    translationY = (1f - headerAnimProgress.value) * 30f
+                }
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
-            // 1. TOP HEADER & BRANDING BAR (PREMIUM HEADER REDESIGN V2)
+            // 1. TOP HEADER & BRANDING BAR (PREMIUM UNIFIED GLASS HEADER)
             // ==================================================
-            // One-time entrance animation sequence (Logo -> Glow -> Title -> Tagline -> Switch -> Settings)
-            val headerAnimProgress = remember { Animatable(0f) }
-            LaunchedEffect(Unit) {
-                headerAnimProgress.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
-                )
-            }
             val animVal = headerAnimProgress.value
 
             val logoScale = 0.75f + (0.25f * (animVal / 0.35f).coerceIn(0f, 1f))
             val logoPulseGlow = if (animVal in 0.25f..0.65f) ((1f - Math.abs(animVal - 0.45f) / 0.2f) * 0.5f) else 0f
             val titleAlpha = ((animVal - 0.2f) / 0.35f).coerceIn(0f, 1f)
             val taglineAlpha = ((animVal - 0.35f) / 0.35f).coerceIn(0f, 1f)
-            val switchAlpha = ((animVal - 0.5f) / 0.3f).coerceIn(0f, 1f)
-            val switchScale = 0.85f + (0.15f * switchAlpha)
-            val settingsAlpha = ((animVal - 0.6f) / 0.3f).coerceIn(0f, 1f)
-            val settingsScale = 0.85f + (0.15f * settingsAlpha)
 
             // Continuous 60 FPS micro-animations
             val headerInfiniteTransition = rememberInfiniteTransition(label = "academyHeaderAnims")
@@ -248,29 +251,6 @@ fun CreatorAcademyScreen(
                 label = "logoFloatY"
             )
 
-            // Interactive press animations for Switch & Settings buttons
-            val switchInteractionSource = remember { MutableInteractionSource() }
-            val isSwitchPressed by switchInteractionSource.collectIsPressedAsState()
-            val switchPressedScale by animateFloatAsState(
-                targetValue = if (isSwitchPressed) 0.92f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-                label = "switchPressedScale"
-            )
-
-            val settingsInteractionSource = remember { MutableInteractionSource() }
-            val isSettingsPressed by settingsInteractionSource.collectIsPressedAsState()
-            val settingsPressedScale by animateFloatAsState(
-                targetValue = if (isSettingsPressed) 0.90f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-                label = "settingsPressedScale"
-            )
-            var settingsClickRotation by remember { mutableStateOf(0f) }
-            val settingsRotationAnimated by animateFloatAsState(
-                targetValue = settingsClickRotation,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-                label = "settingsRotationAnimated"
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -293,7 +273,7 @@ fun CreatorAcademyScreen(
                             Brush.linearGradient(
                                 colors = listOf(
                                     EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                    Color(0xFF10B981).copy(alpha = 0.45f),
+                                    ElectricPurple.copy(alpha = 0.45f),
                                     EmeraldGlow.copy(alpha = logoBreathingAlpha)
                                 ),
                                 start = Offset(headerShimmerOffset, 0f),
@@ -302,7 +282,7 @@ fun CreatorAcademyScreen(
                         ),
                         RoundedCornerShape(24.dp)
                     )
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .padding(horizontal = 18.dp, vertical = 14.dp)
             ) {
                 // Glass reflection shimmer sweep line across container
                 Canvas(
@@ -329,7 +309,6 @@ fun CreatorAcademyScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Left branding: Logo + Title + Tagline
@@ -429,111 +408,6 @@ fun CreatorAcademyScreen(
                             )
                         }
                     }
-
-                    // Right side action buttons: Switch & Settings
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // SWITCH BUTTON (PREMIUM GLASS FLOATING ACTION CHIP)
-                        Box(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    alpha = switchAlpha
-                                    scaleX = switchScale * switchPressedScale
-                                    scaleY = switchScale * switchPressedScale
-                                }
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(
-                                            Color(0x2BFFFFFF),
-                                            Color(0x1A10B981)
-                                        )
-                                    )
-                                )
-                                .border(
-                                    BorderStroke(
-                                        1.dp,
-                                        Brush.horizontalGradient(
-                                            listOf(
-                                                EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                                Color.White.copy(alpha = 0.25f)
-                                            )
-                                        )
-                                    ),
-                                    RoundedCornerShape(16.dp)
-                                )
-                                .clickable(
-                                    interactionSource = switchInteractionSource,
-                                    indication = null
-                                ) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onSwitchExperience()
-                                }
-                                .padding(horizontal = 11.dp, vertical = 7.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = "Switch Experience",
-                                    tint = TextWhite,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Switch",
-                                    fontSize = 11.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite,
-                                    letterSpacing = 0.3.sp
-                                )
-                            }
-                        }
-
-                        // SETTINGS BUTTON (CIRCULAR GLASS BUTTON)
-                        Box(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    alpha = settingsAlpha
-                                    scaleX = settingsScale * settingsPressedScale
-                                    scaleY = settingsScale * settingsPressedScale
-                                    rotationZ = settingsRotationAnimated
-                                }
-                                .size(36.dp)
-                                .shadow(6.dp, CircleShape, spotColor = EmeraldPrimary.copy(alpha = 0.3f))
-                                .clip(CircleShape)
-                                .background(Color(0x22FFFFFF))
-                                .border(
-                                    BorderStroke(
-                                        1.dp,
-                                        Brush.linearGradient(
-                                            listOf(
-                                                Color.White.copy(alpha = 0.35f),
-                                                EmeraldPrimary.copy(alpha = 0.4f)
-                                            )
-                                        )
-                                    ),
-                                    CircleShape
-                                )
-                                .clickable(
-                                    interactionSource = settingsInteractionSource,
-                                    indication = null
-                                ) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    settingsClickRotation += 90f
-                                    onResetSetup()
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Setup Settings",
-                                tint = TextWhite.copy(alpha = 0.95f),
-                                modifier = Modifier.size(17.dp)
-                            )
-                        }
-                    }
                 }
             }
 
@@ -599,7 +473,7 @@ fun CreatorAcademyScreen(
                         "Monetization & AdSense"
                     ),
                     onStartLearning = {
-                        coursePlaceholderTitle = "YouTube Creator"
+                        showYouTubeCreatorV2Dialog = true
                     }
                 )
             }
@@ -614,18 +488,6 @@ fun CreatorAcademyScreen(
                 onOpenTool = { toolName ->
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     activeToolDialog = toolName
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ==================================================
-            // 6. FUTURE READY LINK ANALYSIS
-            // ==================================================
-            FutureReadySection(
-                onOpenLinkAnalysis = { type ->
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    activeLinkDialog = type
                 }
             )
         }
@@ -649,6 +511,13 @@ fun CreatorAcademyScreen(
         if (showInstagramCreatorV2Dialog) {
             com.example.ui.components.InstagramCreatorAiV2Dialog(
                 onDismiss = { showInstagramCreatorV2Dialog = false }
+            )
+        }
+
+        // YouTube Creator AI V2 Personal Mentor Dialog
+        if (showYouTubeCreatorV2Dialog) {
+            com.example.ui.components.YouTubeCreatorAiV2Dialog(
+                onDismiss = { showYouTubeCreatorV2Dialog = false }
             )
         }
 
