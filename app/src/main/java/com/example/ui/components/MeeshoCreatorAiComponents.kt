@@ -446,7 +446,6 @@ fun MeeshoCreatorAiCard(
     onComingSoonClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -466,9 +465,23 @@ fun MeeshoCreatorAiCard(
         ),
         label = "meeshoBorderPulse"
     )
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = -300f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "meeshoShimmerOffset"
+    )
 
-    val savedStep = remember { CreatorAcademyPrefs.getMeeshoStepIndex(context) }
-    val hasProgress = savedStep > 0
+    val bulletFeatures = listOf(
+        "Step-by-Step Meesho Creator Setup",
+        "High-Commission Product Finder",
+        "Viral Reel Scripts & Video Hooks",
+        "One-Click AI Caption & Tag Generator",
+        "Live Wallet & Earnings Growth Guide"
+    )
 
     Box(
         modifier = modifier
@@ -485,18 +498,24 @@ fun MeeshoCreatorAiCard(
             )
             .clip(RoundedCornerShape(24.dp))
             .background(
-                Brush.linearGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF141D26),
-                        Color(0xFF0D141C)
+                        Color(0xFF18221D),
+                        Color(0xFF0C1410)
                     )
                 )
             )
             .border(
                 BorderStroke(
-                    1.5.dp,
-                    Brush.horizontalGradient(
-                        listOf(EmeraldPrimary.copy(alpha = borderPulseAlpha), Color(0xFF00E676), Color(0x33FFFFFF))
+                    1.2.dp,
+                    Brush.linearGradient(
+                        colors = listOf(
+                            EmeraldPrimary.copy(alpha = borderPulseAlpha),
+                            Color(0xFF00E676),
+                            Color.White.copy(alpha = 0.25f)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(shimmerOffset, 0f),
+                        end = androidx.compose.ui.geometry.Offset(shimmerOffset + 350f, 250f)
                     )
                 ),
                 RoundedCornerShape(24.dp)
@@ -511,12 +530,35 @@ fun MeeshoCreatorAiCard(
             )
             .padding(18.dp)
     ) {
+        // Glass Shine Sweep Overlay
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(24.dp))
+        ) {
+            val sweepX = shimmerOffset
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.White.copy(alpha = 0.02f),
+                        Color.White.copy(alpha = 0.1f),
+                        Color.White.copy(alpha = 0.02f),
+                        Color.Transparent
+                    )
+                ),
+                start = androidx.compose.ui.geometry.Offset(sweepX, 0f),
+                end = androidx.compose.ui.geometry.Offset(sweepX + 160f, size.height),
+                strokeWidth = 24.dp.toPx()
+            )
+        }
+
         Column(modifier = Modifier.fillMaxWidth()) {
             // Top Row Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -525,167 +567,126 @@ fun MeeshoCreatorAiCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(46.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0x2210B981))
+                            .background(EmeraldPrimary.copy(alpha = 0.18f))
                             .border(
-                                BorderStroke(1.2.dp, EmeraldPrimary),
+                                BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)),
                                 CircleShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        com.example.ui.screens.OfficialLogo(name = "meesho", modifier = Modifier.size(28.dp))
+                        com.example.ui.screens.OfficialLogo(name = "meesho", modifier = Modifier.size(20.dp))
                     }
 
                     Column {
                         Text(
                             text = "Meesho Creator AI",
-                            fontSize = 16.5.sp,
+                            fontSize = 17.5.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
-                            letterSpacing = 0.4.sp
+                            letterSpacing = (-0.3).sp
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Zero to Hero Affiliate System",
-                            fontSize = 11.5.sp,
-                            color = EmeraldPrimary.copy(alpha = 0.95f),
-                            fontWeight = FontWeight.SemiBold
+                            text = "ZERO TO HERO AFFILIATE SYSTEM",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = com.example.ui.theme.EmeraldGlow,
+                            letterSpacing = 1.2.sp
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x2210B981))
+                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    // ⭐ Most Used Tool Animated Badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFFFFB300), Color(0xFFFF8F00))
-                                )
-                            )
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Most Used",
-                                tint = AmoledBlack,
-                                modifier = Modifier.size(10.dp)
-                            )
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = "Most Used Tool",
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.Black,
-                                color = AmoledBlack,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-
-                    // FREE Badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x2210B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.8f)), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "FREE",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = EmeraldPrimary,
-                            letterSpacing = 0.8.sp
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Short Description
-            Text(
-                text = "Master Meesho Creator setup, product selection, review videos, AI captions & earnings step-by-step.",
-                fontSize = 12.sp,
-                color = TextWhite.copy(alpha = 0.85f),
-                lineHeight = 16.5.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Feature Highlights Pills
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                listOf("Install & Join 📱", "Wallet & Earnings 💰", "Review Script 🎥", "AI Captions ✍️").forEach { tag ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0x14FFFFFF))
-                            .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(8.dp))
-                            .padding(vertical = 5.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = tag,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.9f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = "MOST USED",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = com.example.ui.theme.EmeraldGlow,
+                        letterSpacing = 0.5.sp
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Bottom Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // 5 Bullet Features
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                bulletFeatures.forEach { feature ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(EmeraldPrimary.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = com.example.ui.theme.EmeraldGlow,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                        Text(
+                            text = feature,
+                            fontSize = 12.5.sp,
+                            color = TextWhite.copy(alpha = 0.85f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Large Premium Pill Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(23.dp),
+                        spotColor = EmeraldPrimary
+                    )
+                    .clip(RoundedCornerShape(23.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(EmeraldPrimary, com.example.ui.theme.EmeraldGlow)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Verified,
-                        contentDescription = "Unlocked",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(13.dp)
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Start Learning",
+                        tint = AmoledBlack,
+                        modifier = Modifier.size(18.dp)
                     )
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (hasProgress) "Step $savedStep / 8 Completed • Free Access" else "100% Free • Interactive Mentor",
-                        fontSize = 10.5.sp,
-                        color = TextWhite.copy(alpha = 0.8f)
-                    )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (hasProgress) "Resume Setup 🎯" else "Start Learning 🚀",
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "Open",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(14.dp)
+                        text = "START LEARNING",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmoledBlack,
+                        letterSpacing = 0.8.sp
                     )
                 }
             }

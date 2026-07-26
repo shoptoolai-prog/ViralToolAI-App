@@ -37,7 +37,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -94,13 +98,30 @@ fun InstaAutoDmAiCard(
 
     val infiniteTransition = rememberInfiniteTransition(label = "robotPulse")
     val robotGlowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.8f,
+        initialValue = 0.4f,
+        targetValue = 0.95f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "robotGlow"
+    )
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = -300f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "instaDmShimmerOffset"
+    )
+
+    val bulletFeatures = listOf(
+        "Instant Comment Keyword Trigger Auto-DM",
+        "Smart Product Code & Price Responder",
+        "24/7 Automated Link Dispatch Engine",
+        "Anti-Spam & Instagram Safe Protocol",
+        "Lead Conversion & Click Tracking"
     )
 
     Box(
@@ -111,17 +132,17 @@ fun InstaAutoDmAiCard(
                 scaleY = cardScale
             }
             .shadow(
-                elevation = 12.dp,
+                elevation = 14.dp,
                 shape = RoundedCornerShape(24.dp),
-                spotColor = EmeraldPrimary.copy(alpha = 0.5f),
+                spotColor = EmeraldPrimary.copy(alpha = 0.55f),
                 ambientColor = Color(0x10000000)
             )
             .clip(RoundedCornerShape(24.dp))
             .background(
-                Brush.linearGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF131A24),
-                        Color(0xFF0D1117)
+                        Color(0xFF18221D),
+                        Color(0xFF0C1410)
                     )
                 )
             )
@@ -129,7 +150,13 @@ fun InstaAutoDmAiCard(
                 BorderStroke(
                     1.2.dp,
                     Brush.linearGradient(
-                        listOf(EmeraldPrimary.copy(alpha = 0.5f), Color(0x1AFFFFFF))
+                        colors = listOf(
+                            EmeraldPrimary.copy(alpha = robotGlowAlpha),
+                            Color(0xFF00E676),
+                            Color.White.copy(alpha = 0.25f)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(shimmerOffset, 0f),
+                        end = androidx.compose.ui.geometry.Offset(shimmerOffset + 350f, 250f)
                     )
                 ),
                 RoundedCornerShape(24.dp)
@@ -144,140 +171,31 @@ fun InstaAutoDmAiCard(
             )
             .padding(18.dp)
     ) {
+        // Glass Shine Sweep Overlay
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(24.dp))
+        ) {
+            val sweepX = shimmerOffset
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.White.copy(alpha = 0.02f),
+                        Color.White.copy(alpha = 0.1f),
+                        Color.White.copy(alpha = 0.02f),
+                        Color.Transparent
+                    )
+                ),
+                start = androidx.compose.ui.geometry.Offset(sweepX, 0f),
+                end = androidx.compose.ui.geometry.Offset(sweepX + 160f, size.height),
+                strokeWidth = 24.dp.toPx()
+            )
+        }
+
         Column(modifier = Modifier.fillMaxWidth()) {
             // Header Row: Icon + Title + Badges
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    // Small Robot Icon Container
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x2210B981))
-                            .border(
-                                BorderStroke(1.2.dp, EmeraldPrimary.copy(alpha = robotGlowAlpha)),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(28.dp))
-                    }
-
-                    Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = "Insta Auto DM AI",
-                                fontSize = 16.5.sp,
-                                fontWeight = FontWeight.Black,
-                                color = TextWhite,
-                                letterSpacing = 0.4.sp
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Text(
-                            text = "Automated Comment & DM Product Delivery",
-                            fontSize = 11.5.sp,
-                            color = EmeraldPrimary.copy(alpha = 0.9f),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Badges Column
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(EmeraldPrimary)
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "PREMIUM",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = AmoledBlack,
-                            letterSpacing = 0.8.sp
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x2210B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "🔒 COMING SOON",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldPrimary,
-                            letterSpacing = 0.5.sp
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Short Description
-            Text(
-                text = "Automatically send product links and custom replies to people who comment on your Instagram posts and reels.",
-                fontSize = 12.sp,
-                color = TextWhite.copy(alpha = 0.8f),
-                lineHeight = 16.5.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Trigger Keywords Preview Row
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                listOf("LINK 🔗", "PRICE 💰", "BUY 🛍️", "AMAZON 📦").forEach { tag ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0x14FFFFFF))
-                            .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(8.dp))
-                            .padding(vertical = 5.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = tag,
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.9f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Bottom Bar: Lock Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -285,30 +203,131 @@ fun InstaAutoDmAiCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Lock",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Text(
-                        text = "Under Development (v1.0 Foundation)",
-                        fontSize = 10.5.sp,
-                        color = TextWhite.copy(alpha = 0.6f)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(EmeraldPrimary.copy(alpha = 0.18f))
+                            .border(
+                                BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)),
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(20.dp))
+                    }
+
+                    Column {
+                        Text(
+                            text = "Insta Auto DM AI",
+                            fontSize = 17.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite,
+                            letterSpacing = (-0.3).sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "AUTOMATED COMMENT-TO-DM SALES BOT",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = com.example.ui.theme.EmeraldGlow,
+                            letterSpacing = 1.2.sp
+                        )
+                    }
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x2210B981))
+                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "View Specs",
-                        fontSize = 11.5.sp,
+                        text = "PREMIUM AI",
+                        fontSize = 9.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary
+                        color = com.example.ui.theme.EmeraldGlow,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 5 Bullet Features
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                bulletFeatures.forEach { feature ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(EmeraldPrimary.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = com.example.ui.theme.EmeraldGlow,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                        Text(
+                            text = feature,
+                            fontSize = 12.5.sp,
+                            color = TextWhite.copy(alpha = 0.85f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Large Premium Pill Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(23.dp),
+                        spotColor = EmeraldPrimary
+                    )
+                    .clip(RoundedCornerShape(23.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(EmeraldPrimary, com.example.ui.theme.EmeraldGlow)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Open Tool",
+                        tint = AmoledBlack,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "OPEN TOOL",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmoledBlack,
+                        letterSpacing = 0.8.sp
                     )
                 }
             }

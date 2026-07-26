@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,10 +45,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -205,6 +208,34 @@ fun PremiumToolGlassCard(
         label = "premiumCardScale"
     )
 
+    val infiniteTransition = rememberInfiniteTransition(label = "brandCardShimmer")
+    val borderPulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.95f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1600, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "borderPulseAlpha"
+    )
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = -300f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerOffset"
+    )
+
+    val bulletFeatures = listOf(
+        "High-Converting Brand Pitch Templates",
+        "Instagram DM & Email Outreach Scripts",
+        "Sponsorship Pricing & Rate Calculator",
+        "Brand Deal Contract & Scam Checker",
+        "Custom Media Kit & Portfolio Builder"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,17 +244,17 @@ fun PremiumToolGlassCard(
                 scaleY = scale
             }
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(22.dp),
-                spotColor = EmeraldPrimary.copy(alpha = 0.4f),
+                elevation = 14.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = EmeraldPrimary.copy(alpha = 0.55f),
                 ambientColor = Color(0x10000000)
             )
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(
-                Brush.linearGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF161622),
-                        Color(0xFF0F0F1A)
+                        Color(0xFF18221D),
+                        Color(0xFF0C1410)
                     )
                 )
             )
@@ -231,20 +262,49 @@ fun PremiumToolGlassCard(
                 BorderStroke(
                     1.2.dp,
                     Brush.linearGradient(
-                        listOf(EmeraldPrimary.copy(alpha = 0.45f), Color(0x1AFFFFFF))
+                        colors = listOf(
+                            EmeraldPrimary.copy(alpha = borderPulseAlpha),
+                            Color(0xFF00E676),
+                            Color.White.copy(alpha = 0.25f)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(shimmerOffset, 0f),
+                        end = androidx.compose.ui.geometry.Offset(shimmerOffset + 350f, 250f)
                     )
                 ),
-                RoundedCornerShape(22.dp)
+                RoundedCornerShape(24.dp)
             )
             .clickable(
                 interactionSource = interactionSource,
                 indication = androidx.compose.foundation.LocalIndication.current,
                 onClick = onClick
             )
-            .padding(16.dp)
+            .padding(18.dp)
     ) {
+        // Glass Shine Sweep Overlay
+        Canvas(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(24.dp))
+        ) {
+            val sweepX = shimmerOffset
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.White.copy(alpha = 0.02f),
+                        Color.White.copy(alpha = 0.1f),
+                        Color.White.copy(alpha = 0.02f),
+                        Color.Transparent
+                    )
+                ),
+                start = androidx.compose.ui.geometry.Offset(sweepX, 0f),
+                end = androidx.compose.ui.geometry.Offset(sweepX + 160f, size.height),
+                strokeWidth = 24.dp.toPx()
+            )
+        }
+
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Card Top Row
+            // Top Row Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -257,38 +317,30 @@ fun PremiumToolGlassCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0x2210B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), CircleShape),
+                            .background(EmeraldPrimary.copy(alpha = 0.18f))
+                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (tool.id == "brand_collab_ai") {
-                            com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(26.dp))
-                        } else {
-                            Icon(
-                                imageVector = tool.icon,
-                                contentDescription = tool.title,
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
+                        com.example.ui.screens.OfficialLogo(name = "instagram", modifier = Modifier.size(20.dp))
                     }
 
                     Column {
                         Text(
                             text = tool.title,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.5.sp,
+                            fontWeight = FontWeight.Black,
                             color = TextWhite,
-                            letterSpacing = 0.3.sp
+                            letterSpacing = (-0.3).sp
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = tool.subtitle,
-                            fontSize = 11.sp,
-                            color = TextWhite.copy(alpha = 0.65f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            text = "SPONSORSHIPS, MEDIA KITS & CONTRACTS",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = com.example.ui.theme.EmeraldGlow,
+                            letterSpacing = 1.2.sp
                         )
                     }
                 }
@@ -299,76 +351,89 @@ fun PremiumToolGlassCard(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0x2210B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
+                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "FREE ACCESS",
+                        text = "✨ FEATURED",
                         fontSize = 9.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary,
+                        color = com.example.ui.theme.EmeraldGlow,
                         letterSpacing = 0.5.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Features Pill Chips Preview (3 items max)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                tool.features.take(3).forEach { feature ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0x12FFFFFF))
-                            .padding(horizontal = 6.dp, vertical = 5.dp)
+            // 5 Bullet Features
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                bulletFeatures.forEach { feature ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(EmeraldPrimary.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                                contentDescription = null,
+                                tint = com.example.ui.theme.EmeraldGlow,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
                         Text(
-                            text = "✓ $feature",
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Medium,
+                            text = feature,
+                            fontSize = 12.5.sp,
                             color = TextWhite.copy(alpha = 0.85f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Bottom CTA Preview Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Large Premium Pill Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(23.dp),
+                        spotColor = EmeraldPrimary
+                    )
+                    .clip(RoundedCornerShape(23.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(EmeraldPrimary, com.example.ui.theme.EmeraldGlow)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Unlocked • Free Access",
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = EmeraldPrimary.copy(alpha = 0.9f)
-                )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "Open Tool",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite
-                    )
                     Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = "Open",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(12.dp)
+                        imageVector = androidx.compose.material.icons.Icons.Default.PlayArrow,
+                        contentDescription = "Open Tool",
+                        tint = AmoledBlack,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "OPEN TOOL",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmoledBlack,
+                        letterSpacing = 0.8.sp
                     )
                 }
             }

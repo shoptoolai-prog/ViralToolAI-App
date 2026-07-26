@@ -23,6 +23,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
+import androidx.compose.material.icons.filled.Videocam
+import com.example.ui.screens.VideoEditingScreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,6 +130,7 @@ enum class Screen {
     Home,
     CreatorAcademySetup,
     CreatorAcademy,
+    VideoEditing,
     History,
     Profile,
     Analysis,
@@ -218,11 +221,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                                 if (CreatorAcademyPrefs.isRememberExperience(context)) {
                                     val choice = CreatorAcademyPrefs.getExperienceChoice(context)
                                     if (choice == "CREATOR_ACADEMY") {
-                                        currentScreen = if (CreatorAcademyPrefs.isSetupCompleted(context)) {
-                                            Screen.CreatorAcademy
-                                        } else {
-                                            Screen.CreatorAcademySetup
-                                        }
+                                        currentScreen = Screen.CreatorAcademy
                                     } else {
                                         currentScreen = Screen.Home
                                     }
@@ -241,11 +240,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                         ExperienceSelectorScreen(
                             onExperienceSelected = { choice ->
                                 if (choice == "CREATOR_ACADEMY") {
-                                    currentScreen = if (CreatorAcademyPrefs.isSetupCompleted(context)) {
-                                        Screen.CreatorAcademy
-                                    } else {
-                                        Screen.CreatorAcademySetup
-                                    }
+                                    currentScreen = Screen.CreatorAcademy
                                 } else {
                                     currentScreen = Screen.Home
                                 }
@@ -268,9 +263,13 @@ fun MainAppLayout(sharedUrl: String? = null) {
                                 currentScreen = Screen.ExperienceSelector
                             },
                             onResetSetup = {
-                                CreatorAcademyPrefs.resetSetup(context)
-                                currentScreen = Screen.CreatorAcademySetup
+                                currentScreen = Screen.Home
                             }
+                        )
+                    }
+                    Screen.VideoEditing -> {
+                        VideoEditingScreen(
+                            onNavigateToHome = { currentScreen = Screen.Home }
                         )
                     }
                     Screen.Home -> {
@@ -283,11 +282,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                                 currentScreen = Screen.Analysis
                             },
                             onNavigateToCreatorAcademy = {
-                                currentScreen = if (CreatorAcademyPrefs.isSetupCompleted(context)) {
-                                    Screen.CreatorAcademy
-                                } else {
-                                    Screen.CreatorAcademySetup
-                                }
+                                currentScreen = Screen.CreatorAcademy
                             },
                             initialSharedUrl = sharedUrl
                         )
@@ -338,15 +333,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     FloatingBottomNavigation(
                         currentScreen = currentScreen,
                         onScreenSelected = { selected ->
-                            if (selected == Screen.CreatorAcademy) {
-                                currentScreen = if (CreatorAcademyPrefs.isSetupCompleted(context)) {
-                                    Screen.CreatorAcademy
-                                } else {
-                                    Screen.CreatorAcademySetup
-                                }
-                            } else {
-                                currentScreen = selected
-                            }
+                            currentScreen = selected
                         }
                     )
                 }
@@ -400,19 +387,19 @@ fun FloatingBottomNavigation(
             screen = Screen.CreatorAcademy,
             icon = Icons.Default.School,
             label = com.example.core.LanguageEngine.get("tab_academy"),
-            isSelected = currentScreen == Screen.CreatorAcademy || currentScreen == Screen.CreatorAcademySetup,
+            isSelected = currentScreen == Screen.CreatorAcademy,
             onClick = { onScreenSelected(Screen.CreatorAcademy) },
             testTag = "tab_academy"
         )
         
-        // History tab
+        // Video Editing tab
         NavigationTabItem(
-            screen = Screen.History,
-            icon = Icons.Default.History,
-            label = com.example.core.LanguageEngine.get("tab_history"),
-            isSelected = currentScreen == Screen.History,
-            onClick = { onScreenSelected(Screen.History) },
-            testTag = "tab_history"
+            screen = Screen.VideoEditing,
+            icon = Icons.Default.Videocam,
+            label = "Video Editing",
+            isSelected = currentScreen == Screen.VideoEditing,
+            onClick = { onScreenSelected(Screen.VideoEditing) },
+            testTag = "tab_video_editing"
         )
         
         // Profile tab
