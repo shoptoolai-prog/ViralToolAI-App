@@ -218,31 +218,43 @@ fun MainAppLayout(sharedUrl: String? = null) {
                 when (screen) {
                     Screen.Splash -> {
                         SplashScreen(onSplashComplete = {
-                            currentScreen = Screen.BrandAmbassadorPoster
+                            try {
+                                currentScreen = Screen.BrandAmbassadorPoster
+                            } catch (e: Exception) {
+                                currentScreen = Screen.Home
+                            }
                         })
                     }
                     Screen.BrandAmbassadorPoster -> {
                         BrandAmbassadorPosterScreen(
                             onDismiss = {
-                                if (!OnboardingPrefs.isOnboardingCompleted(context)) {
-                                    currentScreen = Screen.Onboarding
-                                } else {
-                                    if (CreatorAcademyPrefs.isRememberExperience(context)) {
-                                        val choice = CreatorAcademyPrefs.getExperienceChoice(context)
-                                        if (choice == "CREATOR_ACADEMY") {
-                                            currentScreen = Screen.CreatorAcademy
-                                        } else {
-                                            currentScreen = Screen.Home
-                                        }
+                                try {
+                                    if (!OnboardingPrefs.isOnboardingCompleted(context)) {
+                                        currentScreen = Screen.Onboarding
                                     } else {
-                                        currentScreen = Screen.ExperienceSelector
+                                        if (CreatorAcademyPrefs.isRememberExperience(context)) {
+                                            val choice = CreatorAcademyPrefs.getExperienceChoice(context)
+                                            if (choice == "CREATOR_ACADEMY") {
+                                                currentScreen = Screen.CreatorAcademy
+                                            } else {
+                                                currentScreen = Screen.Home
+                                            }
+                                        } else {
+                                            currentScreen = Screen.ExperienceSelector
+                                        }
                                     }
+                                } catch (e: Exception) {
+                                    currentScreen = Screen.Home
                                 }
                             },
                             onExploreClicked = {
-                                if (!OnboardingPrefs.isOnboardingCompleted(context)) {
-                                    currentScreen = Screen.Onboarding
-                                } else {
+                                try {
+                                    if (!OnboardingPrefs.isOnboardingCompleted(context)) {
+                                        currentScreen = Screen.Onboarding
+                                    } else {
+                                        currentScreen = Screen.Home
+                                    }
+                                } catch (e: Exception) {
                                     currentScreen = Screen.Home
                                 }
                             }
@@ -338,8 +350,8 @@ fun MainAppLayout(sharedUrl: String? = null) {
                 }
             }
 
-            // Bottom Navigation floating glass capsule (only display after Splash, Onboarding, ExperienceSelector & Setup screens, not in Analysis or Result)
-            if (currentScreen != Screen.Splash && currentScreen != Screen.Onboarding && currentScreen != Screen.ExperienceSelector && currentScreen != Screen.CreatorAcademySetup && currentScreen != Screen.Result && currentScreen != Screen.Analysis) {
+            // Bottom Navigation floating glass capsule (only display after Splash, Launch/Poster, Onboarding, ExperienceSelector & Setup screens, not in Analysis or Result)
+            if (currentScreen != Screen.Splash && currentScreen != Screen.BrandAmbassadorPoster && currentScreen != Screen.Onboarding && currentScreen != Screen.ExperienceSelector && currentScreen != Screen.CreatorAcademySetup && currentScreen != Screen.Result && currentScreen != Screen.Analysis) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
