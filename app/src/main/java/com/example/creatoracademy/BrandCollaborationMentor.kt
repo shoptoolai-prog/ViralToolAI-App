@@ -33,6 +33,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.shadow
+import com.example.ui.theme.EmeraldGlow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -605,9 +609,11 @@ fun BrandCollaborationAiDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF07090F).copy(alpha = 0.94f))
+                .background(Color.Black.copy(alpha = 0.80f))
                 .clickable(onClick = onDismiss)
-                .padding(10.dp),
+                .navigationBarsPadding()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(
@@ -620,7 +626,7 @@ fun BrandCollaborationAiDialog(
             ) {
                 Surface(
                     shape = RoundedCornerShape(28.dp),
-                    color = Color(0xFF0F121C),
+                    color = Color(0xFF0F1A14),
                     border = BorderStroke(
                         1.5.dp,
                         Brush.horizontalGradient(
@@ -629,8 +635,9 @@ fun BrandCollaborationAiDialog(
                     ),
                     modifier = Modifier
                         .widthIn(max = 520.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.92f)
+                        .fillMaxWidth(0.94f)
+                        .fillMaxHeight(0.74f)
+                        .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
                         .clickable(enabled = false) {}
                 ) {
                     Column(

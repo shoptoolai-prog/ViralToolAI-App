@@ -19,6 +19,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.shadow
+import com.example.ui.theme.ElectricPurple
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -456,24 +460,37 @@ fun InstagramCreatorAiV2Dialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = AmoledBlack
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.80f))
+                .clickable(onClick = onDismiss)
+                .navigationBarsPadding()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xFF0F1A14),
-                                AmoledBlack,
-                                Color(0xFF08120B)
-                            )
-                        )
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = Color(0xFF0F1A14),
+                border = BorderStroke(
+                    1.5.dp,
+                    Brush.linearGradient(
+                        listOf(EmeraldGlow, ElectricPurple.copy(alpha = 0.6f), EmeraldPrimary)
                     )
+                ),
+                modifier = Modifier
+                    .widthIn(max = 520.dp)
+                    .fillMaxWidth(0.94f)
+                    .fillMaxHeight(0.74f)
+                    .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
+                    .clickable(enabled = false) {}
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // TOP NAVBAR

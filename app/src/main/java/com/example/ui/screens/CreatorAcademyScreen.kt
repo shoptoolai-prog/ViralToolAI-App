@@ -146,6 +146,7 @@ fun CreatorAcademyScreen(
     var coursePlaceholderTitle by remember { mutableStateOf<String?>(null) }
     var showInstagramCreatorV2Dialog by remember { mutableStateOf(false) }
     var showYouTubeCreatorV2Dialog by remember { mutableStateOf(false) }
+    var showAiVideoImageGeneratorDialog by remember { mutableStateOf(false) }
 
     val entranceAnimProgress = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
@@ -203,7 +204,7 @@ fun CreatorAcademyScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 110.dp)
+                .padding(bottom = 24.dp)
                 .graphicsLayer {
                     alpha = headerAnimProgress.value
                     translationY = (1f - headerAnimProgress.value) * 30f
@@ -478,6 +479,35 @@ fun CreatorAcademyScreen(
                 )
             }
 
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // CARD 3: AI VIDEO & IMAGES GENERATOR
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = ytAlpha
+                        translationY = ytTranslationY.dp.toPx()
+                    }
+            ) {
+                AcademyCourseCard(
+                    title = "🎬 AI Video & Images Generator",
+                    subtitleText = "Learn AI Video, AI Images, Prompts & Viral Thumbnail Creation",
+                    tagText = "✨ NEW",
+                    logoName = "video_generator",
+                    accentColor = EmeraldGlow,
+                    features = listOf(
+                        "AI Video Generation from Zero using Free AI Tools",
+                        "Professional AI Image Creation & Prompt Writing",
+                        "Talking AI Avatars, Animate Photos & Motion Controls",
+                        "Viral YouTube Thumbnail Psychology & High CTR Rules",
+                        "Step-by-Step Tool Setup & Beginner Guide"
+                    ),
+                    onStartLearning = {
+                        showAiVideoImageGeneratorDialog = true
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // ==================================================
@@ -518,6 +548,13 @@ fun CreatorAcademyScreen(
         if (showYouTubeCreatorV2Dialog) {
             com.example.ui.components.YouTubeCreatorAiV2Dialog(
                 onDismiss = { showYouTubeCreatorV2Dialog = false }
+            )
+        }
+
+        // AI Video & Images Generator Dialog
+        if (showAiVideoImageGeneratorDialog) {
+            com.example.ui.components.AiVideoImageGeneratorDialog(
+                onDismiss = { showAiVideoImageGeneratorDialog = false }
             )
         }
 
@@ -2046,6 +2083,8 @@ private fun AcademyCourseCard(
     logoName: String,
     accentColor: Color,
     features: List<String>,
+    subtitleText: String = "PREMIUM COURSE",
+    tagText: String = "✨ FEATURED",
     onStartLearning: () -> Unit
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -2159,11 +2198,13 @@ private fun AcademyCourseCard(
                             letterSpacing = (-0.3).sp
                         )
                         Text(
-                            text = "PREMIUM COURSE",
+                            text = subtitleText,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = EmeraldGlow,
-                            letterSpacing = 1.2.sp
+                            letterSpacing = 1.2.sp,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -2176,7 +2217,7 @@ private fun AcademyCourseCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "✨ FEATURED",
+                        text = tagText,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = EmeraldGlow

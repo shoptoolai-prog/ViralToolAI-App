@@ -148,7 +148,7 @@ fun HomeScreen(
                 .statusBarsPadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 20.dp)
-                .padding(top = 12.dp, bottom = 90.dp),
+                .padding(top = 12.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ==================================================

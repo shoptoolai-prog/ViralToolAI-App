@@ -18,6 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.shadow
+import com.example.ui.theme.EmeraldGlow
+import com.example.ui.theme.ElectricPurple
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -100,23 +105,26 @@ fun WelcomeBackDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.85f))
+                .background(Color.Black.copy(alpha = 0.80f))
                 .clickable(onClick = onDismiss)
-                .padding(horizontal = 20.dp),
+                .navigationBarsPadding()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             Surface(
                 shape = RoundedCornerShape(28.dp),
-                color = Color(0xFF0F1218),
+                color = Color(0xFF0F1A14),
                 border = BorderStroke(
                     1.5.dp,
                     Brush.linearGradient(
-                        listOf(EmeraldPrimary.copy(alpha = 0.85f), Color(0x33FFFFFF))
+                        listOf(EmeraldGlow, ElectricPurple.copy(alpha = 0.6f), EmeraldPrimary)
                     )
                 ),
                 modifier = Modifier
-                    .widthIn(max = 440.dp)
-                    .fillMaxWidth()
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.92f)
+                    .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
                     .clickable(enabled = false) {}
             ) {
                 Column(

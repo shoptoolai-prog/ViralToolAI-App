@@ -50,6 +50,7 @@ import com.example.ui.screens.CreatorAcademySetupScreen
 import com.example.ui.screens.ExperienceSelectorScreen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -176,14 +177,32 @@ fun MainAppLayout(sharedUrl: String? = null) {
 
     val isOnline by rememberIsOnlineState()
 
+    val showBottomNav = currentScreen != Screen.Splash && 
+            currentScreen != Screen.BrandAmbassadorPoster && 
+            currentScreen != Screen.Onboarding && 
+            currentScreen != Screen.ExperienceSelector && 
+            currentScreen != Screen.CreatorAcademySetup && 
+            currentScreen != Screen.Result && 
+            currentScreen != Screen.Analysis
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = AmoledBlack
+        containerColor = AmoledBlack,
+        bottomBar = {
+            if (showBottomNav) {
+                BottomNavigationBar(
+                    currentScreen = currentScreen,
+                    onScreenSelected = { selected ->
+                        currentScreen = selected
+                    }
+                )
+            }
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = if (currentScreen == Screen.Splash) 0.dp else 4.dp)
+                .padding(innerPadding)
         ) {
             // Offline notification banner
             if (currentScreen != Screen.Splash && currentScreen != Screen.Onboarding) {
@@ -349,97 +368,95 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     }
                 }
             }
-
-            // Bottom Navigation floating glass capsule (only display after Splash, Launch/Poster, Onboarding, ExperienceSelector & Setup screens, not in Analysis or Result)
-            if (currentScreen != Screen.Splash && currentScreen != Screen.BrandAmbassadorPoster && currentScreen != Screen.Onboarding && currentScreen != Screen.ExperienceSelector && currentScreen != Screen.CreatorAcademySetup && currentScreen != Screen.Result && currentScreen != Screen.Analysis) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(100f)
-                        .navigationBarsPadding() // EXTREMELY CRITICAL: Prevents system gesture bar overlap
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    FloatingBottomNavigation(
-                        currentScreen = currentScreen,
-                        onScreenSelected = { selected ->
-                            currentScreen = selected
-                        }
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
-fun FloatingBottomNavigation(
+fun BottomNavigationBar(
     currentScreen: Screen,
     onScreenSelected: (Screen) -> Unit
 ) {
-    // Beautiful floating Glassmorphism Capsule with Luxury Emerald & Purple Border
-    Row(
+    // Pinned Bottom Navigation Bar attached directly to the bottom edge of device
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .shadow(16.dp, RoundedCornerShape(32.dp), spotColor = EmeraldPrimary)
-            .clip(RoundedCornerShape(32.dp))
-            .background(Color(0xF2090910)) // Deep Dark Graphite capsule background
-            .border(
-                BorderStroke(
-                    1.dp,
-                    Brush.linearGradient(
-                        listOf(
-                            EmeraldPrimary.copy(alpha = 0.6f),
-                            ElectricPurple.copy(alpha = 0.4f),
-                            Color(0x33FFFFFF)
+            .zIndex(100f),
+        color = Color(0xFF0B0B12), // Deep dark background
+        shadowElevation = 12.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF0B0B12))
+                .navigationBarsPadding()
+        ) {
+            // Top hairline border with subtle luxury gradient line
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                EmeraldPrimary.copy(alpha = 0.5f),
+                                ElectricPurple.copy(alpha = 0.5f),
+                                EmeraldGlow.copy(alpha = 0.5f)
+                            )
                         )
                     )
-                ),
-                RoundedCornerShape(32.dp)
             )
-            .padding(horizontal = 4.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Home tab
-        NavigationTabItem(
-            screen = Screen.Home,
-            icon = Icons.Default.Home,
-            label = com.example.core.LanguageEngine.get("tab_home"),
-            isSelected = currentScreen == Screen.Home,
-            onClick = { onScreenSelected(Screen.Home) },
-            testTag = "tab_home"
-        )
 
-        // Creator Academy tab
-        NavigationTabItem(
-            screen = Screen.CreatorAcademy,
-            icon = Icons.Default.School,
-            label = com.example.core.LanguageEngine.get("tab_academy"),
-            isSelected = currentScreen == Screen.CreatorAcademy,
-            onClick = { onScreenSelected(Screen.CreatorAcademy) },
-            testTag = "tab_academy"
-        )
-        
-        // Video Editing tab
-        NavigationTabItem(
-            screen = Screen.VideoEditing,
-            icon = Icons.Default.Videocam,
-            label = "Video Editing",
-            isSelected = currentScreen == Screen.VideoEditing,
-            onClick = { onScreenSelected(Screen.VideoEditing) },
-            testTag = "tab_video_editing"
-        )
-        
-        // Profile tab
-        NavigationTabItem(
-            screen = Screen.Profile,
-            icon = Icons.Default.Person,
-            label = com.example.core.LanguageEngine.get("tab_profile"),
-            isSelected = currentScreen == Screen.Profile,
-            onClick = { onScreenSelected(Screen.Profile) },
-            testTag = "tab_profile"
-        )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .background(Color(0xFF0B0B12))
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Home tab
+                NavigationTabItem(
+                    screen = Screen.Home,
+                    icon = Icons.Default.Home,
+                    label = com.example.core.LanguageEngine.get("tab_home"),
+                    isSelected = currentScreen == Screen.Home,
+                    onClick = { onScreenSelected(Screen.Home) },
+                    testTag = "tab_home"
+                )
+
+                // Creator Academy tab
+                NavigationTabItem(
+                    screen = Screen.CreatorAcademy,
+                    icon = Icons.Default.School,
+                    label = com.example.core.LanguageEngine.get("tab_academy"),
+                    isSelected = currentScreen == Screen.CreatorAcademy,
+                    onClick = { onScreenSelected(Screen.CreatorAcademy) },
+                    testTag = "tab_academy"
+                )
+                
+                // Video Editing tab
+                NavigationTabItem(
+                    screen = Screen.VideoEditing,
+                    icon = Icons.Default.Videocam,
+                    label = "Video Editing",
+                    isSelected = currentScreen == Screen.VideoEditing,
+                    onClick = { onScreenSelected(Screen.VideoEditing) },
+                    testTag = "tab_video_editing"
+                )
+                
+                // Profile tab
+                NavigationTabItem(
+                    screen = Screen.Profile,
+                    icon = Icons.Default.Person,
+                    label = com.example.core.LanguageEngine.get("tab_profile"),
+                    isSelected = currentScreen == Screen.Profile,
+                    onClick = { onScreenSelected(Screen.Profile) },
+                    testTag = "tab_profile"
+                )
+            }
+        }
     }
 }
 

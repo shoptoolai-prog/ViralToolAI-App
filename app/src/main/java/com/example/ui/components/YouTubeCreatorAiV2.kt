@@ -19,6 +19,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.shadow
+import com.example.ui.theme.ElectricPurple
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -534,94 +539,94 @@ fun YouTubeCreatorAiV2Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            dismissOnBackPress = true
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
         )
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack),
-            color = AmoledBlack
+                .background(AmoledBlack)
+                .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (selectedLang == null) {
-                    // STEP 1: LANGUAGE SELECTION OVERLAY
-                    YouTubeLanguageSelectionOverlay(
-                        onSelect = { lang ->
-                            selectedLang = lang
-                            CreatorAcademyPrefs.saveYouTubeLanguage(context, lang.name)
-                        },
-                        onClose = onDismiss
-                    )
-                } else if (creatorType == null) {
-                    // STEP 2: CREATOR TYPE SELECTION OVERLAY
-                    YouTubeCreatorTypeSelectionOverlay(
-                        selectedLanguage = selectedLang!!,
-                        onSelect = { type ->
-                            creatorType = type
-                            CreatorAcademyPrefs.saveYouTubeCreatorType(context, type)
-                        },
-                        onBack = { selectedLang = null }
-                    )
-                } else {
-                    // STEP 3: MAIN MENTOR CHAT INTERFACE
-                    YouTubeMentorChatScreen(
-                        language = selectedLang!!,
-                        creatorType = creatorType!!,
-                        currentStepId = currentStepId,
-                        completedSteps = completedSteps,
-                        onStepChange = { newStep ->
-                            currentStepId = newStep
-                            CreatorAcademyPrefs.saveYouTubeCurrentStep(context, newStep)
-                        },
-                        onStepComplete = { stepId ->
-                            if (!completedSteps.contains(stepId)) {
-                                completedSteps.add(stepId)
-                                CreatorAcademyPrefs.saveYouTubeCompletedSteps(context, completedSteps.toSet())
-                            }
-                        },
-                        onChangeLangClick = { selectedLang = null },
-                        onChangeTypeClick = { creatorType = null },
-                        onOpenTool = { tool -> activeToolOverlay = tool },
-                        onClose = onDismiss
-                    )
-                }
+            if (selectedLang == null) {
+                // STEP 1: LANGUAGE SELECTION OVERLAY
+                YouTubeLanguageSelectionOverlay(
+                    onSelect = { lang ->
+                        selectedLang = lang
+                        CreatorAcademyPrefs.saveYouTubeLanguage(context, lang.name)
+                    },
+                    onClose = onDismiss
+                )
+            } else if (creatorType == null) {
+                // STEP 2: CREATOR TYPE SELECTION OVERLAY
+                YouTubeCreatorTypeSelectionOverlay(
+                    selectedLanguage = selectedLang!!,
+                    onSelect = { type ->
+                        creatorType = type
+                        CreatorAcademyPrefs.saveYouTubeCreatorType(context, type)
+                    },
+                    onBack = { selectedLang = null }
+                )
+            } else {
+                // STEP 3: MAIN MENTOR CHAT INTERFACE
+                YouTubeMentorChatScreen(
+                    language = selectedLang!!,
+                    creatorType = creatorType!!,
+                    currentStepId = currentStepId,
+                    completedSteps = completedSteps,
+                    onStepChange = { newStep ->
+                        currentStepId = newStep
+                        CreatorAcademyPrefs.saveYouTubeCurrentStep(context, newStep)
+                    },
+                    onStepComplete = { stepId ->
+                        if (!completedSteps.contains(stepId)) {
+                            completedSteps.add(stepId)
+                            CreatorAcademyPrefs.saveYouTubeCompletedSteps(context, completedSteps.toSet())
+                        }
+                    },
+                    onChangeLangClick = { selectedLang = null },
+                    onChangeTypeClick = { creatorType = null },
+                    onOpenTool = { tool -> activeToolOverlay = tool },
+                    onClose = onDismiss
+                )
+            }
 
-                // TOOL OVERLAYS
-                activeToolOverlay?.let { tool ->
-                    when (tool) {
-                        "script" -> YouTubeScriptGeneratorDialog(
-                            language = selectedLang ?: YouTubeLanguage.HINGLISH,
-                            creatorType = creatorType ?: "Shorts Creator",
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "thumbnail" -> YouTubeThumbnailGuideDialog(
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "title" -> YouTubeTitleGeneratorDialog(
-                            language = selectedLang ?: YouTubeLanguage.HINGLISH,
-                            creatorType = creatorType ?: "Vlogger",
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "description" -> YouTubeDescriptionGeneratorDialog(
-                            language = selectedLang ?: YouTubeLanguage.HINGLISH,
-                            creatorType = creatorType ?: "Tech",
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "checklist" -> YouTubePrePublishChecklistDialog(
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "monetization" -> YouTubeMonetizationGuideDialog(
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "editing" -> VideoEditingAcademyLinkDialog(
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                    }
+            // TOOL OVERLAYS
+            activeToolOverlay?.let { tool ->
+                when (tool) {
+                    "script" -> YouTubeScriptGeneratorDialog(
+                        language = selectedLang ?: YouTubeLanguage.HINGLISH,
+                        creatorType = creatorType ?: "Shorts Creator",
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "thumbnail" -> YouTubeThumbnailGuideDialog(
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "title" -> YouTubeTitleGeneratorDialog(
+                        language = selectedLang ?: YouTubeLanguage.HINGLISH,
+                        creatorType = creatorType ?: "Vlogger",
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "description" -> YouTubeDescriptionGeneratorDialog(
+                        language = selectedLang ?: YouTubeLanguage.HINGLISH,
+                        creatorType = creatorType ?: "Tech",
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "checklist" -> YouTubePrePublishChecklistDialog(
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "monetization" -> YouTubeMonetizationGuideDialog(
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "editing" -> VideoEditingAcademyLinkDialog(
+                        onDismiss = { activeToolOverlay = null }
+                    )
                 }
             }
         }
-    }
+}
 }
 
 // ============================================================================
@@ -1315,6 +1320,8 @@ private fun YouTubeMentorChatScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF140606))
+                .imePadding()
+                .navigationBarsPadding()
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Row(

@@ -10,6 +10,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.shadow
+import com.example.ui.theme.ElectricPurple
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -424,84 +431,84 @@ fun VideoEditingMentorAiDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            dismissOnBackPress = true
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
         )
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack),
-            color = AmoledBlack
+                .background(AmoledBlack)
+                .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (selectedLang == null) {
-                    // STEP 1: LANGUAGE SELECTION OVERLAY
-                    EditingLanguageSelectionOverlay(
-                        toolType = toolType,
-                        onSelect = { lang ->
-                            selectedLang = lang
-                            CreatorAcademyPrefs.saveEditingToolLanguage(context, toolType.key, lang.name)
-                        },
-                        onClose = onDismiss
-                    )
-                } else if (videoType == null) {
-                    // STEP 2: VIDEO FORMAT / CATEGORY SELECTION OVERLAY
-                    EditingVideoTypeSelectionOverlay(
-                        toolType = toolType,
-                        selectedLanguage = selectedLang!!,
-                        onSelect = { type ->
-                            videoType = type
-                            CreatorAcademyPrefs.saveEditingToolVideoType(context, toolType.key, type)
-                        },
-                        onBack = { selectedLang = null }
-                    )
-                } else {
-                    // STEP 3: MAIN AI MENTOR CHAT INTERFACE
-                    EditingMentorChatScreen(
-                        toolType = toolType,
-                        language = selectedLang!!,
-                        videoType = videoType!!,
-                        currentStepId = currentStepId,
-                        completedSteps = completedSteps,
-                        onStepChange = { newStep ->
-                            currentStepId = newStep
-                            CreatorAcademyPrefs.saveEditingToolCurrentStep(context, toolType.key, newStep)
-                        },
-                        onStepComplete = { stepId ->
-                            if (!completedSteps.contains(stepId)) {
-                                completedSteps.add(stepId)
-                                CreatorAcademyPrefs.saveEditingToolCompletedSteps(context, toolType.key, completedSteps.toSet())
-                            }
-                        },
-                        onChangeLangClick = { selectedLang = null },
-                        onChangeTypeClick = { videoType = null },
-                        onOpenTool = { tool -> activeToolOverlay = tool },
-                        onClose = onDismiss
-                    )
-                }
+            if (selectedLang == null) {
+                // STEP 1: LANGUAGE SELECTION OVERLAY
+                EditingLanguageSelectionOverlay(
+                    toolType = toolType,
+                    onSelect = { lang ->
+                        selectedLang = lang
+                        CreatorAcademyPrefs.saveEditingToolLanguage(context, toolType.key, lang.name)
+                    },
+                    onClose = onDismiss
+                )
+            } else if (videoType == null) {
+                // STEP 2: VIDEO FORMAT / CATEGORY SELECTION OVERLAY
+                EditingVideoTypeSelectionOverlay(
+                    toolType = toolType,
+                    selectedLanguage = selectedLang!!,
+                    onSelect = { type ->
+                        videoType = type
+                        CreatorAcademyPrefs.saveEditingToolVideoType(context, toolType.key, type)
+                    },
+                    onBack = { selectedLang = null }
+                )
+            } else {
+                // STEP 3: MAIN AI MENTOR CHAT INTERFACE
+                EditingMentorChatScreen(
+                    toolType = toolType,
+                    language = selectedLang!!,
+                    videoType = videoType!!,
+                    currentStepId = currentStepId,
+                    completedSteps = completedSteps,
+                    onStepChange = { newStep ->
+                        currentStepId = newStep
+                        CreatorAcademyPrefs.saveEditingToolCurrentStep(context, toolType.key, newStep)
+                    },
+                    onStepComplete = { stepId ->
+                        if (!completedSteps.contains(stepId)) {
+                            completedSteps.add(stepId)
+                            CreatorAcademyPrefs.saveEditingToolCompletedSteps(context, toolType.key, completedSteps.toSet())
+                        }
+                    },
+                    onChangeLangClick = { selectedLang = null },
+                    onChangeTypeClick = { videoType = null },
+                    onOpenTool = { tool -> activeToolOverlay = tool },
+                    onClose = onDismiss
+                )
+            }
 
-                // TOOL OVERLAYS
-                activeToolOverlay?.let { tool ->
-                    when (tool) {
-                        "option_finder" -> OptionFinderDialog(
-                            toolType = toolType,
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "export_guide" -> ExportGuideDialog(
-                            toolType = toolType,
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "official_links" -> OfficialLinksDialog(
-                            toolType = toolType,
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                        "script_workflow" -> EditingWorkflowGeneratorDialog(
-                            toolType = toolType,
-                            language = selectedLang ?: EditingLanguage.HINGLISH,
-                            videoType = videoType ?: "Reels / Shorts",
-                            onDismiss = { activeToolOverlay = null }
-                        )
-                    }
+            // TOOL OVERLAYS
+            activeToolOverlay?.let { tool ->
+                when (tool) {
+                    "option_finder" -> OptionFinderDialog(
+                        toolType = toolType,
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "export_guide" -> ExportGuideDialog(
+                        toolType = toolType,
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "official_links" -> OfficialLinksDialog(
+                        toolType = toolType,
+                        onDismiss = { activeToolOverlay = null }
+                    )
+                    "script_workflow" -> EditingWorkflowGeneratorDialog(
+                        toolType = toolType,
+                        language = selectedLang ?: EditingLanguage.HINGLISH,
+                        videoType = videoType ?: "Reels / Shorts",
+                        onDismiss = { activeToolOverlay = null }
+                    )
                 }
             }
         }
@@ -517,174 +524,171 @@ private fun EditingLanguageSelectionOverlay(
     onSelect: (EditingLanguage) -> Unit,
     onClose: () -> Unit
 ) {
+    var selectedTemp by remember { mutableStateOf(EditingLanguage.HINGLISH) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF0F1A14), AmoledBlack, Color(0xFF0A120E))
+                    listOf(Color(0xFF0D1711), AmoledBlack, Color(0xFF08100C))
                 )
             )
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 480.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color(0xFF101B15))
-                .border(
-                    BorderStroke(
-                        1.5.dp,
-                        Brush.linearGradient(listOf(toolType.color, EmeraldGlow, EmeraldPrimary))
-                    ),
-                    RoundedCornerShape(32.dp)
-                )
-                .padding(26.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x22FFFFFF))
-                        .clickable { onClose() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = TextWhite,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            // Custom Tool Icon / Official Logo
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(toolType.color.copy(alpha = 0.2f))
-                    .border(BorderStroke(1.5.dp, toolType.color), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                OfficialLogo(name = toolType.logoType, modifier = Modifier.size(36.dp))
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "👋 Welcome to ${toolType.title}!",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Black,
-                color = TextWhite,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "Aap kis language me seekhna chahenge?\nSelect your learning language:",
-                fontSize = 13.5.sp,
-                color = TextWhite.copy(alpha = 0.75f),
-                textAlign = TextAlign.Center,
-                lineHeight = 18.sp
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            var selectedTemp by remember { mutableStateOf(EditingLanguage.HINGLISH) }
-
-            val languages = listOf(
-                EditingLanguage.HINDI to ("○ हिन्दी" to "Pure Hindi"),
-                EditingLanguage.ENGLISH to ("○ English" to "Pure English"),
-                EditingLanguage.HINGLISH to ("○ Hinglish" to "Hindi + English (Recommended)")
-            )
-
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                languages.forEach { (lang, labels) ->
-                    val isSelected = selectedTemp == lang
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSelected) Brush.horizontalGradient(listOf(toolType.color, EmeraldGlow))
-                                else SolidColor(Color(0x18FFFFFF))
-                            )
-                            .border(
-                                BorderStroke(
-                                    if (isSelected) 1.5.dp else 1.dp,
-                                    if (isSelected) toolType.color else Color(0x33FFFFFF)
-                                ),
-                                RoundedCornerShape(16.dp)
-                            )
-                            .clickable { selectedTemp = lang }
-                            .padding(horizontal = 18.dp, vertical = 14.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x22FFFFFF))
+                            .clickable { onClose() },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column {
-                                Text(
-                                    text = labels.first,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite
-                                )
-                                Text(
-                                    text = labels.second,
-                                    fontSize = 11.5.sp,
-                                    color = if (isSelected) TextWhite.copy(alpha = 0.9f) else TextWhite.copy(alpha = 0.5f)
-                                )
-                            }
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = TextWhite,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
 
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = TextWhite,
-                                    modifier = Modifier.size(22.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(68.dp)
+                        .clip(CircleShape)
+                        .background(toolType.color.copy(alpha = 0.2f))
+                        .border(BorderStroke(1.5.dp, toolType.color), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OfficialLogo(name = toolType.logoType, modifier = Modifier.size(38.dp))
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    text = "👋 Welcome to ${toolType.title}!",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black,
+                    color = TextWhite,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Aap kis language me seekhna chahenge?\nSelect your learning language:",
+                    fontSize = 14.sp,
+                    color = TextWhite.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                val languages = listOf(
+                    EditingLanguage.HINDI to ("○ हिन्दी" to "Pure Hindi"),
+                    EditingLanguage.ENGLISH to ("○ English" to "Pure English"),
+                    EditingLanguage.HINGLISH to ("○ Hinglish" to "Hindi + English (Recommended)")
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    languages.forEach { (lang, labels) ->
+                        val isSelected = selectedTemp == lang
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(
+                                    if (isSelected) Brush.horizontalGradient(listOf(toolType.color.copy(alpha = 0.85f), EmeraldGlow))
+                                    else SolidColor(Color(0x18FFFFFF))
                                 )
+                                .border(
+                                    BorderStroke(
+                                        if (isSelected) 1.5.dp else 1.dp,
+                                        if (isSelected) toolType.color else Color(0x33FFFFFF)
+                                    ),
+                                    RoundedCornerShape(18.dp)
+                                )
+                                .clickable { selectedTemp = lang }
+                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column {
+                                    Text(
+                                        text = labels.first,
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = labels.second,
+                                        fontSize = 12.sp,
+                                        color = if (isSelected) TextWhite.copy(alpha = 0.95f) else TextWhite.copy(alpha = 0.55f)
+                                    )
+                                }
+
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = TextWhite,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, EmeraldGlow)
+            Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(EmeraldPrimary, EmeraldGlow)
+                            )
                         )
+                        .clickable { onSelect(selectedTemp) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "CONTINUE ➔",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmoledBlack,
+                        letterSpacing = 1.sp
                     )
-                    .clickable { onSelect(selectedTemp) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "CONTINUE ➔",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Black,
-                    color = AmoledBlack,
-                    letterSpacing = 1.sp
-                )
+                }
             }
         }
     }
@@ -705,24 +709,13 @@ private fun EditingVideoTypeSelectionOverlay(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF0F1A14), AmoledBlack, Color(0xFF0A120E))
+                    listOf(Color(0xFF0D1711), AmoledBlack, Color(0xFF08100C))
                 )
             )
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 480.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color(0xFF101B15))
-                .border(
-                    BorderStroke(1.5.dp, Brush.linearGradient(listOf(toolType.color, EmeraldGlow))),
-                    RoundedCornerShape(32.dp)
-                )
-                .padding(22.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -731,13 +724,13 @@ private fun EditingVideoTypeSelectionOverlay(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(Color(0x22FFFFFF))
                         .clickable { onBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("←", color = TextWhite, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("←", color = TextWhite, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Box(
@@ -745,54 +738,56 @@ private fun EditingVideoTypeSelectionOverlay(
                         .clip(RoundedCornerShape(12.dp))
                         .background(toolType.color.copy(alpha = 0.2f))
                         .border(BorderStroke(1.dp, toolType.color), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = selectedLanguage.name,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = toolType.color
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "🎬 Video Format / Type?",
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
                 color = TextWhite,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "Aap kis type ki video edit karna seekhna chahte hain?",
-                fontSize = 12.5.sp,
+                fontSize = 13.5.sp,
                 color = TextWhite.copy(alpha = 0.75f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             var selectedType by remember { mutableStateOf("Reels / Shorts") }
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp)
+                    .weight(1f)
             ) {
                 items(VIDEO_TYPES) { (type, emoji) ->
                     val isSelected = selectedType == type
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (isSelected) toolType.color.copy(alpha = 0.3f)
+                                if (isSelected) toolType.color.copy(alpha = 0.35f)
                                 else Color(0x18FFFFFF)
                             )
                             .border(
@@ -800,10 +795,10 @@ private fun EditingVideoTypeSelectionOverlay(
                                     if (isSelected) 1.5.dp else 1.dp,
                                     if (isSelected) toolType.color else Color(0x22FFFFFF)
                                 ),
-                                RoundedCornerShape(14.dp)
+                                RoundedCornerShape(16.dp)
                             )
                             .clickable { selectedType = type }
-                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                            .padding(horizontal = 18.dp, vertical = 14.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -811,11 +806,11 @@ private fun EditingVideoTypeSelectionOverlay(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(emoji, fontSize = 18.sp)
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(emoji, fontSize = 20.sp)
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = type,
-                                    fontSize = 14.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextWhite
                                 )
@@ -826,7 +821,7 @@ private fun EditingVideoTypeSelectionOverlay(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
                                     tint = toolType.color,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -834,13 +829,13 @@ private fun EditingVideoTypeSelectionOverlay(
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(25.dp))
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(26.dp))
                     .background(
                         Brush.horizontalGradient(
                             listOf(EmeraldPrimary, EmeraldGlow)
@@ -851,10 +846,10 @@ private fun EditingVideoTypeSelectionOverlay(
             ) {
                 Text(
                     text = "START MENTORING 🚀",
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
                     color = AmoledBlack,
-                    letterSpacing = 0.8.sp
+                    letterSpacing = 1.sp
                 )
             }
         }
@@ -1192,6 +1187,8 @@ private fun EditingMentorChatScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF0F1712))
+                .imePadding()
+                .navigationBarsPadding()
                 .padding(12.dp)
         ) {
             Row(
