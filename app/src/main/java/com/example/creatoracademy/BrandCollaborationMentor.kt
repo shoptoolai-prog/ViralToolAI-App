@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.example.ui.components.SmartWelcomeBackDialog
+import com.example.ui.components.RestartCourseConfirmDialog
+import com.example.ui.components.LearningProgressIndicatorCard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -480,7 +483,8 @@ fun BrandCollaborationAiDialog(
 
     // Session Memory & Resume State
     val savedStepIndex = remember { CreatorAcademyPrefs.getBrandCollabStepIndex(context) }
-    var showResumeCard by remember { mutableStateOf(savedStepIndex > 0) }
+    var showWelcomeBackDialog by remember { mutableStateOf(isLanguageSelected && savedStepIndex > 0) }
+    var showRestartConfirmDialog by remember { mutableStateOf(false) }
 
     // User Profile
     var userProfile by remember { mutableStateOf(BrandCollabUserProfile()) }
@@ -705,7 +709,7 @@ fun BrandCollaborationAiDialog(
                                 onStartMentorship = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isProfileSet = true
-                                    if (!showResumeCard) {
+                                    if (!showWelcomeBackDialog) {
                                         loadStepLesson(0)
                                     }
                                 }
@@ -739,42 +743,41 @@ fun BrandCollaborationAiDialog(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            if (showResumeCard) {
-                                // Session Resume Memory Card
-                                val resumeLesson = BrandCollabStaticData.guidedLessonsV2.getOrElse(savedStepIndex) { BrandCollabStaticData.guidedLessonsV2.first() }
-                                val resumeTitle = when (selectedLanguage) {
-                                    "Hindi" -> resumeLesson.titleHindi
-                                    "English" -> resumeLesson.titleEnglish
-                                    else -> resumeLesson.titleHinglish
-                                }
-
-                                SessionResumeCard(
-                                    savedStepIndex = savedStepIndex,
+                            if (showWelcomeBackDialog) {
+                                SmartWelcomeBackDialog(
+                                    courseTitle = "Brand Collaboration AI",
+                                    currentStep = savedStepIndex + 1,
                                     totalSteps = BrandCollabStaticData.guidedLessonsV2.size,
-                                    lessonTitle = resumeTitle,
                                     onContinue = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        showResumeCard = false
+                                        showWelcomeBackDialog = false
                                         currentStepIndex = savedStepIndex
                                         loadStepLesson(savedStepIndex)
                                     },
-                                    onRestart = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        showResumeCard = false
-                                        currentStepIndex = 0
-                                        CreatorAcademyPrefs.setBrandCollabStepIndex(context, 0)
-                                        loadStepLesson(0)
-                                    }
+                                    onRestart = { showRestartConfirmDialog = true },
+                                    onDismiss = onDismiss
                                 )
                             } else {
                                 when (activeTab) {
                                     "MENTOR_CHAT" -> {
-                                        // Chat Messages List
-                                        Box(
+                                        Column(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .fillMaxWidth()
                                         ) {
+                                            LearningProgressIndicatorCard(
+                                                currentStep = currentStepIndex + 1,
+                                                totalSteps = BrandCollabStaticData.guidedLessonsV2.size,
+                                                stepTitle = BrandCollabStaticData.guidedLessonsV2.getOrNull(currentStepIndex)?.titleHinglish ?: "Lesson ${currentStepIndex + 1}",
+                                                onResetClick = { showRestartConfirmDialog = true },
+                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                                            )
+
+                                            // Chat Messages List
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .fillMaxWidth()
+                                            ) {
                                             LazyColumn(
                                                 state = listState,
                                                 modifier = Modifier.fillMaxSize(),
@@ -892,6 +895,7 @@ fun BrandCollaborationAiDialog(
                                             }
                                         }
                                     }
+                                }
 
                                     "APPS_MARKET" -> {
                                         // Real Creator Platforms List
@@ -1035,6 +1039,22 @@ fun BrandCollaborationAiDialog(
                         }
                     )
                 }
+            }
+
+            if (showRestartConfirmDialog) {
+                RestartCourseConfirmDialog(
+                    courseTitle = "Brand Collaboration AI",
+                    onConfirmRestart = {
+                        CreatorAcademyPrefs.resetCourseProgress(context, "brand_collab")
+                        isLanguageSelected = false
+                        selectedLanguage = "HinEnglish"
+                        currentStepIndex = 0
+                        chatMessages.clear()
+                        showWelcomeBackDialog = false
+                        showRestartConfirmDialog = false
+                    },
+                    onDismiss = { showRestartConfirmDialog = false }
+                )
             }
         }
     }

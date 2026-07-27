@@ -534,6 +534,8 @@ fun YouTubeCreatorAiV2Dialog(
 
     // Interactive Dialog Overlays
     var activeToolOverlay by remember { mutableStateOf<String?>(null) }
+    var showWelcomeBack by remember { mutableStateOf(selectedLang != null && creatorType != null && (currentStepId > 1 || completedSteps.isNotEmpty())) }
+    var showRestartConfirm by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -550,7 +552,16 @@ fun YouTubeCreatorAiV2Dialog(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            if (selectedLang == null) {
+            if (showWelcomeBack && selectedLang != null && creatorType != null) {
+                SmartWelcomeBackDialog(
+                    courseTitle = "YouTube Creator Course",
+                    currentStep = currentStepId,
+                    totalSteps = YOUTUBE_ROADMAP_STEPS.size,
+                    onContinue = { showWelcomeBack = false },
+                    onRestart = { showRestartConfirm = true },
+                    onDismiss = onDismiss
+                )
+            } else if (selectedLang == null) {
                 // STEP 1: LANGUAGE SELECTION OVERLAY
                 YouTubeLanguageSelectionOverlay(
                     onSelect = { lang ->
@@ -589,7 +600,24 @@ fun YouTubeCreatorAiV2Dialog(
                     onChangeLangClick = { selectedLang = null },
                     onChangeTypeClick = { creatorType = null },
                     onOpenTool = { tool -> activeToolOverlay = tool },
+                    onResetCourse = { showRestartConfirm = true },
                     onClose = onDismiss
+                )
+            }
+
+            if (showRestartConfirm) {
+                RestartCourseConfirmDialog(
+                    courseTitle = "YouTube Creator Course",
+                    onConfirmRestart = {
+                        CreatorAcademyPrefs.resetCourseProgress(context, "youtube")
+                        selectedLang = null
+                        creatorType = null
+                        currentStepId = 1
+                        completedSteps.clear()
+                        showWelcomeBack = false
+                        showRestartConfirm = false
+                    },
+                    onDismiss = { showRestartConfirm = false }
                 )
             }
 
@@ -982,6 +1010,7 @@ private fun YouTubeMentorChatScreen(
     onChangeLangClick: () -> Unit,
     onChangeTypeClick: () -> Unit,
     onOpenTool: (String) -> Unit,
+    onResetCourse: (() -> Unit)? = null,
     onClose: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -1292,6 +1321,15 @@ private fun YouTubeMentorChatScreen(
                 }
             }
         }
+
+        // LEARNING PROGRESS INDICATOR CARD
+        LearningProgressIndicatorCard(
+            currentStep = currentStepId,
+            totalSteps = YOUTUBE_ROADMAP_STEPS.size,
+            stepTitle = currentStep.title,
+            onResetClick = onResetCourse,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+        )
 
         // ACTION TOOLS BAR
         YouTubeMentorActionBar(

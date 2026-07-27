@@ -348,6 +348,9 @@ fun InstagramCreatorAiV2Dialog(
     var showLanguagePicker by remember { mutableStateOf(savedLangCode.isBlank()) }
     var showCreatorTypePicker by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType == null) }
 
+    var showWelcomeBack by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType != null && (currentStepIndex > 0 || completedSteps.isNotEmpty())) }
+    var showRestartConfirm by remember { mutableStateOf(false) }
+
     // Chat Feed State
     val chatMessages = remember { mutableStateListOf<ChatMessage>() }
     var userTextInput by remember { mutableStateOf("") }
@@ -524,6 +527,16 @@ fun InstagramCreatorAiV2Dialog(
                     // MAIN CONTENT AREA
                     Box(modifier = Modifier.weight(1f)) {
                         when {
+                            showWelcomeBack -> {
+                                SmartWelcomeBackDialog(
+                                    courseTitle = "Instagram Creator Course",
+                                    currentStep = currentStepIndex + 1,
+                                    totalSteps = INSTAGRAM_ROADMAP_STEPS.size,
+                                    onContinue = { showWelcomeBack = false },
+                                    onRestart = { showRestartConfirm = true },
+                                    onDismiss = onDismiss
+                                )
+                            }
                             showLanguagePicker -> {
                                 LanguageSelectionOverlay(
                                     selectedLang = currentLang,
@@ -561,6 +574,15 @@ fun InstagramCreatorAiV2Dialog(
                             }
                             else -> {
                                 Column(modifier = Modifier.fillMaxSize()) {
+                                    // LEARNING PROGRESS CARD
+                                    LearningProgressIndicatorCard(
+                                        currentStep = currentStepIndex + 1,
+                                        totalSteps = INSTAGRAM_ROADMAP_STEPS.size,
+                                        stepTitle = INSTAGRAM_ROADMAP_STEPS.getOrNull(currentStepIndex)?.title ?: "Lesson ${currentStepIndex + 1}",
+                                        onResetClick = { showRestartConfirm = true },
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+                                    )
+
                                     // CHAT FEED
                                     LazyColumn(
                                         state = lazyListState,
@@ -681,6 +703,26 @@ fun InstagramCreatorAiV2Dialog(
                     PrePostChecklistDialog(
                         language = currentLang,
                         onDismiss = { showChecklistSheet = false }
+                    )
+                }
+
+                if (showRestartConfirm) {
+                    RestartCourseConfirmDialog(
+                        courseTitle = "Instagram Creator Course",
+                        onConfirmRestart = {
+                            CreatorAcademyPrefs.resetCourseProgress(context, "instagram")
+                            savedLangCode = ""
+                            currentLang = MentorLanguage.HINGLISH
+                            selectedCreatorType = null
+                            currentStepIndex = 0
+                            completedSteps = emptySet()
+                            chatMessages.clear()
+                            showLanguagePicker = true
+                            showCreatorTypePicker = false
+                            showWelcomeBack = false
+                            showRestartConfirm = false
+                        },
+                        onDismiss = { showRestartConfirm = false }
                     )
                 }
             }

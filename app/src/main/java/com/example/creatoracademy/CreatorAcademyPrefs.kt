@@ -310,4 +310,46 @@ object CreatorAcademyPrefs {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().putBoolean(KEY_SETUP_COMPLETED, false).apply()
     }
+
+    /**
+     * Unified Reset Course Progress for any learning tool
+     */
+    fun resetCourseProgress(context: Context, courseKey: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        when (courseKey.lowercase()) {
+            "youtube" -> {
+                editor.remove(KEY_YOUTUBE_LANG)
+                editor.remove(KEY_YOUTUBE_CREATOR_TYPE)
+                editor.remove(KEY_YOUTUBE_CURRENT_STEP)
+                editor.remove(KEY_YOUTUBE_COMPLETED_STEPS)
+            }
+            "instagram" -> {
+                editor.remove("instagram_creator_language")
+                editor.remove("instagram_creator_type")
+                editor.remove("instagram_creator_current_step")
+                editor.remove("instagram_creator_completed_steps")
+                editor.remove(KEY_BRAND_COLLAB_STEP_INDEX)
+            }
+            "brand_collab" -> {
+                editor.remove(KEY_BRAND_COLLAB_LANG)
+                editor.remove(KEY_BRAND_COLLAB_STEP_INDEX)
+            }
+            "meesho" -> {
+                editor.remove(KEY_MEESHO_CREATOR_LANG)
+                editor.remove(KEY_MEESHO_CREATOR_STEP_INDEX)
+            }
+            else -> {
+                editor.remove("video_editing_${courseKey}_lang")
+                editor.remove("video_editing_${courseKey}_video_type")
+                editor.remove("video_editing_${courseKey}_current_step")
+                editor.remove("video_editing_${courseKey}_completed_steps")
+                editor.remove("course_${courseKey}_lang")
+                editor.remove("course_${courseKey}_type")
+                editor.remove("course_${courseKey}_step")
+                editor.remove("course_${courseKey}_completed")
+            }
+        }
+        editor.apply()
+    }
 }

@@ -426,6 +426,8 @@ fun VideoEditingMentorAiDialog(
 
     // Active tool overlays
     var activeToolOverlay by remember { mutableStateOf<String?>(null) }
+    var showWelcomeBack by remember { mutableStateOf(selectedLang != null && videoType != null && (currentStepId > 1 || completedSteps.isNotEmpty())) }
+    var showRestartConfirm by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -442,7 +444,16 @@ fun VideoEditingMentorAiDialog(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            if (selectedLang == null) {
+            if (showWelcomeBack && selectedLang != null && videoType != null) {
+                SmartWelcomeBackDialog(
+                    courseTitle = "${toolType.title} Course",
+                    currentStep = currentStepId,
+                    totalSteps = getEditingRoadmapSteps(toolType).size,
+                    onContinue = { showWelcomeBack = false },
+                    onRestart = { showRestartConfirm = true },
+                    onDismiss = onDismiss
+                )
+            } else if (selectedLang == null) {
                 // STEP 1: LANGUAGE SELECTION OVERLAY
                 EditingLanguageSelectionOverlay(
                     toolType = toolType,
@@ -484,7 +495,24 @@ fun VideoEditingMentorAiDialog(
                     onChangeLangClick = { selectedLang = null },
                     onChangeTypeClick = { videoType = null },
                     onOpenTool = { tool -> activeToolOverlay = tool },
+                    onResetCourse = { showRestartConfirm = true },
                     onClose = onDismiss
+                )
+            }
+
+            if (showRestartConfirm) {
+                RestartCourseConfirmDialog(
+                    courseTitle = "${toolType.title} Course",
+                    onConfirmRestart = {
+                        CreatorAcademyPrefs.resetCourseProgress(context, toolType.key)
+                        selectedLang = null
+                        videoType = null
+                        currentStepId = 1
+                        completedSteps.clear()
+                        showWelcomeBack = false
+                        showRestartConfirm = false
+                    },
+                    onDismiss = { showRestartConfirm = false }
                 )
             }
 
@@ -871,6 +899,7 @@ private fun EditingMentorChatScreen(
     onChangeLangClick: () -> Unit,
     onChangeTypeClick: () -> Unit,
     onOpenTool: (String) -> Unit,
+    onResetCourse: (() -> Unit)? = null,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1071,6 +1100,15 @@ private fun EditingMentorChatScreen(
                 }
             }
         }
+
+        // LEARNING PROGRESS INDICATOR CARD
+        LearningProgressIndicatorCard(
+            currentStep = currentStepId,
+            totalSteps = steps.size,
+            stepTitle = currentStep.title,
+            onResetClick = onResetCourse,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+        )
 
         // ACTION BAR TOOLS (QUICK ACCESS OVERLAYS)
         LazyRow(
