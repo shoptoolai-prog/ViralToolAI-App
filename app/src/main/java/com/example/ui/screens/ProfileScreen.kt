@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -856,10 +857,16 @@ fun AboutFounderDialog(
     onDismiss: () -> Unit,
     onFollowInstagram: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
                 .clip(RoundedCornerShape(28.dp))
                 .background(Color(0xFF0F1813))
                 .border(
@@ -1353,6 +1360,8 @@ fun ReportBugDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        modifier = Modifier.imePadding().navigationBarsPadding(),
         confirmButton = {
             TextButton(
                 onClick = {

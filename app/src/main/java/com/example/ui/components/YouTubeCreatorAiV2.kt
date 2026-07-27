@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.shadow
@@ -541,6 +544,7 @@ fun YouTubeCreatorAiV2Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         )
@@ -1053,9 +1057,11 @@ private fun YouTubeMentorChatScreen(
         )
     }
 
-    // Scroll to bottom when new messages arrive
-    LaunchedEffect(messages.size) {
+    // Scroll to bottom when new messages arrive or keyboard opens
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(messages.size, imeBottomPadding) {
         if (messages.isNotEmpty()) {
+            delay(100)
             listState.animateScrollToItem(messages.size - 1)
         }
     }

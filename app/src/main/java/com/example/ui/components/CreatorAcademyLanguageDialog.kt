@@ -78,7 +78,7 @@ fun CreatorAcademyLanguageDialog(
 
     Dialog(
         onDismissRequest = { /* Modal: require explicit selection */ },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         Box(
             modifier = Modifier

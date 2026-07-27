@@ -1,5 +1,8 @@
 package com.example.ui.screens
 
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -263,12 +266,19 @@ fun CaptionGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     var topicText by remember { mutableStateOf("") }
     var generatedCaption by remember { mutableStateOf<String?>(null) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -353,12 +363,19 @@ fun HashtagGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     val currentLang = LanguageEngine.currentLanguageState.value
     var hashtagResult by remember { mutableStateOf<String?>(null) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -431,12 +448,19 @@ fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
     var topicText by remember { mutableStateOf("") }
     var hooks by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -512,12 +536,19 @@ fun ContentPlannerDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
         )
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -581,12 +612,19 @@ fun PostingChecklistDialog(onDismiss: () -> Unit) {
         )
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -635,12 +673,19 @@ fun BrandPitchGuideDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
         )
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -689,12 +734,19 @@ fun LinkAnalysisDialog(type: String, onDismiss: () -> Unit) {
     val title = if (type == "PROFILE_LINK") "🔗 Profile Link Analysis" else "▶️ Channel Link Analysis"
     val placeholder = if (type == "PROFILE_LINK") "https://instagram.com/username" else "https://youtube.com/@channel"
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -65,12 +67,19 @@ fun MaintenanceDialog(
 ) {
     Dialog(
         onDismissRequest = { /* Non-dismissable */ },
-        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding(),
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF12121A),
             border = androidx.compose.foundation.BorderStroke(
@@ -141,12 +150,19 @@ fun ForceUpdateDialog(
 
     Dialog(
         onDismissRequest = { /* Non-dismissable */ },
-        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding(),
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF12121A),
             border = androidx.compose.foundation.BorderStroke(
@@ -226,12 +242,19 @@ fun LiveAnnouncementDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(12.dp)
+                .imePadding()
+                .navigationBarsPadding(),
             shape = RoundedCornerShape(24.dp),
             color = Color(0xFF141420),
             border = androidx.compose.foundation.BorderStroke(
@@ -315,11 +338,16 @@ fun ToolLockedDialog(
     status: ToolStatus,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding(),
             shape = RoundedCornerShape(20.dp),
             color = Color(0xFF14141E),
             border = androidx.compose.foundation.BorderStroke(

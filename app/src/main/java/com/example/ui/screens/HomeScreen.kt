@@ -1466,12 +1466,14 @@ fun PremiumDialog(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.88f)
-                .background(AmoledBlack)
+                .imePadding()
+                .navigationBarsPadding()
+                .background(AmoledBlack, RoundedCornerShape(22.dp))
                 .border(BorderStroke(1.2.dp, Color(0x33FF2E44)), RoundedCornerShape(22.dp))
                 .padding(20.dp)
         ) {

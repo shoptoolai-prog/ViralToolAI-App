@@ -8,6 +8,9 @@ import com.example.ui.components.SmartWelcomeBackDialog
 import com.example.ui.components.RestartCourseConfirmDialog
 import com.example.ui.components.LearningProgressIndicatorCard
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -574,6 +577,14 @@ fun BrandCollaborationAiDialog(
         }
     }
 
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(chatMessages.size, imeBottomPadding) {
+        if (chatMessages.isNotEmpty()) {
+            delay(100)
+            listState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
+
     // Function to handle custom freeform AI mentor chat queries
     fun sendCustomUserQuery(queryText: String) {
         if (queryText.isBlank()) return
@@ -609,7 +620,10 @@ fun BrandCollaborationAiDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
     ) {
         Box(
             modifier = Modifier
