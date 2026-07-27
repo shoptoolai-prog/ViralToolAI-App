@@ -10,6 +10,12 @@ import coil.util.DebugLogger
 
 class ViralApplication : Application(), ImageLoaderFactory {
 
+    override fun onCreate() {
+        super.onCreate()
+        // Initialize Live Cloud Management System (Firebase Remote Config, Firestore, Analytics, FCM, Offline Cache)
+        com.example.cloud.LiveCloudManager.init(this)
+    }
+
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .memoryCache {

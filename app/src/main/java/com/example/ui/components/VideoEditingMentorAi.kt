@@ -443,6 +443,7 @@ fun VideoEditingMentorAiDialog(
                 .background(AmoledBlack)
                 .statusBarsPadding()
                 .navigationBarsPadding()
+                .imePadding()
         ) {
             if (showWelcomeBack && selectedLang != null && videoType != null) {
                 SmartWelcomeBackDialog(

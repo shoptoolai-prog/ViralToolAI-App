@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cloud.LiveCloudManager
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -114,6 +116,14 @@ fun BrandAmbassadorPosterScreen(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val isPreviewMode = LocalInspectionMode.current
+
+    val baConfig by LiveCloudManager.brandAmbassadorConfig.collectAsStateWithLifecycle()
+
+    LaunchedEffect(baConfig.enabled) {
+        if (!baConfig.enabled) {
+            onDismiss()
+        }
+    }
 
     val isFirstTime = remember {
         try {

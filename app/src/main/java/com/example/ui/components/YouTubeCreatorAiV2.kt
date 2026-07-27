@@ -551,6 +551,7 @@ fun YouTubeCreatorAiV2Dialog(
                 .background(AmoledBlack)
                 .statusBarsPadding()
                 .navigationBarsPadding()
+                .imePadding()
         ) {
             if (showWelcomeBack && selectedLang != null && creatorType != null) {
                 SmartWelcomeBackDialog(

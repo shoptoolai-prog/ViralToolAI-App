@@ -58,6 +58,10 @@ import java.util.Locale
 
 import com.example.data.MerchantDetector
 import com.example.data.MerchantRegistry
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cloud.LiveCloudManager
+import com.example.cloud.ToolLockedDialog
+import com.example.cloud.ToolStatus
 import com.example.data.MerchantInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.scale
@@ -100,6 +104,17 @@ fun HomeScreen(
     var showInstaAutoDmDialog by remember { mutableStateOf(false) }
     var showMeeshoCreatorDialog by remember { mutableStateOf(false) }
     var showSmartRedirectionDialog by remember { mutableStateOf(false) }
+    var lockedToolInfo by remember { mutableStateOf<Pair<String, ToolStatus>?>(null) }
+
+    fun checkAndLaunchTool(toolKey: String, toolName: String, onLaunch: () -> Unit) {
+        val status = LiveCloudManager.getToolStatus(toolKey)
+        if (status == ToolStatus.ENABLED) {
+            LiveCloudManager.logToolOpen(toolKey, toolName)
+            onLaunch()
+        } else {
+            lockedToolInfo = Pair(toolName, status)
+        }
+    }
     
     var isGalleryImageSelected by remember { mutableStateOf(false) }
     var isCameraImageCaptured by remember { mutableStateOf(false) }
@@ -398,349 +413,426 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
-            // UNIVERSAL SHOPPING ANALYZER (COMPACT & MINIMAL - V4)
+            // FLIPKART SHOPPING ANALYZER (HERO GLASS CARD)
             // ==================================================
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                borderColor = GlassCardBorder,
-                backgroundColor = GlassCardBg
+            val flipkartShineTransition = rememberInfiniteTransition(label = "flipkartShine")
+            val flipkartShineOffset by flipkartShineTransition.animateFloat(
+                initialValue = -0.3f,
+                targetValue = 1.3f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(3000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "flipkartShineOffset"
+            )
+            val flipkartGlowPulse by flipkartShineTransition.animateFloat(
+                initialValue = 0.45f,
+                targetValue = 0.95f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1500, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "flipkartGlowPulse"
+            )
+
+            val flipkartCardShape = RoundedCornerShape(22.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 16.dp,
+                        shape = flipkartCardShape,
+                        ambientColor = Color(0xFF2874F0),
+                        spotColor = Color(0xFFFFE11B)
+                    ),
+                shape = flipkartCardShape,
+                color = Color(0xFF091424),
+                border = BorderStroke(
+                    1.5.dp,
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF2874F0).copy(alpha = flipkartGlowPulse),
+                            Color(0xFFFFE11B).copy(alpha = flipkartGlowPulse),
+                            Color(0xFF2874F0).copy(alpha = flipkartGlowPulse)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(800f * flipkartShineOffset, 800f * flipkartShineOffset)
+                    )
+                )
             ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Header inside card with title & PREMIUM badge
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "🛒",
-                                fontSize = 16.sp
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF0E1F38),
+                                    Color(0xFF07101C)
+                                )
                             )
-                            Text(
-                                text = "Universal Shopping Analyzer",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Black,
-                                color = EmeraldGlow,
-                                letterSpacing = 0.3.sp
+                        )
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Header inside card with Official Flipkart Logo, Title, Subtitle & Badge
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.weight(1f, fill = false)
+                            ) {
+                                OfficialLogo(
+                                    name = "flipkart",
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .shadow(6.dp, CircleShape, spotColor = Color(0xFFFFE11B))
+                                )
+                                Column {
+                                    Text(
+                                        text = "Flipkart Shopping Analyzer",
+                                        fontSize = 16.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.White,
+                                        letterSpacing = 0.3.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Analyze Flipkart products with AI-powered insights, price details and smart shopping reports.",
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color(0xFFB8D3F8),
+                                        lineHeight = 15.sp
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(6.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(Color(0xFF2874F0), Color(0xFFFFE11B))
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "FLIPKART AI",
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = AmoledBlack,
+                                    letterSpacing = 0.6.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Link Input Box Polish
+                        val inputGlowElevation by animateDpAsState(
+                            targetValue = if (isInputFocused) 10.dp else 2.dp,
+                            label = "InputGlow"
+                        )
+                        
+                        OutlinedTextField(
+                            value = linkInput,
+                            onValueChange = { linkInput = it },
+                            placeholder = {
+                                Text(
+                                    text = "Paste Flipkart Product URL...",
+                                    color = Color.White.copy(alpha = 0.45f),
+                                    fontSize = 13.5.sp
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFFFE11B),
+                                unfocusedBorderColor = Color(0xFF2874F0).copy(alpha = 0.4f),
+                                focusedLabelColor = Color(0xFFFFE11B),
+                                cursorColor = Color(0xFFFFE11B),
+                                focusedContainerColor = Color(0xFF081220),
+                                unfocusedContainerColor = Color(0xFF0B172B)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .onFocusChanged { isInputFocused = it.isFocused }
+                                .shadow(
+                                    elevation = inputGlowElevation,
+                                    shape = RoundedCornerShape(16.dp),
+                                    clip = false,
+                                    ambientColor = Color(0xFF2874F0),
+                                    spotColor = Color(0xFFFFE11B)
+                                ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Link,
+                                    contentDescription = "Link Icon",
+                                    tint = if (isInputFocused || linkInput.isNotEmpty()) Color(0xFFFFE11B) else Color(0xFF2874F0),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.padding(end = 4.dp)
+                                ) {
+                                    if (linkInput.isNotEmpty()) {
+                                        IconButton(
+                                            onClick = { linkInput = "" },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "Clear",
+                                                tint = TextGray,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    } else {
+                                        // Quick Paste Button inside text field
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .background(
+                                                    Brush.horizontalGradient(
+                                                        listOf(Color(0xFF2874F0), Color(0xFF1B53B4))
+                                                    )
+                                                )
+                                                .clickable {
+                                                    val clipText = clipboardManager.getText()?.text
+                                                    if (!clipText.isNullOrBlank()) {
+                                                        linkInput = clipText
+                                                        val detectedName = detectMerchant(clipText).name
+                                                        toastMessage = "✔ $detectedName Link Pasted"
+                                                    } else {
+                                                        toastMessage = "Clipboard is empty"
+                                                    }
+                                                }
+                                                .padding(horizontal = 9.dp, vertical = 5.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ContentPaste,
+                                                    contentDescription = "Paste",
+                                                    tint = Color(0xFFFFE11B),
+                                                    modifier = Modifier.size(13.dp)
+                                                )
+                                                Text(
+                                                    text = "Paste",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        )
+
+                        AnimatedVisibility(
+                            visible = isGalleryImageSelected || isCameraImageCaptured,
+                            enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = tween(300)),
+                            exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(animationSpec = tween(300))
+                        ) {
+                            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0x1A2C2C2C), RoundedCornerShape(12.dp))
+                                        .border(BorderStroke(1.dp, CrimsonRed.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isGalleryImageSelected) Icons.Default.PhotoLibrary else Icons.Default.PhotoCamera,
+                                        contentDescription = "Visual Input",
+                                        tint = CrimsonLight,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = if (isGalleryImageSelected) "Gallery Image Loaded" else "Camera Image Captured",
+                                            color = TextWhite,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            isGalleryImageSelected = false
+                                            isCameraImageCaptured = false
+                                        },
+                                        modifier = Modifier.size(20.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove",
+                                            tint = TextGray,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (linkInput.isNotBlank()) {
+                            val merchant = remember(linkInput) { detectMerchant(linkInput) }
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = fadeIn(animationSpec = tween(350)) + expandVertically(animationSpec = tween(350)),
+                                exit = fadeOut(animationSpec = tween(250)) + shrinkVertically(animationSpec = tween(250))
+                            ) {
+                                Column {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    MiniatureMerchantCard(merchant = merchant)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        val isInputProvided = linkInput.isNotBlank()
+
+                        // Flagship Compact CTA Button (Perplexity / AI Search style)
+                        val haptic = LocalHapticFeedback.current
+                        var ctaState by remember { mutableStateOf("IDLE") } // "IDLE", "ANALYZING"
+                        val analyzeInteractionSource = remember { MutableInteractionSource() }
+                        val isAnalyzePressed by analyzeInteractionSource.collectIsPressedAsState()
+                        
+                        val analyzeScale by animateFloatAsState(
+                            targetValue = if (isAnalyzePressed) 0.96f else 1.0f,
+                            animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
+                            label = "AnalyzeScaleSpring"
+                        )
+
+                        val buttonBrush = if (isInputProvided) {
+                            Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF2874F0), Color(0xFF1A52B7), Color(0xFF0F3B8C))
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF2874F0).copy(alpha = 0.35f), Color(0xFFFFE11B).copy(alpha = 0.25f))
                             )
                         }
 
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(EmeraldPrimary, EmeraldGlow)
-                                    )
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .graphicsLayer {
+                                    scaleX = analyzeScale
+                                    scaleY = analyzeScale
+                                }
+                                .shadow(
+                                    elevation = if (isInputProvided) 12.dp else 0.dp,
+                                    shape = RoundedCornerShape(14.dp),
+                                    clip = false,
+                                    ambientColor = Color(0xFF2874F0),
+                                    spotColor = Color(0xFFFFE11B)
                                 )
-                                .padding(horizontal = 7.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "PREMIUM AI",
-                                fontSize = 8.sp,
-                                fontWeight = FontWeight.Black,
-                                color = AmoledBlack,
-                                letterSpacing = 0.6.sp
-                            )
-                        }
-                    }
+                                .background(buttonBrush, RoundedCornerShape(14.dp))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        if (isInputProvided) Color(0xFFFFE11B) else Color(0x22FFFFFF)
+                                    ),
+                                    RoundedCornerShape(14.dp)
+                                )
+                                .clickable(
+                                    enabled = isInputProvided && ctaState == "IDLE",
+                                    interactionSource = analyzeInteractionSource,
+                                    indication = if (isInputProvided) androidx.compose.foundation.LocalIndication.current else null
+                                ) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    coroutineScope.launch {
+                                        val targetInput = linkInput.trim()
+                                        val lowerInput = targetInput.lowercase()
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                                        val isInstagramProfile = lowerInput.contains("instagram.com/") && 
+                                            (lowerInput.contains("/profile") || (!lowerInput.contains("/p/") && !lowerInput.contains("/reel/"))) ||
+                                            (lowerInput.startsWith("@") && lowerInput.length > 1)
 
-                    // Compact Search Bar (Perplexity / ChatGPT style)
-                    val inputGlowElevation by animateDpAsState(
-                        targetValue = if (isInputFocused) 8.dp else 0.dp,
-                        label = "InputGlow"
-                    )
-                    
-                    OutlinedTextField(
-                        value = linkInput,
-                        onValueChange = { linkInput = it },
-                        placeholder = {
-                            Text(
-                                text = "Paste Shopping Product URL",
-                                color = TextWhite.copy(alpha = 0.35f),
-                                fontSize = 13.5.sp
-                            )
-                        },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = EmeraldPrimary,
-                            unfocusedBorderColor = Color(0x1AFFFFFF),
-                            focusedLabelColor = EmeraldPrimary,
-                            cursorColor = EmeraldGlow,
-                            focusedContainerColor = Color(0xAA000000),
-                            unfocusedContainerColor = Color(0x66000000)
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .onFocusChanged { isInputFocused = it.isFocused }
-                            .shadow(
-                                elevation = inputGlowElevation,
-                                shape = RoundedCornerShape(16.dp),
-                                clip = false,
-                                ambientColor = EmeraldPrimary,
-                                spotColor = EmeraldGlow
-                            ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Link,
-                                contentDescription = "Link Icon",
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.padding(end = 4.dp)
-                            ) {
-                                if (linkInput.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = { linkInput = "" },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Clear,
-                                            contentDescription = "Clear",
-                                            tint = TextGray,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                } else {
-                                    // Quick Paste Button inside text field
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(Color(0x1FFFFFFF))
-                                            .clickable {
-                                                val clipText = clipboardManager.getText()?.text
-                                                if (!clipText.isNullOrBlank()) {
-                                                    linkInput = clipText
-                                                    val detectedName = detectMerchant(clipText).name
-                                                    toastMessage = "✔ $detectedName Link Pasted"
-                                                } else {
-                                                    toastMessage = "Clipboard is empty"
-                                                }
+                                        if (isInstagramProfile) {
+                                            showCreatorProfileScreen = true
+                                            ctaState = "IDLE"
+                                        } else if (isGalleryImageSelected) {
+                                            showVisionScanDialog = VisionSource.GALLERY
+                                            ctaState = "IDLE"
+                                        } else if (isCameraImageCaptured) {
+                                            showVisionScanDialog = VisionSource.CAMERA
+                                            ctaState = "IDLE"
+                                        } else {
+                                            val validation = com.example.data.ShoppingUrlValidator.validate(targetInput)
+                                            if (!validation.isValid) {
+                                                invalidUrlPopupResult = validation
+                                                ctaState = "IDLE"
+                                            } else {
+                                                ctaState = "ANALYZING"
+                                                focusManager.clearFocus()
+                                                onNavigateToAnalysis(targetInput)
+                                                ctaState = "IDLE"
                                             }
-                                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.ContentPaste,
-                                                contentDescription = "Paste",
-                                                tint = EmeraldGlow,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                            Text(
-                                                text = "Paste",
-                                                fontSize = 10.5.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = TextWhite
-                                            )
                                         }
                                     }
-                                }
-                            }
-                        }
-                    )
-
-                    AnimatedVisibility(
-                        visible = isGalleryImageSelected || isCameraImageCaptured,
-                        enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = tween(300)),
-                        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(animationSpec = tween(300))
-                    ) {
-                        Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color(0x1A2C2C2C), RoundedCornerShape(12.dp))
-                                    .border(BorderStroke(1.dp, CrimsonRed.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             ) {
-                                Icon(
-                                    imageVector = if (isGalleryImageSelected) Icons.Default.PhotoLibrary else Icons.Default.PhotoCamera,
-                                    contentDescription = "Visual Input",
-                                    tint = CrimsonLight,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column(modifier = Modifier.weight(1f)) {
+                                if (ctaState == "ANALYZING") {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        color = Color(0xFFFFE11B),
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (isGalleryImageSelected) "Gallery Image Loaded" else "Camera Image Captured",
-                                        color = TextWhite,
-                                        fontSize = 11.sp,
+                                        text = "Launching Flipkart AI Analyzer...",
+                                        color = Color.White,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "AI Analyze",
+                                        tint = if (isInputProvided) Color(0xFFFFE11B) else TextGray,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (isInputProvided) "Analyze Flipkart Link" else "Paste Flipkart Link to Analyze",
+                                        color = if (isInputProvided) Color.White else TextGray,
+                                        fontSize = 13.5.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
-                                IconButton(
-                                    onClick = {
-                                        isGalleryImageSelected = false
-                                        isCameraImageCaptured = false
-                                    },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Remove",
-                                        tint = TextGray,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if (linkInput.isNotBlank()) {
-                        val merchant = remember(linkInput) { detectMerchant(linkInput) }
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            Column {
-                                Spacer(modifier = Modifier.height(10.dp))
-                                MiniatureMerchantCard(merchant = merchant)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    val isInputProvided = linkInput.isNotBlank()
-
-                    // Flagship Compact CTA Button (Perplexity / AI Search style)
-                    val haptic = LocalHapticFeedback.current
-                    var ctaState by remember { mutableStateOf("IDLE") } // "IDLE", "ANALYZING"
-                    val analyzeInteractionSource = remember { MutableInteractionSource() }
-                    val isAnalyzePressed by analyzeInteractionSource.collectIsPressedAsState()
-                    
-                    val analyzeScale by animateFloatAsState(
-                        targetValue = if (isAnalyzePressed) 0.96f else 1.0f,
-                        animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
-                        label = "AnalyzeScaleSpring"
-                    )
-
-                    val buttonBrush = if (isInputProvided) {
-                        Brush.horizontalGradient(
-                            colors = listOf(EmeraldPrimary, EmeraldGlow, EmeraldDark)
-                        )
-                    } else {
-                        Brush.horizontalGradient(
-                            colors = listOf(EmeraldPrimary.copy(alpha = 0.25f), EmeraldGlow.copy(alpha = 0.15f))
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .graphicsLayer {
-                                scaleX = analyzeScale
-                                scaleY = analyzeScale
-                            }
-                            .shadow(
-                                elevation = if (isInputProvided) 10.dp else 0.dp,
-                                shape = RoundedCornerShape(14.dp),
-                                clip = false,
-                                ambientColor = EmeraldPrimary,
-                                spotColor = EmeraldGlow
-                            )
-                            .background(buttonBrush, RoundedCornerShape(14.dp))
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    if (isInputProvided) Color.White.copy(alpha = 0.4f) else Color(0x1AFFFFFF)
-                                ),
-                                RoundedCornerShape(14.dp)
-                            )
-                            .clickable(
-                                enabled = isInputProvided && ctaState == "IDLE",
-                                interactionSource = analyzeInteractionSource,
-                                indication = if (isInputProvided) androidx.compose.foundation.LocalIndication.current else null
-                            ) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                coroutineScope.launch {
-                                    val targetInput = linkInput.trim()
-                                    val lowerInput = targetInput.lowercase()
-
-                                    val isInstagramProfile = lowerInput.contains("instagram.com/") && 
-                                        (lowerInput.contains("/profile") || (!lowerInput.contains("/p/") && !lowerInput.contains("/reel/"))) ||
-                                        (lowerInput.startsWith("@") && lowerInput.length > 1)
-
-                                    if (isInstagramProfile) {
-                                        showCreatorProfileScreen = true
-                                        ctaState = "IDLE"
-                                    } else if (isGalleryImageSelected) {
-                                        showVisionScanDialog = VisionSource.GALLERY
-                                        ctaState = "IDLE"
-                                    } else if (isCameraImageCaptured) {
-                                        showVisionScanDialog = VisionSource.CAMERA
-                                        ctaState = "IDLE"
-                                    } else {
-                                        val validation = com.example.data.ShoppingUrlValidator.validate(targetInput)
-                                        if (!validation.isValid) {
-                                            invalidUrlPopupResult = validation
-                                            ctaState = "IDLE"
-                                        } else {
-                                            ctaState = "ANALYZING"
-                                            focusManager.clearFocus()
-                                            onNavigateToAnalysis(targetInput)
-                                            ctaState = "IDLE"
-                                        }
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        ) {
-                            if (ctaState == "ANALYZING") {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    color = TextWhite,
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Launching AI Analyzer...",
-                                    color = TextWhite,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "AI Analyze",
-                                    tint = if (isInputProvided) AmoledBlack else TextGray,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (isInputProvided) "Analyze Product" else "Paste Link to Analyze",
-                                    color = if (isInputProvided) AmoledBlack else TextGray,
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 0.3.sp
-                                )
                             }
                         }
                     }
@@ -755,9 +847,13 @@ fun HomeScreen(
             com.example.ui.components.PremiumCreatorToolsSection(
                 onToolSelected = { tool ->
                     if (tool.id == "brand_collab_ai") {
-                        showBrandCollabDialog = true
+                        checkAndLaunchTool("tool_brand_collaboration", "Brand Collaboration AI") {
+                            showBrandCollabDialog = true
+                        }
                     } else {
-                        selectedPremiumTool = tool
+                        checkAndLaunchTool(tool.id, tool.title) {
+                            selectedPremiumTool = tool
+                        }
                     }
                 }
             )
@@ -769,7 +865,9 @@ fun HomeScreen(
             // ==================================================
             com.example.ui.components.MeeshoCreatorAiCard(
                 onComingSoonClick = {
-                    showMeeshoCreatorDialog = true
+                    checkAndLaunchTool("tool_shopping_ai", "Meesho Creator AI") {
+                        showMeeshoCreatorDialog = true
+                    }
                 }
             )
 
@@ -780,7 +878,9 @@ fun HomeScreen(
             // ==================================================
             PremiumFeatureComingSoonCard(
                 onComingSoonClick = {
-                    showInstagramBottomSheet = true
+                    checkAndLaunchTool("tool_instagram", "Instagram Shopping AI") {
+                        showInstagramBottomSheet = true
+                    }
                 }
             )
 
@@ -791,7 +891,9 @@ fun HomeScreen(
             // ==================================================
             com.example.ui.components.InstaAutoDmAiCard(
                 onComingSoonClick = {
-                    showInstaAutoDmDialog = true
+                    checkAndLaunchTool("tool_instagram", "Insta Auto DM AI") {
+                        showInstaAutoDmDialog = true
+                    }
                 }
             )
 
@@ -1165,6 +1267,15 @@ fun HomeScreen(
                 showMeeshoCreatorDialog = false
                 showBrandCollabDialog = true
             }
+        )
+    }
+
+    // Tool Locked Dialog
+    lockedToolInfo?.let { (toolName, status) ->
+        ToolLockedDialog(
+            toolName = toolName,
+            status = status,
+            onDismiss = { lockedToolInfo = null }
         )
     }
 
@@ -2535,7 +2646,11 @@ fun hslToLong(h: Float, s: Float, l: Float): Long {
 
 @Composable
 fun MiniatureMerchantCard(merchant: DetectedMerchant) {
-    // Green pulse animation for verified badge
+    val isFlipkart = merchant.name.lowercase().contains("flipkart")
+    val accentCol = if (isFlipkart) Color(0xFF2874F0) else merchant.accentColor
+    val highlightCol = if (isFlipkart) Color(0xFFFFE11B) else Color(0xFF00FFCC)
+
+    // Green/Yellow pulse animation for verified badge & link detection
     val infinitePulse = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infinitePulse.animateFloat(
         initialValue = 0.85f,
@@ -2547,7 +2662,7 @@ fun MiniatureMerchantCard(merchant: DetectedMerchant) {
         label = "pulseScale"
     )
     val pulseAlpha by infinitePulse.animateFloat(
-        initialValue = 0.3f,
+        initialValue = 0.35f,
         targetValue = 0.95f,
         animationSpec = infiniteRepeatable(
             animation = tween(800, easing = LinearEasing),
@@ -2555,108 +2670,154 @@ fun MiniatureMerchantCard(merchant: DetectedMerchant) {
         ),
         label = "pulseAlpha"
     )
+    val sweepProgress by infinitePulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "sweepProgress"
+    )
 
     var isGlowActive by remember(merchant.name) { mutableStateOf(true) }
     LaunchedEffect(merchant.name) {
         isGlowActive = true
-        delay(300)
+        delay(350)
         isGlowActive = false
     }
 
     val animatedGlowAlpha by animateFloatAsState(
-        targetValue = if (isGlowActive) 0.6f else 0.18f,
+        targetValue = if (isGlowActive) 0.75f else 0.25f,
         animationSpec = tween(300),
         label = "glowAlpha"
     )
 
-    GlassCard(
-        modifier = Modifier.fillMaxWidth(),
-        borderColor = merchant.accentColor.copy(alpha = animatedGlowAlpha + 0.2f),
-        backgroundColor = merchant.accentColor.copy(alpha = animatedGlowAlpha * 0.4f)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OfficialLogo(
-                name = merchant.name,
-                modifier = Modifier
-                    .size(42.dp)
-                    .border(BorderStroke(1.2.dp, merchant.accentColor.copy(alpha = 0.5f)), CircleShape)
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFF0C1A2B),
+        border = BorderStroke(
+            1.2.dp,
+            Brush.linearGradient(
+                listOf(
+                    accentCol.copy(alpha = animatedGlowAlpha + 0.3f),
+                    highlightCol.copy(alpha = animatedGlowAlpha + 0.3f),
+                    accentCol.copy(alpha = animatedGlowAlpha + 0.3f)
+                )
             )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = merchant.name,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black,
-                        color = TextWhite
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(18.dp), spotColor = accentCol)
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Tiny progress sweep indicator line at top of card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.5.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                highlightCol.copy(alpha = 0.9f),
+                                accentCol,
+                                Color.Transparent
+                            ),
+                            startX = sweepProgress * 600f - 200f,
+                            endX = sweepProgress * 600f + 200f
+                        )
                     )
-                    if (merchant.isSupported) {
-                        Icon(
-                            imageVector = Icons.Default.Verified,
-                            contentDescription = "Verified Merchant",
-                            tint = Color(0xFF4CAF50),
-                            modifier = Modifier.size(16.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OfficialLogo(
+                    name = merchant.name,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .border(BorderStroke(1.2.dp, accentCol.copy(alpha = 0.7f)), CircleShape)
+                        .shadow(4.dp, CircleShape, spotColor = highlightCol)
+                )
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = if (isFlipkart) "Flipkart Product Verified" else merchant.name,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+                        if (merchant.isSupported) {
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = "Verified Merchant",
+                                tint = if (isFlipkart) Color(0xFFFFE11B) else Color(0xFF4CAF50),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(2.dp))
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .scale(pulseScale)
+                                .background(highlightCol.copy(alpha = pulseAlpha), CircleShape)
+                        )
+                        Text(
+                            text = if (merchant.isProductPage) "Flipkart Product Link Detected" else "Flipkart Store Page Detected",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = highlightCol
                         )
                     }
                 }
-                
-                Spacer(modifier = Modifier.height(2.dp))
-                
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .scale(pulseScale)
-                            .background(Color(0xFF00FFCC).copy(alpha = pulseAlpha), CircleShape)
-                    )
-                    Text(
-                        text = if (merchant.isProductPage) "Product Link Detected" else "Verified Merchant Page",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF00FFCC)
-                    )
-                }
-            }
 
-            Box(
-                modifier = Modifier
-                    .background(
-                        if (merchant.isSupported) Color(0x1F4CAF50) else Color(0x1FFF5252),
-                        RoundedCornerShape(12.dp)
-                    )
-                    .border(
-                        BorderStroke(1.dp, if (merchant.isSupported) Color(0x334CAF50) else Color(0x33FF5252)),
-                        RoundedCornerShape(12.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (merchant.isSupported) accentCol.copy(alpha = 0.25f) else Color(0x1FFF5252),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .border(
+                            BorderStroke(
+                                1.dp,
+                                if (merchant.isSupported) highlightCol.copy(alpha = 0.6f) else Color(0x33FF5252)
+                            ),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
-                    Icon(
-                        imageVector = if (merchant.isSupported) Icons.Default.CheckCircle else Icons.Default.Warning,
-                        contentDescription = "Status",
-                        tint = if (merchant.isSupported) Color(0xFF4CAF50) else Color(0xFFFF5252),
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = if (merchant.isSupported) "Verified Merchant" else "Unsupported",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (merchant.isSupported) Color(0xFF4CAF50) else Color(0xFFFF5252),
-                        letterSpacing = 0.5.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (merchant.isSupported) Icons.Default.CheckCircle else Icons.Default.Warning,
+                            contentDescription = "Status",
+                            tint = if (merchant.isSupported) highlightCol else Color(0xFFFF5252),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = if (merchant.isSupported) "Verified Link" else "Unsupported",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (merchant.isSupported) highlightCol else Color(0xFFFF5252),
+                            letterSpacing = 0.5.sp
+                        )
+                    }
                 }
             }
         }

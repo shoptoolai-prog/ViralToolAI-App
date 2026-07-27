@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -892,36 +893,22 @@ fun MeeshoCreatorAiDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.80f))
-                .clickable(onClick = onDismiss)
-                .navigationBarsPadding()
+                .background(AmoledBlack)
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            contentAlignment = Alignment.Center
+                .navigationBarsPadding()
+                .imePadding()
         ) {
             AnimatedVisibility(
                 visible = isEntranceVisible,
                 enter = slideInHorizontally(
                     initialOffsetX = { -it },
                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)
-                ) + fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 0.92f),
-                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut() + scaleOut()
+                ) + fadeIn(animationSpec = tween(400)),
+                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
             ) {
                 Surface(
-                    shape = RoundedCornerShape(28.dp),
                     color = Color(0xFF0F1A14),
-                    border = BorderStroke(
-                        1.5.dp,
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, Color(0xFF00E676), Color(0x33FFFFFF))
-                        )
-                    ),
-                    modifier = Modifier
-                        .widthIn(max = 520.dp)
-                        .fillMaxWidth(0.94f)
-                        .fillMaxHeight(0.74f)
-                        .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
-                        .clickable(enabled = false) {}
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Column(
                         modifier = Modifier

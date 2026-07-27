@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.draw.shadow
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.ElectricPurple
@@ -480,28 +481,14 @@ fun CommonPremiumToolPopupDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.80f))
-                .clickable(onClick = onDismiss)
-                .navigationBarsPadding()
+                .background(AmoledBlack)
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            contentAlignment = Alignment.Center
+                .navigationBarsPadding()
+                .imePadding()
         ) {
             Surface(
-                shape = RoundedCornerShape(28.dp),
                 color = Color(0xFF0F1A14),
-                border = BorderStroke(
-                    1.5.dp,
-                    Brush.linearGradient(
-                        listOf(EmeraldGlow, ElectricPurple.copy(alpha = 0.6f), EmeraldPrimary)
-                    )
-                ),
-                modifier = Modifier
-                    .widthIn(max = 520.dp)
-                    .fillMaxWidth(0.94f)
-                    .fillMaxHeight(0.74f)
-                    .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = EmeraldGlow)
-                    .clickable(enabled = false) {}
+                modifier = Modifier.fillMaxSize()
             ) {
                 Column(
                     modifier = Modifier

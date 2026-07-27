@@ -87,6 +87,11 @@ import com.example.ui.screens.BrandAmbassadorPrefs
 import com.example.ui.screens.OnboardingPrefs
 import com.example.ui.screens.OnboardingScreen
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cloud.LiveCloudManager
+import com.example.cloud.MaintenanceDialog
+import com.example.cloud.ForceUpdateDialog
+import com.example.cloud.LiveAnnouncementDialog
 
 import com.example.core.rememberIsOnlineState
 import com.example.ui.components.OfflineBanner
@@ -176,6 +181,33 @@ fun MainAppLayout(sharedUrl: String? = null) {
     }
 
     val isOnline by rememberIsOnlineState()
+
+    // Live Cloud System States
+    val maintenanceMode by LiveCloudManager.maintenanceMode.collectAsStateWithLifecycle()
+    val forceUpdate by LiveCloudManager.forceUpdate.collectAsStateWithLifecycle()
+    val minimumSupportedVersion by LiveCloudManager.minimumSupportedVersion.collectAsStateWithLifecycle()
+    val playstoreUrl by LiveCloudManager.playstoreUrl.collectAsStateWithLifecycle()
+    val announcementConfig by LiveCloudManager.announcementConfig.collectAsStateWithLifecycle()
+
+    var showAnnouncementDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(announcementConfig) {
+        if (announcementConfig.enabled && announcementConfig.title.isNotBlank()) {
+            showAnnouncementDialog = true
+        }
+    }
+
+    // Render cloud global dialogs
+    if (maintenanceMode) {
+        MaintenanceDialog(onRetry = { /* Re-check */ })
+    } else if (forceUpdate) {
+        ForceUpdateDialog(playstoreUrl = playstoreUrl, minimumVersion = minimumSupportedVersion)
+    } else if (showAnnouncementDialog && announcementConfig.enabled) {
+        LiveAnnouncementDialog(
+            config = announcementConfig,
+            onDismiss = { showAnnouncementDialog = false }
+        )
+    }
 
     val showBottomNav = currentScreen != Screen.Splash && 
             currentScreen != Screen.BrandAmbassadorPoster && 
