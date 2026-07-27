@@ -47,8 +47,8 @@ jobs:
 
       - name: 4. Ensure Gradle Wrapper
         run: |
-          if [ ! -f gradlew ]; then
-            echo "Gradle wrapper not found. Generating wrapper..."
+          if [ ! -f gradlew ] || [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "Gradle wrapper or jar missing. Generating wrapper..."
             gradle wrapper --gradle-version 8.10.2
           fi
           chmod +x gradlew
