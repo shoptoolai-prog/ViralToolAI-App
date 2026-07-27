@@ -897,7 +897,7 @@ fun HomeScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(88.dp)) // Standard padding for BottomNav overlap
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // 3. Sliding Premium Bottom Sheet for Instagram Shopping AI
@@ -919,7 +919,7 @@ fun HomeScreen(
                         .widthIn(max = 600.dp)
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(start = 24.dp, end = 24.dp, bottom = 100.dp)
+                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
                         .background(
                             color = Color(0xF90A0A0A),
                             shape = RoundedCornerShape(24.dp)

@@ -153,7 +153,7 @@ fun VideoEditingScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 16.dp)
                 .graphicsLayer {
                     alpha = animProgress.value
                     translationY = (1f - animProgress.value) * 30f

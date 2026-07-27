@@ -196,7 +196,7 @@ fun ProfileScreen(
                 .statusBarsPadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 20.dp)
-                .padding(top = 12.dp, bottom = 24.dp),
+                .padding(top = 12.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -487,7 +487,7 @@ fun ProfileScreen(
             // ================= FOOTER =================
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 120.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 Text(
                     text = "Made with ❤️ by Asit Yadav",

@@ -219,7 +219,7 @@ fun HistoryScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(bottom = 24.dp)
+                        contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(historyList, key = { it.id }) { item ->
                             GlassCard(
@@ -359,7 +359,7 @@ fun HistoryScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(bottom = 120.dp)
+                        contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(wishlistItems, key = { it.id }) { wishItem ->
                             GlassCard(

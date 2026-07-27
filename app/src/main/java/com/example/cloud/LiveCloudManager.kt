@@ -117,18 +117,26 @@ object LiveCloudManager {
         // 2. Initialize Firebase safely
         scope.launch {
             try {
-                if (FirebaseApp.getApps(context).isEmpty()) {
-                    FirebaseApp.initializeApp(context)
+                val appContext = context.applicationContext
+                if (FirebaseApp.getApps(appContext).isEmpty()) {
+                    FirebaseApp.initializeApp(appContext)
                 }
+
+                if (FirebaseApp.getApps(appContext).isEmpty()) {
+                    Log.i(TAG, "Firebase configuration not present - proceeding in offline fallback mode")
+                    isFirebaseInitialized = false
+                    return@launch
+                }
+
                 isFirebaseInitialized = true
 
                 // Firebase Services
-                auth = FirebaseAuth.getInstance()
-                remoteConfig = FirebaseRemoteConfig.getInstance()
-                firestore = FirebaseFirestore.getInstance()
-                analytics = FirebaseAnalytics.getInstance(context)
-                crashlytics = FirebaseCrashlytics.getInstance()
-                storage = FirebaseStorage.getInstance()
+                auth = runCatching { FirebaseAuth.getInstance() }.getOrNull()
+                remoteConfig = runCatching { FirebaseRemoteConfig.getInstance() }.getOrNull()
+                firestore = runCatching { FirebaseFirestore.getInstance() }.getOrNull()
+                analytics = runCatching { FirebaseAnalytics.getInstance(appContext) }.getOrNull()
+                crashlytics = runCatching { FirebaseCrashlytics.getInstance() }.getOrNull()
+                storage = runCatching { FirebaseStorage.getInstance() }.getOrNull()
 
                 // Configure Firestore persistence
                 try {
@@ -154,7 +162,7 @@ object LiveCloudManager {
                 syncFirestoreCollections()
 
             } catch (e: Exception) {
-                Log.e(TAG, "Firebase initialization failed - proceeding in offline fallback mode", e)
+                Log.e(TAG, "Firebase initialization error - proceeding in offline fallback mode", e)
                 isFirebaseInitialized = false
             }
         }

@@ -204,7 +204,7 @@ fun CreatorAcademyScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 16.dp)
                 .graphicsLayer {
                     alpha = headerAnimProgress.value
                     translationY = (1f - headerAnimProgress.value) * 30f

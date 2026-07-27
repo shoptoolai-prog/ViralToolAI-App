@@ -79,7 +79,7 @@ fun CreatorProfileAiScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp)
-                .padding(bottom = 60.dp)
+                .padding(bottom = 16.dp)
         ) {
             // Header
             Row(
