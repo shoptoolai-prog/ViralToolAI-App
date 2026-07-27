@@ -49,7 +49,7 @@ jobs:
         run: |
           if [ ! -f gradlew ]; then
             echo "Gradle wrapper not found. Generating wrapper..."
-            gradle wrapper --gradle-version 8.2
+            gradle wrapper --gradle-version 8.10.2
           fi
           chmod +x gradlew
 
