@@ -172,6 +172,7 @@ fun ResultScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
+                    .navigationBarsPadding()
                     .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {

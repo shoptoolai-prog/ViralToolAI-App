@@ -7,6 +7,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -80,6 +82,7 @@ fun VisionScanDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xEE000000))
+                .statusBarsPadding()
                 .imePadding()
                 .navigationBarsPadding()
                 .padding(20.dp),
@@ -87,6 +90,7 @@ fun VisionScanDialog(
         ) {
             Card(
                 modifier = Modifier
+                    .widthIn(max = 480.dp)
                     .fillMaxWidth(0.92f)
                     .clip(RoundedCornerShape(24.dp))
                     .border(
@@ -98,6 +102,7 @@ fun VisionScanDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)

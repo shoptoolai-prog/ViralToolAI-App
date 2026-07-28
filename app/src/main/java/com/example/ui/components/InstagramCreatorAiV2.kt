@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.ime
@@ -359,6 +360,7 @@ fun InstagramCreatorAiV2Dialog(
     val chatMessages = remember { mutableStateListOf<ChatMessage>() }
     var userTextInput by remember { mutableStateOf("") }
     var isThinking by remember { mutableStateOf(false) }
+    var reExplainCount by remember { mutableIntStateOf(0) }
 
     // Interactive Dialog Overlays
     var showScriptGeneratorSheet by remember { mutableStateOf(false) }
@@ -396,10 +398,19 @@ fun InstagramCreatorAiV2Dialog(
     // Initialize Mentor Welcome
     fun initMentorForStep(stepIdx: Int, isFreshExplanation: Boolean = false) {
         val step = INSTAGRAM_ROADMAP_STEPS.getOrNull(stepIdx) ?: return
-        val mentorMsg = when (currentLang) {
-            MentorLanguage.HINDI -> if (isFreshExplanation) getFreshExplanationHi(stepIdx) else step.mentorPromptHi
-            MentorLanguage.ENGLISH -> if (isFreshExplanation) getFreshExplanationEn(stepIdx) else step.mentorPromptEn
-            MentorLanguage.HINGLISH -> if (isFreshExplanation) getFreshExplanationHinglish(stepIdx) else step.mentorPromptHinglish
+        val mentorMsg = if (isFreshExplanation) {
+            com.example.creatoracademy.AiTeachingVariationsEngine.getMultiStyleExplanation(
+                stepTitle = step.title,
+                coreConcept = step.mentorPromptEn,
+                lang = currentLang.name,
+                variationCount = reExplainCount
+            )
+        } else {
+            when (currentLang) {
+                MentorLanguage.HINDI -> step.mentorPromptHi
+                MentorLanguage.ENGLISH -> step.mentorPromptEn
+                MentorLanguage.HINGLISH -> step.mentorPromptHinglish
+            }
         }
         addMentorMessage(text = mentorMsg, isFresh = isFreshExplanation)
     }
@@ -446,29 +457,30 @@ fun InstagramCreatorAiV2Dialog(
 
     // Handle "Explain Again" request
     fun handleExplainAgain() {
+        reExplainCount += 1
         chatMessages.add(
             ChatMessage(
                 sender = "CREATOR",
                 text = when (currentLang) {
                     MentorLanguage.HINDI -> "❓ Mujhe samajh nahi aaya. Dubara samjhao."
-                    MentorLanguage.ENGLISH -> "❓ I didn't understand. Please explain again with an example."
-                    MentorLanguage.HINGLISH -> "❓ Samajh nahi aaya, please ek simple example se dubara batao."
+                    MentorLanguage.ENGLISH -> "❓ I didn't understand. Please explain again with another style."
+                    MentorLanguage.HINGLISH -> "❓ Samajh nahi aaya, please ek aur tareeke se batao."
                 },
                 stepIndex = currentStepIndex
             )
         )
         coroutineScope.launch {
             isThinking = true
-            delay(600)
+            delay(500)
             isThinking = false
             initMentorForStep(currentStepIndex, isFreshExplanation = true)
         }
     }
 
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    LaunchedEffect(chatMessages.size, imeBottomPadding) {
+    LaunchedEffect(chatMessages.size, isThinking, userTextInput, imeBottomPadding) {
         if (chatMessages.isNotEmpty()) {
-            delay(100)
+            delay(60)
             lazyListState.animateScrollToItem(chatMessages.size - 1)
         }
     }
@@ -487,8 +499,7 @@ fun InstagramCreatorAiV2Dialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             Surface(
                 color = Color(0xFF0F1A14),

@@ -37,9 +37,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.AutoResizedText
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
+import com.example.ui.theme.LocalResponsiveMetrics
 import com.example.ui.theme.TextWhite
+import com.example.ui.theme.responsiveButtonBounds
 
 /**
  * Universal Premium Glass Header for Tools & Dialogs.
@@ -279,6 +282,7 @@ fun UniversalPrimaryButton(
     textColor: Color = AmoledBlack
 ) {
     val haptic = LocalHapticFeedback.current
+    val responsiveMetrics = LocalResponsiveMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -291,7 +295,7 @@ fun UniversalPrimaryButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .responsiveButtonBounds(responsiveMetrics)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -324,7 +328,7 @@ fun UniversalPrimaryButton(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onClick()
             }
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -337,15 +341,16 @@ fun UniversalPrimaryButton(
                     imageVector = icon,
                     contentDescription = null,
                     tint = textColor,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(responsiveMetrics.scaledDp(20f))
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text(
+            AutoResizedText(
                 text = text,
-                fontSize = 15.sp,
+                fontSize = responsiveMetrics.scaledSp(15f),
                 fontWeight = FontWeight.Bold,
-                color = if (enabled) textColor else TextWhite.copy(alpha = 0.4f)
+                color = if (enabled) textColor else TextWhite.copy(alpha = 0.4f),
+                maxLines = 1
             )
         }
     }
@@ -364,6 +369,7 @@ fun UniversalSecondaryButton(
     textColor: Color = TextWhite
 ) {
     val haptic = LocalHapticFeedback.current
+    val responsiveMetrics = LocalResponsiveMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -375,7 +381,7 @@ fun UniversalSecondaryButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .responsiveButtonBounds(responsiveMetrics)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -390,7 +396,7 @@ fun UniversalSecondaryButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -402,15 +408,16 @@ fun UniversalSecondaryButton(
                     imageVector = icon,
                     contentDescription = null,
                     tint = textColor,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(responsiveMetrics.scaledDp(18f))
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text(
+            AutoResizedText(
                 text = text,
-                fontSize = 14.5.sp,
+                fontSize = responsiveMetrics.scaledSp(14.5f),
                 fontWeight = FontWeight.SemiBold,
-                color = textColor
+                color = textColor,
+                maxLines = 1
             )
         }
     }

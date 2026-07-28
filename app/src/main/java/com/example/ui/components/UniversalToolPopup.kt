@@ -51,6 +51,7 @@ fun UniversalToolPopupDialog(
     scrollableContent: @Composable ColumnScope.() -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+    val responsiveMetrics = LocalResponsiveMetrics.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -66,12 +67,15 @@ fun UniversalToolPopupDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding(),
+            contentAlignment = Alignment.Center
         ) {
             Surface(
                 color = Color(0xFF0F1A14), // Glass Theme Dark Palette
-                modifier = Modifier.fillMaxSize()
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .responsiveDialogBounds(responsiveMetrics)
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize()
@@ -83,9 +87,12 @@ fun UniversalToolPopupDialog(
                             .background(Color(0xFF0D1611))
                             .border(
                                 BorderStroke(0.8.dp, Color(0x22FFFFFF)),
-                                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                                RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                             )
-                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                            .padding(
+                                horizontal = responsiveMetrics.horizontalPadding,
+                                vertical = 12.dp
+                            ),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -96,7 +103,7 @@ fun UniversalToolPopupDialog(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(42.dp)
+                                    .size(responsiveMetrics.scaledDp(42f))
                                     .clip(CircleShape)
                                     .background(EmeraldPrimary.copy(alpha = 0.2f))
                                     .border(BorderStroke(1.2.dp, EmeraldGlow), CircleShape),
@@ -106,23 +113,23 @@ fun UniversalToolPopupDialog(
                                     imageVector = icon,
                                     contentDescription = null,
                                     tint = EmeraldGlow,
-                                    modifier = Modifier.size(22.dp)
+                                    modifier = Modifier.size(responsiveMetrics.scaledDp(22f))
                                 )
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
+                                AutoResizedText(
                                     text = title,
-                                    fontSize = 15.sp,
+                                    fontSize = responsiveMetrics.scaledSp(15f),
                                     fontWeight = FontWeight.Black,
                                     color = TextWhite,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 subtitle?.let { sub ->
-                                    Text(
+                                    AutoResizedText(
                                         text = sub,
-                                        fontSize = 11.sp,
+                                        fontSize = responsiveMetrics.scaledSp(11f),
                                         fontWeight = FontWeight.Bold,
                                         color = EmeraldGlow,
                                         maxLines = 1,
@@ -150,7 +157,7 @@ fun UniversalToolPopupDialog(
                                 ) {
                                     Text(
                                         text = tag,
-                                        fontSize = 10.sp,
+                                        fontSize = responsiveMetrics.scaledSp(10f),
                                         fontWeight = FontWeight.Bold,
                                         color = EmeraldGlow
                                     )
@@ -166,7 +173,7 @@ fun UniversalToolPopupDialog(
                                 ) {
                                     Text(
                                         text = step,
-                                        fontSize = 10.sp,
+                                        fontSize = responsiveMetrics.scaledSp(10f),
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFFA78BFA)
                                     )
@@ -192,7 +199,10 @@ fun UniversalToolPopupDialog(
                             .weight(1f)
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                            .padding(
+                                horizontal = responsiveMetrics.horizontalPadding,
+                                vertical = 14.dp
+                            ),
                         content = scrollableContent
                     )
 
@@ -201,13 +211,16 @@ fun UniversalToolPopupDialog(
                         Surface(
                             color = Color(0xFF0B120E),
                             border = BorderStroke(0.8.dp, Color(0x22FFFFFF)),
-                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                            shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                                    .padding(
+                                        horizontal = responsiveMetrics.horizontalPadding,
+                                        vertical = 14.dp
+                                    ),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 ctaText?.let { text ->
@@ -229,16 +242,16 @@ fun UniversalToolPopupDialog(
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(48.dp),
+                                            .responsiveButtonBounds(responsiveMetrics),
                                         shape = RoundedCornerShape(16.dp),
                                         border = BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.5f)),
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = EmeraldGlow
                                         )
                                     ) {
-                                        Text(
+                                        AutoResizedText(
                                             text = text,
-                                            fontSize = 13.5.sp,
+                                            fontSize = responsiveMetrics.scaledSp(13.5f),
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
@@ -260,6 +273,7 @@ fun UniversalCtaButton(
     icon: ImageVector? = null,
     onClick: () -> Unit
 ) {
+    val responsiveMetrics = LocalResponsiveMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -274,7 +288,7 @@ fun UniversalCtaButton(
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .responsiveButtonBounds(responsiveMetrics)
             .scale(scale)
             .shadow(12.dp, RoundedCornerShape(16.dp), spotColor = EmeraldGlow),
         shape = RoundedCornerShape(16.dp),
@@ -306,21 +320,23 @@ fun UniversalCtaButton(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp)
             ) {
                 icon?.let {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
                         tint = if (enabled) AmoledBlack else TextWhite.copy(alpha = 0.4f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(responsiveMetrics.scaledDp(20f))
                     )
                 }
-                Text(
+                AutoResizedText(
                     text = text,
-                    fontSize = 15.sp,
+                    fontSize = responsiveMetrics.scaledSp(15f),
                     fontWeight = FontWeight.Black,
-                    color = if (enabled) AmoledBlack else TextWhite.copy(alpha = 0.4f)
+                    color = if (enabled) AmoledBlack else TextWhite.copy(alpha = 0.4f),
+                    maxLines = 1
                 )
             }
         }

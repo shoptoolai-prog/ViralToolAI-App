@@ -1471,8 +1471,7 @@ fun PremiumDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.88f)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
                 .background(AmoledBlack, RoundedCornerShape(22.dp))
                 .border(BorderStroke(1.2.dp, Color(0x33FF2E44)), RoundedCornerShape(22.dp))
                 .padding(20.dp)
@@ -2143,6 +2142,7 @@ fun AnalysisScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
+                    .navigationBarsPadding()
                     .verticalScroll(scrollState)
                     .padding(horizontal = 24.dp, vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

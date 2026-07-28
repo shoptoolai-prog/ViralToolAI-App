@@ -547,3 +547,105 @@ object AiMentorEngine {
     }
 }
 
+/**
+ * MASTER PHASE 1 — MULTI-STYLE AI TEACHING VARIATIONS ENGINE
+ * Provides 10 distinct explanation styles (Story, Friend, Teacher, Simple Hindi, Hinglish,
+ * Practical, Real Creator Example, Step-by-Step, Analogy, Common Mistakes) so the mentor NEVER
+ * repeats the exact same answer when a user asks for re-explanation.
+ */
+object AiTeachingVariationsEngine {
+    fun getMultiStyleExplanation(
+        stepTitle: String,
+        coreConcept: String,
+        lang: String,
+        variationCount: Int
+    ): String {
+        val styleIndex = (variationCount - 1).coerceAtLeast(0) % 10
+        val isHindi = lang.contains("HINDI", ignoreCase = true) && !lang.contains("HINGLISH", ignoreCase = true)
+        val isHinglish = lang.contains("HINGLISH", ignoreCase = true)
+
+        return when (styleIndex) {
+            0 -> if (isHindi) {
+                "📖 *Kahaani Style:* Isse ek kahani se samjho: Rohan naam ke creator ne 3 ghante edit kiye par views nahi aaye kyunki unhone '$coreConcept' miss kar diya. Jaise hi unhone '$stepTitle' ko samjha, unki agli video 10x viral ho gayi!"
+            } else if (isHinglish) {
+                "📖 *Story Style:* Imagine karo ek creator ne mast video banayi par reach zero mili. Reason? Unhone '$coreConcept' ka funda apply nahi kiya tha. Jaise hi '$stepTitle' me yeh add kiya, reach boom ho gayi!"
+            } else {
+                "📖 *Story Explanation:* Picture this: Creator Rohan spent 3 hours editing, but got zero views because he missed this exact step. Once he applied '$coreConcept' to '$stepTitle', his next posts exploded!"
+            }
+
+            1 -> if (isHindi) {
+                "🤝 *Dost Style:* Suno dost, tension mat lo! Bilkul simple rakhte hain. '$stepTitle' me bas '$coreConcept' par dhyaan do. Ek baar try karo, turant result dikhega."
+            } else if (isHinglish) {
+                "🤝 *Buddy Style:* Bro chill karo! Isko overcomplicate mat karo. Main point bas yeh hai ki '$stepTitle' ke liye aapko '$coreConcept' par focus karna hai."
+            } else {
+                "🤝 *Buddy Style:* Hey friend, let's keep it super casual. Don't overcomplicate '$stepTitle'. All you need is to focus 100% on '$coreConcept'. Try it right now!"
+            }
+
+            2 -> if (isHindi) {
+                "🎓 *Masterclass Method:* Aao '$stepTitle' ko 3 mukhya niyam me dekhein:\n1) Mukhya Niyam: '$coreConcept'.\n2) Algorithm fayda: Audience video par rukti hai.\n3) Action: Apne agle post me turant lagayein."
+            } else if (isHinglish) {
+                "🎓 *Masterclass Breakdown:* Let's analyze '$stepTitle':\n1) Main Rule: '$coreConcept'.\n2) Algorithm Impact: Audience drop-off rokti hai.\n3) Action Plan: Agle video me implement karo."
+            } else {
+                "🎓 *Masterclass Method:* Let's analyze '$stepTitle' scientifically:\n1) Core Principle: '$coreConcept'.\n2) Algorithmic Effect: Maximizes audience retention.\n3) Implementation: Apply in your next draft immediately."
+            }
+
+            3 -> if (isHindi) {
+                "🇮🇳 *Saral Hindi:* Bilkul seedhi baat: '$stepTitle' ka asli maksad hai '$coreConcept'. Jab viewer ko turant value dikhti hai, woh aapko follow karta hai."
+            } else if (isHinglish) {
+                "🇮🇳 *Aasan Hindi:* Simple Shabdon me: '$stepTitle' me aapko '$coreConcept' ko dhyan me rakhna hai taaki koi bhi swipe away na kare."
+            } else {
+                "🇮🇳 *Simplified Guide:* Plain and simple: '$stepTitle' is all about '$coreConcept'. When viewers see instant clarity, they stick around."
+            }
+
+            4 -> if (isHindi) {
+                "⚡ *Quick Hinglish:* Dekho ji, '$stepTitle' ka main secret hai '$coreConcept'. Agar yeh strong hoga toh algorithm khud aapki video push karega!"
+            } else if (isHinglish) {
+                "⚡ *Quick Hinglish:* Dekho yaar, '$stepTitle' ka main secret '$coreConcept' hai. Iske bina video average reh jaati hai, iske saath viral ho jaati hai!"
+            } else {
+                "⚡ *Hinglish Power Tip:* Key takeaways for '$stepTitle': Master '$coreConcept' and watch your retention metrics surge automatically."
+            }
+
+            5 -> if (isHindi) {
+                "🛠️ *Practical Action Example:* '$stepTitle' ke liye yeh formula use karein: Direct problem dikhao -> '$coreConcept' ka solution do -> Call to action do."
+            } else if (isHinglish) {
+                "🛠️ *Practical Action:* Formula for '$stepTitle': Problem bolo -> '$coreConcept' offer karo -> Direct CTA do."
+            } else {
+                "🛠️ *Practical Action Example:* For '$stepTitle', use this action formula: Highlight the problem -> Deliver '$coreConcept' -> End with a clear call-to-action."
+            }
+
+            6 -> if (isHindi) {
+                "🌟 *Creator Case Study:* Bade creators jaise @viral_pro ne bhi pehle yahi galti ki thi. Jaise hi unhone '$coreConcept' ko '$stepTitle' me lagaya, unke followers double ho gaye!"
+            } else if (isHinglish) {
+                "🌟 *Real Creator Case Study:* Top viral creators hamesha '$coreConcept' use karte hain. Isse audience end tak video dekhti hai aur engage karti hai."
+            } else {
+                "🌟 *Creator Case Study:* Top viral creators blew up using '$coreConcept'. They kept content under 30 seconds and focused strictly on '$stepTitle'."
+            }
+
+            7 -> if (isHindi) {
+                "🔢 *Step-by-Step Plan:*\n1️⃣ Pehle hook tayyar karein.\n2️⃣ Phir '$coreConcept' add karein.\n3️⃣ Final check karke post button dabayein."
+            } else if (isHinglish) {
+                "🔢 *Step-by-Step Method:*\n1️⃣ Clear idea pakdo.\n2️⃣ '$coreConcept' inject karo.\n3️⃣ Publish karke metrics measure karo."
+            } else {
+                "🔢 *Step-by-Step Blueprint:*\n1️⃣ Pinpoint your primary audience angle.\n2️⃣ Inject '$coreConcept'.\n3️⃣ Review and hit publish with confidence."
+            }
+
+            8 -> if (isHindi) {
+                "💡 *Aasan Udaharan:* '$stepTitle' ko ek dukan ke board ki tarah samjho. Agar '$coreConcept' saaf dikhai dega, toh har aane wala grahak rukk kar dekhega!"
+            } else if (isHinglish) {
+                "💡 *Real Life Analogy:* '$stepTitle' is like a sports car's engine. '$coreConcept' is the turbocharger! Iske bina video slow rahegi, iske saath rocket ban jaayegi!"
+            } else {
+                "💡 *Real-Life Analogy:* Think of '$stepTitle' like a store storefront. Without '$coreConcept', the lights are off. Turn the lights on and watch visitors enter!"
+            }
+
+            else -> if (isHindi) {
+                "⚠️ *Galti aur Solution:* 90% naye creators '$stepTitle' me '$coreConcept' bhool jaate hain. Aap yeh galti mat karo — ise clear aur engaging rakho!"
+            } else if (isHinglish) {
+                "⚠️ *Mistake vs Solution:* 90% creators random cheezein karte hain. Aapko bas '$coreConcept' ko '$stepTitle' me master karna hai."
+            } else {
+                "⚠️ *Common Mistake vs Fix:* 90% of creators fail because they ignore '$coreConcept' during '$stepTitle'. The top 10% fix this by keeping it sharp and focused."
+            }
+        }
+    }
+}
+
+

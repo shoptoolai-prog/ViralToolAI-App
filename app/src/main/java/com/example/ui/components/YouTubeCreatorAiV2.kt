@@ -10,6 +10,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.ime
@@ -98,11 +101,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.theme.AmoledBlack
-import com.example.ui.theme.EmeraldGlow
-import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private val EmeraldPrimary = Color(0xFFEF4444) // YouTube Red Theme
+private val EmeraldGlow = Color(0x33EF4444) // Red Glow Effect
+private val ytTheme = MentorToolTheme.YouTubeCreator
 
 /**
  * PHASE — YOUTUBE CREATOR AI (ZERO TO ADVANCED AI MENTOR)
@@ -554,8 +560,7 @@ fun YouTubeCreatorAiV2Dialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             if (showWelcomeBack && selectedLang != null && creatorType != null) {
                 SmartWelcomeBackDialog(
@@ -1057,11 +1062,11 @@ private fun YouTubeMentorChatScreen(
         )
     }
 
-    // Scroll to bottom when new messages arrive or keyboard opens
+    // Scroll to bottom when new messages arrive, typing occurs, or keyboard opens
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    LaunchedEffect(messages.size, imeBottomPadding) {
+    LaunchedEffect(messages.size, inputText, imeBottomPadding) {
         if (messages.isNotEmpty()) {
-            delay(100)
+            delay(60)
             listState.animateScrollToItem(messages.size - 1)
         }
     }
@@ -1623,19 +1628,35 @@ private fun YouTubeScriptGeneratorDialog(
         listOf("3 min", "5 min", "8 min", "10 min", "20 min")
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(28.dp))
-                .background(Color(0xFF1C0A0A)),
-            color = Color(0xFF1C0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
-                    .padding(22.dp)
-                    .fillMaxWidth()
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(28.dp),
+                color = Color(0xFF1C0A0A)
             ) {
+                Column(
+                    modifier = Modifier
+                        .padding(22.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1837,6 +1858,7 @@ private fun YouTubeScriptGeneratorDialog(
         }
     }
 }
+}
 
 private fun generateYouTubeScript(
     topic: String,
@@ -1890,15 +1912,35 @@ Category: $creatorType | Topic: $topic
 // ============================================================================
 @Composable
 private fun YouTubeThumbnailGuideDialog(onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1967,6 +2009,7 @@ private fun YouTubeThumbnailGuideDialog(onDismiss: () -> Unit) {
         }
     }
 }
+}
 
 // ============================================================================
 // TOOL 3: TITLE GENERATOR DIALOG
@@ -1983,17 +2026,37 @@ private fun YouTubeTitleGeneratorDialog(
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "🏷️ Viral Title Generator AI",
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "🏷️ Viral Title Generator AI",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite
@@ -2084,6 +2147,7 @@ private fun YouTubeTitleGeneratorDialog(
         }
     }
 }
+}
 
 // ============================================================================
 // TOOL 4: DESCRIPTION & TAG GENERATOR DIALOG
@@ -2100,17 +2164,37 @@ private fun YouTubeDescriptionGeneratorDialog(
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "📝 Description & Tag Generator",
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "📝 Description & Tag Generator",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite
@@ -2202,6 +2286,7 @@ $topic, $topic 2026, $topic guide, $creatorType tips, how to $topic, $topic hind
         }
     }
 }
+}
 
 // ============================================================================
 // TOOL 5: PRE-PUBLISH CHECKLIST DIALOG
@@ -2221,17 +2306,37 @@ private fun YouTubePrePublishChecklistDialog(onDismiss: () -> Unit) {
         )
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "✔ Pre-Publish Inspector",
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "✔ Pre-Publish Inspector",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite
@@ -2282,23 +2387,44 @@ private fun YouTubePrePublishChecklistDialog(onDismiss: () -> Unit) {
         }
     }
 }
+}
 
 // ============================================================================
 // TOOL 6: MONETIZATION GUIDE DIALOG
 // ============================================================================
 @Composable
 private fun YouTubeMonetizationGuideDialog(onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "💰 Monetization Roadmap (YPP)",
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "💰 Monetization Roadmap (YPP)",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite
@@ -2346,23 +2472,44 @@ private fun YouTubeMonetizationGuideDialog(onDismiss: () -> Unit) {
         }
     }
 }
+}
 
 // ============================================================================
 // LINK TO VIDEO EDITING ACADEMY DIALOG
 // ============================================================================
 @Composable
 private fun VideoEditingAcademyLinkDialog(onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF1A0A0A)),
-            color = Color(0xFF1A0A0A)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "✂️ Video Editing Academy",
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "✂️ Video Editing Academy",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite
@@ -2393,4 +2540,5 @@ private fun VideoEditingAcademyLinkDialog(onDismiss: () -> Unit) {
             }
         }
     }
+}
 }

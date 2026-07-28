@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -136,8 +137,7 @@ fun AiContentStudioDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             Surface(
                 color = Color(0xFF0F1A14),

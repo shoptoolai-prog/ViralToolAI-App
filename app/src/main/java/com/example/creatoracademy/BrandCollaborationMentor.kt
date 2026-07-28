@@ -7,7 +7,18 @@ import android.widget.Toast
 import com.example.ui.components.SmartWelcomeBackDialog
 import com.example.ui.components.RestartCourseConfirmDialog
 import com.example.ui.components.LearningProgressIndicatorCard
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.ui.draw.scale
 import androidx.compose.foundation.layout.imePadding
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.ime
@@ -19,6 +30,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
@@ -43,7 +55,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.shadow
-import com.example.ui.theme.EmeraldGlow
+import com.example.ui.components.PremiumIPhoneButton
+import com.example.ui.components.CompactHelperChip
+import com.example.ui.components.MentorToolTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -120,17 +134,22 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.BuildConfig
 import com.example.ui.screens.OfficialLogo
 import com.example.ui.theme.AmoledBlack
-import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
+
+private val EmeraldPrimary = Color(0xFFFACC15) // Gold Yellow for Brand Collab AI
+private val EmeraldGlow = Color(0x33FACC15) // Gold Glow Glass Effect
+private val brandCollabTheme = MentorToolTheme.BrandCollab
 
 /**
  * MASTER PHASE V2 — Brand Collaboration AI
@@ -514,11 +533,20 @@ fun BrandCollaborationAiDialog(
     }
 
     // Function to load step lesson
-    fun loadStepLesson(stepIdx: Int, isSimpler: Boolean = false) {
+    fun loadStepLesson(
+        stepIdx: Int,
+        isSimpler: Boolean = false,
+        giveExample: Boolean = false,
+        styleFormat: String? = null
+    ) {
         scope.launch {
             isThinking = true
-            thinkingMessage = if (isSimpler) "🧠 Simplifying explanation with fresh real-world example..." else "🔍 Deep Search: Retrieving campaign strategies & industry data..."
-            delay(800)
+            thinkingMessage = when {
+                giveExample -> "🧠 Generating real-world creator example (Email, DM, Rates)..."
+                isSimpler -> "🧠 Crafting a fresh, easy-to-understand explanation..."
+                else -> "🧠 Deep Thinking: Analyzing your progress, profile & lesson context..."
+            }
+            delay(700)
 
             val lessonItem = BrandCollabStaticData.guidedLessonsV2.getOrElse(stepIdx) {
                 BrandCollabStaticData.guidedLessonsV2.first()
@@ -549,7 +577,10 @@ fun BrandCollaborationAiDialog(
                 baseContent = baseContent,
                 userProfile = userProfile,
                 selectedLanguage = selectedLanguage,
-                isSimpler = isSimpler
+                isSimpler = isSimpler,
+                giveExample = giveExample,
+                styleFormat = styleFormat,
+                recentHistory = chatMessages.toList()
             )
 
             isThinking = false
@@ -577,14 +608,6 @@ fun BrandCollaborationAiDialog(
         }
     }
 
-    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    LaunchedEffect(chatMessages.size, imeBottomPadding) {
-        if (chatMessages.isNotEmpty()) {
-            delay(100)
-            listState.animateScrollToItem(chatMessages.size - 1)
-        }
-    }
-
     // Function to handle custom freeform AI mentor chat queries
     fun sendCustomUserQuery(queryText: String) {
         if (queryText.isBlank()) return
@@ -599,10 +622,15 @@ fun BrandCollaborationAiDialog(
                 listState.animateScrollToItem(chatMessages.size - 1)
             }
             isThinking = true
-            thinkingMessage = "🧠 Deep Thinking: Analyzing your question & Gemini research..."
-            delay(1000)
+            thinkingMessage = "🧠 Deep Thinking: Analyzing your question, progress & lesson context..."
+            delay(800)
 
-            val response = generateGeminiMentorResponse(queryText, userProfile, selectedLanguage)
+            val response = generateGeminiMentorResponse(
+                query = queryText,
+                profile = userProfile,
+                selectedLanguage = selectedLanguage,
+                recentHistory = chatMessages.toList()
+            )
             isThinking = false
 
             val aiMsg = BrandMentorMessage(
@@ -618,6 +646,14 @@ fun BrandCollaborationAiDialog(
         }
     }
 
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(chatMessages.size, isThinking, customUserInput, imeBottomPadding) {
+        if (chatMessages.isNotEmpty()) {
+            delay(60)
+            listState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -630,8 +666,7 @@ fun BrandCollaborationAiDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             AnimatedVisibility(
                 visible = isEntranceVisible,
@@ -680,20 +715,12 @@ fun BrandCollaborationAiDialog(
                             )
                         } else if (!isIntroCompleted) {
                             // ==================================================
-                            // 2. INTRODUCTION CARDS VIEW (SWIPE/NEXT SLIDES)
+                            // 2. INTRODUCTION & SWIPEABLE ROADMAP CARDS
                             // ==================================================
                             IntroCardsView(
-                                currentCardIndex = currentIntroCardIndex,
-                                onNextCard = {
+                                onStartMentorship = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (currentIntroCardIndex < BrandCollabStaticData.introCards.size - 1) {
-                                        currentIntroCardIndex++
-                                    } else {
-                                        isIntroCompleted = true
-                                    }
-                                },
-                                onPrevCard = {
-                                    if (currentIntroCardIndex > 0) currentIntroCardIndex--
+                                    isIntroCompleted = true
                                 },
                                 onSkipIntro = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -760,18 +787,69 @@ fun BrandCollaborationAiDialog(
                             } else {
                                 when (activeTab) {
                                     "MENTOR_CHAT" -> {
+                                        LaunchedEffect(chatMessages.size, isThinking) {
+                                            if (chatMessages.isNotEmpty()) {
+                                                listState.animateScrollToItem(chatMessages.size - 1)
+                                            }
+                                        }
+
                                         Column(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .fillMaxWidth()
+                                                .navigationBarsPadding()
+                                                .imePadding()
                                         ) {
-                                            LearningProgressIndicatorCard(
-                                                currentStep = currentStepIndex + 1,
-                                                totalSteps = BrandCollabStaticData.guidedLessonsV2.size,
-                                                stepTitle = BrandCollabStaticData.guidedLessonsV2.getOrNull(currentStepIndex)?.titleHinglish ?: "Lesson ${currentStepIndex + 1}",
-                                                onResetClick = { showRestartConfirmDialog = true },
-                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-                                            )
+                                            // Fixed Current Step Header
+                                            Surface(
+                                                shape = RoundedCornerShape(16.dp),
+                                                color = Color(0xFF121B16),
+                                                border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.45f)),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Column {
+                                                        Text(
+                                                            text = "Brand Collaboration AI",
+                                                            fontSize = 13.5.sp,
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            color = TextWhite,
+                                                            letterSpacing = 0.3.sp
+                                                        )
+                                                        Spacer(modifier = Modifier.height(2.dp))
+                                                        Text(
+                                                            text = "Current Step: ${currentStepIndex + 1} / ${BrandCollabStaticData.guidedLessonsV2.size}",
+                                                            fontSize = 11.5.sp,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = EmeraldPrimary
+                                                        )
+                                                    }
+
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .background(Color(0x2210B981))
+                                                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
+                                                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                                                    ) {
+                                                        val percent = ((currentStepIndex + 1) * 100 / BrandCollabStaticData.guidedLessonsV2.size)
+                                                        Text(
+                                                            text = "$percent% Done",
+                                                            fontSize = 10.5.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = EmeraldPrimary
+                                                        )
+                                                    }
+                                                }
+                                            }
 
                                             // Chat Messages List
                                             Box(
@@ -779,124 +857,174 @@ fun BrandCollaborationAiDialog(
                                                     .weight(1f)
                                                     .fillMaxWidth()
                                             ) {
-                                            LazyColumn(
-                                                state = listState,
-                                                modifier = Modifier.fillMaxSize(),
-                                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                items(chatMessages, key = { it.id }) { msg ->
-                                                    ChatMessageItem(
-                                                        message = msg,
-                                                        selectedLanguage = selectedLanguage,
-                                                        onConfirmedNext = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            // Award XP and increment step index
-                                                            CreatorAcademyPrefs.addXpPoints(context, 50, "BRAND_DEALS")
-                                                            val nextIdx = currentStepIndex + 1
-                                                            CreatorAcademyPrefs.setBrandCollabStepIndex(context, nextIdx)
+                                                LazyColumn(
+                                                    state = listState,
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    items(chatMessages, key = { it.id }) { msg ->
+                                                        ChatMessageItem(
+                                                            message = msg,
+                                                            selectedLanguage = selectedLanguage,
+                                                            totalSteps = BrandCollabStaticData.guidedLessonsV2.size,
+                                                            onConfirmedNext = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                CreatorAcademyPrefs.addXpPoints(context, 50, "BRAND_DEALS")
+                                                                val nextIdx = currentStepIndex + 1
+                                                                CreatorAcademyPrefs.setBrandCollabStepIndex(context, nextIdx)
 
-                                                            if (nextIdx < BrandCollabStaticData.guidedLessonsV2.size) {
-                                                                currentStepIndex = nextIdx
-                                                                val celebrationToast = when (selectedLanguage) {
-                                                                    "Hindi" -> "🎉 बहुत बढ़िया! +50 XP मिले। अगला लेसन..."
-                                                                    "English" -> "🎉 Great job! +50 XP earned. Next lesson loading..."
-                                                                    else -> "🎉 Awesome! +50 XP earned. Next lesson shuru..."
+                                                                if (nextIdx < BrandCollabStaticData.guidedLessonsV2.size) {
+                                                                    currentStepIndex = nextIdx
+                                                                    val celebrationToast = when (selectedLanguage) {
+                                                                        "Hindi" -> "🎉 बहुत बढ़िया! +50 XP मिले। अगला लेसन..."
+                                                                        "English" -> "🎉 Great job! +50 XP earned. Next lesson loading..."
+                                                                        else -> "🎉 Awesome! +50 XP earned. Next lesson shuru..."
+                                                                    }
+                                                                    Toast.makeText(context, celebrationToast, Toast.LENGTH_SHORT).show()
+                                                                    loadStepLesson(currentStepIndex, isSimpler = false)
+                                                                } else {
+                                                                    Toast.makeText(context, "🏆 Congratulations! You completed all 10 Brand Collaboration Lessons!", Toast.LENGTH_LONG).show()
                                                                 }
-                                                                Toast.makeText(context, celebrationToast, Toast.LENGTH_SHORT).show()
-                                                                loadStepLesson(currentStepIndex, isSimpler = false)
-                                                            } else {
-                                                                Toast.makeText(context, "🏆 Congratulations! You completed all 10 Brand Collaboration Lessons!", Toast.LENGTH_LONG).show()
+                                                            },
+                                                            onExplainAgain = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                loadStepLesson(currentStepIndex, isSimpler = true)
+                                                            },
+                                                            onGiveExample = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                loadStepLesson(currentStepIndex, giveExample = true)
+                                                            },
+                                                            onPreviousStep = {
+                                                                if (currentStepIndex > 0) {
+                                                                    currentStepIndex--
+                                                                    loadStepLesson(currentStepIndex)
+                                                                }
+                                                            },
+                                                            onNextStep = {
+                                                                if (currentStepIndex + 1 < BrandCollabStaticData.guidedLessonsV2.size) {
+                                                                    currentStepIndex++
+                                                                    loadStepLesson(currentStepIndex)
+                                                                }
+                                                            },
+                                                            onAskQuestion = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                customUserInput = "Can you give me another example for ${msg.stepTitle}?"
+                                                            },
+                                                            onOpenPlayStore = { pkg ->
+                                                                try {
+                                                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
+                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                                    context.startActivity(intent)
+                                                                } catch (_: Exception) {
+                                                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg"))
+                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                                    context.startActivity(intent)
+                                                                }
+                                                            },
+                                                            onOpenWebsite = { url ->
+                                                                try {
+                                                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                                    context.startActivity(intent)
+                                                                } catch (_: Exception) {
+                                                                    Toast.makeText(context, "Opening $url", Toast.LENGTH_SHORT).show()
+                                                                }
                                                             }
-                                                        },
-                                                        onExplainAgain = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            loadStepLesson(currentStepIndex, isSimpler = true)
-                                                        },
-                                                        onAskQuestion = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            customUserInput = "Can you give me another example for ${msg.stepTitle}?"
-                                                        },
-                                                        onOpenPlayStore = { pkg ->
-                                                            try {
-                                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
-                                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                                context.startActivity(intent)
-                                                            } catch (_: Exception) {
-                                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg"))
-                                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                                context.startActivity(intent)
-                                                            }
-                                                        },
-                                                        onOpenWebsite = { url ->
-                                                            try {
-                                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                                context.startActivity(intent)
-                                                            } catch (_: Exception) {
-                                                                Toast.makeText(context, "Opening $url", Toast.LENGTH_SHORT).show()
-                                                            }
-                                                        }
-                                                    )
-                                                }
+                                                        )
+                                                    }
 
-                                                if (isThinking) {
-                                                    item {
-                                                        AiThinkingIndicator(message = thinkingMessage)
+                                                    if (isThinking) {
+                                                        item {
+                                                            AiThinkingIndicator(message = thinkingMessage)
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
 
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(8.dp))
 
-                                        // Chat Input Row
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            OutlinedTextField(
-                                                value = customUserInput,
-                                                onValueChange = { customUserInput = it },
-                                                placeholder = {
-                                                    val placeholderText = when (selectedLanguage) {
-                                                        "Hindi" -> "ब्रांड डील्स के बारे में कुछ भी पूछें..."
-                                                        "English" -> "Ask AI Mentor anything about brand deals..."
-                                                        else -> "Brand deals ke baare me kuch bhi poochho..."
-                                                    }
-                                                    Text(placeholderText, fontSize = 11.5.sp, color = TextWhite.copy(alpha = 0.45f))
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    focusedBorderColor = EmeraldPrimary,
-                                                    unfocusedBorderColor = Color(0x33FFFFFF),
-                                                    focusedTextColor = TextWhite,
-                                                    unfocusedTextColor = TextWhite
-                                                ),
-                                                shape = RoundedCornerShape(20.dp),
-                                                maxLines = 2
-                                            )
-
-                                            Box(
+                                            // ChatGPT Style Floating Glass Input Area
+                                            Surface(
+                                                shape = RoundedCornerShape(26.dp),
+                                                color = Color(0x2818221D),
+                                                border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.45f)),
                                                 modifier = Modifier
-                                                    .size(44.dp)
-                                                    .clip(CircleShape)
-                                                    .background(EmeraldPrimary)
-                                                    .clickable {
-                                                        sendCustomUserQuery(customUserInput)
-                                                    },
-                                                contentAlignment = Alignment.Center
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                                                    .shadow(
+                                                        elevation = 10.dp,
+                                                        shape = RoundedCornerShape(26.dp),
+                                                        spotColor = EmeraldPrimary.copy(alpha = 0.35f)
+                                                    )
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Send,
-                                                    contentDescription = "Send",
-                                                    tint = AmoledBlack,
-                                                    modifier = Modifier.size(20.dp)
-                                                )
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    androidx.compose.foundation.text.BasicTextField(
+                                                        value = customUserInput,
+                                                        onValueChange = { customUserInput = it },
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .padding(vertical = 8.dp),
+                                                        textStyle = androidx.compose.ui.text.TextStyle(
+                                                            color = TextWhite,
+                                                            fontSize = 13.sp,
+                                                            fontFamily = androidx.compose.ui.text.font.FontFamily.Default
+                                                        ),
+                                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(EmeraldPrimary),
+                                                        maxLines = 3,
+                                                        decorationBox = { innerTextField ->
+                                                            if (customUserInput.isBlank()) {
+                                                                val placeholderText = when (selectedLanguage) {
+                                                                    "Hindi" -> "ब्रांड डील्स के बारे में कुछ भी पूछें..."
+                                                                    "English" -> "Ask AI Mentor anything about brand deals..."
+                                                                    else -> "Brand deals ke baare me kuch bhi poochho..."
+                                                                }
+                                                                Text(
+                                                                    text = placeholderText,
+                                                                    fontSize = 13.sp,
+                                                                    color = TextWhite.copy(alpha = 0.45f)
+                                                                )
+                                                            }
+                                                            innerTextField()
+                                                        }
+                                                    )
+
+                                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                                    val isEnabled = customUserInput.isNotBlank() && !isThinking
+                                                    val sendScale by animateFloatAsState(
+                                                        targetValue = if (isEnabled) 1.05f else 0.95f,
+                                                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                                                        label = "sendScale"
+                                                    )
+
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(38.dp)
+                                                            .scale(sendScale)
+                                                            .clip(CircleShape)
+                                                            .background(if (isEnabled) EmeraldPrimary else Color(0x33FFFFFF))
+                                                            .clickable(enabled = isEnabled) {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                sendCustomUserQuery(customUserInput)
+                                                            },
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Send,
+                                                            contentDescription = "Send",
+                                                            tint = if (isEnabled) AmoledBlack else TextWhite.copy(alpha = 0.3f),
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }
 
                                     "APPS_MARKET" -> {
                                         // Real Creator Platforms List
@@ -991,78 +1119,98 @@ fun BrandCollaborationAiDialog(
 
     // Language Switcher Overlay Modal (When clicking header badge)
     if (showLanguageSwitcherModal) {
-        Dialog(onDismissRequest = { showLanguageSwitcherModal = false }) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color(0xFF0F121C),
-                border = BorderStroke(1.5.dp, EmeraldPrimary),
+        Dialog(
+            onDismissRequest = { showLanguageSwitcherModal = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.85f))
+                    .clickable { showLanguageSwitcherModal = false }
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF0F121C),
+                    border = BorderStroke(1.5.dp, EmeraldPrimary),
+                    modifier = Modifier
+                        .widthIn(max = 480.dp)
+                        .fillMaxWidth(0.94f)
+                        .clickable(enabled = false) {}
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
                     ) {
-                        Text(
-                            text = "🌐 Switch Learning Language",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x22FFFFFF))
-                                .clickable { showLanguageSwitcherModal = false },
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    LanguageSelectionScreen(
-                        currentLanguage = selectedLanguage,
-                        onLanguageSelected = { lang ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            selectedLanguage = lang
-                            CreatorAcademyPrefs.setBrandCollabLanguage(context, lang)
-                            showLanguageSwitcherModal = false
-                            // Refresh current lesson in new language
-                            if (chatMessages.isNotEmpty()) {
-                                loadStepLesson(currentStepIndex, isSimpler = false)
+                            Text(
+                                text = "🌐 Switch Learning Language",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0x22FFFFFF))
+                                    .clickable { showLanguageSwitcherModal = false },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
                             }
                         }
-                    )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        LanguageSelectionScreen(
+                            currentLanguage = selectedLanguage,
+                            onLanguageSelected = { lang ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                selectedLanguage = lang
+                                CreatorAcademyPrefs.setBrandCollabLanguage(context, lang)
+                                showLanguageSwitcherModal = false
+                                // Refresh current lesson in new language
+                                if (chatMessages.isNotEmpty()) {
+                                    loadStepLesson(currentStepIndex, isSimpler = false)
+                                }
+                            }
+                        )
+                    }
                 }
             }
-
-            if (showRestartConfirmDialog) {
-                RestartCourseConfirmDialog(
-                    courseTitle = "Brand Collaboration AI",
-                    onConfirmRestart = {
-                        CreatorAcademyPrefs.resetCourseProgress(context, "brand_collab")
-                        isLanguageSelected = false
-                        selectedLanguage = "HinEnglish"
-                        currentStepIndex = 0
-                        chatMessages.clear()
-                        showWelcomeBackDialog = false
-                        showRestartConfirmDialog = false
-                    },
-                    onDismiss = { showRestartConfirmDialog = false }
-                )
-            }
         }
+    }
+
+    if (showRestartConfirmDialog) {
+        RestartCourseConfirmDialog(
+            courseTitle = "Brand Collaboration AI",
+            onConfirmRestart = {
+                CreatorAcademyPrefs.resetCourseProgress(context, "brand_collab")
+                isLanguageSelected = false
+                selectedLanguage = "HinEnglish"
+                currentStepIndex = 0
+                chatMessages.clear()
+                showWelcomeBackDialog = false
+                showRestartConfirmDialog = false
+            },
+            onDismiss = { showRestartConfirmDialog = false }
+        )
     }
 }
 
 /**
- * 1. Language Selection Screen Component
+ * 1. Redesigned Language Selection Screen Component (Glass sheet, Apple rounded buttons, equal spacing)
  */
 @Composable
 private fun LanguageSelectionScreen(
@@ -1071,172 +1219,166 @@ private fun LanguageSelectionScreen(
 ) {
     var selected by remember { mutableStateOf(if (currentLanguage.isNotBlank()) currentLanguage else "HinEnglish") }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(Color(0x2210B981))
-                .border(BorderStroke(1.5.dp, EmeraldPrimary), CircleShape),
-            contentAlignment = Alignment.Center
+                .widthIn(max = 440.dp)
+                .fillMaxWidth(0.95f)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "🌐", fontSize = 28.sp)
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "Which language would you like to learn in?",
-            fontSize = 16.5.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextWhite,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "अपनी पसंदीदा भाषा चुनें • Select Your Preferred Language",
-            fontSize = 11.5.sp,
-            color = TextWhite.copy(alpha = 0.65f),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Card 1: HinEnglish
-        LanguageCardOption(
-            flag = "🌐",
-            title = "HinEnglish (Mix)",
-            subtitle = "Most popular for Indian creators! Easy mix of Hindi & English. (e.g. 'Awesome 😄 Aaj hum zero se seekhenge')",
-            badge = "POPULAR",
-            isSelected = selected == "HinEnglish",
-            onClick = { selected = "HinEnglish" }
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Card 2: Hindi
-        LanguageCardOption(
-            flag = "🇮🇳",
-            title = "Hindi (हिन्दी)",
-            subtitle = "शुद्ध व सरल हिन्दी। हर टॉपिक आसान भाषा में सीखें। (e.g. 'नमस्ते! 😄 आज हम ब्रांड डील्स सीखेंगे')",
-            badge = "EASY HINDI",
-            isSelected = selected == "Hindi",
-            onClick = { selected = "Hindi" }
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Card 3: English
-        LanguageCardOption(
-            flag = "🇺🇸",
-            title = "English",
-            subtitle = "Simple & clear conversational English. (e.g. 'Hey creator! 😄 Let's learn brand deals from zero')",
-            badge = "GLOBAL",
-            isSelected = selected == "English",
-            onClick = { selected = "English" }
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(EmeraldPrimary)
-                .clickable { onLanguageSelected(selected) },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Start Learning in $selected 🚀",
-                fontSize = 14.5.sp,
-                fontWeight = FontWeight.Bold,
-                color = AmoledBlack
-            )
-        }
-    }
-}
-
-@Composable
-private fun LanguageCardOption(
-    flag: String,
-    title: String,
-    subtitle: String,
-    badge: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color(0xFF16251F) else Color(0xFF141824),
-        border = BorderStroke(
-            if (isSelected) 2.dp else 1.dp,
-            if (isSelected) EmeraldPrimary else Color(0x22FFFFFF)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = flag, fontSize = 26.sp)
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = Color(0x1A102018),
+                border = BorderStroke(
+                    1.5.dp,
+                    Brush.verticalGradient(
+                        listOf(EmeraldPrimary.copy(alpha = 0.6f), Color(0x22FFFFFF))
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                ),
+                shadowElevation = 12.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(if (isSelected) EmeraldPrimary else Color(0x22FFFFFF))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(EmeraldPrimary.copy(alpha = 0.35f), Color.Transparent)
+                                )
+                            )
+                            .border(BorderStroke(1.5.dp, EmeraldPrimary), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🌐", fontSize = 30.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "Choose Your Language",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextWhite,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Select the language you are most comfortable learning in.",
+                        fontSize = 12.5.sp,
+                        color = TextWhite.copy(alpha = 0.75f),
+                        textAlign = TextAlign.Center,
+                        lineHeight = 17.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    val languageOptions = listOf(
+                        Triple("Hindi", "Hindi (हिन्दी)", "🇮🇳"),
+                        Triple("English", "English", "🇺🇸"),
+                        Triple("HinEnglish", "Hinglish (Mix)", "🌐")
+                    )
+
+                    languageOptions.forEach { (code, displayName, flag) ->
+                        val isSelected = selected == code
+
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                                .clickable { selected = code },
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSelected) Color(0xFF162A20) else Color(0x18FFFFFF),
+                            border = BorderStroke(
+                                if (isSelected) 2.dp else 1.dp,
+                                if (isSelected) EmeraldPrimary else Color(0x25FFFFFF)
+                            ),
+                            shadowElevation = if (isSelected) 6.dp else 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 18.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(text = flag, fontSize = 22.sp)
+                                    Text(
+                                        text = displayName,
+                                        fontSize = 15.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) EmeraldPrimary else TextWhite
+                                    )
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isSelected) EmeraldPrimary else Color.Transparent)
+                                        .border(
+                                            BorderStroke(
+                                                1.5.dp,
+                                                if (isSelected) EmeraldPrimary else Color(0x44FFFFFF)
+                                            ),
+                                            CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Selected",
+                                            tint = AmoledBlack,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(26.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(EmeraldPrimary, Color(0xFF00E676))
+                                )
+                            )
+                            .clickable { onLanguageSelected(selected) },
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = badge,
-                            fontSize = 8.sp,
+                            text = "Continue in ${if (selected == "HinEnglish") "Hinglish" else selected} ➔",
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isSelected) AmoledBlack else TextWhite.copy(alpha = 0.8f)
+                            color = AmoledBlack
                         )
                     }
-                }
-                Spacer(modifier = Modifier.height(3.dp))
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = TextWhite.copy(alpha = 0.7f),
-                    lineHeight = 15.sp
-                )
-            }
-            Spacer(modifier = Modifier.width(6.dp))
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .background(if (isSelected) EmeraldPrimary else Color.Transparent)
-                    .border(BorderStroke(1.5.dp, if (isSelected) EmeraldPrimary else Color(0x44FFFFFF)), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isSelected) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
-                        tint = AmoledBlack,
-                        modifier = Modifier.size(13.dp)
-                    )
                 }
             }
         }
@@ -1359,7 +1501,6 @@ private fun DynamicIslandHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Dynamic Island Capsule
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
@@ -1388,7 +1529,6 @@ private fun DynamicIslandHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Language Selector Badge Button
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
@@ -1434,7 +1574,6 @@ private fun DynamicIslandHeader(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Progress Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1459,173 +1598,266 @@ private fun DynamicIslandHeader(
 }
 
 /**
- * Introduction Swipe/Next Cards View
+ * 2 & 3 & 4. Redesigned Intro & Swipeable Roadmap Cards View
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun IntroCardsView(
-    currentCardIndex: Int,
-    onNextCard: () -> Unit,
-    onPrevCard: () -> Unit,
+    onStartMentorship: () -> Unit,
     onSkipIntro: () -> Unit
 ) {
-    val card = BrandCollabStaticData.introCards.getOrElse(currentCardIndex) { BrandCollabStaticData.introCards.first() }
+    val cards = BrandCollabStaticData.introCards
+    val pagerState = rememberPagerState(pageCount = { cards.size })
+    var hasSwipedRoadmap by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage > 0) {
+            hasSwipedRoadmap = true
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "borderGlow")
+    val borderGlowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowAlpha"
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            Text(
-                text = "Skip Intro ➔",
-                fontSize = 12.sp,
-                color = EmeraldPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onSkipIntro() }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0x15FFFFFF))
-                .border(
-                    BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary.copy(alpha = 0.6f), Color(0x1CFFFFFF)))),
-                    RoundedCornerShape(24.dp)
-                )
-                .padding(20.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x2210B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = card.icon,
-                        contentDescription = card.title,
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
+            if (!hasSwipedRoadmap) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0x2210B981))
+                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = card.highlightTag,
-                        fontSize = 10.sp,
+                        text = "⬅ Swipe to explore ➡",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary,
-                        letterSpacing = 0.5.sp
+                        color = EmeraldPrimary
                     )
                 }
+            } else {
+                Spacer(modifier = Modifier.width(1.dp))
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Skip Intro ➔",
+                fontSize = 12.sp,
+                color = TextWhite.copy(alpha = 0.7f),
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { onSkipIntro() }
+            )
+        }
 
-                Text(
-                    text = card.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite,
-                    textAlign = TextAlign.Center
+        Spacer(modifier = Modifier.height(8.dp))
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(380.dp),
+            contentPadding = PaddingValues(horizontal = 10.dp),
+            pageSpacing = 12.dp
+        ) { pageIndex ->
+            val card = cards[pageIndex]
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shadow(12.dp, RoundedCornerShape(24.dp), spotColor = EmeraldGlow),
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0x1A14241C),
+                border = BorderStroke(
+                    1.2.dp,
+                    Brush.linearGradient(
+                        listOf(
+                            EmeraldPrimary.copy(alpha = borderGlowAlpha),
+                            Color(0x33FFFFFF)
+                        )
+                    )
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = card.subtitle,
-                    fontSize = 13.sp,
-                    color = TextWhite.copy(alpha = 0.75f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+            ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    card.bulletPoints.forEach { pt ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(58.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x2210B981))
+                                .border(BorderStroke(1.5.dp, EmeraldPrimary), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Check",
+                                imageVector = card.icon,
+                                contentDescription = card.title,
                                 tint = EmeraldPrimary,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(28.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = pt, fontSize = 12.sp, color = TextWhite.copy(alpha = 0.9f))
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0x2210B981))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = card.highlightTag,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EmeraldPrimary,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = card.title,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextWhite,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = card.subtitle,
+                            fontSize = 12.5.sp,
+                            color = TextWhite.copy(alpha = 0.75f),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            card.bulletPoints.forEach { pt ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Check",
+                                        tint = EmeraldPrimary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = pt,
+                                        fontSize = 12.sp,
+                                        color = TextWhite.copy(alpha = 0.9f),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    Text(
+                        text = "Card ${pageIndex + 1} of ${cards.size}",
+                        fontSize = 11.sp,
+                        color = TextWhite.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                BrandCollabStaticData.introCards.indices.forEach { idx ->
-                    Box(
-                        modifier = Modifier
-                            .size(if (idx == currentCardIndex) 18.dp else 8.dp, 8.dp)
-                            .clip(CircleShape)
-                            .background(if (idx == currentCardIndex) EmeraldPrimary else Color(0x33FFFFFF))
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                if (currentCardIndex > 0) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp)
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(Color(0x20FFFFFF))
-                            .clickable { onPrevCard() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Back", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    }
-                }
-
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            cards.indices.forEach { idx ->
+                val isSelected = idx == pagerState.currentPage
                 Box(
                     modifier = Modifier
-                        .weight(1.5f)
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(EmeraldPrimary)
-                        .clickable { onNextCard() },
-                    contentAlignment = Alignment.Center
+                        .size(if (isSelected) 22.dp else 8.dp, 8.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) EmeraldPrimary else Color(0x33FFFFFF))
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        var isPressed by remember { mutableStateOf(false) }
+        val buttonScale by animateFloatAsState(
+            targetValue = if (isPressed) 0.96f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            label = "buttonScale"
+        )
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .height(52.dp)
+                .scale(buttonScale)
+                .clickable {
+                    isPressed = true
+                    onStartMentorship()
+                },
+            shape = RoundedCornerShape(26.dp),
+            color = EmeraldPrimary,
+            border = BorderStroke(1.5.dp, Color(0xFF00FF87)),
+            shadowElevation = 8.dp
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(EmeraldPrimary, Color(0xFF00E676))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = if (currentCardIndex == BrandCollabStaticData.introCards.size - 1) "Start AI Mentor 🚀" else "Next Card ➔",
-                        fontSize = 13.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = "Start AI Mentorship 🚀",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold,
                         color = AmoledBlack
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Start",
+                        tint = AmoledBlack,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -1745,218 +1977,347 @@ private fun ZeroKnowledgeProfileSetup(
 private fun ChatMessageItem(
     message: BrandMentorMessage,
     selectedLanguage: String,
-    onConfirmedNext: () -> Unit,
-    onExplainAgain: () -> Unit,
-    onAskQuestion: () -> Unit,
-    onOpenPlayStore: (String) -> Unit,
-    onOpenWebsite: (String) -> Unit
+    totalSteps: Int = 10,
+    onConfirmedNext: () -> Unit = {},
+    onExplainAgain: () -> Unit = {},
+    onGiveExample: () -> Unit = {},
+    onPreviousStep: () -> Unit = {},
+    onNextStep: () -> Unit = {},
+    onAskQuestion: () -> Unit = {},
+    onOpenPlayStore: (String) -> Unit = {},
+    onOpenWebsite: (String) -> Unit = {}
 ) {
     val isUser = message.isFromUser
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn(animationSpec = tween(350)) + slideInVertically(animationSpec = tween(350), initialOffsetY = { it / 3 })
     ) {
-        if (!isUser) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color(0x2210B981))
-                    .border(BorderStroke(1.dp, EmeraldPrimary), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Campaign,
-                    contentDescription = "AI Mentor",
-                    tint = EmeraldPrimary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        Column(
-            modifier = Modifier.widthIn(max = 340.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
         ) {
-            Surface(
-                shape = RoundedCornerShape(
-                    topStart = 18.dp,
-                    topEnd = 18.dp,
-                    bottomStart = if (isUser) 18.dp else 4.dp,
-                    bottomEnd = if (isUser) 4.dp else 18.dp
-                ),
-                color = if (isUser) EmeraldPrimary else Color(0xFF171C28),
-                border = if (!isUser) BorderStroke(1.dp, Color(0x22FFFFFF)) else null
+            if (!isUser) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x2E10B981))
+                        .border(BorderStroke(1.dp, EmeraldPrimary), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Campaign,
+                        contentDescription = "AI Mentor",
+                        tint = EmeraldPrimary,
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Column(
+                modifier = Modifier.widthIn(max = 420.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    if (message.isLessonStep) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                val bubbleShape = RoundedCornerShape(
+                    topStart = if (isUser) 22.dp else 4.dp,
+                    topEnd = if (isUser) 4.dp else 22.dp,
+                    bottomStart = 22.dp,
+                    bottomEnd = 22.dp
+                )
+
+                Surface(
+                    shape = bubbleShape,
+                    color = if (isUser) Color(0x3B10B981) else Color(0x2E14241C),
+                    border = BorderStroke(1.dp, if (isUser) EmeraldPrimary.copy(alpha = 0.6f) else EmeraldPrimary.copy(alpha = 0.35f)),
+                    modifier = Modifier.shadow(
+                        elevation = 8.dp,
+                        shape = bubbleShape,
+                        spotColor = if (isUser) EmeraldPrimary.copy(alpha = 0.3f) else Color(0x2210B981)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        if (message.isLessonStep) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = "Lesson",
+                                    tint = EmeraldPrimary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = message.stepTitle,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                        }
+
+                        Text(
+                            text = message.text,
+                            fontSize = 12.5.sp,
+                            color = TextWhite,
+                            lineHeight = 18.5.sp
+                        )
+
+                        // Daily Mission / Practical Task Chip
+                        message.practicalTaskText?.let { task ->
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0x2210B981))
+                                    .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                                    .padding(10.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.Top) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = "Task", tint = EmeraldPrimary, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = "DAILY PRACTICAL MISSION",
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = EmeraldPrimary
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = task,
+                                            fontSize = 11.5.sp,
+                                            color = TextWhite,
+                                            lineHeight = 16.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Embedded Platform Apps List
+                        message.platformApps?.let { apps ->
+                            Spacer(modifier = Modifier.height(10.dp))
+                            apps.take(3).forEach { app ->
+                                RealPlatformCardItem(
+                                    app = app,
+                                    onOpenPlayStore = onOpenPlayStore,
+                                    onOpenWebsite = onOpenWebsite
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                            }
+                        }
+                    }
+                }
+
+                // Interactive Confirmation Prompt Box ("Did you understand?")
+                if (!isUser && message.showConfirmationPrompt) {
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Progress Updated ✓ Chip
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0x2210B981),
+                        border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.School,
-                                contentDescription = "Lesson",
-                                tint = if (isUser) AmoledBlack else EmeraldPrimary,
-                                modifier = Modifier.size(16.dp)
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Progress Updated",
+                                tint = EmeraldPrimary,
+                                modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = message.stepTitle,
-                                fontSize = 13.sp,
+                                text = "Progress Updated ✓",
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isUser) AmoledBlack else TextWhite
+                                color = EmeraldPrimary,
+                                letterSpacing = 0.3.sp
                             )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
                     }
 
-                    Text(
-                        text = message.text,
-                        fontSize = 12.5.sp,
-                        color = if (isUser) AmoledBlack else TextWhite,
-                        lineHeight = 18.sp
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Daily Mission / Practical Task Chip
-                    message.practicalTaskText?.let { task ->
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x2210B981))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
-                                .padding(10.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.Top) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = "Task", tint = EmeraldPrimary, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0x1C10B981))
+                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(16.dp))
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            val promptTitle = when (selectedLanguage) {
+                                "Hindi" -> "✅ क्या यह स्टेप समझ आ गया?"
+                                "English" -> "✅ Did you understand this step?"
+                                else -> "✅ Yeh step samajh aa gaya?"
+                            }
+
+                            Text(
+                                text = promptTitle,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EmeraldPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                // Yes, Continue Button
+                                val yesLabel = when (selectedLanguage) {
+                                    "Hindi" -> "हाँ 👍"
+                                    "English" -> "Yes, Continue ✅"
+                                    else -> "Yes, Continue ✅"
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1.3f)
+                                        .height(36.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(EmeraldPrimary)
+                                        .clickable { onConfirmedNext() },
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(
-                                        text = "DAILY PRACTICAL MISSION",
-                                        fontSize = 9.sp,
+                                        text = yesLabel,
+                                        fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = EmeraldPrimary
+                                        color = AmoledBlack
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                }
+
+                                // Explain Again Button
+                                val explainLabel = when (selectedLanguage) {
+                                    "Hindi" -> "फिर से समझाओ ❓"
+                                    "English" -> "Explain Again ❓"
+                                    else -> "Explain Again ❓"
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1.2f)
+                                        .height(36.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .clickable { onExplainAgain() },
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(
-                                        text = task,
-                                        fontSize = 11.5.sp,
-                                        color = TextWhite,
-                                        lineHeight = 16.sp
+                                        text = explainLabel,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextWhite
+                                    )
+                                }
+
+                                // Give Example Button
+                                val exampleLabel = when (selectedLanguage) {
+                                    "Hindi" -> "उदाहरण 📝"
+                                    "English" -> "Give Example 📝"
+                                    else -> "Give Example 📝"
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1.2f)
+                                        .height(36.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .clickable { onGiveExample() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = exampleLabel,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextWhite
                                     )
                                 }
                             }
                         }
                     }
 
-                    // Embedded Platform Apps List
-                    message.platformApps?.let { apps ->
-                        Spacer(modifier = Modifier.height(10.dp))
-                        apps.take(3).forEach { app ->
-                            RealPlatformCardItem(
-                                app = app,
-                                onOpenPlayStore = onOpenPlayStore,
-                                onOpenWebsite = onOpenWebsite
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                        }
-                    }
-                }
-            }
+                    Spacer(modifier = Modifier.height(10.dp))
 
-            // Interactive Confirmation Prompt Box ("Did you understand?")
-            if (!isUser && message.showConfirmationPrompt) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0x1810B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(14.dp))
-                        .padding(10.dp)
-                ) {
-                    Column {
-                        val promptTitle = when (selectedLanguage) {
-                            "Hindi" -> "✅ क्या यह स्टेप समझ आ गया?"
-                            "English" -> "✅ Did you understand this step?"
-                            else -> "✅ Yeh step samajh aa gaya?"
-                        }
-
-                        Text(
-                            text = promptTitle,
-                            fontSize = 11.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldPrimary
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    // Glass Apple-Style Navigation Buttons: ← Previous  |  Continue →
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val canGoPrev = message.stepNumber > 1
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color(0x1AFFFFFF),
+                            border = BorderStroke(1.dp, if (canGoPrev) Color(0x33FFFFFF) else Color(0x11FFFFFF)),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(38.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable(enabled = canGoPrev) { onPreviousStep() }
                         ) {
-                            // Yes Button
-                            val yesLabel = when (selectedLanguage) {
-                                "Hindi" -> "हाँ 👍"
-                                "English" -> "Yes 👍"
-                                else -> "Yes 👍"
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(34.dp)
-                                    .clip(RoundedCornerShape(17.dp))
-                                    .background(EmeraldPrimary)
-                                    .clickable { onConfirmedNext() },
-                                contentAlignment = Alignment.Center
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Previous",
+                                    tint = if (canGoPrev) TextWhite else TextWhite.copy(alpha = 0.3f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = yesLabel,
-                                    fontSize = 11.sp,
+                                    text = "← Previous",
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = AmoledBlack
+                                    color = if (canGoPrev) TextWhite else TextWhite.copy(alpha = 0.3f)
                                 )
                             }
+                        }
 
-                            // Explain Again Button
-                            val explainLabel = when (selectedLanguage) {
-                                "Hindi" -> "फिर से समझाओ 🔄"
-                                "English" -> "Explain Again 🔄"
-                                else -> "Explain Again 🔄"
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .weight(1.2f)
-                                    .height(34.dp)
-                                    .clip(RoundedCornerShape(17.dp))
-                                    .background(Color(0x22FFFFFF))
-                                    .clickable { onExplainAgain() },
-                                contentAlignment = Alignment.Center
+                        val isLast = message.stepNumber >= totalSteps
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color(0x2210B981),
+                            border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(38.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { onNextStep() }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = explainLabel,
-                                    fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextWhite
+                                    text = if (isLast) "Finish 🏆" else "Continue →",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = EmeraldPrimary
                                 )
-                            }
-
-                            // Ask Question Button
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(34.dp)
-                                    .clip(RoundedCornerShape(17.dp))
-                                    .background(Color(0x22FFFFFF))
-                                    .clickable { onAskQuestion() },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Ask ❓",
-                                    fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextWhite
-                                )
+                                if (!isLast) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = "Continue",
+                                        tint = EmeraldPrimary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -1971,28 +2332,64 @@ private fun ChatMessageItem(
  */
 @Composable
 private fun AiThinkingIndicator(message: String) {
-    Row(
+    val infiniteTransition = rememberInfiniteTransition(label = "thinking")
+    val alphaAnim by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0x2810B981),
+        border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.45f)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 6.dp)
+            .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = EmeraldPrimary.copy(alpha = 0.25f))
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(Color(0x2210B981)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Psychology, contentDescription = "Thinking", tint = EmeraldPrimary, modifier = Modifier.size(16.dp))
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x3310B981)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Psychology,
+                    contentDescription = "Thinking",
+                    tint = EmeraldPrimary,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .scale(0.9f + alphaAnim * 0.18f)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = message,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EmeraldPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Analyzing campaign strategies & preparing best answer...",
+                    fontSize = 10.5.sp,
+                    color = TextWhite.copy(alpha = 0.65f)
+                )
+            }
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = message,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = EmeraldPrimary.copy(alpha = 0.85f)
-        )
     }
 }
 
@@ -2257,26 +2654,56 @@ private suspend fun fetchDynamicStepExplanation(
     baseContent: String,
     userProfile: BrandCollabUserProfile,
     selectedLanguage: String,
-    isSimpler: Boolean
+    isSimpler: Boolean = false,
+    giveExample: Boolean = false,
+    styleFormat: String? = null,
+    recentHistory: List<BrandMentorMessage> = emptyList()
 ): String = withContext(Dispatchers.IO) {
     val apiKey = try {
         val key = BuildConfig.GEMINI_API_KEY
         if (!key.isNullOrBlank() && key != "BUILDCONFIG_MISSING" && key != "null") key else System.getenv("GEMINI_API_KEY") ?: ""
     } catch (_: Exception) { "" }
 
+    val randomNonce = System.currentTimeMillis() % 10000
+    val availableStyles = listOf(
+        "Story format with a real creator journey",
+        "Beginner explanation with step-by-step points",
+        "Real-life practical example (Email pitch, DM, Media Kit, or Contract)",
+        "Flowchart style step-by-step breakdown",
+        "Checklist format with clear actionable items",
+        "Friendly mentor coach style with practical creator pro-tips"
+    )
+    val chosenStyle = styleFormat ?: availableStyles.random()
+
     if (apiKey.isNotBlank()) {
         try {
-            val systemContext = when (selectedLanguage) {
-                "Hindi" -> "You are Brand Collaboration AI, a super friendly creator mentor who speaks conversational Devanagari Hindi. Use warm emojis 😄 and real Indian brand examples like Boat, Meesho, Minimalist, Snitch, Mamaearth, Nykaa."
-                "English" -> "You are Brand Collaboration AI, a super friendly creator mentor who speaks clear conversational English. Use warm emojis 😄 and real brand examples like Boat, Meesho, Minimalist, Snitch, Mamaearth, Nykaa."
-                else -> "You are Brand Collaboration AI, a super friendly creator mentor who speaks natural Hinglish (Hindi + English mix). Use warm emojis 😄 and real brand examples like Boat, Meesho, Minimalist, Snitch, Mamaearth, Nykaa."
+            val historySnippet = recentHistory.takeLast(4).joinToString("\n") { m ->
+                if (m.isFromUser) "User: ${m.text}" else "Mentor: ${m.text.take(120)}"
             }
 
-            val prompt = if (isSimpler) {
-                "$systemContext\nExplain '$stepTitle' simply with a real-life analogy to a beginner creator (${userProfile.followers} followers in ${userProfile.niche}). Keep it friendly under 4 sentences."
-            } else {
-                "$systemContext\nTeach '$stepTitle' to a creator with ${userProfile.followers} followers in ${userProfile.niche}. Provide actionable steps and real brand examples."
+            val langDirective = when (selectedLanguage) {
+                "Hindi" -> "Speak in warm, natural Devanagari Hindi."
+                "English" -> "Speak in clear, encouraging conversational English."
+                else -> "Speak in natural Hinglish (Hindi + English mix)."
             }
+
+            val prompt = """
+You are Brand Collaboration AI, an experienced senior creator coach mentoring a beginner one-on-one.
+Tone: Friendly, patient, professional, motivating, practical, and human (NEVER robotic, dry, or textbook jargon).
+Language: $langDirective
+
+CRITICAL MANDATORY RULES:
+1. NEVER REPEAT WORDING. Every reply MUST be newly generated with fresh phrasing. (Variation seed: $randomNonce)
+2. EXPLANATION STYLE: Use this format/style: $chosenStyle.
+3. REASONING & CONTEXT: Consider user profile (${userProfile.followers} followers in ${userProfile.niche} on ${userProfile.platform}) and lesson step ($stepIndex: $stepTitle).
+4. SMART EXAMPLES: Include real Indian/global brands (e.g. Boat, Meesho, Snitch, Mamaearth, Minimalist, Nykaa, Amazon) and practical formats (Email pitch, DM, Media Kit, Rates, Contracts).
+${if (giveExample) "5. EXPLICIT DEMAND: The user clicked 'Give Example'. Provide a clear, copyable real-life example (e.g., exact email draft, DM script, pricing card, or contract clause)." else ""}
+
+Recent Chat History:
+$historySnippet
+
+Explain '$stepTitle' (Base Concept: $baseContent) in a fresh, engaging way.
+""".trimIndent()
 
             val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
             val url = URL(endpoint)
@@ -2284,8 +2711,8 @@ private suspend fun fetchDynamicStepExplanation(
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json")
             conn.doOutput = true
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
+            conn.connectTimeout = 6000
+            conn.readTimeout = 6000
 
             val jsonBody = JSONObject().apply {
                 put("contents", JSONArray().apply {
@@ -2320,15 +2747,34 @@ private suspend fun fetchDynamicStepExplanation(
         } catch (_: Exception) {}
     }
 
-    // Multi-Lingual Local Mentor Fallback Engine
-    if (isSimpler) {
+    // Dynamic Multi-Style Local Mentor Engine (Fallback)
+    val exampleSuffix = when (stepIndex) {
+        1 -> "\n\n📝 Real DM Example:\n'Hey Boat Audio Team! 👋 I create tech gadget Reels on Instagram with 5k daily reach. Loved your new Airdopes 141. Would love to feature them in a dedicated Reel! Shall I share my Media Kit?'"
+        2 -> "\n\n📝 Profile Bio Example:\n'🎥 Tech & Lifestyle Reviews\n📩 Brand Collabs: contact.rahul@gmail.com\n📍 Mumbai, India'"
+        3 -> "\n\n📝 Micro-Brand Target List:\n• Boat Audio (@boatarat.audio)\n• Snitch Clothing (@snitch.co.in)\n• Minimalist Skincare (@beminimalist.co)"
+        4 -> "\n\n📝 Platform Application Tip:\nOn Meesho Creator Program or Amazon Influencer, always link your highest-performing Reel in the application notes to get approved within 24 hours!"
+        5 -> "\n\n✉️ Real Email Pitch Template:\nSubject: Reel Collaboration — ${userProfile.niche} Creator x Brand\nDear Marketing Team,\nI run a growing channel with ${userProfile.followers} followers on ${userProfile.platform}. We'd love to review your flagship product..."
+        6 -> "\n\n📝 Follow-Up Script:\n'Hey! Following up on my previous message regarding the Reel collab. We're finalizing our content calendar for this month and would love to include you guys!'"
+        7 -> "\n\n💰 Rate Card Example:\n• 1x Instagram Reel: ₹3,500\n• 2x Instagram Stories: ₹1,500\n• Paid Ad Usage Rights (30 Days): +50% (₹1,750)"
+        8 -> "\n\n📝 Gift Upgrade Script:\n'Thank you! I'd love to share an unboxing Story for free. However, for a dedicated high-converting Reel, my standard fee is ₹3,000.'"
+        9 -> "\n\n🛡️ Safety Contract Rule:\n1. Never click unknown verification links.\n2. Ensure 50% advance before posting.\n3. Verify sender email domain (@company.com)."
+        else -> "\n\n📝 Post-Campaign Report Example:\n'Campaign Results: 42,000 Impressions, 3,800 Engagements, 412 Link Clicks. Looking forward to our next monthly retainer!'"
+    }
+
+    if (giveExample) {
         when (selectedLanguage) {
-            "Hindi" -> "💡 आसान उदाहरण:\nसोचिए जैसे आप अपने दोस्त को अपनी पसंदीदा बोट इयरफोन रिकमेंड कर रहे हैं! ब्रांड कोलैबोरेशन में आपको बेचना नहीं है, बस ईमानदारी से यह दिखाना है कि प्रोडक्ट आपकी लाइफ में कैसे फिट बैठता है।"
-            "English" -> "💡 Simple Analogy:\nThink of brand collaboration like recommending your favorite Boat earphones to a close friend. You aren't hard-selling; you're simply demonstrating how naturally it fits into your everyday lifestyle!"
-            else -> "💡 Simple Analogy:\nBrand collaboration socho jaise apne dost ko favorite Boat earphones recommend karna! Hard-sell nahi karna, bas batao ki ye product aapki daily life me kitna useful hai."
+            "Hindi" -> "📝 व्यावहारिक उदाहरण (Practical Example):\n$exampleSuffix"
+            "English" -> "📝 Practical Real-World Example:\n$exampleSuffix"
+            else -> "📝 Practical Real-World Example:\n$exampleSuffix"
+        }
+    } else if (isSimpler) {
+        when (selectedLanguage) {
+            "Hindi" -> "💡 सरल शब्द (Simple Analogy):\nसोचिए जैसे आप किसी करीबी दोस्त को अपनी पसंदीदा बोट इयरफोन या कपड़े रिकमेंड कर रहे हैं! ब्रांड कोलैबोरेशन में बेचना नहीं है, बस ईमानदारी से दिखाना है।"
+            "English" -> "💡 Simple Analogy:\nThink of brand collaboration like recommending your favorite gadget or outfit to a close friend. You aren't selling hard; you're naturally sharing value!"
+            else -> "💡 Simple Analogy:\nBrand collab socho jaise apne best friend ko favorite gadget recommend karna. Sell nahi karna, bas natural style me show karna hai!"
         }
     } else {
-        "$baseContent\n\n📌 Customized for ${userProfile.niche} (${userProfile.followers} Followers on ${userProfile.platform}):\n• Focus on high engagement over follower count.\n• Showcase clean lighting & clear audio in every Reel."
+        "$baseContent\n\n📌 Senior Coach Advice for ${userProfile.niche} (${userProfile.followers} on ${userProfile.platform}):\n• Focus on high engagement & clean presentation.\n• Consistency builds long-term brand trust!" + (if (kotlin.random.Random.nextBoolean()) exampleSuffix else "")
     }
 }
 
@@ -2338,35 +2784,59 @@ private suspend fun fetchDynamicStepExplanation(
 private suspend fun generateGeminiMentorResponse(
     query: String,
     profile: BrandCollabUserProfile,
-    selectedLanguage: String
+    selectedLanguage: String,
+    recentHistory: List<BrandMentorMessage> = emptyList()
 ): String = withContext(Dispatchers.IO) {
     val apiKey = try {
         val key = BuildConfig.GEMINI_API_KEY
         if (!key.isNullOrBlank() && key != "BUILDCONFIG_MISSING" && key != "null") key else System.getenv("GEMINI_API_KEY") ?: ""
     } catch (_: Exception) { "" }
 
+    val randomNonce = System.currentTimeMillis() % 10000
+
     if (apiKey.isNotBlank()) {
         try {
+            val historySnippet = recentHistory.takeLast(4).joinToString("\n") { m ->
+                if (m.isFromUser) "User: ${m.text}" else "Mentor: ${m.text.take(120)}"
+            }
+
+            val langDirective = when (selectedLanguage) {
+                "Hindi" -> "Answer in warm, friendly Devanagari Hindi."
+                "English" -> "Answer in clear, motivating conversational English."
+                else -> "Answer in natural Hinglish (Hindi + English mix)."
+            }
+
+            val prompt = """
+You are Brand Collaboration AI, an experienced senior creator coach.
+Tone: Friendly, patient, professional, motivating, practical, and human (NEVER robotic or textbook).
+Language: $langDirective
+
+CRITICAL MANDATORY RULES:
+1. NEVER REPEAT PREVIOUS ANSWERS WORD-FOR-WORD. Generate a newly phrased response. (Seed: $randomNonce)
+2. THINK & ANALYZE: Consider creator profile (${profile.followers} followers in ${profile.niche} on ${profile.platform}) and context.
+3. SMART EXAMPLES: Whenever possible, include real practical examples (e.g. Email pitch, DM script, Media kit, Pricing, Contract, Payment terms).
+
+Recent Chat History:
+$historySnippet
+
+User Question:
+$query
+""".trimIndent()
+
             val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
             val url = URL(endpoint)
             val conn = url.openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json")
             conn.doOutput = true
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-
-            val systemContext = when (selectedLanguage) {
-                "Hindi" -> "You are Brand Collaboration AI, a super friendly creator mentor. Answer in conversational Devanagari Hindi to a creator with ${profile.followers} followers in ${profile.niche}."
-                "English" -> "You are Brand Collaboration AI, a super friendly creator mentor. Answer in clear conversational English to a creator with ${profile.followers} followers in ${profile.niche}."
-                else -> "You are Brand Collaboration AI, a super friendly creator mentor. Answer in natural conversational Hinglish (Hindi + English mix) to a creator with ${profile.followers} followers in ${profile.niche}."
-            }
+            conn.connectTimeout = 6000
+            conn.readTimeout = 6000
 
             val jsonBody = JSONObject().apply {
                 put("contents", JSONArray().apply {
                     put(JSONObject().apply {
                         put("parts", JSONArray().apply {
-                            put(JSONObject().apply { put("text", "$systemContext\nUser Question: $query") })
+                            put(JSONObject().apply { put("text", prompt) })
                         })
                     })
                 })
@@ -2395,15 +2865,15 @@ private suspend fun generateGeminiMentorResponse(
         } catch (_: Exception) {}
     }
 
-    // Local Fallback Strategy Answers
+    // Fallback Answers
     when {
         query.contains("charge", ignoreCase = true) || query.contains("price", ignoreCase = true) || query.contains("rate", ignoreCase = true) ->
-            "💰 Rate Guidance for ${profile.followers} Followers:\n• Standard Reel: ₹2,500 - ₹8,000\n• Dedicated Story Series: ₹1,000 - ₹3,000\n• Reel + 30-day Paid Ad Usage Rights: Add 50% extra usage fee!"
+            "💰 Rate Guidance for ${profile.followers} Followers (${profile.niche}):\n• Standard Reel: ₹2,500 - ₹8,000\n• Dedicated Story Series: ₹1,000 - ₹3,000\n• Reel + 30-day Paid Ad Usage Rights: Add 50% extra usage fee!\n\n📝 Example Rate Card:\n'1x Reel (₹4,000) + 2x Stories (₹1,500) = Package Deal ₹5,000'"
 
         query.contains("contract", ignoreCase = true) || query.contains("scam", ignoreCase = true) ->
-            "🛡️ Contract Protection Rule:\n1. Limit re-shoots to maximum 2 minor edits.\n2. Require 50% advance payment before posting.\n3. Never share your password or click unknown verification links."
+            "🛡️ Senior Coach Contract Rules:\n1. Re-shoots limited to maximum 2 minor edits.\n2. Require 50% advance payment before posting.\n3. Never click unknown verification links or share passwords.\n\n📝 Sample Contract Clause:\n'Payment: 50% upon script approval, 50% within 7 days of live post.'"
 
         else ->
-            "✨ Creator Pro Tip:\nAlways send a post-campaign performance summary to brand managers 7 days after publishing! Showing impressions and engagement turns one-off deals into recurring monthly retainers."
+            "✨ Senior Creator Pro Tip:\nAlways send a post-campaign performance summary to brand managers 7 days after publishing! Showing impressions and engagement turns one-off deals into recurring monthly retainers.\n\n📝 Sample Summary Note:\n'Hey Boat Team! Our Reel reached 38k viewers with 8.2% engagement! Excited for our next collab.'"
     }
 }

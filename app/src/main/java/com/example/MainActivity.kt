@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.School
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.screens.CreatorAcademyScreen
 import com.example.ui.screens.CreatorAcademySetupScreen
-import com.example.ui.screens.ExperienceSelectorScreen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -135,7 +134,6 @@ enum class Screen {
     Splash,
     BrandAmbassadorPoster,
     Onboarding,
-    ExperienceSelector,
     Home,
     CreatorAcademySetup,
     CreatorAcademy,
@@ -212,7 +210,6 @@ fun MainAppLayout(sharedUrl: String? = null) {
     val showBottomNav = currentScreen != Screen.Splash && 
             currentScreen != Screen.BrandAmbassadorPoster && 
             currentScreen != Screen.Onboarding && 
-            currentScreen != Screen.ExperienceSelector && 
             currentScreen != Screen.CreatorAcademySetup && 
             currentScreen != Screen.Result && 
             currentScreen != Screen.Analysis
@@ -280,52 +277,25 @@ fun MainAppLayout(sharedUrl: String? = null) {
                         BrandAmbassadorPosterScreen(
                             onDismiss = {
                                 try {
-                                    if (!OnboardingPrefs.isOnboardingCompleted(context)) {
-                                        currentScreen = Screen.Onboarding
-                                    } else {
-                                        if (CreatorAcademyPrefs.isRememberExperience(context)) {
-                                            val choice = CreatorAcademyPrefs.getExperienceChoice(context)
-                                            if (choice == "CREATOR_ACADEMY") {
-                                                currentScreen = Screen.CreatorAcademy
-                                            } else {
-                                                currentScreen = Screen.Home
-                                            }
-                                        } else {
-                                            currentScreen = Screen.ExperienceSelector
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    currentScreen = Screen.Home
-                                }
-                            },
-                            onExploreClicked = {
-                                try {
-                                    if (!OnboardingPrefs.isOnboardingCompleted(context)) {
-                                        currentScreen = Screen.Onboarding
+                                    if (CreatorAcademyPrefs.isRememberExperience(context) &&
+                                        CreatorAcademyPrefs.getExperienceChoice(context) == "CREATOR_ACADEMY") {
+                                        currentScreen = Screen.CreatorAcademy
                                     } else {
                                         currentScreen = Screen.Home
                                     }
                                 } catch (e: Exception) {
                                     currentScreen = Screen.Home
                                 }
+                            },
+                            onExploreClicked = {
+                                currentScreen = Screen.Home
                             }
                         )
                     }
                     Screen.Onboarding -> {
                         OnboardingScreen(onOnboardingFinished = {
-                            currentScreen = Screen.ExperienceSelector
+                            currentScreen = Screen.Home
                         })
-                    }
-                    Screen.ExperienceSelector -> {
-                        ExperienceSelectorScreen(
-                            onExperienceSelected = { choice ->
-                                if (choice == "CREATOR_ACADEMY") {
-                                    currentScreen = Screen.CreatorAcademy
-                                } else {
-                                    currentScreen = Screen.Home
-                                }
-                            }
-                        )
                     }
                     Screen.CreatorAcademySetup -> {
                         CreatorAcademySetupScreen(
@@ -340,7 +310,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     Screen.CreatorAcademy -> {
                         CreatorAcademyScreen(
                             onSwitchExperience = {
-                                currentScreen = Screen.ExperienceSelector
+                                currentScreen = Screen.Home
                             },
                             onResetSetup = {
                                 currentScreen = Screen.Home
@@ -381,7 +351,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     }
                     Screen.Profile -> {
                         ProfileScreen(
-                            onSwitchExperience = { currentScreen = Screen.ExperienceSelector }
+                            onSwitchExperience = { currentScreen = Screen.Home }
                         )
                     }
                     Screen.Analysis -> {

@@ -1509,6 +1509,8 @@ fun LegalDialogSheet(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        modifier = Modifier.imePadding().navigationBarsPadding(),
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Got It", color = EmeraldPrimary, fontWeight = FontWeight.Bold)

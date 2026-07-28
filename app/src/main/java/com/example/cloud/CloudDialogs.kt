@@ -9,18 +9,24 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,23 +80,34 @@ fun MaintenanceDialog(
             dismissOnClickOutside = false
         )
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .imePadding()
-                .navigationBarsPadding(),
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF12121A),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                Brush.linearGradient(listOf(GoldenAmber.copy(alpha = 0.6f), ElectricPurple.copy(alpha = 0.4f)))
-            )
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f),
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF12121A),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(listOf(GoldenAmber.copy(alpha = 0.6f), ElectricPurple.copy(alpha = 0.4f)))
+                )
             ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -140,6 +157,7 @@ fun MaintenanceDialog(
         }
     }
 }
+}
 
 @Composable
 fun ForceUpdateDialog(
@@ -157,23 +175,34 @@ fun ForceUpdateDialog(
             dismissOnClickOutside = false
         )
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .imePadding()
-                .navigationBarsPadding(),
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF12121A),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                Brush.linearGradient(listOf(EmeraldGlow.copy(alpha = 0.6f), ElectricPurple.copy(alpha = 0.4f)))
-            )
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f),
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF12121A),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(listOf(EmeraldGlow.copy(alpha = 0.6f), ElectricPurple.copy(alpha = 0.4f)))
+                )
             ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -232,6 +261,7 @@ fun ForceUpdateDialog(
         }
     }
 }
+}
 
 @Composable
 fun LiveAnnouncementDialog(
@@ -249,23 +279,36 @@ fun LiveAnnouncementDialog(
             dismissOnClickOutside = true
         )
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .imePadding()
-                .navigationBarsPadding(),
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF141420),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                Brush.linearGradient(listOf(ElectricPurple.copy(alpha = 0.6f), EmeraldGlow.copy(alpha = 0.4f)))
-            )
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF141420),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(listOf(ElectricPurple.copy(alpha = 0.6f), EmeraldGlow.copy(alpha = 0.4f)))
+                )
             ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -331,6 +374,7 @@ fun LiveAnnouncementDialog(
         }
     }
 }
+}
 
 @Composable
 fun ToolLockedDialog(
@@ -342,23 +386,36 @@ fun ToolLockedDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .imePadding()
-                .navigationBarsPadding(),
-            shape = RoundedCornerShape(20.dp),
-            color = Color(0xFF14141E),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                Brush.linearGradient(listOf(ElectricPurple.copy(alpha = 0.5f), GoldenAmber.copy(alpha = 0.3f)))
-            )
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(20.dp),
+                color = Color(0xFF14141E),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(listOf(ElectricPurple.copy(alpha = 0.5f), GoldenAmber.copy(alpha = 0.3f)))
+                )
             ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                 Box(
                     modifier = Modifier
                         .size(56.dp)
@@ -424,4 +481,5 @@ fun ToolLockedDialog(
             }
         }
     }
+}
 }

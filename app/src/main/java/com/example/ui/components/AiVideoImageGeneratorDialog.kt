@@ -409,6 +409,14 @@ fun AiVideoImageGeneratorDialog(
         }
     }
 
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(chatMessages.size, isThinking, imeBottomPadding) {
+        if (chatMessages.isNotEmpty()) {
+            delay(60)
+            lazyListState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -423,8 +431,7 @@ fun AiVideoImageGeneratorDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             Surface(
                 color = Color(0xFF0F1A14),

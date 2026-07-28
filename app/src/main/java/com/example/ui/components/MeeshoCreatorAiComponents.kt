@@ -28,6 +28,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -125,8 +129,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.BuildConfig
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.theme.AmoledBlack
-import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -135,6 +139,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+
+private val EmeraldPrimary = Color(0xFFF43F5E) // Pink theme for Meesho Creator AI
+private val EmeraldGlow = Color(0x33F43F5E) // Pink Glow Effect
+private val meeshoTheme = MentorToolTheme.MeeshoCreator
 
 /**
  * MEESHO CREATOR AI V3 — ZERO TO HERO LEARNING SYSTEM
@@ -886,6 +894,14 @@ fun MeeshoCreatorAiDialog(
         }
     }
 
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(chatMessages.size, isThinking, customUserInput, imeBottomPadding) {
+        if (chatMessages.isNotEmpty()) {
+            delay(60)
+            listState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -898,8 +914,7 @@ fun MeeshoCreatorAiDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             AnimatedVisibility(
                 visible = isEntranceVisible,

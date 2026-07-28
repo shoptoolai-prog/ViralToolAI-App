@@ -21,9 +21,11 @@ fun MyApplicationTheme(
     darkTheme: Boolean = true, // Force AMOLED Theme
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography,
-        content = content
-    )
+    ProvideUniversalResponsiveEngine {
+        MaterialTheme(
+            colorScheme = DarkColorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

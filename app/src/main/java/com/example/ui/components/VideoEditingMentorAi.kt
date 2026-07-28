@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.shadow
@@ -443,8 +447,7 @@ fun VideoEditingMentorAiDialog(
                 .fillMaxSize()
                 .background(AmoledBlack)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding()
         ) {
             if (showWelcomeBack && selectedLang != null && videoType != null) {
                 SmartWelcomeBackDialog(
@@ -947,6 +950,15 @@ private fun EditingMentorChatScreen(
             )
         )
         listState.animateScrollToItem(messages.size - 1)
+    }
+
+    // Auto-scroll when messages update, user types, or IME opens
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    LaunchedEffect(messages.size, userInput, imeBottomPadding) {
+        if (messages.isNotEmpty()) {
+            delay(60)
+            listState.animateScrollToItem(messages.size - 1)
+        }
     }
 
     Column(
@@ -1503,25 +1515,42 @@ private fun OptionFinderDialog(
         "Background Noise Reduction 🔊" to "Select audio/video clip ➔ Scroll right on toolbar ➔ 'Reduce Noise'."
     )
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 440.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xFF101B15))
-                .border(BorderStroke(1.5.dp, toolType.color), RoundedCornerShape(26.dp))
-                .padding(20.dp),
-            color = Color(0xFF101B15)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(26.dp),
+                color = Color(0xFF101B15)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text(
-                        text = "📍 $toolName Option Finder",
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "📍 $toolName Option Finder",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
                         color = TextWhite
@@ -1560,16 +1589,15 @@ private fun OptionFinderDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.height(280.dp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     val filtered = optionsList.filter {
                         it.first.contains(searchQuery, ignoreCase = true) ||
                         it.second.contains(searchQuery, ignoreCase = true)
                     }
 
-                    items(filtered) { (name, loc) ->
+                    filtered.forEach { (name, loc) ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1590,31 +1618,49 @@ private fun OptionFinderDialog(
         }
     }
 }
+}
 
 @Composable
 private fun ExportGuideDialog(
     toolType: EditingToolType,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 440.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xFF101B15))
-                .border(BorderStroke(1.5.dp, EmeraldGlow), RoundedCornerShape(26.dp))
-                .padding(20.dp),
-            color = Color(0xFF101B15)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(26.dp),
+                color = Color(0xFF101B15)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text(
-                        text = "⚙️ HD 1080p Export Checklist",
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "⚙️ HD 1080p Export Checklist",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
                         color = TextWhite
@@ -1678,6 +1724,7 @@ private fun ExportGuideDialog(
         }
     }
 }
+}
 
 @Composable
 private fun OfficialLinksDialog(
@@ -1687,72 +1734,90 @@ private fun OfficialLinksDialog(
     val context = LocalContext.current
     val toolName = toolType.title.replace(" AI Mentor", "")
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 440.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xFF101B15))
-                .border(BorderStroke(1.5.dp, Color(0xFFF59E0B)), RoundedCornerShape(26.dp))
-                .padding(20.dp),
-            color = Color(0xFF101B15)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(26.dp),
+                color = Color(0xFF101B15)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text(
-                        text = "🔗 $toolName Official Links",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Black,
-                        color = TextWhite
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🔗 $toolName Official Links",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x22FFFFFF))
+                                .clickable { onDismiss() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = null, tint = TextWhite, modifier = Modifier.size(16.dp))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    val links = listOf(
+                        "Play Store App Page" to "Official verified store link for $toolName Android",
+                        "Official Help Center" to "Frequently asked questions & feature guides",
+                        "Community Templates" to "Trending pre-made transition templates"
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x22FFFFFF))
-                            .clickable { onDismiss() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null, tint = TextWhite, modifier = Modifier.size(16.dp))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                val links = listOf(
-                    "Play Store App Page" to "Official verified store link for $toolName Android",
-                    "Official Help Center" to "Frequently asked questions & feature guides",
-                    "Community Templates" to "Trending pre-made transition templates"
-                )
-
-                links.forEach { (title, sub) ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0x18FFFFFF))
-                            .clickable {
-                                Toast.makeText(context, "Opening official link for $title...", Toast.LENGTH_SHORT).show()
-                            }
-                            .padding(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                    links.forEach { (title, sub) ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(Color(0x18FFFFFF))
+                                .clickable {
+                                    Toast.makeText(context, "Opening official link for $title...", Toast.LENGTH_SHORT).show()
+                                }
+                                .padding(12.dp)
                         ) {
-                            Column {
-                                Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                                Text(sub, fontSize = 11.sp, color = TextWhite.copy(0.6f))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(sub, fontSize = 11.sp, color = TextWhite.copy(0.6f))
+                                }
+                                Icon(Icons.Default.OpenInNew, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(18.dp))
                             }
-                            Icon(Icons.Default.OpenInNew, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(18.dp))
                         }
                     }
                 }
@@ -1780,25 +1845,42 @@ private fun EditingWorkflowGeneratorDialog(
         5. 0:45 - 0:60 ➔ Call to Action (Subscribe / Follow) + Smooth transition
     """.trimIndent()
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 440.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xFF101B15))
-                .border(BorderStroke(1.5.dp, Color(0xFF38BDF8)), RoundedCornerShape(26.dp))
-                .padding(20.dp),
-            color = Color(0xFF101B15)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(onClick = onDismiss)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Surface(
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth(0.94f)
+                    .clickable(enabled = false) {},
+                shape = RoundedCornerShape(26.dp),
+                color = Color(0xFF101B15)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text(
-                        text = "⚡ $videoType Workflow",
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "⚡ $videoType Workflow",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
                         color = TextWhite
@@ -1852,4 +1934,5 @@ private fun EditingWorkflowGeneratorDialog(
             }
         }
     }
+}
 }

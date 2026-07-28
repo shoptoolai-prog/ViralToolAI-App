@@ -1,8 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import com.example.ui.theme.responsiveImeAndNavPadding
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -277,8 +276,7 @@ fun CaptionGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -374,8 +372,7 @@ fun HashtagGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -459,8 +456,7 @@ fun HookGeneratorDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -547,8 +543,7 @@ fun ContentPlannerDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -623,8 +618,7 @@ fun PostingChecklistDialog(onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -684,8 +678,7 @@ fun BrandPitchGuideDialog(setupData: CreatorSetupData, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp).verticalScroll(rememberScrollState())) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -745,8 +738,7 @@ fun LinkAnalysisDialog(type: String, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .imePadding()
-                .navigationBarsPadding()
+                .responsiveImeAndNavPadding()
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
