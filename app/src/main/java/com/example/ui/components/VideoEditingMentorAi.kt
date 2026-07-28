@@ -1231,6 +1231,23 @@ private fun EditingMentorChatScreen(
                 }
             }
 
+            if (completedSteps.size >= steps.size) {
+                item {
+                    CourseCompletionCard(
+                        courseTitle = "${toolType.title} Video Editing Course",
+                        skillsLearned = listOf(
+                            "Timeline Trimming & Keyframing",
+                            "Text Overlay & Animated Titles",
+                            "Sound Effects & Audio Leveling",
+                            "4K Export & Color Grading"
+                        ),
+                        onContinue = { onClose?.invoke() },
+                        onResetCourse = { onResetCourse?.invoke() },
+                        theme = MentorToolTheme.InstagramCreator
+                    )
+                }
+            }
+
             item { Spacer(modifier = Modifier.height(12.dp)) }
         }
 

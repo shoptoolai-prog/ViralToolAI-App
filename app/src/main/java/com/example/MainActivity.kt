@@ -472,6 +472,7 @@ fun NavigationTabItem(
     testTag: String
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val responsiveMetrics = LocalResponsiveMetrics.current
     val contentColor = if (isSelected) EmeraldGlow else TextWhite.copy(alpha = 0.4f)
     
     val backgroundBrush = if (isSelected) {
@@ -481,6 +482,8 @@ fun NavigationTabItem(
     } else {
         null
     }
+
+    val horizontalPad = if (responsiveMetrics.isSmallPhone) 8.dp else 12.dp
 
     Box(
         modifier = Modifier
@@ -497,7 +500,7 @@ fun NavigationTabItem(
                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(vertical = 10.dp, horizontal = 16.dp),
+            .padding(vertical = 8.dp, horizontal = horizontalPad),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -507,11 +510,11 @@ fun NavigationTabItem(
             if (isSelected) {
                 Box(
                     modifier = Modifier
-                        .padding(end = 6.dp)
-                        .size(5.dp)
+                        .padding(end = 4.dp)
+                        .size(4.dp)
                         .clip(CircleShape)
                         .background(EmeraldGlow)
-                        .shadow(6.dp, CircleShape, spotColor = EmeraldGlow)
+                        .shadow(4.dp, CircleShape, spotColor = EmeraldGlow)
                 )
             }
 
@@ -528,13 +531,15 @@ fun NavigationTabItem(
                 enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                 exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
             ) {
-                Row {
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    AutoResizedText(
                         text = label,
                         color = contentColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = if (responsiveMetrics.isSmallPhone) 10.sp else 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        minFontSize = 8.sp
                     )
                 }
             }

@@ -152,17 +152,21 @@ fun HomeScreen(
         return
     }
 
+    val responsiveMetrics = LocalResponsiveMetrics.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(AmoledBlack),
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .widthIn(max = responsiveMetrics.cardMaxWidth)
                 .statusBarsPadding()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = responsiveMetrics.horizontalPadding)
                 .padding(top = 12.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

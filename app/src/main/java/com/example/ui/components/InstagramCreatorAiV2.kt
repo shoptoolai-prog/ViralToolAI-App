@@ -620,6 +620,23 @@ fun InstagramCreatorAiV2Dialog(
                                             }
                                         }
 
+                                        if (completedSteps.size >= INSTAGRAM_ROADMAP_STEPS.size) {
+                                            item {
+                                                CourseCompletionCard(
+                                                    courseTitle = "Instagram Zero to Hero Course",
+                                                    skillsLearned = listOf(
+                                                        "Viral Reel Hooks & Scripting",
+                                                        "Hashtag & SEO Strategy",
+                                                        "High-CTR Thumbnail Design",
+                                                        "Audience Engagement & Monetization"
+                                                    ),
+                                                    onContinue = onDismiss,
+                                                    onResetCourse = { showRestartConfirm = true },
+                                                    theme = MentorToolTheme.InstagramCreator
+                                                )
+                                            }
+                                        }
+
                                         item { Spacer(modifier = Modifier.height(16.dp)) }
                                     }
 

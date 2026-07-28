@@ -883,7 +883,8 @@ fun BrandCollaborationAiDialog(
                                                                     Toast.makeText(context, celebrationToast, Toast.LENGTH_SHORT).show()
                                                                     loadStepLesson(currentStepIndex, isSimpler = false)
                                                                 } else {
-                                                                    Toast.makeText(context, "🏆 Congratulations! You completed all 10 Brand Collaboration Lessons!", Toast.LENGTH_LONG).show()
+                                                                    currentStepIndex = BrandCollabStaticData.guidedLessonsV2.size
+                                                                    Toast.makeText(context, "🏆 Course Completed! Mastered Brand Deals!", Toast.LENGTH_LONG).show()
                                                                 }
                                                             },
                                                             onExplainAgain = {

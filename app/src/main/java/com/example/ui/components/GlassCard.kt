@@ -2,6 +2,12 @@ package com.example.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -45,6 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.LocalResponsiveMetrics
 import com.example.ui.theme.responsiveCardBounds
+
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Refresh
 
 @Composable
 fun GlassCard(
@@ -397,4 +411,419 @@ fun CompactHelperChip(
         }
     }
 }
+
+/**
+ * MASTER PHASE 2 — STEP CELEBRATION CARD
+ * Shows a glowing success card whenever a learning step is completed.
+ */
+@Composable
+fun StepCelebrationCard(
+    stepTitle: String,
+    xpEarned: Int = 50,
+    theme: MentorToolTheme = MentorToolTheme.InstagramCreator,
+    modifier: Modifier = Modifier,
+    onNext: (() -> Unit)? = null
+) {
+    val shape = RoundedCornerShape(20.dp)
+    val infiniteTransition = rememberInfiniteTransition(label = "GlowTransition")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "GlowAlpha"
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        theme.primaryColor.copy(alpha = 0.18f),
+                        Color(0x1A111111)
+                    )
+                )
+            )
+            .border(
+                BorderStroke(
+                    width = 1.5.dp,
+                    brush = Brush.linearGradient(
+                        listOf(
+                            theme.primaryColor.copy(alpha = glowAlpha),
+                            theme.secondaryColor.copy(alpha = 0.3f)
+                        )
+                    )
+                ),
+                shape = shape
+            )
+            .shadow(
+                elevation = 12.dp,
+                shape = shape,
+                ambientColor = theme.glowColor,
+                spotColor = theme.primaryColor
+            )
+            .padding(16.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(theme.primaryColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Success",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.size(10.dp))
+                Column {
+                    Text(
+                        text = "🎉 Step Completed!",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        text = "Creator Level Increased • +$xpEarned XP",
+                        color = theme.primaryColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Great Job! You have mastered: \"$stepTitle\"",
+                color = Color(0xFFDDDDDD),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            if (onNext != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                PremiumIPhoneButton(
+                    text = "Continue to Next Step 🚀",
+                    onClick = onNext,
+                    theme = theme,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+/**
+ * MASTER PHASE 2 — SMART HINT CHIP
+ * Compact expandable hint chip that offers optional hints ("Need a hint?").
+ */
+@Composable
+fun SmartHintChip(
+    hintText: String,
+    theme: MentorToolTheme = MentorToolTheme.InstagramCreator,
+    modifier: Modifier = Modifier
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    CompactHelperChip(
+        title = "💡 Need a Hint?",
+        subtitle = "Tap to view a quick shortcut / tip",
+        isExpanded = isExpanded,
+        onToggleExpand = { isExpanded = !isExpanded },
+        theme = theme,
+        modifier = modifier
+    ) {
+        Text(
+            text = hintText,
+            color = Color(0xFFFFE082),
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Normal
+        )
+    }
+}
+
+/**
+ * MASTER PHASE 2 — PREMIUM COURSE COMPLETION CARD
+ * Displayed when the full mentor course finishes.
+ */
+@Composable
+fun CourseCompletionCard(
+    courseTitle: String,
+    skillsLearned: List<String>,
+    onContinue: () -> Unit,
+    onResetCourse: () -> Unit,
+    theme: MentorToolTheme = MentorToolTheme.InstagramCreator,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(24.dp)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF1E1E2C),
+                        Color(0xFF0F0F1A)
+                    )
+                )
+            )
+            .border(
+                BorderStroke(2.dp, theme.gradientBrush),
+                shape = shape
+            )
+            .shadow(16.dp, shape, ambientColor = theme.glowColor, spotColor = theme.primaryColor)
+            .padding(20.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(theme.gradientBrush),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = "Trophy",
+                    tint = Color.Black,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "🏆 COURSE COMPLETED!",
+                color = theme.primaryColor,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black
+            )
+
+            Text(
+                text = courseTitle,
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0x33FFFFFF))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(
+                    text = "100% Mastered • Creator Certified",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0x1AFFFFFF))
+                    .border(BorderStroke(1.dp, Color(0x1CFFFFFF)), RoundedCornerShape(14.dp))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "📈 Skills Mastered:",
+                    color = theme.primaryColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                skillsLearned.forEach { skill ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 3.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = theme.primaryColor,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.size(6.dp))
+                        Text(
+                            text = skill,
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            PremiumIPhoneButton(
+                text = "🎯 Ready for Next Course",
+                onClick = onContinue,
+                theme = theme,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            PremiumIPhoneButton(
+                text = "🔄 Revise / Practice Again",
+                onClick = onResetCourse,
+                theme = theme,
+                isSecondary = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+/**
+ * MASTER PHASE 2 — PREMIUM CHAT BUBBLE
+ * AI Mentor glass card with soft glow & user contrasting pill bubble.
+ */
+@Composable
+fun MentorChatBubble(
+    message: String,
+    isUser: Boolean,
+    theme: MentorToolTheme = MentorToolTheme.InstagramCreator,
+    followUpText: String? = null,
+    modifier: Modifier = Modifier
+) {
+    if (isUser) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 18.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .background(theme.gradientBrush)
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = message,
+                    color = Color.Black,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    } else {
+        val shape = RoundedCornerShape(
+            topStart = 4.dp,
+            topEnd = 18.dp,
+            bottomStart = 18.dp,
+            bottomEnd = 18.dp
+        )
+
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(Color(0x1F222233))
+                .border(BorderStroke(1.dp, theme.glassBorderColor), shape)
+                .shadow(8.dp, shape, ambientColor = theme.glowColor, spotColor = theme.primaryColor)
+                .padding(14.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(theme.gradientBrush),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "AI",
+                            color = Color.Black,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = theme.badgeLabel,
+                        color = theme.primaryColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = message,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Normal
+                )
+
+                if (!followUpText.isNull_or_blank()) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(theme.glowColor)
+                            .border(BorderStroke(1.dp, theme.glassBorderColor), RoundedCornerShape(10.dp))
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = followUpText ?: "",
+                            color = theme.primaryColor,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()
+
 

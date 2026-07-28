@@ -1363,6 +1363,23 @@ private fun YouTubeMentorChatScreen(
                     onQuickReplyClick = { reply -> handleUserMsg(reply) }
                 )
             }
+
+            if (completedSteps.size >= YOUTUBE_ROADMAP_STEPS.size) {
+                item {
+                    CourseCompletionCard(
+                        courseTitle = "YouTube Creator Masterclass",
+                        skillsLearned = listOf(
+                            "Viral Shorts & Long-Form Ideas",
+                            "High-CTR Thumbnail Design",
+                            "YouTube SEO & Algorithm Hacking",
+                            "Channel Monetization & Sponsorships"
+                        ),
+                        onContinue = { onClose?.invoke() },
+                        onResetCourse = { onResetCourse?.invoke() },
+                        theme = ytTheme
+                    )
+                }
+            }
         }
 
         // BOTTOM INPUT BAR

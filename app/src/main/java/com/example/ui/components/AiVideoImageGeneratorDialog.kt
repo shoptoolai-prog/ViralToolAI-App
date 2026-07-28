@@ -514,6 +514,29 @@ fun AiVideoImageGeneratorDialog(
                                         ThinkingBubble()
                                     }
                                 }
+
+                                val totalStepsInPath = if (selectedPath == LearningPath.VIDEO) 5 else 4
+                                if (completedSteps.size >= totalStepsInPath) {
+                                    item {
+                                        CourseCompletionCard(
+                                            courseTitle = if (selectedPath == LearningPath.VIDEO) "AI Video Generation Course" else "AI Thumbnail & Image Design",
+                                            skillsLearned = listOf(
+                                                "Text-to-Video & Image Prompts",
+                                                "Cinematic Camera Movement Keywords",
+                                                "Thumbnail Visual Psychology & CTR",
+                                                "High-Contrast Color & Aspect Ratio Control"
+                                            ),
+                                            onContinue = onDismiss,
+                                            onResetCourse = {
+                                                completedSteps = emptySet()
+                                                currentStepIndex = 0
+                                                chatMessages.clear()
+                                                if (selectedPath == LearningPath.VIDEO) initVideoStep(0) else initImageStep(0)
+                                            },
+                                            theme = MentorToolTheme.InstagramCreator
+                                        )
+                                    }
+                                }
                             }
 
                             // INTERACTIVE INPUTS / SELECTION CONTROLS FOR CURRENT STEP

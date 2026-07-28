@@ -1165,6 +1165,28 @@ fun MeeshoCreatorAiDialog(
                                                 )
                                             }
 
+                                            if (isSessionCompleted) {
+                                                item {
+                                                    CourseCompletionCard(
+                                                        courseTitle = "Meesho Creator E-Commerce Course",
+                                                        skillsLearned = listOf(
+                                                            "Product Selection & Margins",
+                                                            "Reselling Reel Strategies",
+                                                            "WhatsApp & Instagram Shop Marketing",
+                                                            "Zero-Cost Order Fulfillment"
+                                                        ),
+                                                        onContinue = onDismiss,
+                                                        onResetCourse = {
+                                                            CreatorAcademyPrefs.setMeeshoStepIndex(context, 0)
+                                                            currentStepIndex = 0
+                                                            isSessionCompleted = false
+                                                            loadGuidedStep(0)
+                                                        },
+                                                        theme = meeshoTheme
+                                                    )
+                                                }
+                                            }
+
                                             if (isThinking) {
                                                 item {
                                                     MeeshoThinkingBubble(text = thinkingText)
