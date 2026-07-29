@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.WindowInsets
@@ -932,7 +933,7 @@ private fun YouTubeCreatorTypeSelectionOverlay(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp)
+                    .heightIn(max = 280.dp)
             ) {
                 items(YOUTUBE_CREATOR_TYPES) { (type, emoji) ->
                     val isSelected = selectedTypeTemp == type

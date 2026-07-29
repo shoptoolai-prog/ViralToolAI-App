@@ -497,7 +497,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Header inside card with Official Flipkart Logo, Title, Subtitle & Badge
+                        // Header inside card with AI Shopping Intelligence Icon, Title, Subtitle & Badge
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -505,30 +505,43 @@ fun HomeScreen(
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.weight(1f, fill = false)
                             ) {
-                                OfficialLogo(
-                                    name = "flipkart",
+                                Box(
                                     modifier = Modifier
-                                        .size(28.dp)
-                                        .shadow(6.dp, CircleShape, spotColor = Color(0xFFFFE11B))
-                                )
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            Brush.linearGradient(
+                                                listOf(Color(0xFF00E5FF), Color(0xFF6C5CE7))
+                                            )
+                                        )
+                                        .shadow(6.dp, RoundedCornerShape(12.dp), spotColor = Color(0xFF00E5FF)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "AI Shopping Intelligence",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                                 Column {
                                     Text(
-                                        text = "Flipkart Shopping Analyzer",
-                                        fontSize = 16.5.sp,
+                                        text = "AI Shopping Intelligence",
+                                        fontSize = 17.5.sp,
                                         fontWeight = FontWeight.Black,
                                         color = Color.White,
                                         letterSpacing = 0.3.sp
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "Analyze Flipkart products with AI-powered insights, price details and smart shopping reports.",
-                                        fontSize = 11.5.sp,
+                                        text = "Paste any shopping link for AI-powered analysis.",
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = Color(0xFFB8D3F8),
-                                        lineHeight = 15.sp
+                                        lineHeight = 16.sp
                                     )
                                 }
                             }
@@ -540,18 +553,53 @@ fun HomeScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(
                                         Brush.horizontalGradient(
-                                            listOf(Color(0xFF2874F0), Color(0xFFFFE11B))
+                                            listOf(Color(0xFF00E5FF).copy(alpha = 0.2f), Color(0xFF6C5CE7).copy(alpha = 0.2f))
                                         )
+                                    )
+                                    .border(
+                                        BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.5f)),
+                                        RoundedCornerShape(8.dp)
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = "FLIPKART AI",
+                                    text = "AI POWERED",
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = AmoledBlack,
+                                    color = Color(0xFF00E5FF),
                                     letterSpacing = 0.6.sp
                                 )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Supported Shopping Platforms Pills Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Supported:",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White.copy(alpha = 0.55f)
+                            )
+                            listOf("Amazon", "Flipkart", "Meesho", "Myntra", "AJIO", "Nykaa").forEach { storeName ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = storeName,
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White.copy(alpha = 0.9f)
+                                    )
+                                }
                             }
                         }
 
@@ -568,9 +616,9 @@ fun HomeScreen(
                             onValueChange = { linkInput = it },
                             placeholder = {
                                 Text(
-                                    text = "Paste Flipkart Product URL...",
+                                    text = "Paste product link (Amazon, Flipkart, Meesho, etc.)...",
                                     color = Color.White.copy(alpha = 0.45f),
-                                    fontSize = 13.5.sp
+                                    fontSize = 13.sp
                                 )
                             },
                             singleLine = true,
@@ -833,7 +881,7 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Launching Flipkart AI Analyzer...",
+                                        text = "Analyzing Shopping Link with AI...",
                                         color = Color.White,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
@@ -847,7 +895,7 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (isInputProvided) "Analyze Flipkart Link" else "Paste Flipkart Link to Analyze",
+                                        text = if (isInputProvided) "Analyze Shopping Link" else "Paste Shopping Link to Analyze",
                                         color = if (isInputProvided) Color.White else TextGray,
                                         fontSize = 13.5.sp,
                                         fontWeight = FontWeight.Bold

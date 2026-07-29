@@ -36,7 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.SubcomposeAsyncImage
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.R
 import com.example.ui.theme.EmeraldGlow
@@ -49,7 +50,7 @@ import kotlin.math.sin
 
 private const val TAG = "BrandAmbassadorPoster"
 private const val POSTER_IMAGE_URL =
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/a7996a261d91d703ea1e41a90cba30233d85b80a/Picsart_26-07-26_21-11-24-122.jpg"
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png"
 
 object BrandAmbassadorPrefs {
     private const val PREF_NAME = "viraltoolai_launch_prefs"
@@ -210,31 +211,27 @@ private fun PosterHeroImage(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val baConfig by LiveCloudManager.brandAmbassadorConfig.collectAsStateWithLifecycle()
+
+    val rawUrl = baConfig.image.ifBlank { POSTER_IMAGE_URL }
+    val imageUrl = if (rawUrl.contains("Picsart") || rawUrl.contains("a7996a261d91d703ea1e41a90cba30233d85b80a")) {
+        POSTER_IMAGE_URL
+    } else {
+        rawUrl
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        SubcomposeAsyncImage(
+        AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(POSTER_IMAGE_URL)
-                .crossfade(true)
+                .data(imageUrl)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .crossfade(false)
                 .build(),
-            loading = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black)
-                )
-            },
-            error = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black)
-                )
-            },
             contentDescription = "ViralToolAI Brand Ambassador Poster",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -254,8 +251,6 @@ private fun FirstTimeWelcomeView(
 ) {
     val posterZoomScale = remember { Animatable(1.0f) }
     val contentAlpha = remember { Animatable(0f) }
-    val signatureProgress = remember { Animatable(0f) }
-    val shineProgress = remember { Animatable(0f) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "welcomeBgAnims")
     val ambientPulse by infiniteTransition.animateFloat(
@@ -281,18 +276,16 @@ private fun FirstTimeWelcomeView(
     LaunchedEffect(Unit) {
         if (isPreviewMode) {
             contentAlpha.snapTo(1f)
-            signatureProgress.snapTo(1f)
-            shineProgress.snapTo(0.5f)
             return@LaunchedEffect
         }
 
         try {
-            // Camera Zoom: 100% to 102% over 5 seconds
+            // Camera Zoom: 100% to 102% over 3.5 seconds
             launch {
                 try {
                     posterZoomScale.animateTo(
                         targetValue = 1.02f,
-                        animationSpec = tween(5000, easing = LinearEasing)
+                        animationSpec = tween(3500, easing = LinearEasing)
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Zoom animation error", e)
@@ -308,35 +301,8 @@ private fun FirstTimeWelcomeView(
                 }
             }
 
-            // Animated Handwritten Signature starts after "Thanks For Downloading" (delay 800ms)
-            // Complete full handwriting animation within 1 second (1000ms)
-            delay(800)
-            launch {
-                try {
-                    signatureProgress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(1000, easing = FastOutSlowInEasing)
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Signature animation error", e)
-                }
-            }
-
-            // Immediately after signature finishes (~1.8s mark), small shine passes once
-            delay(1000)
-            launch {
-                try {
-                    shineProgress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(900, easing = FastOutSlowInEasing)
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Shine animation error", e)
-                }
-            }
-
-            // Total screen duration: exactly 5 seconds
-            delay(2200)
+            // Total screen duration: exactly 3.5 seconds
+            delay(3500)
             onFinish()
         } catch (e: Exception) {
             Log.e(TAG, "Fatal LaunchedEffect exception in FirstTimeWelcomeView", e)
@@ -408,12 +374,12 @@ private fun FirstTimeWelcomeView(
                 )
         )
 
-        // Lower Third Typography & Signature
+        // Lower Third Typography
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 28.dp)
                 .graphicsLayer { alpha = contentAlpha.value },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -457,144 +423,6 @@ private fun FirstTimeWelcomeView(
                 color = TextWhite.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Fast Real Ink Animated Signature "Asit Yadav"
-            AnimatedRealInkSignature(
-                progress = signatureProgress.value,
-                shineProgress = shineProgress.value,
-                modifier = Modifier
-                    .width(230.dp)
-                    .height(75.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun AnimatedRealInkSignature(
-    progress: Float,
-    shineProgress: Float,
-    modifier: Modifier = Modifier
-) {
-    val signaturePath = remember {
-        Path().apply {
-            // 'A'
-            moveTo(20f, 60f)
-            cubicTo(15f, 38f, 32f, 15f, 42f, 15f)
-            cubicTo(48f, 15f, 45f, 48f, 52f, 60f)
-            cubicTo(28f, 40f, 56f, 40f, 64f, 38f)
-
-            // 's'
-            cubicTo(70f, 30f, 74f, 28f, 76f, 32f)
-            cubicTo(78f, 42f, 68f, 50f, 80f, 46f)
-
-            // 'i'
-            cubicTo(84f, 35f, 88f, 34f, 88f, 48f)
-
-            // 't'
-            cubicTo(92f, 18f, 96f, 15f, 96f, 48f)
-            cubicTo(98f, 48f, 106f, 46f, 110f, 44f)
-
-            // Space & 'Y'
-            moveTo(128f, 20f)
-            cubicTo(122f, 32f, 134f, 48f, 142f, 44f)
-            cubicTo(148f, 38f, 155f, 18f, 155f, 18f)
-            cubicTo(155f, 32f, 144f, 75f, 136f, 78f)
-            cubicTo(130f, 80f, 126f, 68f, 145f, 48f)
-
-            // 'a'
-            cubicTo(152f, 36f, 160f, 34f, 162f, 42f)
-            cubicTo(164f, 50f, 158f, 50f, 168f, 46f)
-
-            // 'd'
-            cubicTo(172f, 36f, 178f, 18f, 178f, 48f)
-            cubicTo(180f, 48f, 184f, 42f, 187f, 46f)
-
-            // 'a'
-            cubicTo(190f, 38f, 196f, 36f, 197f, 44f)
-            cubicTo(198f, 50f, 194f, 50f, 204f, 42f)
-
-            // 'v'
-            cubicTo(207f, 48f, 212f, 50f, 216f, 35f)
-
-            // Sweeping underline flourish
-            cubicTo(218f, 30f, 220f, 55f, 202f, 62f)
-            cubicTo(155f, 70f, 65f, 68f, 28f, 64f)
-        }
-    }
-
-    val iDotPath = remember {
-        Path().apply {
-            addOval(Rect(86f, 20f, 90f, 24f))
-        }
-    }
-
-    val tCrossPath = remember {
-        Path().apply {
-            moveTo(88f, 28f)
-            lineTo(104f, 26f)
-        }
-    }
-
-    Canvas(modifier = modifier) {
-        try {
-            val pathMeasure = PathMeasure()
-            pathMeasure.setPath(signaturePath, false)
-            val totalLength = pathMeasure.length
-
-            val currentDrawLength = (totalLength * progress.coerceIn(0f, 1f)).coerceAtLeast(0f)
-            val animatedPath = Path()
-            if (currentDrawLength > 0f) {
-                pathMeasure.getSegment(0f, currentDrawLength, animatedPath, true)
-            }
-
-            // Subtle depth stroke (Real Ink effect)
-            drawPath(
-                path = animatedPath,
-                color = Color.Black.copy(alpha = 0.40f),
-                style = Stroke(width = 3.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
-
-            // Main White Real Ink Autograph Stroke
-            drawPath(
-                path = animatedPath,
-                color = TextWhite,
-                style = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
-
-            if (progress > 0.40f) {
-                drawPath(
-                    path = iDotPath,
-                    color = TextWhite,
-                    style = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round)
-                )
-                drawPath(
-                    path = tCrossPath,
-                    color = TextWhite,
-                    style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
-                )
-            }
-
-            // Small Light Shine Pass
-            if (shineProgress > 0f && shineProgress < 1f) {
-                val shineX = size.width * (shineProgress * 1.4f - 0.2f)
-                drawRect(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.70f),
-                            Color.Transparent
-                        ),
-                        startX = shineX - 30f,
-                        endX = shineX + 30f
-                    ),
-                    blendMode = BlendMode.Screen
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error drawing signature canvas", e)
         }
     }
 }

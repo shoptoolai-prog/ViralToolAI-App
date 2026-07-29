@@ -101,6 +101,10 @@ import com.example.cloud.LiveAnnouncementDialog
 import com.example.core.rememberIsOnlineState
 import com.example.ui.components.OfflineBanner
 import androidx.compose.foundation.layout.statusBarsPadding
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.CachePolicy
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
 
@@ -157,6 +161,17 @@ fun MainAppLayout(sharedUrl: String? = null) {
 
     LaunchedEffect(Unit) {
         com.example.core.LanguageEngine.init(context)
+        try {
+            val imageLoader = context.imageLoader
+            val request = ImageRequest.Builder(context)
+                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png")
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .build()
+            imageLoader.enqueue(request)
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error preloading poster image", e)
+        }
     }
 
     var currentScreen by remember { mutableStateOf(if (!sharedUrl.isNullOrBlank()) Screen.Home else Screen.Splash) }

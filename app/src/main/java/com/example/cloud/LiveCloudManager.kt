@@ -191,9 +191,15 @@ object LiveCloudManager {
             val baJson = prefs.getString("brand_ambassador_json", null)
             if (!baJson.isNullOrBlank()) {
                 val json = JSONObject(baJson)
+                val savedImg = json.optString("image", "")
+                val finalImg = if (savedImg.isBlank() || savedImg.contains("Picsart") || savedImg.contains("a7996a261d91d703ea1e41a90cba30233d85b80a") || savedImg.contains("unsplash")) {
+                    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png"
+                } else {
+                    savedImg
+                }
                 _brandAmbassadorConfig.value = BrandAmbassadorConfig(
                     enabled = json.optBoolean("enabled", true),
-                    image = json.optString("image", _brandAmbassadorConfig.value.image),
+                    image = finalImg,
                     durationMs = json.optLong("duration", 5000L)
                 )
             }
@@ -321,9 +327,15 @@ object LiveCloudManager {
             )
             _announcementConfig.value = annConfig
 
+            val rcBaImg = rc.getString("brand_ambassador_image").ifBlank { _brandAmbassadorConfig.value.image }
+            val finalBaImg = if (rcBaImg.contains("Picsart") || rcBaImg.contains("a7996a261d91d703ea1e41a90cba30233d85b80a") || rcBaImg.contains("unsplash")) {
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png"
+            } else {
+                rcBaImg
+            }
             val baConfig = BrandAmbassadorConfig(
                 enabled = rc.getBoolean("brand_ambassador_enabled"),
-                image = rc.getString("brand_ambassador_image").ifBlank { _brandAmbassadorConfig.value.image },
+                image = finalBaImg,
                 durationMs = rc.getLong("brand_ambassador_duration").let { if (it <= 0) 5000L else it }
             )
             _brandAmbassadorConfig.value = baConfig
