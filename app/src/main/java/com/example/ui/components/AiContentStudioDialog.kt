@@ -87,6 +87,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.creatoracademy.AiContentStudioEngine
 import com.example.creatoracademy.ContentStudioResult
 import com.example.creatoracademy.CreatorSetupData
+import com.example.ui.theme.LocalResponsiveMetrics
+import com.example.ui.theme.responsiveDialogBounds
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
@@ -104,6 +106,7 @@ fun AiContentStudioDialog(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val clipboard = LocalClipboardManager.current
+    val responsiveMetrics = LocalResponsiveMetrics.current
 
     val userMemory = remember { AiContentStudioEngine.getUserMemory(context) }
 
@@ -135,17 +138,22 @@ fun AiContentStudioDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack)
+                .background(Color.Black.copy(alpha = 0.85f))
                 .statusBarsPadding()
-                .responsiveImeAndNavPadding()
+                .responsiveImeAndNavPadding(),
+            contentAlignment = Alignment.Center
         ) {
-            Surface(
-                color = Color(0xFF0F1A14),
-                modifier = Modifier.fillMaxSize()
-            ) {
+            CommonPopupAnimation(visible = true) {
+                Surface(
+                    color = Color(0xFF0F1A14),
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier
+                        .responsiveDialogBounds(responsiveMetrics)
+                        .border(BorderStroke(1.dp, Color(0x3310B981)), RoundedCornerShape(24.dp))
+                ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(18.dp)
                 ) {
                     // Header Row
@@ -283,7 +291,7 @@ fun AiContentStudioDialog(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Main Tab Body
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(modifier = Modifier.weight(1f, fill = false)) {
                         if (activeTab == "STUDIO") {
                             if (generatedPlan == null) {
                                 // Form Input Mode
@@ -535,6 +543,7 @@ fun AiContentStudioDialog(
             }
         }
     }
+}
 }
 
 @Composable

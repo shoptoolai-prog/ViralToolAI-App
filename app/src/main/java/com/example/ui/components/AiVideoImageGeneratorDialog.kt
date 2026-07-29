@@ -85,7 +85,8 @@ fun AiVideoImageGeneratorDialog(
 
     // Preferences & Language state
     var selectedLang by remember { mutableStateOf(MentorLanguageChoice.HINGLISH) }
-    var showLangSelector by remember { mutableStateOf(true) }
+    var showLangSelector by remember { mutableStateOf(false) }
+    var showIntro by remember { mutableStateOf(true) }
 
     // Learning Path: VIDEO vs IMAGE
     var selectedPath by remember { mutableStateOf<LearningPath?>(null) }
@@ -428,17 +429,24 @@ fun AiVideoImageGeneratorDialog(
             dismissOnClickOutside = true
         )
     ) {
+        val responsiveMetrics = LocalResponsiveMetrics.current
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack)
+                .background(Color.Black.copy(alpha = 0.85f))
                 .statusBarsPadding()
-                .responsiveImeAndNavPadding()
+                .responsiveImeAndNavPadding(),
+            contentAlignment = Alignment.Center
         ) {
-            Surface(
-                color = Color(0xFF0F1A14),
-                modifier = Modifier.fillMaxSize()
-            ) {
+            CommonPopupAnimation(visible = true) {
+                Surface(
+                    color = Color(0xFF0F1A14),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, Color(0x3310B981)),
+                    modifier = Modifier
+                        .responsiveDialogBounds(responsiveMetrics)
+                ) {
                 Column(modifier = Modifier.fillMaxSize()) {
 
                     // TOP NAVIGATION BAR
@@ -458,7 +466,52 @@ fun AiVideoImageGeneratorDialog(
                     )
 
                     // DIALOG CONTENT SWITCHER
-                    if (showLangSelector) {
+                    if (showIntro) {
+                        val aiGenIntroCards = remember {
+                            listOf(
+                                ToolIntroCardData(
+                                    title = "AI Video & Image Masterclass",
+                                    subtitle = "Generate Photorealistic Art & Cinema Videos",
+                                    icon = Icons.Default.AutoAwesome,
+                                    highlightTag = "AI Studio Engine",
+                                    bulletPoints = listOf(
+                                        "4K Photorealistic Image Prompts",
+                                        "Text-to-Video & Image-to-Video Motion",
+                                        "YouTube Thumbnail & Banner Mastery",
+                                        "Top FREE AI Tools Setup Guides"
+                                    )
+                                ),
+                                ToolIntroCardData(
+                                    title = "AI Image Generator",
+                                    subtitle = "Create High-CTR Thumbnails & Digital Art",
+                                    icon = Icons.Default.Image,
+                                    highlightTag = "DALL-E & Midjourney",
+                                    bulletPoints = listOf(
+                                        "Custom Aspect Ratio Control (16:9, 9:16)",
+                                        "Lighting, Mood & Camera Angle Controls",
+                                        "Leonardo AI & Bing Creator Setup",
+                                        "One-Tap Prompt Copying"
+                                    )
+                                ),
+                                ToolIntroCardData(
+                                    title = "AI Video Generation",
+                                    subtitle = "Animate Photos & Text into 60fps Clips",
+                                    icon = Icons.Default.Videocam,
+                                    highlightTag = "Sora & Luma Engine",
+                                    bulletPoints = listOf(
+                                        "Cinematic Camera Motion Vectors",
+                                        "Personal Photo Animation Guide",
+                                        "Google Flow & Runway Workflows",
+                                        "Social Reel & Short Format Exports"
+                                    )
+                                )
+                            )
+                        }
+                        CommonToolIntroContainer(
+                            cards = aiGenIntroCards,
+                            onCompleteIntro = { showIntro = false }
+                        )
+                    } else if (showLangSelector) {
                         // STEP 1: LANGUAGE SELECTION POPUP
                         LanguageSelectionStep(
                             currentLang = selectedLang,
@@ -577,6 +630,7 @@ fun AiVideoImageGeneratorDialog(
                     }
                 }
             }
+        }
         }
 
         // PROMPT HISTORY SHEET

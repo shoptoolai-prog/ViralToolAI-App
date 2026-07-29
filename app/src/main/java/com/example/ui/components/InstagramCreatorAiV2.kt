@@ -40,6 +40,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -354,6 +358,7 @@ fun InstagramCreatorAiV2Dialog(
     var showCreatorTypePicker by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType == null) }
 
     var showWelcomeBack by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType != null && (currentStepIndex > 0 || completedSteps.isNotEmpty())) }
+    var showIntro by remember { mutableStateOf(!showWelcomeBack) }
     var showRestartConfirm by remember { mutableStateOf(false) }
 
     // Chat Feed State
@@ -537,6 +542,52 @@ fun InstagramCreatorAiV2Dialog(
                     // MAIN CONTENT AREA
                     Box(modifier = Modifier.weight(1f)) {
                         when {
+                            showIntro -> {
+                                val instagramIntroCards = remember {
+                                    listOf(
+                                        ToolIntroCardData(
+                                            title = "Instagram Creator AI Roadmap",
+                                            subtitle = "Master Reels, Virality & Audience Growth",
+                                            icon = Icons.Default.CameraAlt,
+                                            highlightTag = "Instagram Masterclass",
+                                            bulletPoints = listOf(
+                                                "Viral Reel Hooks & Scripting",
+                                                "Algorithm Secrets & SEO Hashtags",
+                                                "Profile Branding & Bio Optimization",
+                                                "Creator Monetization & Brand Deals"
+                                            )
+                                        ),
+                                        ToolIntroCardData(
+                                            title = "AI Script & Caption Generator",
+                                            subtitle = "Generate High-Converting Reel Ideas in 1-Tap",
+                                            icon = Icons.Default.AutoAwesome,
+                                            highlightTag = "AI Reel Engine",
+                                            bulletPoints = listOf(
+                                                "3-Second Hook Formulas",
+                                                "SEO Optimized Captions & Tags",
+                                                "Call-to-Action Templates",
+                                                "Audio Beat Sync Guidelines"
+                                            )
+                                        ),
+                                        ToolIntroCardData(
+                                            title = "Pre-Publish & Growth Checklist",
+                                            subtitle = "Ensure Max Reach Before You Hit Share",
+                                            icon = Icons.Default.CheckCircle,
+                                            highlightTag = "Viral Guarantee",
+                                            bulletPoints = listOf(
+                                                "Reel Cover Design Guidelines",
+                                                "Peak Engagement Posting Hours",
+                                                "Native Instagram Edits Tips",
+                                                "Audience Retention Triggers"
+                                            )
+                                        )
+                                    )
+                                }
+                                CommonToolIntroContainer(
+                                    cards = instagramIntroCards,
+                                    onCompleteIntro = { showIntro = false }
+                                )
+                            }
                             showWelcomeBack -> {
                                 SmartWelcomeBackDialog(
                                     courseTitle = "Instagram Creator Course",

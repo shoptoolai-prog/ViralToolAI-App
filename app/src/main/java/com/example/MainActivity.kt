@@ -293,7 +293,11 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     Screen.Splash -> {
                         SplashScreen(onSplashComplete = {
                             try {
-                                currentScreen = Screen.BrandAmbassadorPoster
+                                if (!OnboardingPrefs.isOnboardingCompleted(context)) {
+                                    currentScreen = Screen.Onboarding
+                                } else {
+                                    currentScreen = Screen.BrandAmbassadorPoster
+                                }
                             } catch (e: Exception) {
                                 currentScreen = Screen.Home
                             }

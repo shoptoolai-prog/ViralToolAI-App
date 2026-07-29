@@ -65,79 +65,78 @@ fun UniversalToolPopupDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack)
+                .background(Color.Black.copy(alpha = 0.85f))
                 .statusBarsPadding()
                 .responsiveImeAndNavPadding(),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
-                color = Color(0xFF0F1A14), // Glass Theme Dark Palette
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .responsiveDialogBounds(responsiveMetrics)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
+            CommonPopupAnimation(visible = true) {
+                Surface(
+                    color = Color(0xFF0F1A14), // Glass Theme Dark Palette
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, Color(0x3310B981)),
+                    modifier = Modifier
+                        .responsiveDialogBounds(responsiveMetrics)
                 ) {
-                    // 1. GLASS HEADER
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF0D1611))
-                            .border(
-                                BorderStroke(0.8.dp, Color(0x22FFFFFF)),
-                                RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                            )
-                            .padding(
-                                horizontal = responsiveMetrics.horizontalPadding,
-                                vertical = 12.dp
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
+                        // 1. GLASS HEADER
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF0D1611))
+                                .border(
+                                    BorderStroke(0.8.dp, Color(0x22FFFFFF)),
+                                    RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                                )
+                                .padding(
+                                    horizontal = responsiveMetrics.horizontalPadding,
+                                    vertical = 12.dp
+                                ),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(responsiveMetrics.scaledDp(42f))
-                                    .clip(CircleShape)
-                                    .background(EmeraldPrimary.copy(alpha = 0.2f))
-                                    .border(BorderStroke(1.2.dp, EmeraldGlow), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    tint = EmeraldGlow,
-                                    modifier = Modifier.size(responsiveMetrics.scaledDp(22f))
-                                )
-                            }
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                AutoResizedText(
-                                    text = title,
-                                    fontSize = responsiveMetrics.scaledSp(15f),
-                                    fontWeight = FontWeight.Black,
-                                    color = TextWhite,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                subtitle?.let { sub ->
-                                    AutoResizedText(
-                                        text = sub,
-                                        fontSize = responsiveMetrics.scaledSp(11f),
-                                        fontWeight = FontWeight.Bold,
-                                        color = EmeraldGlow,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                Box(
+                                    modifier = Modifier
+                                        .size(responsiveMetrics.scaledDp(42f))
+                                        .clip(CircleShape)
+                                        .background(EmeraldPrimary.copy(alpha = 0.2f))
+                                        .border(BorderStroke(1.2.dp, EmeraldGlow), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = EmeraldGlow,
+                                        modifier = Modifier.size(responsiveMetrics.scaledDp(22f))
                                     )
                                 }
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    CommonResponsiveText(
+                                        text = title,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextWhite,
+                                        maxLines = 1
+                                    )
+                                    subtitle?.let { sub ->
+                                        CommonResponsiveText(
+                                            text = sub,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = EmeraldGlow,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
                             }
-                        }
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -196,7 +195,7 @@ fun UniversalToolPopupDialog(
                     // 2. SCROLLABLE CONTENT BODY
                     Column(
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(1f, fill = false)
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState())
                             .padding(
@@ -223,7 +222,7 @@ fun UniversalToolPopupDialog(
                                     ),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                ctaText?.let { text ->
+                                ctaText?.let { text: String ->
                                     UniversalCtaButton(
                                         text = text,
                                         enabled = ctaEnabled,
@@ -234,7 +233,7 @@ fun UniversalToolPopupDialog(
                                     )
                                 }
 
-                                secondaryCtaText?.let { text ->
+                                secondaryCtaText?.let { text: String ->
                                     OutlinedButton(
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -263,6 +262,7 @@ fun UniversalToolPopupDialog(
             }
         }
     }
+}
 }
 
 @Composable

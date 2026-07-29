@@ -1569,170 +1569,38 @@ private fun MeeshoRoadmapSwipeView(
     onPrevCard: () -> Unit,
     onSkipRoadmap: () -> Unit
 ) {
-    val totalCards = MeeshoCreatorStaticData.roadmapCards.size
-    val currentCard = MeeshoCreatorStaticData.roadmapCards[currentCardIndex]
+    val introCards = remember(selectedLanguage) {
+        MeeshoCreatorStaticData.roadmapCards.map { card ->
+            val title = when (selectedLanguage) {
+                "Hindi" -> card.titleHindi
+                "English" -> card.titleEnglish
+                else -> card.titleHinglish
+            }
+            val subtitle = when (selectedLanguage) {
+                "Hindi" -> card.subtitleHindi
+                "English" -> card.subtitleEnglish
+                else -> card.subtitleHinglish
+            }
+            val bullets = when (selectedLanguage) {
+                "Hindi" -> card.bulletPointsHindi
+                "English" -> card.bulletPointsEnglish
+                else -> card.bulletPointsHinglish
+            }
 
-    val title = when (selectedLanguage) {
-        "Hindi" -> currentCard.titleHindi
-        "English" -> currentCard.titleEnglish
-        else -> currentCard.titleHinglish
-    }
-
-    val subtitle = when (selectedLanguage) {
-        "Hindi" -> currentCard.subtitleHindi
-        "English" -> currentCard.subtitleEnglish
-        else -> currentCard.subtitleHinglish
-    }
-
-    val bullets = when (selectedLanguage) {
-        "Hindi" -> currentCard.bulletPointsHindi
-        "English" -> currentCard.bulletPointsEnglish
-        else -> currentCard.bulletPointsHinglish
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Progress Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "ROADMAP ${currentCardIndex + 1} OF $totalCards",
-                fontSize = 10.5.sp,
-                fontWeight = FontWeight.Black,
-                color = EmeraldPrimary,
-                letterSpacing = 0.8.sp
-            )
-
-            Text(
-                text = "Skip Roadmap ⏩",
-                fontSize = 11.sp,
-                color = TextWhite.copy(alpha = 0.6f),
-                modifier = Modifier.clickable { onSkipRoadmap() }
+            ToolIntroCardData(
+                title = title,
+                subtitle = subtitle,
+                icon = Icons.Default.ShoppingBag,
+                highlightTag = "Meesho Creator Roadmap",
+                bulletPoints = bullets
             )
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Main Card View
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0x18FFFFFF))
-                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(24.dp))
-                .padding(20.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = currentCard.iconEmoji, fontSize = 28.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = title,
-                            fontSize = 17.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = subtitle,
-                        fontSize = 12.5.sp,
-                        color = TextWhite.copy(alpha = 0.85f),
-                        lineHeight = 17.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    bullets.forEach { b ->
-                        Row(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Point",
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = b,
-                                fontSize = 11.5.sp,
-                                color = TextWhite.copy(alpha = 0.9f)
-                            )
-                        }
-                    }
-                }
-
-                // Page Indicator Dots
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    for (i in 0 until totalCards) {
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 3.dp)
-                                .size(if (i == currentCardIndex) 10.dp else 6.dp)
-                                .clip(CircleShape)
-                                .background(if (i == currentCardIndex) EmeraldPrimary else Color(0x33FFFFFF))
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Bottom Controls
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (currentCardIndex > 0) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0x22FFFFFF))
-                        .clickable { onPrevCard() }
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    Text(text = "← Back", fontSize = 12.sp, color = TextWhite)
-                }
-            } else {
-                Spacer(modifier = Modifier.width(1.dp))
-            }
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(EmeraldPrimary)
-                    .clickable { onNextCard() }
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = if (currentCardIndex == totalCards - 1) "Start Lesson 1 🚀" else "Next Step →",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AmoledBlack
-                )
-            }
-        }
     }
+
+    CommonToolIntroContainer(
+        cards = introCards,
+        onCompleteIntro = onSkipRoadmap
+    )
 }
 
 /**

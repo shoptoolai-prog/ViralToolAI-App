@@ -35,6 +35,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.draw.shadow
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.ElectricPurple
+import com.example.ui.theme.LocalResponsiveMetrics
+import com.example.ui.theme.responsiveDialogBounds
+import com.example.ui.theme.responsiveImeAndNavPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -475,6 +478,8 @@ fun CommonPremiumToolPopupDialog(
         label = "lockPulse"
     )
 
+    val responsiveMetrics = LocalResponsiveMetrics.current
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -485,23 +490,25 @@ fun CommonPremiumToolPopupDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack)
+                .background(Color.Black.copy(alpha = 0.85f))
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .imePadding()
+                .responsiveImeAndNavPadding(),
+            contentAlignment = Alignment.Center
         ) {
-            Surface(
-                color = Color(0xFF0F1A14),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .materialSharedBounds("premium_tool_card_${tool.id}")
-            ) {
-                Column(
+            CommonPopupAnimation(visible = true) {
+                Surface(
+                    color = Color(0xFF0F1A14),
+                    shape = RoundedCornerShape(24.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .verticalScroll(rememberScrollState())
+                        .responsiveDialogBounds(responsiveMetrics)
+                        .border(BorderStroke(1.dp, Color(0x3310B981)), RoundedCornerShape(24.dp))
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                     // Header Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -769,4 +776,5 @@ fun CommonPremiumToolPopupDialog(
             }
         }
     }
+}
 }

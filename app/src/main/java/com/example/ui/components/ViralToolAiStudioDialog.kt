@@ -135,27 +135,27 @@ fun ViralToolAiStudioDialog(
                 .padding(dialogPadding),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = responsiveMetrics.dialogMaxWidth)
-                    .clip(RoundedCornerShape(26.dp))
-                    .border(
-                        BorderStroke(
-                            1.5.dp,
-                            Brush.linearGradient(
-                                listOf(
-                                    EmeraldGlow,
-                                    ElectricPurple,
-                                    EmeraldPrimary
+            CommonPopupAnimation(visible = true) {
+                Surface(
+                    modifier = Modifier
+                        .responsiveDialogBounds(responsiveMetrics)
+                        .clip(RoundedCornerShape(26.dp))
+                        .border(
+                            BorderStroke(
+                                1.5.dp,
+                                Brush.linearGradient(
+                                    listOf(
+                                        EmeraldGlow,
+                                        ElectricPurple,
+                                        EmeraldPrimary
+                                    )
                                 )
-                            )
+                            ),
+                            RoundedCornerShape(26.dp)
                         ),
-                        RoundedCornerShape(26.dp)
-                    ),
-                color = Color(0xFF0F1412),
-                shape = RoundedCornerShape(26.dp)
-            ) {
+                    color = Color(0xFF0F1412),
+                    shape = RoundedCornerShape(26.dp)
+                ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -801,4 +801,5 @@ fun ViralToolAiStudioDialog(
             }
         }
     }
+}
 }

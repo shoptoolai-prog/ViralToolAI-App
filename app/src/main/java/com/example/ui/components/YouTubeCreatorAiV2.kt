@@ -545,6 +545,7 @@ fun YouTubeCreatorAiV2Dialog(
     // Interactive Dialog Overlays
     var activeToolOverlay by remember { mutableStateOf<String?>(null) }
     var showWelcomeBack by remember { mutableStateOf(selectedLang != null && creatorType != null && (currentStepId > 1 || completedSteps.isNotEmpty())) }
+    var showIntro by remember { mutableStateOf(!showWelcomeBack) }
     var showRestartConfirm by remember { mutableStateOf(false) }
 
     Dialog(
@@ -563,7 +564,52 @@ fun YouTubeCreatorAiV2Dialog(
                 .statusBarsPadding()
                 .responsiveImeAndNavPadding()
         ) {
-            if (showWelcomeBack && selectedLang != null && creatorType != null) {
+            if (showIntro) {
+                val youtubeIntroCards = remember {
+                    listOf(
+                        ToolIntroCardData(
+                            title = "YouTube Master Blueprint",
+                            subtitle = "Grow Channel Reach, Subscribers & Revenue",
+                            icon = Icons.Default.PlayArrow,
+                            highlightTag = "YouTube Masterclass",
+                            bulletPoints = listOf(
+                                "High CTR Title & Concept Formula",
+                                "Viral Thumbnail Design Rules",
+                                "Audience Retention Hook Strategies",
+                                "Monetization & Sponsorship Secrets"
+                            )
+                        ),
+                        ToolIntroCardData(
+                            title = "AI Video Script & SEO Tools",
+                            subtitle = "Generate Full Scripts & Optimized Tags",
+                            icon = Icons.Default.AutoAwesome,
+                            highlightTag = "AI YouTube Engine",
+                            bulletPoints = listOf(
+                                "Video Structure & Outlines",
+                                "Intro & Hook Generator",
+                                "SEO Keywords & Description Generator",
+                                "Tag Optimization System"
+                            )
+                        ),
+                        ToolIntroCardData(
+                            title = "Pre-Publish & Growth System",
+                            subtitle = "Verify Every Detail Before Hitting Publish",
+                            icon = Icons.Default.CheckCircle,
+                            highlightTag = "Viral Growth Checklist",
+                            bulletPoints = listOf(
+                                "Pre-Publish Upload Checklist",
+                                "Thumbnail Contrast Test",
+                                "RPM & Revenue Optimization",
+                                "Video Editing Course Options"
+                            )
+                        )
+                    )
+                }
+                CommonToolIntroContainer(
+                    cards = youtubeIntroCards,
+                    onCompleteIntro = { showIntro = false }
+                )
+            } else if (showWelcomeBack && selectedLang != null && creatorType != null) {
                 SmartWelcomeBackDialog(
                     courseTitle = "YouTube Creator Course",
                     currentStep = currentStepId,
@@ -1183,158 +1229,22 @@ private fun YouTubeMentorChatScreen(
             .background(Color(0xFF0F0505))
     ) {
         // TOP HEADER BAR
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF1D0808), Color(0xFF120404))
-                    )
-                )
-                .border(
-                    BorderStroke(1.dp, YouTubeRed.copy(alpha = 0.4f)),
-                    RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(YouTubeRed.copy(alpha = 0.2f))
-                            .border(BorderStroke(1.dp, YouTubeRedGlow), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        OfficialLogo(
-                            name = "youtube",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "YouTube Personal AI Mentor",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Black,
-                                color = TextWhite
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(EmeraldGlow)
-                            )
-                        }
-                        Text(
-                            text = "$creatorType • ${language.name} • Step $currentStepId/${YOUTUBE_ROADMAP_STEPS.size}",
-                            fontSize = 11.sp,
-                            color = TextWhite.copy(alpha = 0.65f)
-                        )
-                    }
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Language Switch Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x22FFFFFF))
-                            .clickable { onChangeLangClick() }
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Language,
-                                contentDescription = null,
-                                tint = TextWhite,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = language.name, fontSize = 10.sp, color = TextWhite, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    // Close Button
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x22FFFFFF))
-                            .clickable { onClose() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
-                    }
-                }
-            }
-        }
+        YouTubeHeaderBar(
+            creatorType = creatorType,
+            language = language,
+            currentStepId = currentStepId,
+            totalSteps = YOUTUBE_ROADMAP_STEPS.size,
+            onChangeLangClick = onChangeLangClick,
+            onClose = onClose
+        )
 
         // STEP PROGRESS INDICATOR STRIP
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF140606))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(YOUTUBE_ROADMAP_STEPS) { step ->
-                val isCompleted = completedSteps.contains(step.id)
-                val isCurrent = step.id == currentStepId
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            when {
-                                isCurrent -> Brush.horizontalGradient(listOf(YouTubeRed, YouTubeRedGlow))
-                                isCompleted -> SolidColor(Color(0x3310B981))
-                                else -> SolidColor(Color(0x18FFFFFF))
-                            }
-                        )
-                        .border(
-                            BorderStroke(
-                                1.dp,
-                                when {
-                                    isCurrent -> YouTubeRedGlow
-                                    isCompleted -> EmeraldGlow
-                                    else -> Color(0x22FFFFFF)
-                                }
-                            ),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .clickable { onStepChange(step.id) }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (isCompleted) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = EmeraldGlow,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        Text(
-                            text = "S${step.id}",
-                            fontSize = 11.sp,
-                            fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
-                            color = if (isCurrent || isCompleted) TextWhite else TextWhite.copy(alpha = 0.5f)
-                        )
-                    }
-                }
-            }
-        }
+        YouTubeStepProgressStrip(
+            steps = YOUTUBE_ROADMAP_STEPS,
+            completedSteps = completedSteps,
+            currentStepId = currentStepId,
+            onStepChange = onStepChange
+        )
 
         // LEARNING PROGRESS INDICATOR CARD
         LearningProgressIndicatorCard(
@@ -1376,7 +1286,7 @@ private fun YouTubeMentorChatScreen(
                             "YouTube SEO & Algorithm Hacking",
                             "Channel Monetization & Sponsorships"
                         ),
-                        onContinue = { onClose?.invoke() },
+                        onContinue = { onClose() },
                         onResetCourse = { onResetCourse?.invoke() },
                         theme = ytTheme
                     )
@@ -1385,62 +1295,245 @@ private fun YouTubeMentorChatScreen(
         }
 
         // BOTTOM INPUT BAR
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF140606))
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 14.dp, vertical = 10.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    placeholder = {
-                        Text(
-                            text = when (language) {
-                                YouTubeLanguage.HINDI -> "Poochho ya 'Done' bolo..."
-                                YouTubeLanguage.ENGLISH -> "Ask or type 'Done'..."
-                                YouTubeLanguage.HINGLISH -> "Poochho ya 'Done' bolo..."
-                            },
-                            fontSize = 13.sp,
-                            color = TextWhite.copy(alpha = 0.4f)
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = YouTubeRedGlow,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedContainerColor = Color(0xFF1C0909),
-                        unfocusedContainerColor = Color(0xFF1A0808),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    ),
-                    maxLines = 3
-                )
+        YouTubeBottomInputBar(
+            inputText = inputText,
+            onInputTextChange = { inputText = it },
+            language = language,
+            onSendClick = { handleUserMsg(inputText) }
+        )
+    }
+}
 
-                Spacer(modifier = Modifier.width(8.dp))
+@Composable
+private fun YouTubeHeaderBar(
+    creatorType: String,
+    language: YouTubeLanguage,
+    currentStepId: Int,
+    totalSteps: Int,
+    onChangeLangClick: () -> Unit,
+    onClose: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF1D0808), Color(0xFF120404))
+                )
+            )
+            .border(
+                BorderStroke(1.dp, YouTubeRed.copy(alpha = 0.4f)),
+                RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(YouTubeRed.copy(alpha = 0.2f))
+                        .border(BorderStroke(1.dp, YouTubeRedGlow), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OfficialLogo(
+                        name = "youtube",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "YouTube Personal AI Mentor",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(EmeraldGlow)
+                        )
+                    }
+                    Text(
+                        text = "$creatorType • ${language.name} • Step $currentStepId/$totalSteps",
+                        fontSize = 11.sp,
+                        color = TextWhite.copy(alpha = 0.65f)
+                    )
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x22FFFFFF))
+                        .clickable { onChangeLangClick() }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = null,
+                            tint = TextWhite,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = language.name, fontSize = 10.sp, color = TextWhite, fontWeight = FontWeight.Bold)
+                    }
+                }
 
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
-                        .background(Brush.horizontalGradient(listOf(YouTubeRed, YouTubeRedGlow)))
-                        .clickable { handleUserMsg(inputText) },
+                        .background(Color(0x22FFFFFF))
+                        .clickable { onClose() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = TextWhite,
-                        modifier = Modifier.size(20.dp)
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun YouTubeStepProgressStrip(
+    steps: List<YouTubeStep>,
+    completedSteps: List<Int>,
+    currentStepId: Int,
+    onStepChange: (Int) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF140606))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(steps) { step ->
+            val isCompleted = completedSteps.contains(step.id)
+            val isCurrent = step.id == currentStepId
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        when {
+                            isCurrent -> Brush.horizontalGradient(listOf(YouTubeRed, YouTubeRedGlow))
+                            isCompleted -> SolidColor(Color(0x3310B981))
+                            else -> SolidColor(Color(0x18FFFFFF))
+                        }
+                    )
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            when {
+                                isCurrent -> YouTubeRedGlow
+                                isCompleted -> EmeraldGlow
+                                else -> Color(0x22FFFFFF)
+                            }
+                        ),
+                        RoundedCornerShape(12.dp)
+                    )
+                    .clickable { onStepChange(step.id) }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isCompleted) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = EmeraldGlow,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    Text(
+                        text = "S${step.id}",
+                        fontSize = 11.sp,
+                        fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
+                        color = if (isCurrent || isCompleted) TextWhite else TextWhite.copy(alpha = 0.5f)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun YouTubeBottomInputBar(
+    inputText: String,
+    onInputTextChange: (String) -> Unit,
+    language: YouTubeLanguage,
+    onSendClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF140606))
+            .imePadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = inputText,
+                onValueChange = onInputTextChange,
+                placeholder = {
+                    Text(
+                        text = when (language) {
+                            YouTubeLanguage.HINDI -> "Poochho ya 'Done' bolo..."
+                            YouTubeLanguage.ENGLISH -> "Ask or type 'Done'..."
+                            YouTubeLanguage.HINGLISH -> "Poochho ya 'Done' bolo..."
+                        },
+                        fontSize = 13.sp,
+                        color = TextWhite.copy(alpha = 0.4f)
+                    )
+                },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = YouTubeRedGlow,
+                    unfocusedBorderColor = Color(0x33FFFFFF),
+                    focusedContainerColor = Color(0xFF1C0909),
+                    unfocusedContainerColor = Color(0xFF1A0808),
+                    focusedTextColor = TextWhite,
+                    unfocusedTextColor = TextWhite
+                ),
+                maxLines = 3
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(Brush.horizontalGradient(listOf(YouTubeRed, YouTubeRedGlow)))
+                    .clickable { onSendClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "Send",
+                    tint = TextWhite,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

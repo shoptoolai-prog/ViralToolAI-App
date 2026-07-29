@@ -2,12 +2,11 @@ package com.example.ui.screens
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.cloud.LiveCloudManager
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -16,30 +15,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.example.R
+import com.example.cloud.LiveCloudManager
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
@@ -77,34 +69,32 @@ object BrandAmbassadorPrefs {
     }
 
     fun getRandomStatusMessage(context: Context): String {
-        val defaultMessages = listOf(
-            "Create. Inspire. Repeat.",
-            "Your Creative Studio is Ready.",
-            "Edit Better. Grow Faster.",
-            "Premium Creator Mode Enabled.",
-            "Your Next Viral Reel Starts Here.",
-            "AI Workspace Ready.",
-            "Learn Something New Today.",
-            "Great Creators Never Stop Learning.",
-            "Build. Learn. Earn.",
-            "Preparing Your Creative Tools.",
-            "Success Starts With One Video.",
-            "Lights On. Creativity Begins.",
-            "Every Reel Can Change Your Future.",
-            "Let's Create Something Amazing."
+        val motivationalMessages = listOf(
+            "Create. Inspire. Grow.",
+            "Your next viral moment starts today.",
+            "Keep creating, success follows consistency.",
+            "Consistency builds legends.",
+            "Transform your ideas into viral reality.",
+            "Consistency beats talent when talent doesn't work hard.",
+            "Every great creator started with zero views.",
+            "Your creativity has no limits.",
+            "Dream big. Build fast. Go viral.",
+            "Craft stories that resonate worldwide.",
+            "Turn passion into high-impact content.",
+            "Master the algorithm with authentic storytelling."
         )
         return try {
             val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             val lastIdx = prefs.getInt(KEY_LAST_MSG, -1)
-            var newIdx = (0 until defaultMessages.size).random()
-            if (defaultMessages.size > 1 && newIdx == lastIdx) {
-                newIdx = (newIdx + 1) % defaultMessages.size
+            var newIdx = (0 until motivationalMessages.size).random()
+            if (motivationalMessages.size > 1 && newIdx == lastIdx) {
+                newIdx = (newIdx + 1) % motivationalMessages.size
             }
             prefs.edit().putInt(KEY_LAST_MSG, newIdx).apply()
-            defaultMessages[newIdx]
+            motivationalMessages[newIdx]
         } catch (e: Exception) {
             Log.e(TAG, "Error getting random status message", e)
-            defaultMessages.random()
+            motivationalMessages.random()
         }
     }
 }
@@ -190,6 +180,12 @@ fun BrandAmbassadorPosterScreen(
             .background(Color.Black)
             .statusBarsPadding()
             .navigationBarsPadding()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                handleExit()
+            }
     ) {
         if (isFirstTime) {
             FirstTimeWelcomeView(
@@ -214,7 +210,7 @@ private fun PosterHeroImage(
     val baConfig by LiveCloudManager.brandAmbassadorConfig.collectAsStateWithLifecycle()
 
     val rawUrl = baConfig.image.ifBlank { POSTER_IMAGE_URL }
-    val imageUrl = if (rawUrl.contains("Picsart") || rawUrl.contains("a7996a261d91d703ea1e41a90cba30233d85b80a")) {
+    val imageUrl = if (rawUrl.contains("Picsart") || rawUrl.contains("a7996a261d91d703ea1e41a90cba30233d85b80a") || rawUrl.contains("unsplash")) {
         POSTER_IMAGE_URL
     } else {
         rawUrl
@@ -223,16 +219,16 @@ private fun PosterHeroImage(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color(0xFF0C0E12))
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(imageUrl)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
-                .crossfade(false)
+                .crossfade(true)
                 .build(),
-            contentDescription = "ViralToolAI Brand Ambassador Poster",
+            contentDescription = "ViralToolAI Welcome Banner",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
@@ -250,7 +246,11 @@ private fun FirstTimeWelcomeView(
     isPreviewMode: Boolean
 ) {
     val posterZoomScale = remember { Animatable(1.0f) }
-    val contentAlpha = remember { Animatable(0f) }
+    val titleAlpha = remember { Animatable(0f) }
+    val titleOffsetY = remember { Animatable(40f) }
+    val subAlpha = remember { Animatable(0f) }
+    val subOffsetY = remember { Animatable(30f) }
+    val progressAnim = remember { Animatable(0f) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "welcomeBgAnims")
     val ambientPulse by infiniteTransition.animateFloat(
@@ -267,7 +267,7 @@ private fun FirstTimeWelcomeView(
         initialValue = -500f,
         targetValue = 1200f,
         animationSpec = infiniteRepeatable(
-            animation = tween(5000, easing = LinearEasing),
+            animation = tween(6000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "reflectionOffset"
@@ -275,34 +275,74 @@ private fun FirstTimeWelcomeView(
 
     LaunchedEffect(Unit) {
         if (isPreviewMode) {
-            contentAlpha.snapTo(1f)
+            titleAlpha.snapTo(1f)
+            titleOffsetY.snapTo(0f)
+            subAlpha.snapTo(1f)
+            subOffsetY.snapTo(0f)
+            progressAnim.snapTo(1f)
             return@LaunchedEffect
         }
 
         try {
-            // Camera Zoom: 100% to 102% over 3.5 seconds
+            // Camera Zoom: 100% to 102.5% over 6 seconds
             launch {
                 try {
                     posterZoomScale.animateTo(
-                        targetValue = 1.02f,
-                        animationSpec = tween(3500, easing = LinearEasing)
+                        targetValue = 1.025f,
+                        animationSpec = tween(6000, easing = LinearEasing)
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Zoom animation error", e)
                 }
             }
 
-            // Fade in text block
+            // Smooth progress bar filling over 6 seconds
             launch {
                 try {
-                    contentAlpha.animateTo(1f, tween(500, easing = FastOutSlowInEasing))
+                    progressAnim.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(6000, easing = LinearEasing)
+                    )
                 } catch (e: Exception) {
-                    Log.e(TAG, "Content alpha animation error", e)
+                    Log.e(TAG, "Progress animation error", e)
                 }
             }
 
-            // Total screen duration: exactly 3.5 seconds
-            delay(3500)
+            // iOS-style text reveal: Main Title
+            launch {
+                try {
+                    titleAlpha.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Title alpha error", e)
+                }
+            }
+            launch {
+                try {
+                    titleOffsetY.animateTo(0f, tween(900, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Title offset error", e)
+                }
+            }
+
+            // iOS-style text reveal: Subtitle message after 400ms delay
+            delay(400)
+            launch {
+                try {
+                    subAlpha.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Sub alpha error", e)
+                }
+            }
+            launch {
+                try {
+                    subOffsetY.animateTo(0f, tween(900, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Sub offset error", e)
+                }
+            }
+
+            // Total screen duration: 6 seconds (6000ms)
+            delay(5600) // remaining delay after the initial 400ms
             onFinish()
         } catch (e: Exception) {
             Log.e(TAG, "Fatal LaunchedEffect exception in FirstTimeWelcomeView", e)
@@ -356,12 +396,12 @@ private fun FirstTimeWelcomeView(
             }
         }
 
-        // Lower Third Vignette Gradient (keeps face completely untouched and 100% bright)
+        // Lower Third Vignette Gradient
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .fillMaxHeight(0.45f)
+                .fillMaxHeight(0.48f)
                 .background(
                     Brush.verticalGradient(
                         listOf(
@@ -374,55 +414,86 @@ private fun FirstTimeWelcomeView(
                 )
         )
 
-        // Lower Third Typography
+        // Lower Third iOS-Style Typography Layout
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 28.dp)
-                .graphicsLayer { alpha = contentAlpha.value },
+                .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Main Welcome Title with animated slide and fade
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.graphicsLayer {
+                    alpha = titleAlpha.value
+                    translationY = titleOffsetY.value
+                }
+            ) {
+                Text(
+                    text = "WELCOME TO VIRALTOOLAI",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EmeraldGlow,
+                    letterSpacing = 2.5.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Thanks For Downloading ViralToolAI App",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextWhite,
+                    letterSpacing = 0.3.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 28.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Subtitle / Additional Message with separate delay reveal
             Text(
-                text = "WELCOME TO",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextWhite.copy(alpha = 0.70f),
-                letterSpacing = 3.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = "VIRALTOOLAI",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextWhite,
-                letterSpacing = 2.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(3.dp))
-
-            Text(
-                text = "Build Your Creator Journey",
+                text = "Support us and follow ViralToolAI on Instagram",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = EmeraldGlow,
-                letterSpacing = 0.6.sp,
-                textAlign = TextAlign.Center
+                color = TextWhite.copy(alpha = 0.90f),
+                letterSpacing = 0.4.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.graphicsLayer {
+                    alpha = subAlpha.value
+                    translationY = subOffsetY.value
+                }
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-            Text(
-                text = "Thanks For Downloading ❤️",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextWhite.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center
-            )
+            // Fast Animated Loading Line (6s duration)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .height(3.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x33FFFFFF))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(progressAnim.value)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    EmeraldPrimary,
+                                    EmeraldGlow,
+                                    Color.White
+                                )
+                            )
+                        )
+                )
+            }
         }
     }
 }
@@ -439,6 +510,8 @@ private fun ReturningUserStatusView(
     }
 
     val posterZoomScale = remember { Animatable(1.0f) }
+    val contentAlpha = remember { Animatable(0f) }
+    val contentOffsetY = remember { Animatable(30f) }
     val progressAnim = remember { Animatable(0f) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "statusAnims")
@@ -454,36 +527,54 @@ private fun ReturningUserStatusView(
 
     LaunchedEffect(Unit) {
         if (isPreviewMode) {
+            contentAlpha.snapTo(1f)
+            contentOffsetY.snapTo(0f)
             progressAnim.snapTo(1f)
             return@LaunchedEffect
         }
 
         try {
-            // Light cinematic zoom (100% -> 102%)
+            // Light cinematic zoom (100% -> 102%) over 3.5 seconds
             launch {
                 try {
                     posterZoomScale.animateTo(
                         targetValue = 1.02f,
-                        animationSpec = tween(3000, easing = LinearEasing)
+                        animationSpec = tween(3500, easing = LinearEasing)
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Zoom animation error", e)
                 }
             }
 
-            // Fill progress bar smoothly over 3 seconds
+            // Fill progress bar smoothly over 3.5 seconds
             launch {
                 try {
                     progressAnim.animateTo(
                         targetValue = 1f,
-                        animationSpec = tween(3000, easing = LinearEasing)
+                        animationSpec = tween(3500, easing = LinearEasing)
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Progress animation error", e)
                 }
             }
 
-            delay(3000)
+            // Smooth content reveal animation
+            launch {
+                try {
+                    contentAlpha.animateTo(1f, tween(700, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Content alpha error", e)
+                }
+            }
+            launch {
+                try {
+                    contentOffsetY.animateTo(0f, tween(700, easing = FastOutSlowInEasing))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Content offset error", e)
+                }
+            }
+
+            delay(3500)
             onFinish()
         } catch (e: Exception) {
             Log.e(TAG, "Fatal LaunchedEffect exception in ReturningUserStatusView", e)
@@ -492,7 +583,7 @@ private fun ReturningUserStatusView(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Hero Poster Image with 100% brightness & perfect face clarity
+        // Hero Poster Image with 100% brightness
         PosterHeroImage(zoomScale = posterZoomScale.value)
 
         // Glass Reflection Sweep
@@ -516,7 +607,7 @@ private fun ReturningUserStatusView(
             }
         }
 
-        // Soft gradient at LOWER THIRD ONLY (face and body remain 100% visible and bright)
+        // Soft gradient at lower third only
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -534,42 +625,48 @@ private fun ReturningUserStatusView(
                 )
         )
 
-        // Minimal Apple-style Lower Third Layout
+        // Apple-style Lower Third Layout
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 28.dp),
+                .padding(horizontal = 24.dp, vertical = 28.dp)
+                .graphicsLayer {
+                    alpha = contentAlpha.value
+                    translationY = contentOffsetY.value
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Tiny Emerald Accent Sparkle
             Text(
-                text = "✨",
-                fontSize = 16.sp,
+                text = "✨ CREATOR MODE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = EmeraldGlow,
+                letterSpacing = 2.sp,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Minimal, elegant SF Pro style status message
+            // Dynamic motivational creator line
             Text(
                 text = statusMessage,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
                 color = TextWhite,
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.3.sp,
-                lineHeight = 24.sp,
+                lineHeight = 25.sp,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Very Thin Glass Loading Line (3s duration)
+            // Fast Progress Line (3.5s duration)
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.55f)
-                    .height(2.dp)
+                    .height(2.5.dp)
                     .clip(CircleShape)
                     .background(Color(0x33FFFFFF))
             ) {

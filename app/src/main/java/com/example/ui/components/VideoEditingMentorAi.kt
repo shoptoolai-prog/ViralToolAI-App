@@ -62,7 +62,8 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Subtitles
-import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -431,6 +432,7 @@ fun VideoEditingMentorAiDialog(
     // Active tool overlays
     var activeToolOverlay by remember { mutableStateOf<String?>(null) }
     var showWelcomeBack by remember { mutableStateOf(selectedLang != null && videoType != null && (currentStepId > 1 || completedSteps.isNotEmpty())) }
+    var showIntro by remember { mutableStateOf(!showWelcomeBack) }
     var showRestartConfirm by remember { mutableStateOf(false) }
 
     Dialog(
@@ -449,7 +451,130 @@ fun VideoEditingMentorAiDialog(
                 .statusBarsPadding()
                 .responsiveImeAndNavPadding()
         ) {
-            if (showWelcomeBack && selectedLang != null && videoType != null) {
+            if (showIntro) {
+                val editingIntroCards = remember(toolType) {
+                    when (toolType) {
+                        EditingToolType.CAPCUT -> listOf(
+                            ToolIntroCardData(
+                                title = "CapCut Pro Speed & Text Mastery",
+                                subtitle = "Master Keyframe Animations & Velocity Cuts",
+                                icon = Icons.Default.Movie,
+                                highlightTag = "CapCut Masterclass",
+                                bulletPoints = listOf(
+                                    "Auto-Caption Styling & Text Effects",
+                                    "Smooth Slow-Mo & Velocity Curves",
+                                    "3D Text Overlays & Keyframes",
+                                    "4K 60fps High Quality Export Settings"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "Trending CapCut Effects",
+                                subtitle = "1-Tap Viral Transitions & Beat Syncing",
+                                icon = Icons.Default.AutoAwesome,
+                                highlightTag = "Viral CapCut Effects",
+                                bulletPoints = listOf(
+                                    "Neon Edge Glow & Body Effects",
+                                    "Auto-Velocity Beat Matching",
+                                    "Green Screen & Cutout Removal",
+                                    "Sound FX & Beat Drop Timing"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "Pro Mobile Workflow",
+                                subtitle = "Edit Reels 10x Faster on Mobile",
+                                icon = Icons.Default.CheckCircle,
+                                highlightTag = "CapCut Workflow",
+                                bulletPoints = listOf(
+                                    "Timeline Trimming & Split Hacks",
+                                    "Audio Beat Markers & Waveforms",
+                                    "Color Grading Filters & Presets",
+                                    "Direct Instagram & TikTok Export"
+                                )
+                            )
+                        )
+                        EditingToolType.VN -> listOf(
+                            ToolIntroCardData(
+                                title = "VN Video Editor Masterclass",
+                                subtitle = "No Watermark Pro Mobile Video Editing",
+                                icon = Icons.Default.Movie,
+                                highlightTag = "VN Masterclass",
+                                bulletPoints = listOf(
+                                    "Speed Curve Customization & Ramping",
+                                    "Multi-Track Timeline & PIP Layers",
+                                    "Keyframe Animation & Masking",
+                                    "Custom LUT Filters & Color Profiles"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "VN Code & Template Sharing",
+                                subtitle = "Import Viral VN Templates & Sound Kits",
+                                icon = Icons.Default.AutoAwesome,
+                                highlightTag = "VN Code Engine",
+                                bulletPoints = listOf(
+                                    "1-Tap VN Code QR Import",
+                                    "Beat Alignment & Music Sync",
+                                    "Chroma Key & Background Removal",
+                                    "Text Animations & Preset Effects"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "Cinematic Mobile Color & Cut",
+                                subtitle = "Professional Color Grading & Audio Mixing",
+                                icon = Icons.Default.CheckCircle,
+                                highlightTag = "VN Production",
+                                bulletPoints = listOf(
+                                    "HSL Color Wheel Adjustments",
+                                    "Fade In/Out Audio Curves",
+                                    "Aspect Ratio Presets (9:16, 16:9)",
+                                    "Lossless 4K 60fps Exporting"
+                                )
+                            )
+                        )
+                        EditingToolType.INSTAGRAM_EDITS -> listOf(
+                            ToolIntroCardData(
+                                title = "Instagram In-App Edits & Reels Studio",
+                                subtitle = "Create Viral Reels Directly Inside Instagram",
+                                icon = Icons.Default.CameraAlt,
+                                highlightTag = "Instagram Reels Studio",
+                                bulletPoints = listOf(
+                                    "Reel Audio Beat Syncing",
+                                    "Text Timing & Sticker Placement",
+                                    "Trending Audio & Effects Engine",
+                                    "Custom Cover Photo Frame Selection"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "In-App Transitions & Filters",
+                                subtitle = "Level Up Engagement with Native Instagram Tools",
+                                icon = Icons.Default.AutoAwesome,
+                                highlightTag = "Native Reels Hacks",
+                                bulletPoints = listOf(
+                                    "Seamless Transition Cuts",
+                                    "Native Voiceover & Auto Captions",
+                                    "Interactive Polls & Quiz Overlays",
+                                    "Reel Grid Frame Alignment"
+                                )
+                            ),
+                            ToolIntroCardData(
+                                title = "High Quality Export Settings",
+                                subtitle = "Prevent Blur & Quality Drop on Reels Uploads",
+                                icon = Icons.Default.CheckCircle,
+                                highlightTag = "Crisp Reel Uploads",
+                                bulletPoints = listOf(
+                                    "Enable 'Upload at Highest Quality' Setting",
+                                    "Color Profile & Brightness Balance",
+                                    "9:16 Aspect Ratio Margin Guides",
+                                    "Draft Saving & Scheduling Tips"
+                                )
+                            )
+                        )
+                    }
+                }
+                CommonToolIntroContainer(
+                    cards = editingIntroCards,
+                    onCompleteIntro = { showIntro = false }
+                )
+            } else if (showWelcomeBack && selectedLang != null && videoType != null) {
                 SmartWelcomeBackDialog(
                     courseTitle = "${toolType.title} Course",
                     currentStep = currentStepId,

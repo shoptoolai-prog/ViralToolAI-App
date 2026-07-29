@@ -40,6 +40,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.max
 
+enum class WindowWidthSizeClass { COMPACT, MEDIUM, EXPANDED }
+enum class WindowHeightSizeClass { COMPACT, MEDIUM, EXPANDED }
+
+@Immutable
+data class WindowSizeClass(
+    val widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.COMPACT,
+    val heightSizeClass: WindowHeightSizeClass = WindowHeightSizeClass.MEDIUM
+) {
+    val isCompactWidth: Boolean get() = widthSizeClass == WindowWidthSizeClass.COMPACT
+    val isMediumWidth: Boolean get() = widthSizeClass == WindowWidthSizeClass.MEDIUM
+    val isExpandedWidth: Boolean get() = widthSizeClass == WindowWidthSizeClass.EXPANDED
+
+    val isCompactHeight: Boolean get() = heightSizeClass == WindowHeightSizeClass.COMPACT
+    val isMediumHeight: Boolean get() = heightSizeClass == WindowHeightSizeClass.MEDIUM
+    val isExpandedHeight: Boolean get() = heightSizeClass == WindowHeightSizeClass.EXPANDED
+}
+
 /**
  * MASTER PHASE — UNIVERSAL AUTO RESPONSIVE ENGINE
  * Automatically detects device metrics (width, height, aspect ratio, DPI, font scale, safe area)
@@ -59,11 +76,12 @@ data class ResponsiveMetrics(
     val isLargePhone: Boolean = false,
     val isTablet: Boolean = false,
     val isFoldable: Boolean = false,
+    val windowSizeClass: WindowSizeClass = WindowSizeClass(),
     val scaleFactor: Float = 1.0f,
-    val cardMaxWidth: Dp = 600.dp,
-    val dialogMaxWidth: Dp = 540.dp,
-    val dialogMaxHeight: Dp = 780.dp,
-    val buttonMaxWidth: Dp = 500.dp,
+    val cardMaxWidth: Dp = 560.dp,
+    val dialogMaxWidth: Dp = 520.dp,
+    val dialogMaxHeight: Dp = 680.dp,
+    val buttonMaxWidth: Dp = 440.dp,
     val minButtonHeight: Dp = 48.dp,
     val horizontalPadding: Dp = 16.dp,
     val cardSpacing: Dp = 12.dp,
@@ -100,13 +118,33 @@ fun ProvideUniversalResponsiveEngine(
         val isTab = rawWidth >= 600f
         val isFold = rawWidth >= 840f || (rawWidth > 500f && aspect < 1.45f)
 
-        // Standard baseline width: 390dp (modern smartphone average)
-        val rawScaleFactor = (rawWidth / 390f).coerceIn(0.85f, 1.25f)
+        val widthClass = when {
+            rawWidth < 600f -> WindowWidthSizeClass.COMPACT
+            rawWidth < 840f -> WindowWidthSizeClass.MEDIUM
+            else -> WindowWidthSizeClass.EXPANDED
+        }
 
-        val cardMaxW = if (isTab || isFold) 640.dp else if (widthDp - 24.dp < 600.dp) widthDp - 24.dp else 600.dp
-        val dialogMaxW = if (isTab || isFold) 560.dp else if (widthDp - 28.dp < 520.dp) widthDp - 28.dp else 520.dp
-        val dialogMaxH = if (heightDp - 48.dp < 860.dp) heightDp - 48.dp else 860.dp
-        val buttonMaxW = if (isTab || isFold) 480.dp else if (widthDp - 32.dp < 500.dp) widthDp - 32.dp else 500.dp
+        val heightClass = when {
+            rawHeight < 480f -> WindowHeightSizeClass.COMPACT
+            rawHeight < 900f -> WindowHeightSizeClass.MEDIUM
+            else -> WindowHeightSizeClass.EXPANDED
+        }
+
+        val windowSize = WindowSizeClass(widthClass, heightClass)
+
+        // Adaptive scaling factor capped on large screens to prevent component bloating/stretching
+        val rawScaleFactor = when {
+            isSmall -> 0.90f
+            isMedium -> 1.0f
+            isLarge -> 1.02f
+            else -> 1.04f // Cap at 1.04f max so cards & text stay crisp and un-bloated
+        }
+
+        val cardMaxW = if (isTab || isFold) 560.dp else if (widthDp - 24.dp < 520.dp) widthDp - 24.dp else 520.dp
+        val dialogMaxW = if (isTab || isFold) 520.dp else if (widthDp - 28.dp < 480.dp) widthDp - 28.dp else 480.dp
+        // Cap max dialog height adaptively so dialogs stay compact and bottom buttons remain pinned & visible
+        val dialogMaxH = if (heightDp < 480.dp) heightDp - 24.dp else if (heightDp - 48.dp < 680.dp) heightDp - 48.dp else 680.dp
+        val buttonMaxW = if (isTab || isFold) 440.dp else if (widthDp - 32.dp < 440.dp) widthDp - 32.dp else 440.dp
 
         val paddingH = when {
             isSmall -> 12.dp
@@ -138,6 +176,7 @@ fun ProvideUniversalResponsiveEngine(
             isLargePhone = isLarge,
             isTablet = isTab,
             isFoldable = isFold,
+            windowSizeClass = windowSize,
             scaleFactor = rawScaleFactor,
             cardMaxWidth = cardMaxW,
             dialogMaxWidth = dialogMaxW,
