@@ -1910,12 +1910,13 @@ private fun getFreshExplanationHinglish(stepIdx: Int): String {
     }
 }
 
-private fun generateDynamicAiReply(input: String, lang: MentorLanguage, stepIdx: Int): String {
-    return when (lang) {
-        MentorLanguage.HINDI -> "Aapka sawaal bohot accha hai! Step ${stepIdx + 1} ke baare me: '$input' par dhyaan do aur agla step unlock karne ke liye 'Ho gaya' button tap karo! 😄"
-        MentorLanguage.ENGLISH -> "Great question! Regarding Step ${stepIdx + 1}: focus on '$input' and tap 'Done' when you're ready for the next step! 😄"
-        MentorLanguage.HINGLISH -> "Mast question hai! Step ${stepIdx + 1} me '$input' par focus karo. Complete hone par 'Ho gaya' button tap karke next step par chalein! 😄"
-    }
+private suspend fun generateDynamicAiReply(input: String, lang: MentorLanguage, stepIdx: Int): String {
+    return com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
+        domain = com.example.creatoracademy.MentorToolDomain.INSTAGRAM_CREATOR_AI,
+        userQuery = input,
+        userContext = "Instagram Creator Academy Step ${stepIdx + 1}",
+        language = lang.label
+    )
 }
 
 private fun generateReelScript(topic: String, duration: String, creatorType: String, language: MentorLanguage): ScriptResult {

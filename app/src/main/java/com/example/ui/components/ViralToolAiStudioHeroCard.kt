@@ -63,6 +63,7 @@ fun ViralToolAiStudioHeroCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .materialSharedBounds("viraltool_ai_studio_tool_card")
             .shadow(
                 elevation = 18.dp,
                 shape = cardShape,

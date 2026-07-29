@@ -53,11 +53,11 @@ object AiProductAnalysisEngine {
 
         val cleanUrl = when (routeResult) {
             is com.example.data.parsers.UniversalShoppingUrlRouter.RouteResult.Routed -> routeResult.normalizedUrl
-            is com.example.data.parsers.UniversalShoppingUrlRouter.RouteResult.Unsupported -> return@withContext buildUnsupportedLinkResult(routeResult.rawUrl)
+            is com.example.data.parsers.UniversalShoppingUrlRouter.RouteResult.Unsupported -> routeResult.rawUrl
             is com.example.data.parsers.UniversalShoppingUrlRouter.RouteResult.Invalid -> return@withContext buildInvalidLinkResult(url)
         }
 
-        // 1. Run Platform Extraction Router for dedicated store parsing
+        // STEP 1: Try extracting data using the platform parser
         val platformExtracted = com.example.data.parsers.PlatformExtractionRouter.routeAndExtract(cleanUrl, null, rawMetadata)
 
         val merchantInfo = MerchantRegistry.findMerchant(platformExtracted.merchantName)
@@ -78,14 +78,34 @@ object AiProductAnalysisEngine {
             merchantName = merchantName
         )
 
-        // 2. Try Gemini AI Cloud Verification & Extraction if API Key is available
+        // STEP 2: If the platform parser successfully extracts the product, display ONLY that verified data. Do NOT call Google Search.
+        if (platformExtracted.isVerified && !mergedRaw.title.isNullOrBlank() && mergedRaw.currentPrice != null && mergedRaw.currentPrice > 0.0) {
+            val directResult = buildIntelligentFallbackResult(cleanUrl, merchantName, mergedRaw)
+            if (directResult.isReliable) {
+                return@withContext directResult
+            }
+        }
+
+        // Try Gemini AI Cloud Analysis on direct extracted metadata
         val aiResult = callGeminiApiForProductAnalysis(cleanUrl, merchantName, mergedRaw)
         if (aiResult != null && aiResult.productName.isNotBlank() && aiResult.isReliable) {
             return@withContext aiResult
         }
 
-        // 3. Fallback to verified extracted platform data without fake default estimation
-        return@withContext buildIntelligentFallbackResult(cleanUrl, merchantName, mergedRaw)
+        // Check if mergedRaw itself has valid verified title and price from live HTML/meta tags extraction
+        val directResult = buildIntelligentFallbackResult(cleanUrl, merchantName, mergedRaw)
+        if (directResult.isReliable) {
+            return@withContext directResult
+        }
+
+        // STEP 3: If extraction fails or returns incomplete information, automatically activate Google Search Data Engine.
+        val searchFallbackResult = GoogleSearchFallbackEngine.searchAndVerifyProduct(cleanUrl, merchantName, mergedRaw)
+        if (searchFallbackResult != null && searchFallbackResult.isReliable) {
+            return@withContext searchFallbackResult
+        }
+
+        // FAILURE HANDLING: If Google Search ALSO cannot verify the product, return unverified result.
+        return@withContext buildUnverifiedResult(cleanUrl, merchantName, "Google Search Data Engine could not verify product details.")
     }
 
     private suspend fun callGeminiApiForProductAnalysis(

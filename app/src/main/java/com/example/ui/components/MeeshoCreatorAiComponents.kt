@@ -1,6 +1,7 @@
 package com.example.ui.components
 
-import android.content.Context
+import com.example.creatoracademy.ViralAiMentorEngine
+import com.example.creatoracademy.MentorToolDomain
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -2500,63 +2501,12 @@ private suspend fun generateMeeshoAiResponse(
     query: String,
     selectedLanguage: String
 ): String = withContext(Dispatchers.IO) {
-    val apiKey = try {
-        val key = BuildConfig.GEMINI_API_KEY
-        if (!key.isNullOrBlank() && key != "BUILDCONFIG_MISSING" && key != "null") key else System.getenv("GEMINI_API_KEY") ?: ""
-    } catch (_: Exception) { "" }
-
-    if (apiKey.isNotBlank()) {
-        try {
-            val systemContext = when (selectedLanguage) {
-                "Hindi" -> "You are Meesho Creator AI mentor. Answer the user's Meesho creator question in friendly Hindi."
-                "English" -> "You are Meesho Creator AI mentor. Answer the user's Meesho creator question in friendly English."
-                else -> "You are Meesho Creator AI mentor. Answer the user's Meesho creator question in natural Hinglish."
-            }
-
-            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
-            val url = URL(endpoint)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-
-            val jsonBody = JSONObject().apply {
-                put("contents", JSONArray().apply {
-                    put(JSONObject().apply {
-                        put("parts", JSONArray().apply {
-                            put(JSONObject().put("text", "$systemContext\nUser question: $query"))
-                        })
-                    })
-                })
-            }
-
-            conn.outputStream.use { os ->
-                os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-            }
-
-            if (conn.responseCode == 200) {
-                val resp = conn.inputStream.bufferedReader().use { it.readText() }
-                val root = JSONObject(resp)
-                val candidates = root.optJSONArray("candidates")
-                if (candidates != null && candidates.length() > 0) {
-                    val text = candidates.getJSONObject(0)
-                        .getJSONObject("content")
-                        .getJSONArray("parts")
-                        .getJSONObject(0)
-                        .getString("text")
-                    if (text.isNotBlank()) return@withContext text.trim()
-                }
-            }
-        } catch (_: Exception) {}
-    }
-
-    return@withContext when (selectedLanguage) {
-        "Hindi" -> "मीशो क्रिएटर से जुड़ी किसी भी समस्या के लिए मीशो ऐप के 'Account' -> 'Help Center' में सपोर्ट टिकट भी रेज कर सकते हैं! 😄"
-        "English" -> "For any account issues, you can also reach out to Meesho support via 'Account' -> 'Help Center' in the Meesho app! 😄"
-        else -> "Meesho Creator related kisi bhi doubt ke liye aap Meesho app ke 'Account' -> 'Help Center' me direct support ticket raise kar sakte ho! 😄"
-    }
+    ViralAiMentorEngine.generateIntegratedMentorResponse(
+        domain = MentorToolDomain.MEESHO_CREATOR_AI,
+        userQuery = query,
+        userContext = "Meesho Creator Hub - Affiliate & Reselling Mentor",
+        language = selectedLanguage
+    )
 }
 
 private fun generateMeeshoCaptionAi(

@@ -47,6 +47,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.data.ShoppingItem
 import coil.compose.SubcomposeAsyncImage
 import com.example.ui.components.GlassCard
+import com.example.ui.components.ViralToolAiStudioHeroCard
+import com.example.ui.components.ViralToolAiStudioDialog
+import com.example.ui.components.materialSharedBounds
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -100,6 +103,7 @@ fun HomeScreen(
     var showCreatorProfileScreen by remember { mutableStateOf(false) }
     var invalidUrlPopupResult by remember { mutableStateOf<com.example.data.ShoppingValidationResult?>(null) }
     var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
+    var showViralToolAiStudioDialog by remember { mutableStateOf(false) }
     var showBrandCollabDialog by remember { mutableStateOf(false) }
     var showInstaAutoDmDialog by remember { mutableStateOf(false) }
     var showMeeshoCreatorDialog by remember { mutableStateOf(false) }
@@ -417,6 +421,17 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
+            // FLAGSHIP TOOL #1: VIRALTOOLAI STUDIO
+            // ==================================================
+            ViralToolAiStudioHeroCard(
+                onClick = {
+                    showViralToolAiStudioDialog = true
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==================================================
             // FLIPKART SHOPPING ANALYZER (HERO GLASS CARD)
             // ==================================================
             val flipkartShineTransition = rememberInfiniteTransition(label = "flipkartShine")
@@ -443,6 +458,7 @@ fun HomeScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .materialSharedBounds("shopping_analyzer_main_card")
                     .shadow(
                         elevation = 16.dp,
                         shape = flipkartCardShape,
@@ -1247,6 +1263,13 @@ fun HomeScreen(
                 onDismiss = { selectedPremiumTool = null }
             )
         }
+    }
+
+    // Flagship ViralToolAI Studio Dialog
+    if (showViralToolAiStudioDialog) {
+        ViralToolAiStudioDialog(
+            onDismiss = { showViralToolAiStudioDialog = false }
+        )
     }
 
     // Brand Collaboration AI Mentor Dialog (MASTER PHASE V3)

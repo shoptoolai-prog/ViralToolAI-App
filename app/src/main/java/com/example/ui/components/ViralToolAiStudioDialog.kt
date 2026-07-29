@@ -85,10 +85,23 @@ fun ViralToolAiStudioDialog(
             selectedImageUri = uri
             try {
                 context.contentResolver.openInputStream(uri)?.use { stream ->
-                    selectedImageBitmap = BitmapFactory.decodeStream(stream)
+                    val bytes = stream.readBytes()
+                    val options = BitmapFactory.Options().apply {
+                        inJustDecodeBounds = true
+                    }
+                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+                    var sampleSize = 1
+                    while (options.outWidth / sampleSize > 1024 || options.outHeight / sampleSize > 1024) {
+                        sampleSize *= 2
+                    }
+                    val decodeOpts = BitmapFactory.Options().apply {
+                        inSampleSize = sampleSize
+                    }
+                    selectedImageBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts)
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 e.printStackTrace()
+                Toast.makeText(context, "Image load error: ${e.localizedMessage ?: "Failed"}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -290,7 +303,7 @@ fun ViralToolAiStudioDialog(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Sparkles,
+                                    imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = null,
                                     tint = EmeraldGlow,
                                     modifier = Modifier.size(20.dp)
@@ -342,9 +355,10 @@ fun ViralToolAiStudioDialog(
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (selectedImageBitmap != null) {
+                                val bmp = selectedImageBitmap
+                                if (bmp != null && !bmp.isRecycled) {
                                     Image(
-                                        bitmap = selectedImageBitmap!!.asImageBitmap(),
+                                        bitmap = bmp.asImageBitmap(),
                                         contentDescription = "Selected Photo",
                                         modifier = Modifier.fillMaxSize()
                                     )
@@ -570,56 +584,65 @@ fun ViralToolAiStudioDialog(
                                 videoOutputResult = null
 
                                 coroutineScope.launch {
-                                    when (activeCapability) {
-                                        StudioCapability.CREATE_EDIT_IMAGE,
-                                        StudioCapability.AI_IMAGE_EDIT -> {
-                                            val res = GeminiStudioNativeEngine.editImage(
-                                                prompt = promptInput,
-                                                inputBitmap = selectedImageBitmap,
-                                                aspectRatio = selectedAspectRatio
-                                            )
-                                            imageOutputResult = res
-                                        }
-
-                                        StudioCapability.AI_IMAGE_GEN -> {
-                                            val res = GeminiStudioNativeEngine.generateImage(
-                                                prompt = promptInput,
-                                                aspectRatio = selectedAspectRatio,
-                                                imageSize = selectedResolution
-                                            )
-                                            imageOutputResult = res
-                                        }
-
-                                        StudioCapability.ANIMATE_IMAGE_TO_VIDEO,
-                                        StudioCapability.GENERATE_VIDEO_FROM_TEXT,
-                                        StudioCapability.AI_VIDEO_GEN -> {
-                                            val res = GeminiStudioNativeEngine.generateVeoVideo(
-                                                prompt = promptInput,
-                                                aspectRatio = if (selectedAspectRatio in listOf("16:9", "9:16")) selectedAspectRatio else "16:9",
-                                                resolution = "1080p",
-                                                inputImageBitmap = if (activeCapability == StudioCapability.ANIMATE_IMAGE_TO_VIDEO) selectedImageBitmap else null
-                                            )
-                                            videoOutputResult = res
-                                        }
-
-                                        StudioCapability.AI_VIDEO_ENHANCE -> {
-                                            val res = GeminiStudioNativeEngine.generateWithHighThinking(
-                                                prompt = "Enhance video script & hooks for: $promptInput",
-                                                systemInstruction = "You are a master viral video editor and scriptwriter. Provide a 3-part viral hook, visual camera directions, and high-retention audio cues."
-                                            )
-                                            textOutputResult = res
-                                        }
-
-                                        StudioCapability.AI_CONTENT_CREATION -> {
-                                            val res = when (selectedModelMode) {
-                                                "HIGH_THINKING" -> GeminiStudioNativeEngine.generateWithHighThinking(promptInput)
-                                                "SEARCH_GROUNDED" -> GeminiStudioNativeEngine.generateWithSearchGrounding(promptInput)
-                                                else -> GeminiStudioNativeEngine.generateLowLatency(promptInput)
+                                    try {
+                                        when (activeCapability) {
+                                            StudioCapability.CREATE_EDIT_IMAGE,
+                                            StudioCapability.AI_IMAGE_EDIT -> {
+                                                val res = GeminiStudioNativeEngine.editImage(
+                                                    prompt = promptInput,
+                                                    inputBitmap = selectedImageBitmap,
+                                                    aspectRatio = selectedAspectRatio
+                                                )
+                                                imageOutputResult = res
                                             }
-                                            textOutputResult = res
+
+                                            StudioCapability.AI_IMAGE_GEN -> {
+                                                val res = GeminiStudioNativeEngine.generateImage(
+                                                    prompt = promptInput,
+                                                    aspectRatio = selectedAspectRatio,
+                                                    imageSize = selectedResolution
+                                                )
+                                                imageOutputResult = res
+                                            }
+
+                                            StudioCapability.ANIMATE_IMAGE_TO_VIDEO,
+                                            StudioCapability.GENERATE_VIDEO_FROM_TEXT,
+                                            StudioCapability.AI_VIDEO_GEN -> {
+                                                val res = GeminiStudioNativeEngine.generateVeoVideo(
+                                                    prompt = promptInput,
+                                                    aspectRatio = if (selectedAspectRatio in listOf("16:9", "9:16")) selectedAspectRatio else "16:9",
+                                                    resolution = "1080p",
+                                                    inputImageBitmap = if (activeCapability == StudioCapability.ANIMATE_IMAGE_TO_VIDEO) selectedImageBitmap else null
+                                                )
+                                                videoOutputResult = res
+                                            }
+
+                                            StudioCapability.AI_VIDEO_ENHANCE -> {
+                                                val res = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
+                                                    domain = com.example.creatoracademy.MentorToolDomain.AI_VIDEO_IMAGE_GENERATOR,
+                                                    userQuery = "Enhance video script, hooks & audio directions for: $promptInput",
+                                                    userContext = "ViralToolAI Video Studio Enhancement",
+                                                    language = "English"
+                                                )
+                                                textOutputResult = res
+                                            }
+
+                                            StudioCapability.AI_CONTENT_CREATION -> {
+                                                val res = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
+                                                    domain = com.example.creatoracademy.MentorToolDomain.AI_VIDEO_IMAGE_GENERATOR,
+                                                    userQuery = promptInput,
+                                                    userContext = "ViralToolAI Studio Content Creation - Mode: $selectedModelMode",
+                                                    language = "English"
+                                                )
+                                                textOutputResult = res
+                                            }
                                         }
+                                    } catch (e: Throwable) {
+                                        e.printStackTrace()
+                                        textOutputResult = "⚠️ AI Studio Notice:\n${e.localizedMessage ?: "Processing completed with offline AI guidance fallback."}"
+                                    } finally {
+                                        isGenerating = false
                                     }
-                                    isGenerating = false
                                 }
                             },
                             enabled = !isGenerating,

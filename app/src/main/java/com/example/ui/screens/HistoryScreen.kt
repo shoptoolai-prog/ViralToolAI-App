@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.ShoppingItem
 import com.example.data.WishlistStorageManager
 import com.example.ui.components.GlassCard
+import com.example.ui.components.materialSharedBounds
 import com.example.ui.theme.*
 
 @Composable
@@ -225,6 +226,7 @@ fun HistoryScreen(
                             GlassCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .materialSharedBounds("history_item_${item.id}")
                                     .clickable { onReopenReport(item.url) },
                                 borderColor = GlassCardBorder,
                                 backgroundColor = GlassCardBg

@@ -2,7 +2,9 @@ package com.example.ai
 
 import android.graphics.Bitmap
 import android.util.Base64
-import com.example.ai.vision.GeminiVisionProvider
+import com.example.ai.AiProviderManager
+import com.example.core.AiSecurityManager
+import com.example.core.UniversalAiProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -35,7 +37,30 @@ object GeminiStudioNativeEngine {
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
     fun getApiKey(): String {
-        return GeminiVisionProvider.getActiveApiKey()
+        var key = try {
+            com.example.BuildConfig.GEMINI_API_KEY
+        } catch (e: Throwable) {
+            ""
+        }
+        if (key.isNotBlank() && key != "MY_GEMINI_API_KEY" && key != "null") {
+            return key
+        }
+
+        key = System.getenv("GEMINI_API_KEY") ?: ""
+        if (key.isNotBlank() && key != "MY_GEMINI_API_KEY") {
+            return key
+        }
+
+        key = try {
+            AiProviderManager.getSettings().apiKey
+        } catch (e: Throwable) {
+            ""
+        }
+        if (key.isNotBlank() && key != "STUDIO_SECURE_GEMINI_KEY" && key != "MY_GEMINI_API_KEY") {
+            return key
+        }
+
+        return ""
     }
 
     /**

@@ -1159,15 +1159,16 @@ private fun YouTubeMentorChatScreen(
                 onOpenTool("editing")
                 messages.add(YouTubeChatMessage(isFromUser = false, text = "🎬 Video Editing Academy opened!"))
             } else {
-                val genericReply = when (language) {
-                    YouTubeLanguage.HINDI -> "Mast question! Is STEP (${currentStep.title}) ko complete karne ke liye 'Done' bolo ya 'Dubara batao' dabaayein!"
-                    YouTubeLanguage.ENGLISH -> "Good question! Reply 'Done' once completed or 'Explain Again' for more details."
-                    YouTubeLanguage.HINGLISH -> "Sahi question hai! Aage badhne ke liye 'Done' bolo ya 'Dubara batao' button dabaao."
-                }
+                val aiReply = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
+                    domain = com.example.creatoracademy.MentorToolDomain.YOUTUBE_CREATOR_AI,
+                    userQuery = userInputText,
+                    userContext = "YouTube Step: ${currentStep.title}",
+                    language = language.name
+                )
                 messages.add(
                     YouTubeChatMessage(
                         isFromUser = false,
-                        text = genericReply,
+                        text = aiReply,
                         quickReplies = listOf("✅ Done", "❓ Explain Again")
                     )
                 )

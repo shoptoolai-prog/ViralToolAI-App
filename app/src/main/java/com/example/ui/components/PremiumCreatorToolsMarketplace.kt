@@ -246,6 +246,7 @@ fun PremiumToolGlassCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .materialSharedBounds("premium_tool_card_${tool.id}")
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -491,7 +492,9 @@ fun CommonPremiumToolPopupDialog(
         ) {
             Surface(
                 color = Color(0xFF0F1A14),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .materialSharedBounds("premium_tool_card_${tool.id}")
             ) {
                 Column(
                     modifier = Modifier

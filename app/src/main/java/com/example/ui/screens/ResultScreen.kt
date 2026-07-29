@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.PriceCompareItem
+import com.example.ui.components.materialSharedBounds
 import com.example.data.SimilarProduct
 import com.example.data.ShoppingResult
 import com.example.data.InstagramProduct
@@ -191,6 +192,7 @@ fun ResultScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .materialSharedBounds("shopping_analyzer_main_card")
                         .shadow(
                             elevation = 12.dp,
                             shape = RoundedCornerShape(24.dp),
@@ -2678,17 +2680,8 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
                     resultData.status.contains("Unsupported", ignoreCase = true) ||
                     resultData.aiRecommendation.contains("Unsupported", ignoreCase = true)
 
-            val titleText = when {
-                isUnsupported -> "Unsupported Shopping Link"
-                isAmazon -> "We couldn't verify this Amazon product yet."
-                else -> "We couldn't verify this product yet."
-            }
-
-            val subtitleText = when {
-                isUnsupported -> "This shopping website is not supported yet."
-                isAmazon -> "Product details could not be verified from the Amazon link."
-                else -> "Product details could not be extracted or verified from this link."
-            }
+            val titleText = "❌ Product could not be verified."
+            val subtitleText = "Product details could not be verified by platform parsers or Google Search."
             
             Text(
                 text = titleText,
@@ -2720,33 +2713,19 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "POSSIBLE REASONS",
-                        fontSize = 11.sp,
+                        text = "Possible reasons:",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextGray,
-                        letterSpacing = 1.sp
+                        color = TextWhite,
+                        letterSpacing = 0.5.sp
                     )
                     
-                    val reasons = when {
-                        isAmazon -> listOf(
-                            "• Product removed",
-                            "• Broken link",
-                            "• Unsupported page",
-                            "• Temporary issue"
-                        )
-                        isUnsupported -> listOf(
-                            "• Unsupported website",
-                            "• Product removed",
-                            "• Broken link",
-                            "• Temporary issue"
-                        )
-                        else -> listOf(
-                            "• Unsupported website",
-                            "• Product removed",
-                            "• Broken link",
-                            "• Temporary issue"
-                        )
-                    }
+                    val reasons = listOf(
+                        "• Unsupported website",
+                        "• Broken link",
+                        "• Product removed",
+                        "• Temporary network issue"
+                    )
                     
                     reasons.forEach { reason ->
                         Text(
@@ -3707,7 +3686,15 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
             currentPrice = resultData.currentPrice,
             rawPriceTrend = resultData.priceTrend,
             accentColor = accentColor,
-            onShowToast = onShowToast
+            onShowToast = onShowToast,
+            imageUrl = resultData.imageUrl.ifBlank { resultData.productImageWebUrl ?: "" },
+            detectedStore = resultData.detectedStore,
+            originalPrice = resultData.originalPrice,
+            discountPercent = resultData.discountPercent,
+            rating = resultData.rating,
+            reviewsCount = resultData.reviewsCount,
+            availability = resultData.availability,
+            bestPrice = resultData.bestPrice
         )
         
         // SECTION 5: Similar Products List

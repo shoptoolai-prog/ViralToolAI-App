@@ -2788,93 +2788,15 @@ private suspend fun generateGeminiMentorResponse(
     selectedLanguage: String,
     recentHistory: List<BrandMentorMessage> = emptyList()
 ): String = withContext(Dispatchers.IO) {
-    val apiKey = try {
-        val key = BuildConfig.GEMINI_API_KEY
-        if (!key.isNullOrBlank() && key != "BUILDCONFIG_MISSING" && key != "null") key else System.getenv("GEMINI_API_KEY") ?: ""
-    } catch (_: Exception) { "" }
-
-    val randomNonce = System.currentTimeMillis() % 10000
-
-    if (apiKey.isNotBlank()) {
-        try {
-            val historySnippet = recentHistory.takeLast(4).joinToString("\n") { m ->
-                if (m.isFromUser) "User: ${m.text}" else "Mentor: ${m.text.take(120)}"
-            }
-
-            val langDirective = when (selectedLanguage) {
-                "Hindi" -> "Answer in warm, friendly Devanagari Hindi."
-                "English" -> "Answer in clear, motivating conversational English."
-                else -> "Answer in natural Hinglish (Hindi + English mix)."
-            }
-
-            val prompt = """
-You are Brand Collaboration AI, an experienced senior creator coach.
-Tone: Friendly, patient, professional, motivating, practical, and human (NEVER robotic or textbook).
-Language: $langDirective
-
-CRITICAL MANDATORY RULES:
-1. NEVER REPEAT PREVIOUS ANSWERS WORD-FOR-WORD. Generate a newly phrased response. (Seed: $randomNonce)
-2. THINK & ANALYZE: Consider creator profile (${profile.followers} followers in ${profile.niche} on ${profile.platform}) and context.
-3. SMART EXAMPLES: Whenever possible, include real practical examples (e.g. Email pitch, DM script, Media kit, Pricing, Contract, Payment terms).
-
-Recent Chat History:
-$historySnippet
-
-User Question:
-$query
-""".trimIndent()
-
-            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
-            val url = URL(endpoint)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-            conn.connectTimeout = 6000
-            conn.readTimeout = 6000
-
-            val jsonBody = JSONObject().apply {
-                put("contents", JSONArray().apply {
-                    put(JSONObject().apply {
-                        put("parts", JSONArray().apply {
-                            put(JSONObject().apply { put("text", prompt) })
-                        })
-                    })
-                })
-            }
-
-            conn.outputStream.use { os ->
-                os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-            }
-
-            if (conn.responseCode == 200) {
-                val responseStr = conn.inputStream.bufferedReader().use { it.readText() }
-                val root = JSONObject(responseStr)
-                val candidates = root.optJSONArray("candidates")
-                if (candidates != null && candidates.length() > 0) {
-                    val first = candidates.getJSONObject(0)
-                    val content = first.optJSONObject("content")
-                    val parts = content?.optJSONArray("parts")
-                    if (parts != null && parts.length() > 0) {
-                        val text = parts.getJSONObject(0).optString("text")
-                        if (text.isNotBlank()) {
-                            return@withContext text.trim()
-                        }
-                    }
-                }
-            }
-        } catch (_: Exception) {}
+    val historySnippet = recentHistory.takeLast(4).joinToString("\n") { m ->
+        if (m.isFromUser) "User: ${m.text}" else "Mentor: ${m.text.take(100)}"
     }
-
-    // Fallback Answers
-    when {
-        query.contains("charge", ignoreCase = true) || query.contains("price", ignoreCase = true) || query.contains("rate", ignoreCase = true) ->
-            "💰 Rate Guidance for ${profile.followers} Followers (${profile.niche}):\n• Standard Reel: ₹2,500 - ₹8,000\n• Dedicated Story Series: ₹1,000 - ₹3,000\n• Reel + 30-day Paid Ad Usage Rights: Add 50% extra usage fee!\n\n📝 Example Rate Card:\n'1x Reel (₹4,000) + 2x Stories (₹1,500) = Package Deal ₹5,000'"
-
-        query.contains("contract", ignoreCase = true) || query.contains("scam", ignoreCase = true) ->
-            "🛡️ Senior Coach Contract Rules:\n1. Re-shoots limited to maximum 2 minor edits.\n2. Require 50% advance payment before posting.\n3. Never click unknown verification links or share passwords.\n\n📝 Sample Contract Clause:\n'Payment: 50% upon script approval, 50% within 7 days of live post.'"
-
-        else ->
-            "✨ Senior Creator Pro Tip:\nAlways send a post-campaign performance summary to brand managers 7 days after publishing! Showing impressions and engagement turns one-off deals into recurring monthly retainers.\n\n📝 Sample Summary Note:\n'Hey Boat Team! Our Reel reached 38k viewers with 8.2% engagement! Excited for our next collab.'"
-    }
+    val contextStr = "Creator Profile: ${profile.followers} followers in ${profile.niche} on ${profile.platform}.\nHistory:\n$historySnippet"
+    
+    ViralAiMentorEngine.generateIntegratedMentorResponse(
+        domain = MentorToolDomain.BRAND_COLLABORATION_AI,
+        userQuery = query,
+        userContext = contextStr,
+        language = selectedLanguage
+    )
 }

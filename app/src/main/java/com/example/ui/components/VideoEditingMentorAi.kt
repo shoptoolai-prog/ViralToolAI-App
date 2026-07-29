@@ -1397,10 +1397,21 @@ private suspend fun processUserReply(
         }
 
         else -> {
+            val domain = when (toolType) {
+                EditingToolType.CAPCUT -> com.example.creatoracademy.MentorToolDomain.CAPCUT_MASTER
+                EditingToolType.VN -> com.example.creatoracademy.MentorToolDomain.VN_EDITING
+                EditingToolType.INSTAGRAM_EDITS -> com.example.creatoracademy.MentorToolDomain.INSTAGRAM_EDITS
+            }
+            val aiResponse = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
+                domain = domain,
+                userQuery = reply,
+                userContext = "${toolType.title} Step: ${currentStep.title}",
+                language = language.name
+            )
             onAddMessage(
                 EditingChatMessage(
                     isFromUser = false,
-                    text = "Aapka doubt receive hua! $toolType me is step '${currentStep.title}' ko complete karne ke liye: pehle timeline clip select karke action confirm karo.\n\nKya ye step Ho Gaya?",
+                    text = aiResponse,
                     quickReplies = listOf("✅ Ho Gaya / Done", "❓ Dubara Batao")
                 )
             )

@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -16,7 +17,11 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.ui.components.Material3SharedElementContainer
+import com.example.ui.components.LocalAnimatedVisibilityScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -145,7 +150,7 @@ enum class Screen {
     Result
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MainAppLayout(sharedUrl: String? = null) {
     val context = LocalContext.current
@@ -251,21 +256,25 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     )
                 }
             }
-            // Screen switching with smooth, premium crossfade animations (under 400ms)
-            AnimatedContent(
-                targetState = currentScreen,
-                transitionSpec = {
-                    val duration = 350
-                    (fadeIn(animationSpec = tween(duration)) +
-                            scaleIn(initialScale = 0.94f, animationSpec = tween(duration)) +
-                            slideInHorizontally(initialOffsetX = { it / 10 }, animationSpec = tween(duration))) with
-                    (fadeOut(animationSpec = tween(duration)) +
-                            scaleOut(targetScale = 1.04f, animationSpec = tween(duration)) +
-                            slideOutHorizontally(targetOffsetX = { -it / 10 }, animationSpec = tween(duration)))
-                },
-                label = "ScreenTransition"
-            ) { screen ->
-                when (screen) {
+            // Screen switching with smooth Material 3 Shared Element & Container Transform transitions
+            Material3SharedElementContainer {
+                AnimatedContent(
+                    targetState = currentScreen,
+                    transitionSpec = {
+                        val duration = 380
+                        (fadeIn(animationSpec = tween(duration, easing = FastOutSlowInEasing)) +
+                                scaleIn(initialScale = 0.93f, animationSpec = tween(duration, easing = FastOutSlowInEasing)) +
+                                slideInHorizontally(initialOffsetX = { it / 10 }, animationSpec = tween(duration))) togetherWith
+                        (fadeOut(animationSpec = tween(duration, easing = FastOutSlowInEasing)) +
+                                scaleOut(targetScale = 1.05f, animationSpec = tween(duration, easing = FastOutSlowInEasing)) +
+                                slideOutHorizontally(targetOffsetX = { -it / 10 }, animationSpec = tween(duration)))
+                    },
+                    label = "Material3SharedElementScreenTransition"
+                ) { screen ->
+                    CompositionLocalProvider(
+                        LocalAnimatedVisibilityScope provides this
+                    ) {
+                        when (screen) {
                     Screen.Splash -> {
                         SplashScreen(onSplashComplete = {
                             try {
@@ -372,6 +381,8 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     }
                 }
             }
+        }
+    }
         }
     }
 }
