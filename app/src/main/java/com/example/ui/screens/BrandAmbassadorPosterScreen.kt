@@ -216,10 +216,32 @@ private fun PosterHeroImage(
         rawUrl
     }
 
+    // Preload image with high priority
+    LaunchedEffect(imageUrl) {
+        try {
+            val request = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .build()
+            coil.Coil.imageLoader(context).enqueue(request)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error preloading image in PosterHeroImage", e)
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0C0E12))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF0E1C16),
+                        Color(0xFF0A1410),
+                        Color(0xFF040806)
+                    )
+                )
+            )
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)

@@ -92,63 +92,53 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
     val scope = rememberCoroutineScope()
     val isPreviewMode = LocalInspectionMode.current
 
-    // 4 Fresh Onboarding Cards
+    // 3 Fresh Onboarding Cards
     val cards = remember {
         listOf(
             OnboardingCardData(
                 pageIndex = 0,
-                title = "Welcome to ViralToolAI",
-                subtitle = "Everything a creator needs in one app.",
-                highlights = emptyList(),
-                icon = Icons.Default.AutoAwesome,
-                badge = "CREATOR WORKSPACE",
+                title = "What You Can Create",
+                subtitle = "Viral Reels, Shorts, Posts, Captions & Prompts",
+                highlights = listOf(
+                    "Viral Reels & Shorts Scripts",
+                    "AI Prompt Extractor",
+                    "Image & Video Analysis",
+                    "High-Converting Posts"
+                ),
+                icon = Icons.Default.Movie,
+                badge = "CREATOR SUITE",
                 primaryColor = EmeraldPrimary,
                 secondaryColor = Color(0xFF00E5FF)
             ),
             OnboardingCardData(
                 pageIndex = 1,
-                title = "Create Faster",
-                subtitle = "Turbocharge your content creation",
+                title = "Creator AI Tools",
+                subtitle = "Everything a creator needs to speed up workflow",
                 highlights = listOf(
-                    "AI Prompt Extractor",
-                    "Image Analysis",
-                    "Video Analysis",
-                    "Creator Academy"
+                    "Smart AI Generator",
+                    "Shopping Intelligence",
+                    "Creator Academy Guides",
+                    "Daily Creator Support"
                 ),
-                icon = Icons.Default.Movie,
-                badge = "CONTENT STUDIO",
+                icon = Icons.Default.AutoAwesome,
+                badge = "AI TOOLKIT",
                 primaryColor = Color(0xFF8B5CF6),
                 secondaryColor = Color(0xFFEC4899)
             ),
             OnboardingCardData(
                 pageIndex = 2,
-                title = "Grow Smarter",
-                subtitle = "Scale reach across top platforms",
+                title = "How ViralToolAI Helps You Grow",
+                subtitle = "Scale reach & monetize across platforms",
                 highlights = listOf(
                     "Brand Collaboration AI",
                     "Instagram Creator AI",
                     "YouTube Creator AI",
                     "Meesho Creator AI"
                 ),
-                icon = Icons.Default.TrendingUp,
-                badge = "VIRAL GROWTH AI",
+                icon = Icons.Default.RocketLaunch,
+                badge = "VIRAL GROWTH",
                 primaryColor = Color(0xFFA3E635),
                 secondaryColor = EmeraldGlow
-            ),
-            OnboardingCardData(
-                pageIndex = 3,
-                title = "Ready to Go Viral?",
-                subtitle = "Unlock full creative intelligence",
-                highlights = listOf(
-                    "Premium AI Tools",
-                    "Smart Shopping Intelligence",
-                    "Daily Creator Support",
-                    "Free Powerful Features"
-                ),
-                icon = Icons.Default.RocketLaunch,
-                badge = "READY TO LAUNCH",
-                primaryColor = Color(0xFF3B82F6),
-                secondaryColor = EmeraldPrimary
             )
         )
     }
@@ -875,25 +865,6 @@ private fun OnboardingFloatingIllustration(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .graphicsLayer { translationX = pageOffset * 50f; translationY = 10f }
-                )
-            }
-            3 -> {
-                // Launch Accents
-                FloatingGlassChip(
-                    text = "100% Free Features",
-                    icon = Icons.Default.CheckCircle,
-                    color = cardData.primaryColor,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .graphicsLayer { translationX = pageOffset * 60f; translationY = -12f }
-                )
-                FloatingGlassChip(
-                    text = "Instant Setup",
-                    icon = Icons.Default.RocketLaunch,
-                    color = cardData.secondaryColor,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .graphicsLayer { translationX = pageOffset * -60f; translationY = 12f }
                 )
             }
         }

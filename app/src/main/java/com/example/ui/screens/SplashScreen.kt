@@ -31,6 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.imageLoader
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.R
 import com.example.core.StartupSoundPlayer
 import com.example.ui.theme.AmoledBlack
@@ -67,6 +70,24 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
 
     LaunchedEffect(Unit) {
         StartupSoundPlayer.playStartupChimeIfEnabled(context)
+
+        // Preload poster image & home carousel banners in background for instant display
+        try {
+            val bannerUrls = listOf(
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-45-35-887.jpg",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-04-094.jpg",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-40-738.jpg"
+            )
+            bannerUrls.forEach { url ->
+                val preloadRequest = ImageRequest.Builder(context)
+                    .data(url)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build()
+                context.imageLoader.enqueue(preloadRequest)
+            }
+        } catch (_: Exception) {}
 
         // 0.1s: Custom ViralToolAI icon & scale fade in
         delay(100)

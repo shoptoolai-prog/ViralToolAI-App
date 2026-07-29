@@ -47,6 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.data.ShoppingItem
 import coil.compose.SubcomposeAsyncImage
 import com.example.ui.components.GlassCard
+import com.example.ui.components.HomeBannerCarousel
 import com.example.ui.components.ViralToolAiStudioHeroCard
 import com.example.ui.components.ViralToolAiStudioDialog
 import com.example.ui.components.materialSharedBounds
@@ -419,6 +420,13 @@ fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
+
+            // ==================================================
+            // PREMIUM FEATURED BANNER CAROUSEL
+            // ==================================================
+            HomeBannerCarousel(
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
 
             // ==================================================
             // FLAGSHIP TOOL #1: VIRALTOOLAI STUDIO
