@@ -67,7 +67,7 @@ fun ViralToolAiStudioHeroCard(
             .shadow(
                 elevation = 18.dp,
                 shape = cardShape,
-                ambientColor = EmeraldPrimary,
+                ambientColor = Color(0xFF8B5CF6),
                 spotColor = ElectricPurple
             )
             .clip(cardShape)
@@ -76,9 +76,9 @@ fun ViralToolAiStudioHeroCard(
                     1.5.dp,
                     Brush.linearGradient(
                         colors = listOf(
-                            EmeraldGlow.copy(alpha = pulseAlpha),
+                            Color(0xFFA78BFA).copy(alpha = pulseAlpha),
                             ElectricPurple.copy(alpha = 0.8f),
-                            EmeraldPrimary.copy(alpha = pulseAlpha)
+                            Color(0xFF8B5CF6).copy(alpha = pulseAlpha)
                         ),
                         start = Offset(shimmerOffset, 0f),
                         end = Offset(shimmerOffset + 400f, 300f)
@@ -90,7 +90,7 @@ fun ViralToolAiStudioHeroCard(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onClick()
             },
-        color = Color(0xFF0D1411),
+        color = Color(0xFF100B1E),
         shape = cardShape
     ) {
         Box(
@@ -99,9 +99,9 @@ fun ViralToolAiStudioHeroCard(
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF111D18),
-                            Color(0xFF0C1310),
-                            Color(0xFF151022)
+                            Color(0xFF150D28),
+                            Color(0xFF100B1E),
+                            Color(0xFF1E1038)
                         )
                     )
                 )
@@ -127,10 +127,10 @@ fun ViralToolAiStudioHeroCard(
             }
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                // TOP TAG + BADGE ROW
+                // TOP TAG ROW (Cleaned, no extra right badge)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -138,7 +138,7 @@ fun ViralToolAiStudioHeroCard(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 Brush.horizontalGradient(
-                                    listOf(EmeraldPrimary, ElectricPurple)
+                                    listOf(Color(0xFF8B5CF6), ElectricPurple)
                                 )
                             )
                             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -160,20 +160,6 @@ fun ViralToolAiStudioHeroCard(
                             )
                         }
                     }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "AI Vision Extraction Powered",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldGlow
-                        )
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -183,11 +169,11 @@ fun ViralToolAiStudioHeroCard(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .shadow(10.dp, RoundedCornerShape(16.dp), spotColor = EmeraldGlow)
+                            .shadow(10.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFA78BFA))
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 Brush.linearGradient(
-                                    listOf(EmeraldPrimary, ElectricPurple)
+                                    listOf(Color(0xFF8B5CF6), ElectricPurple)
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -210,7 +196,7 @@ fun ViralToolAiStudioHeroCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "Extract 8K Recreation Prompts from any AI Image or Screenshot",
+                            text = "Recreate AI Prompts from any Image or Screenshot",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextWhite.copy(alpha = 0.75f)
@@ -236,8 +222,8 @@ fun ViralToolAiStudioHeroCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF16221D))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.35f)), RoundedCornerShape(10.dp))
+                                .background(Color(0x228B5CF6))
+                                .border(BorderStroke(1.dp, Color(0x558B5CF6)), RoundedCornerShape(10.dp))
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
@@ -260,10 +246,10 @@ fun ViralToolAiStudioHeroCard(
                         .clip(RoundedCornerShape(14.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(EmeraldPrimary, ElectricPurple)
+                                listOf(Color(0xFF8B5CF6), Color(0xFFA855F7), Color(0xFFC084FC))
                             )
                         )
-                        .border(BorderStroke(1.dp, EmeraldGlow), RoundedCornerShape(14.dp)),
+                        .border(BorderStroke(1.dp, Color(0xFFA78BFA)), RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

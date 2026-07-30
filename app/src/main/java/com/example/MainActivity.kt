@@ -164,7 +164,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
         try {
             val imageLoader = context.imageLoader
             val request = ImageRequest.Builder(context)
-                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png")
+                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png")
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .build()

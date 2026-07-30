@@ -42,7 +42,7 @@ import kotlin.math.sin
 
 private const val TAG = "BrandAmbassadorPoster"
 private const val POSTER_IMAGE_URL =
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png"
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png"
 
 object BrandAmbassadorPrefs {
     private const val PREF_NAME = "viraltoolai_launch_prefs"

@@ -147,8 +147,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
 
-private val EmeraldPrimary = Color(0xFFFFD700) // Gold Yellow for Brand Collab AI
-private val EmeraldGlow = Color(0x33FFD700) // Gold Glow Glass Effect
+private val EmeraldPrimary = Color(0xFFE2E8F0) // Premium Soft Silver White
+private val EmeraldGlow = Color(0x33E2E8F0) // Soft Silver Glass Glow
+private val GreyButtonGradient = Brush.horizontalGradient(listOf(Color(0xFFF1F5F9), Color(0xFFCBD5E1), Color(0xFF94A3B8)))
 private val brandCollabTheme = MentorToolTheme.BrandCollab
 
 /**
@@ -677,7 +678,7 @@ fun BrandCollaborationAiDialog(
                 exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
             ) {
                 Surface(
-                    color = Color(0xFF0F1A14),
+                    color = Color(0xFF0F1118),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Column(
@@ -703,8 +704,8 @@ fun BrandCollaborationAiDialog(
                         com.example.ui.components.ToolHeroBanner(
                             toolType = com.example.ui.components.ToolHeroType.BRAND_COLLAB,
                             height = 110.dp,
-                            badgeText = "✨ BRAND COLLAB AI",
-                            subtitleText = "Golden Sponsorship & Pitching Suite"
+                            badgeText = null,
+                            subtitleText = null
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -1374,11 +1375,7 @@ private fun LanguageSelectionScreen(
                             .fillMaxWidth()
                             .height(52.dp)
                             .clip(RoundedCornerShape(26.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(EmeraldPrimary, Color(0xFF00E676))
-                                )
-                            )
+                            .background(GreyButtonGradient)
                             .clickable { onLanguageSelected(selected) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -1478,7 +1475,7 @@ private fun SessionResumeCard(
                         .weight(1.5f)
                         .height(38.dp)
                         .clip(RoundedCornerShape(19.dp))
-                        .background(EmeraldPrimary)
+                        .background(GreyButtonGradient)
                         .clickable { onContinue() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -1597,11 +1594,7 @@ private fun DynamicIslandHeader(
                     .fillMaxHeight()
                     .fillMaxWidth(progressRatio)
                     .clip(CircleShape)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, Color(0xFF00E676))
-                        )
-                    )
+                    .background(GreyButtonGradient)
             )
         }
     }
@@ -1839,18 +1832,14 @@ private fun IntroCardsView(
                     onStartMentorship()
                 },
             shape = RoundedCornerShape(26.dp),
-            color = EmeraldPrimary,
-            border = BorderStroke(1.5.dp, Color(0xFF00FF87)),
+            color = Color.Transparent,
+            border = BorderStroke(1.5.dp, Color(0x88E2E8F0)),
             shadowElevation = 8.dp
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, Color(0xFF00E676))
-                        )
-                    ),
+                    .background(GreyButtonGradient),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
@@ -1966,7 +1955,7 @@ private fun ZeroKnowledgeProfileSetup(
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(EmeraldPrimary)
+                .background(GreyButtonGradient)
                 .clickable { onStartMentorship() },
             contentAlignment = Alignment.Center
         ) {
@@ -2197,7 +2186,7 @@ private fun ChatMessageItem(
                                         .weight(1.3f)
                                         .height(36.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(EmeraldPrimary)
+                                        .background(GreyButtonGradient)
                                         .clickable { onConfirmedNext() },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -2458,7 +2447,7 @@ private fun RealPlatformCardItem(
                         .weight(1f)
                         .height(32.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(EmeraldPrimary)
+                        .background(GreyButtonGradient)
                         .clickable { onOpenPlayStore(app.playStorePackage) },
                     contentAlignment = Alignment.Center
                 ) {
@@ -2545,7 +2534,7 @@ private fun AiPitchCoachGeneratorView(
                 .fillMaxWidth()
                 .height(42.dp)
                 .clip(RoundedCornerShape(21.dp))
-                .background(EmeraldPrimary)
+                .background(GreyButtonGradient)
                 .clickable {
                     scope.launch {
                         isGenerating = true
@@ -2617,7 +2606,7 @@ private fun TabPill(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) EmeraldPrimary else Color.Transparent)
+            .background(if (isSelected) GreyButtonGradient else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
             .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
@@ -2642,7 +2631,7 @@ private fun ChipPill(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) EmeraldPrimary else Color(0x22FFFFFF))
+            .background(if (isSelected) GreyButtonGradient else Brush.linearGradient(listOf(Color(0x22FFFFFF), Color(0x22FFFFFF))))
             .clickable { onClick() }
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {

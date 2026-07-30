@@ -141,8 +141,11 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-private val EmeraldPrimary = Color(0xFFFF4081) // Premium Pink theme for Meesho Creator AI
-private val EmeraldGlow = Color(0x33FF4081) // Pink Glow Effect
+private val MeeshoPinkPrimary = Color(0xFFFF2A7A) // Signature Meesho Pink
+private val MeeshoPinkSecondary = Color(0xFFE91E63) // Rose Pink / Soft Magenta
+private val MeeshoPinkGradient = Brush.horizontalGradient(listOf(Color(0xFFFF2A7A), Color(0xFFFF4081), Color(0xFFE91E63)))
+private val EmeraldPrimary = Color(0xFFFF2A7A) // Premium Pink Theme
+private val EmeraldGlow = Color(0x33FF2A7A) // Pink Glow Effect
 private val meeshoTheme = MentorToolTheme.MeeshoCreator
 
 /**
@@ -524,7 +527,7 @@ fun MeeshoCreatorAiCard(
                     Brush.linearGradient(
                         colors = listOf(
                             EmeraldPrimary.copy(alpha = borderPulseAlpha),
-                            Color(0xFF00E676),
+                            Color(0xFFFF5252),
                             Color.White.copy(alpha = 0.25f)
                         ),
                         start = androidx.compose.ui.geometry.Offset(shimmerOffset, 0f),
@@ -570,8 +573,8 @@ fun MeeshoCreatorAiCard(
             ToolHeroBanner(
                 toolType = ToolHeroType.MEESHO_CREATOR,
                 height = 100.dp,
-                badgeText = "🔥 MEESHO CREATOR AI",
-                subtitleText = "Reseller Commission & Growth Mentor"
+                badgeText = null,
+                subtitleText = null
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -614,7 +617,7 @@ fun MeeshoCreatorAiCard(
                             text = "ZERO TO HERO AFFILIATE SYSTEM",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = com.example.ui.theme.EmeraldGlow,
+                            color = EmeraldPrimary,
                             letterSpacing = 1.2.sp
                         )
                     }
@@ -625,15 +628,15 @@ fun MeeshoCreatorAiCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x2210B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                        .background(Color(0x22FF2A7A))
+                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "MOST USED",
                         fontSize = 9.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = com.example.ui.theme.EmeraldGlow,
+                        color = EmeraldPrimary,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -652,13 +655,13 @@ fun MeeshoCreatorAiCard(
                             modifier = Modifier
                                 .size(16.dp)
                                 .clip(CircleShape)
-                                .background(EmeraldPrimary.copy(alpha = 0.2f)),
+                                .background(EmeraldPrimary.copy(alpha = 0.25f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
-                                tint = com.example.ui.theme.EmeraldGlow,
+                                tint = Color.White,
                                 modifier = Modifier.size(11.dp)
                             )
                         }
@@ -685,11 +688,7 @@ fun MeeshoCreatorAiCard(
                         spotColor = EmeraldPrimary
                     )
                     .clip(RoundedCornerShape(23.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, com.example.ui.theme.EmeraldGlow)
-                        )
-                    ),
+                    .background(MeeshoPinkGradient),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
@@ -699,7 +698,7 @@ fun MeeshoCreatorAiCard(
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Start Learning",
-                        tint = AmoledBlack,
+                        tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -707,7 +706,7 @@ fun MeeshoCreatorAiCard(
                         text = "START LEARNING",
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmoledBlack,
+                        color = Color.White,
                         letterSpacing = 0.8.sp
                     )
                 }
@@ -935,7 +934,7 @@ fun MeeshoCreatorAiDialog(
                 exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
             ) {
                 Surface(
-                    color = Color(0xFF0F1A14),
+                    color = Color(0xFF140B13),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Column(
@@ -959,7 +958,7 @@ fun MeeshoCreatorAiDialog(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0x2210B981))
+                                        .background(Color(0x22FF2A7A))
                                         .border(BorderStroke(1.2.dp, EmeraldPrimary), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -978,7 +977,7 @@ fun MeeshoCreatorAiDialog(
                                         Box(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(6.dp))
-                                                .background(Color(0x2210B981))
+                                                .background(Color(0x22FF2A7A))
                                                 .border(BorderStroke(0.8.dp, EmeraldPrimary), RoundedCornerShape(6.dp))
                                                 .padding(horizontal = 5.dp, vertical = 1.dp)
                                         ) {
@@ -1008,8 +1007,8 @@ fun MeeshoCreatorAiDialog(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0x22FFFFFF))
-                                        .border(BorderStroke(1.dp, Color(0x33FFFFFF)), RoundedCornerShape(12.dp))
+                                        .background(Color(0x22FF2A7A))
+                                        .border(BorderStroke(1.dp, Color(0x66FF2A7A)), RoundedCornerShape(12.dp))
                                         .clickable {
                                             isLanguageSelected = false
                                         }
@@ -1043,8 +1042,8 @@ fun MeeshoCreatorAiDialog(
                         ToolHeroBanner(
                             toolType = ToolHeroType.MEESHO_CREATOR,
                             height = 110.dp,
-                            badgeText = "🛍️ MEESHO AI",
-                            subtitleText = "Reseller Commission & Growth Mentor"
+                            badgeText = null,
+                            subtitleText = null
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -1256,7 +1255,7 @@ fun MeeshoCreatorAiDialog(
                                             modifier = Modifier
                                                 .size(44.dp)
                                                 .clip(CircleShape)
-                                                .background(EmeraldPrimary)
+                                                .background(MeeshoPinkGradient)
                                                 .clickable {
                                                     sendCustomUserQuery(customUserInput)
                                                 },
@@ -1265,7 +1264,7 @@ fun MeeshoCreatorAiDialog(
                                             Icon(
                                                 imageVector = Icons.Default.Send,
                                                 contentDescription = "Send",
-                                                tint = AmoledBlack,
+                                                tint = Color.White,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
@@ -1348,13 +1347,13 @@ private fun MeeshoWelcomeScreenView(
     ) {
         Box(
             modifier = Modifier
-                .size(72.dp)
+                .size(76.dp)
                 .clip(CircleShape)
-                .background(EmeraldPrimary.copy(alpha = 0.18f))
-                .border(BorderStroke(2.dp, EmeraldPrimary), CircleShape),
+                .background(Color(0x22FF2A7A))
+                .border(BorderStroke(2.dp, Brush.radialGradient(listOf(EmeraldPrimary, MeeshoPinkSecondary))), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            com.example.ui.screens.OfficialLogo(name = "meesho", modifier = Modifier.size(44.dp))
+            com.example.ui.screens.OfficialLogo(name = "meesho", modifier = Modifier.size(46.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -1362,9 +1361,9 @@ private fun MeeshoWelcomeScreenView(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(EmeraldPrimary.copy(alpha = 0.18f))
+                .background(Color(0x22FF2A7A))
                 .border(BorderStroke(1.dp, EmeraldPrimary), RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 5.dp)
         ) {
             Text(
                 text = "⚡ ZERO TO HERO LEARNING SYSTEM",
@@ -1407,8 +1406,8 @@ private fun MeeshoWelcomeScreenView(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0x12FFFFFF))
-                    .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(14.dp))
+                    .background(Color(0x1824131D))
+                    .border(BorderStroke(0.8.dp, Color(0x33FF2A7A)), RoundedCornerShape(14.dp))
                     .padding(12.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -1423,8 +1422,8 @@ private fun MeeshoWelcomeScreenView(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0x12FFFFFF))
-                    .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(14.dp))
+                    .background(Color(0x1824131D))
+                    .border(BorderStroke(0.8.dp, Color(0x33FF2A7A)), RoundedCornerShape(14.dp))
                     .padding(12.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -1443,8 +1442,8 @@ private fun MeeshoWelcomeScreenView(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0x0CFFFFFF))
-                .border(BorderStroke(1.dp, Color(0x1AFFFFFF)), RoundedCornerShape(16.dp))
+                .background(Color(0x1424131D))
+                .border(BorderStroke(1.dp, Color(0x33FF2A7A)), RoundedCornerShape(16.dp))
                 .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -1470,11 +1469,7 @@ private fun MeeshoWelcomeScreenView(
                 .fillMaxWidth()
                 .height(50.dp)
                 .clip(RoundedCornerShape(25.dp))
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(EmeraldPrimary, Color(0xFF00E676))
-                    )
-                )
+                .background(MeeshoPinkGradient)
                 .clickable { onStartClick() },
             contentAlignment = Alignment.Center
         ) {
@@ -1482,7 +1477,7 @@ private fun MeeshoWelcomeScreenView(
                 text = "Start Learning 🚀",
                 fontSize = 14.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmoledBlack,
+                color = Color.White,
                 letterSpacing = 0.5.sp
             )
         }
@@ -1674,7 +1669,7 @@ private fun MeeshoChatMessageItem(
                 Text(
                     text = message.text,
                     fontSize = 12.5.sp,
-                    color = if (isUser) AmoledBlack else TextWhite,
+                    color = TextWhite,
                     lineHeight = 17.5.sp
                 )
 
@@ -1709,7 +1704,7 @@ private fun MeeshoChatMessageItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(EmeraldPrimary)
+                            .background(MeeshoPinkGradient)
                             .clickable { onOpenUrl(message.directActionUrl) }
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
@@ -1718,7 +1713,7 @@ private fun MeeshoChatMessageItem(
                             Icon(
                                 imageVector = Icons.Default.OpenInNew,
                                 contentDescription = "Link",
-                                tint = AmoledBlack,
+                                tint = Color.White,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -1726,7 +1721,7 @@ private fun MeeshoChatMessageItem(
                                 text = message.directActionLabel ?: "Open Meesho Direct Link",
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = AmoledBlack
+                                color = Color.White
                             )
                         }
                     }
@@ -1778,7 +1773,7 @@ private fun MeeshoChatMessageItem(
                         modifier = Modifier
                             .weight(1.2f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(EmeraldPrimary)
+                            .background(MeeshoPinkGradient)
                             .clickable { onConfirmedNext() }
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
@@ -1787,7 +1782,7 @@ private fun MeeshoChatMessageItem(
                             text = "✅ Yes, Done! 👍",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = AmoledBlack
+                            color = Color.White
                         )
                     }
 
@@ -1872,10 +1867,10 @@ private fun MeeshoDirectLinksView(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(EmeraldPrimary)
+                            .background(MeeshoPinkGradient)
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
-                        Text(text = "Open ↗", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                        Text(text = "Open ↗", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
@@ -1968,7 +1963,7 @@ private fun MeeshoCaptionGeneratorView(
                 .fillMaxWidth()
                 .height(44.dp)
                 .clip(RoundedCornerShape(22.dp))
-                .background(EmeraldPrimary)
+                .background(MeeshoPinkGradient)
                 .clickable(enabled = !isGenerating) { onGenerate() },
             contentAlignment = Alignment.Center
         ) {
@@ -1976,7 +1971,7 @@ private fun MeeshoCaptionGeneratorView(
                 text = if (isGenerating) "🧠 Generating AI Copy..." else "✨ Generate Viral Caption",
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = AmoledBlack
+                color = Color.White
             )
         }
 
@@ -2003,11 +1998,11 @@ private fun MeeshoCaptionGeneratorView(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(EmeraldPrimary)
+                                .background(MeeshoPinkGradient)
                                 .clickable { onCopyAll(fullText) }
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
-                            Text(text = "Copy All 📋", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                            Text(text = "Copy All 📋", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
 
@@ -2093,7 +2088,7 @@ private fun MeeshoChecklistView(
                         colors = CheckboxDefaults.colors(
                             checkedColor = EmeraldPrimary,
                             uncheckedColor = TextWhite.copy(alpha = 0.4f),
-                            checkmarkColor = AmoledBlack
+                            checkmarkColor = Color.White
                         )
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -2114,7 +2109,7 @@ private fun MeeshoChecklistView(
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(EmeraldPrimary)
+                .background(MeeshoPinkGradient)
                 .clickable { onFinishChecklist() },
             contentAlignment = Alignment.Center
         ) {
@@ -2122,7 +2117,7 @@ private fun MeeshoChecklistView(
                 text = "Complete Session & Celebrate 🎉",
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmoledBlack
+                color = Color.White
             )
         }
     }
@@ -2269,7 +2264,7 @@ private fun MeeshoTabPill(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) EmeraldPrimary else Color.Transparent)
+            .background(if (isSelected) MeeshoPinkGradient else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
             .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
@@ -2278,7 +2273,7 @@ private fun MeeshoTabPill(
             text = label,
             fontSize = 10.5.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) AmoledBlack else TextWhite.copy(alpha = 0.8f)
+            color = if (isSelected) Color.White else TextWhite.copy(alpha = 0.8f)
         )
     }
 }

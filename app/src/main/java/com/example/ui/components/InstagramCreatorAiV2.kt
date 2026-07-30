@@ -507,31 +507,18 @@ fun InstagramCreatorAiV2Dialog(
                 .responsiveImeAndNavPadding()
         ) {
             Surface(
-                color = Color(0xFF0F1A14),
+                color = Color(0xFF140D1A),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // TOP NAVBAR
                     TopNavBar(
                         selectedLanguage = currentLang,
-                        selectedCreatorType = selectedCreatorType,
-                        currentStepIndex = currentStepIndex,
-                        totalSteps = INSTAGRAM_ROADMAP_STEPS.size,
                         onChangeLanguage = { showLanguagePicker = true },
-                        onChangeCreatorType = { showCreatorTypePicker = true },
                         onClose = onDismiss
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    com.example.ui.components.ToolHeroBanner(
-                        toolType = com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR,
-                        height = 110.dp,
-                        badgeText = "📸 INSTA CREATOR AI",
-                        subtitleText = "Viral Reels & Growth Blueprint"
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // STEP PROGRESS HORIZONTAL BAR
                     if (!showLanguagePicker && !showCreatorTypePicker) {
@@ -554,49 +541,8 @@ fun InstagramCreatorAiV2Dialog(
                     Box(modifier = Modifier.weight(1f)) {
                         when {
                             showIntro -> {
-                                val instagramIntroCards = remember {
-                                    listOf(
-                                        ToolIntroCardData(
-                                            title = "Instagram Creator AI Roadmap",
-                                            subtitle = "Master Reels, Virality & Audience Growth",
-                                            icon = Icons.Default.CameraAlt,
-                                            highlightTag = "Instagram Masterclass",
-                                            bulletPoints = listOf(
-                                                "Viral Reel Hooks & Scripting",
-                                                "Algorithm Secrets & SEO Hashtags",
-                                                "Profile Branding & Bio Optimization",
-                                                "Creator Monetization & Brand Deals"
-                                            )
-                                        ),
-                                        ToolIntroCardData(
-                                            title = "AI Script & Caption Generator",
-                                            subtitle = "Generate High-Converting Reel Ideas in 1-Tap",
-                                            icon = Icons.Default.AutoAwesome,
-                                            highlightTag = "AI Reel Engine",
-                                            bulletPoints = listOf(
-                                                "3-Second Hook Formulas",
-                                                "SEO Optimized Captions & Tags",
-                                                "Call-to-Action Templates",
-                                                "Audio Beat Sync Guidelines"
-                                            )
-                                        ),
-                                        ToolIntroCardData(
-                                            title = "Pre-Publish & Growth Checklist",
-                                            subtitle = "Ensure Max Reach Before You Hit Share",
-                                            icon = Icons.Default.CheckCircle,
-                                            highlightTag = "Viral Guarantee",
-                                            bulletPoints = listOf(
-                                                "Reel Cover Design Guidelines",
-                                                "Peak Engagement Posting Hours",
-                                                "Native Instagram Edits Tips",
-                                                "Audience Retention Triggers"
-                                            )
-                                        )
-                                    )
-                                }
-                                CommonToolIntroContainer(
-                                    cards = instagramIntroCards,
-                                    onCompleteIntro = { showIntro = false }
+                                InstagramLuxuryIntroCard(
+                                    onStart = { showIntro = false }
                                 )
                             }
                             showWelcomeBack -> {
@@ -820,18 +766,173 @@ fun InstagramCreatorAiV2Dialog(
 }
 
 @Composable
+private fun InstagramLuxuryIntroCard(
+    onStart: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .border(
+                    BorderStroke(
+                        1.5.dp,
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFF833AB4),
+                                Color(0xFFE1306C),
+                                Color(0xFFFD1D1D)
+                            )
+                        )
+                    ),
+                    RoundedCornerShape(24.dp)
+                )
+                .shadow(16.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFFE1306C)),
+            color = Color(0xEE1A0E22)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Animated Hero Banner at Top - NO TEXT
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(
+                            BorderStroke(1.dp, Color(0xFFE1306C).copy(alpha = 0.4f)),
+                            RoundedCornerShape(18.dp)
+                        )
+                ) {
+                    com.example.ui.components.ToolHeroBanner(
+                        toolType = com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR,
+                        height = 130.dp,
+                        badgeText = null,
+                        subtitleText = null
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    text = "Instagram Mentor AI",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Zero to Hero Creator Growth Masterclass",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFE1306C)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Luxury Glass Feature Bullets
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val features = listOf(
+                        "📸 Viral Reel Scripts, Hooks & AI Audio Sync",
+                        "⚡ 3-Tier SEO Hashtags & Bio Optimization",
+                        "🔥 Pre-Publish 9-Point Virality Checklist",
+                        "🚀 Step-by-Step Personal AI Mentor Guidance"
+                    )
+                    features.forEach { feature ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x33833AB4))
+                                .border(
+                                    BorderStroke(0.8.dp, Color(0xFFE1306C).copy(alpha = 0.3f)),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = feature,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Instagram Gradient Start Button
+                androidx.compose.material3.Button(
+                    onClick = onStart,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFE1306C)),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color(0xFF833AB4),
+                                        Color(0xFFE1306C),
+                                        Color(0xFFFD1D1D)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Start Instagram Journey",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun TopNavBar(
     selectedLanguage: MentorLanguage,
-    selectedCreatorType: String?,
-    currentStepIndex: Int,
-    totalSteps: Int,
     onChangeLanguage: () -> Unit,
-    onChangeCreatorType: () -> Unit,
     onClose: () -> Unit
 ) {
     Surface(
-        color = Color(0xFF101913),
-        border = BorderStroke(0.8.dp, Color(0x2210B981))
+        color = Color(0xFF190F24),
+        border = BorderStroke(0.8.dp, Color(0x33E1306C))
     ) {
         Row(
             modifier = Modifier
@@ -848,91 +949,47 @@ private fun TopNavBar(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(EmeraldPrimary.copy(alpha = 0.2f))
-                        .border(BorderStroke(1.dp, EmeraldGlow), CircleShape),
+                        .background(Color(0x33E1306C))
+                        .border(BorderStroke(1.dp, Color(0xFFE1306C)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     OfficialLogo(name = "instagram", modifier = Modifier.size(20.dp))
                 }
 
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Instagram Mentor AI",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(EmeraldPrimary)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "V2 PRO",
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.Black,
-                                color = AmoledBlack
-                            )
-                        }
-                    }
-                    Text(
-                        text = "Zero to Hero Personal Mentor",
-                        fontSize = 10.5.sp,
-                        color = EmeraldGlow,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                Text(
+                    text = "Instagram Mentor AI",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = TextWhite
+                )
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Language Switch Pill
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x22FFFFFF))
-                        .border(BorderStroke(0.8.dp, Color(0x33FFFFFF)), RoundedCornerShape(12.dp))
+                        .background(Color(0x33E1306C))
+                        .border(BorderStroke(0.8.dp, Color(0xFFE1306C).copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
                         .clickable { onChangeLanguage() }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Language,
                             contentDescription = "Lang",
-                            tint = EmeraldGlow,
-                            modifier = Modifier.size(12.dp)
+                            tint = Color(0xFFE1306C),
+                            modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = selectedLanguage.code,
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
-                        )
-                    }
-                }
-
-                // Creator Type Switch Pill
-                selectedCreatorType?.let { type ->
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x22FFFFFF))
-                            .border(BorderStroke(0.8.dp, Color(0x33FFFFFF)), RoundedCornerShape(12.dp))
-                            .clickable { onChangeCreatorType() }
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = type,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite,
-                            maxLines = 1
                         )
                     }
                 }
@@ -940,7 +997,7 @@ private fun TopNavBar(
                 // Close Button
                 Box(
                     modifier = Modifier
-                        .size(30.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(Color(0x22FFFFFF))
                         .clickable { onClose() },
@@ -966,8 +1023,8 @@ private fun StepProgressBar(
     onStepClick: (Int) -> Unit
 ) {
     Surface(
-        color = Color(0xFF0B140E),
-        border = BorderStroke(0.5.dp, Color(0x2210B981))
+        color = Color(0xFF190F24),
+        border = BorderStroke(0.5.dp, Color(0x33E1306C))
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             Row(
@@ -981,7 +1038,7 @@ private fun StepProgressBar(
                     text = "ROADMAP PROGRESS",
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = EmeraldGlow,
+                    color = Color(0xFFE1306C),
                     letterSpacing = 1.sp
                 )
                 Text(
@@ -1008,8 +1065,8 @@ private fun StepProgressBar(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 when {
-                                    isCurrent -> Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                    isDone -> SolidColor(Color(0x3310B981))
+                                    isCurrent -> Brush.horizontalGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D)))
+                                    isDone -> SolidColor(Color(0x33E1306C))
                                     else -> SolidColor(Color(0x18FFFFFF))
                                 }
                             )
@@ -1017,8 +1074,8 @@ private fun StepProgressBar(
                                 BorderStroke(
                                     1.dp,
                                     when {
-                                        isCurrent -> EmeraldGlow
-                                        isDone -> EmeraldPrimary.copy(alpha = 0.5f)
+                                        isCurrent -> Color(0xFFE1306C)
+                                        isDone -> Color(0xFFE1306C).copy(alpha = 0.5f)
                                         else -> Color(0x22FFFFFF)
                                     }
                                 ),
@@ -1032,7 +1089,7 @@ private fun StepProgressBar(
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = "Done",
-                                    tint = if (isCurrent) AmoledBlack else EmeraldGlow,
+                                    tint = if (isCurrent) Color.White else Color(0xFFE1306C),
                                     modifier = Modifier.size(11.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -1049,7 +1106,7 @@ private fun StepProgressBar(
                                 text = "S${step.id}",
                                 fontSize = 10.sp,
                                 fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
-                                color = if (isCurrent) AmoledBlack else TextWhite.copy(alpha = if (isDone) 0.9f else 0.5f)
+                                color = if (isCurrent) Color.White else TextWhite.copy(alpha = if (isDone) 0.9f else 0.5f)
                             )
                         }
                     }
@@ -1072,8 +1129,8 @@ private fun LanguageSelectionOverlay(
     ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
+            color = Color(0xFF1A0E22),
+            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C)))),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -1093,7 +1150,7 @@ private fun LanguageSelectionOverlay(
                 Text(
                     text = "Aap kis language me seekhna chahenge?",
                     fontSize = 13.5.sp,
-                    color = EmeraldGlow,
+                    color = Color(0xFFE1306C),
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
@@ -1108,13 +1165,13 @@ private fun LanguageSelectionOverlay(
                             .height(50.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (isSelected) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
+                                if (isSelected) Brush.horizontalGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D)))
                                 else SolidColor(Color(0x18FFFFFF))
                             )
                             .border(
                                 BorderStroke(
                                     1.dp,
-                                    if (isSelected) EmeraldGlow else Color(0x22FFFFFF)
+                                    if (isSelected) Color(0xFFE1306C) else Color(0x22FFFFFF)
                                 ),
                                 RoundedCornerShape(16.dp)
                             )
@@ -1131,14 +1188,14 @@ private fun LanguageSelectionOverlay(
                                 text = "○  ${lang.label} (${lang.nativeName})",
                                 fontSize = 15.sp,
                                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = if (isSelected) AmoledBlack else TextWhite
+                                color = TextWhite
                             )
 
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Selected",
-                                    tint = AmoledBlack,
+                                    tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -1166,8 +1223,8 @@ private fun CreatorTypeSelectionOverlay(
     ) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
+            color = Color(0xFF1A0E22),
+            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C)))),
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
@@ -1195,7 +1252,7 @@ private fun CreatorTypeSelectionOverlay(
                 Text(
                     text = "Personalized Roadmap for your Creator Niche",
                     fontSize = 11.5.sp,
-                    color = EmeraldGlow,
+                    color = Color(0xFFE1306C),
                     fontWeight = FontWeight.SemiBold
                 )
 

@@ -36,7 +36,8 @@ enum class ToolHeroType {
     AI_PROMPT_EXTRACTOR,
     CAPCUT_MASTER,
     VN_EDITOR,
-    INSTAGRAM_EDITS
+    INSTAGRAM_EDITS,
+    AI_VIDEO_IMAGE
 }
 
 @Composable
@@ -63,6 +64,7 @@ fun ToolHeroBanner(
             ToolHeroType.CAPCUT_MASTER -> CapCutMasterHeroCanvas()
             ToolHeroType.VN_EDITOR -> VnEditorHeroCanvas()
             ToolHeroType.INSTAGRAM_EDITS -> InstagramEditsHeroCanvas()
+            ToolHeroType.AI_VIDEO_IMAGE -> AiVideoImageHeroCanvas()
         }
 
         if (badgeText != null || subtitleText != null) {
@@ -89,7 +91,7 @@ fun ToolHeroBanner(
                 }
                 if (badgeText != null) {
                     val badgeColor = when (toolType) {
-                        ToolHeroType.BRAND_COLLAB -> Color(0xFFFFD700)
+                        ToolHeroType.BRAND_COLLAB -> Color(0xFFE2E8F0)
                         ToolHeroType.MEESHO_CREATOR -> Color(0xFFFF4081)
                         ToolHeroType.INSTAGRAM_CREATOR -> Color(0xFFE1306C)
                         ToolHeroType.YOUTUBE_CREATOR -> Color(0xFFFF0000)
@@ -97,6 +99,7 @@ fun ToolHeroBanner(
                         ToolHeroType.CAPCUT_MASTER -> Color(0xFF00E5FF)
                         ToolHeroType.VN_EDITOR -> Color(0xFF0288D1)
                         ToolHeroType.INSTAGRAM_EDITS -> Color(0xFFCFD8DC)
+                        ToolHeroType.AI_VIDEO_IMAGE -> Color(0xFF8B5CF6)
                     }
                     Box(
                         modifier = Modifier
@@ -118,96 +121,149 @@ fun ToolHeroBanner(
     }
 }
 
-/** 1. Brand Collaboration Hero: Golden particles, handshake/collaborating deal figures, floating sponsorship icons, soft shine sweep */
+/** 1. Brand Collaboration Hero: Premium Titanium & Silver Luxury Collab Canvas (Handshake, Contract, Luxury Brand Badges, Soft White Glow) */
 @Composable
 private fun BrandCollabHeroCanvas() {
     val transition = rememberInfiniteTransition(label = "brandCollab")
     val sweepProgress by transition.animateFloat(
         initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing), RepeatMode.Restart),
+        animationSpec = infiniteRepeatable(tween(4500, easing = LinearEasing), RepeatMode.Restart),
         label = "sweep"
     )
     val floatY by transition.animateFloat(
-        initialValue = -8f, targetValue = 8f,
-        animationSpec = infiniteRepeatable(tween(2500, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        initialValue = -7f, targetValue = 7f,
+        animationSpec = infiniteRepeatable(tween(2800, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "float"
+    )
+    val rotationAngle by transition.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Restart),
+        label = "rotation"
     )
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
 
-        // Background Gradient
+        // Deep Graphite & Titanium Radial Background
         drawRect(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0x33FFD700), Color(0x11FFA000), Color(0xFF0C0D14)),
+                colors = listOf(Color(0xFF333846), Color(0xFF1B1D26), Color(0xFF0F1017)),
                 center = Offset(w * 0.5f, h * 0.5f),
-                radius = w * 0.7f
+                radius = w * 0.75f
             )
         )
 
-        // Golden Particles
-        val particleCount = 12
+        // Silver & Platinum Particles
+        val particleCount = 14
         for (i in 0 until particleCount) {
-            val px = (w * (0.08f + 0.84f * ((i * 37) % 100) / 100f))
-            val py = (h * (0.15f + 0.7f * ((i * 53) % 100) / 100f) + sin((sweepProgress * 6.28f + i).toDouble()).toFloat() * 6f)
+            val px = (w * (0.05f + 0.9f * ((i * 37) % 100) / 100f))
+            val py = (h * (0.12f + 0.76f * ((i * 53) % 100) / 100f) + sin((sweepProgress * 6.28f + i).toDouble()).toFloat() * 5f)
             val pRadius = 2f + (i % 3) * 1.5f
             drawCircle(
-                color = Color(0xFFFFD700).copy(alpha = 0.4f + 0.4f * sin((sweepProgress * 3.14f + i).toDouble()).toFloat()),
+                color = Color(0xFFE2E8F0).copy(alpha = 0.35f + 0.45f * sin((sweepProgress * 3.14f + i).toDouble()).toFloat()),
                 radius = pRadius,
                 center = Offset(px, py)
             )
         }
 
-        // Deal Badge / Handshake Icon graphic in center
         val centerX = w * 0.5f
         val centerY = h * 0.48f + floatY
 
-        // Outer Golden Ring
+        // Rotating Silver & Titanium Outer Seal Ring
+        rotate(degrees = rotationAngle, pivot = Offset(centerX, centerY)) {
+            drawCircle(
+                brush = Brush.sweepGradient(listOf(Color(0xFFF1F5F9), Color(0xFF64748B), Color(0xFFE2E8F0))),
+                radius = 36f,
+                center = Offset(centerX, centerY),
+                style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f))
+            )
+        }
+
+        // Inner Titanium Glass Disc
         drawCircle(
-            brush = Brush.sweepGradient(listOf(Color(0xFFFFD700), Color(0xFFFFA000), Color(0xFFFFD700))),
-            radius = 34f,
-            center = Offset(centerX, centerY),
-            style = Stroke(width = 3.5f)
-        )
-        drawCircle(
-            color = Color(0x22FFD700),
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF475569), Color(0xFF1E293B)),
+                center = Offset(centerX, centerY),
+                radius = 32f
+            ),
             radius = 32f,
             center = Offset(centerX, centerY)
         )
+        drawCircle(
+            color = Color(0x66E2E8F0),
+            radius = 32f,
+            center = Offset(centerX, centerY),
+            style = Stroke(width = 1.5f)
+        )
 
-        // Handshake lines
-        val path = Path().apply {
+        // Creator & Brand Handshake Icon Graphic
+        val handshakePath = Path().apply {
             moveTo(centerX - 16f, centerY - 2f)
-            lineTo(centerX - 4f, centerY + 10f)
-            lineTo(centerX + 4f, centerY + 2f)
-            lineTo(centerX + 16f, centerY - 4f)
+            lineTo(centerX - 5f, centerY + 9f)
+            lineTo(centerX + 3f, centerY + 1f)
+            lineTo(centerX + 16f, centerY - 5f)
         }
-        drawPath(path = path, color = Color(0xFFFFD700), style = Stroke(width = 4f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-
-        // Floating deal icons (Sponsor $ & Deal Badges)
-        drawRoundRect(
-            color = Color(0x33FFD700),
-            topLeft = Offset(w * 0.2f, h * 0.3f + floatY * 0.5f),
-            size = Size(46f, 26f),
-            cornerRadius = CornerRadius(8f),
-            style = Stroke(width = 1.5f)
-        )
-        drawRoundRect(
-            color = Color(0x33FFD700),
-            topLeft = Offset(w * 0.75f, h * 0.4f - floatY * 0.5f),
-            size = Size(40f, 24f),
-            cornerRadius = CornerRadius(8f),
-            style = Stroke(width = 1.5f)
+        drawPath(
+            path = handshakePath,
+            color = Color(0xFFF8FAFC),
+            style = Stroke(width = 4f, cap = StrokeCap.Round, join = StrokeJoin.Round)
         )
 
-        // Gold Shine Sweep
+        // Floating Luxury Brand Star / Diamond Badge (Left)
+        val leftX = w * 0.16f
+        val leftY = h * 0.35f + floatY * 0.6f
+        drawRoundRect(
+            brush = Brush.linearGradient(listOf(Color(0xFF334155), Color(0xFF1E293B))),
+            topLeft = Offset(leftX, leftY),
+            size = Size(52f, 28f),
+            cornerRadius = CornerRadius(10f)
+        )
+        drawRoundRect(
+            color = Color(0x88CBD5E1),
+            topLeft = Offset(leftX, leftY),
+            size = Size(52f, 28f),
+            cornerRadius = CornerRadius(10f),
+            style = Stroke(width = 1.2f)
+        )
+        // Diamond / Star symbol inside left card
+        drawCircle(
+            color = Color(0xFFE2E8F0),
+            radius = 5f,
+            center = Offset(leftX + 16f, leftY + 14f)
+        )
+
+        // Floating Camera / Creator Studio Box (Right)
+        val rightX = w * 0.74f
+        val rightY = h * 0.38f - floatY * 0.6f
+        drawRoundRect(
+            brush = Brush.linearGradient(listOf(Color(0xFF334155), Color(0xFF1E293B))),
+            topLeft = Offset(rightX, rightY),
+            size = Size(48f, 28f),
+            cornerRadius = CornerRadius(10f)
+        )
+        drawRoundRect(
+            color = Color(0x88CBD5E1),
+            topLeft = Offset(rightX, rightY),
+            size = Size(48f, 28f),
+            cornerRadius = CornerRadius(10f),
+            style = Stroke(width = 1.2f)
+        )
+        // Camera lens graphic inside right card
+        drawCircle(
+            color = Color(0xFFE2E8F0),
+            radius = 6f,
+            center = Offset(rightX + 24f, rightY + 14f),
+            style = Stroke(width = 2f)
+        )
+
+        // Premium Metallic Silver Sweep Animation
         val shineX = -w * 0.5f + (w * 2f) * sweepProgress
         drawRect(
             brush = Brush.linearGradient(
-                colors = listOf(Color.Transparent, Color(0x22FFD700), Color.Transparent),
+                colors = listOf(Color.Transparent, Color(0x35E2E8F0), Color.Transparent),
                 start = Offset(shineX, 0f),
-                end = Offset(shineX + 100f, h)
+                end = Offset(shineX + 110f, h)
             )
         )
     }
@@ -216,86 +272,150 @@ private fun BrandCollabHeroCanvas() {
 /** 2. Meesho Creator Hero: Floating shopping bags, product cards, affiliate commission coins, pink particles */
 @Composable
 private fun MeeshoHeroCanvas() {
-    val transition = rememberInfiniteTransition(label = "meesho")
+    val transition = rememberInfiniteTransition(label = "meeshoHero")
     val pulse by transition.animateFloat(
         initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(3000, easing = LinearEasing), RepeatMode.Restart),
+        animationSpec = infiniteRepeatable(tween(3500, easing = LinearEasing), RepeatMode.Restart),
         label = "pulse"
     )
     val floatY by transition.animateFloat(
-        initialValue = -6f, targetValue = 6f,
-        animationSpec = infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        initialValue = -7f, targetValue = 7f,
+        animationSpec = infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "float"
+    )
+    val sweepProgress by transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing), RepeatMode.Restart),
+        label = "sweep"
     )
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
 
+        // Deep Luxury Dark Pink/Magenta Radial Backdrop
         drawRect(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0x33FF4081), Color(0x11E91E63), Color(0xFF0D0B12)),
+                colors = listOf(Color(0x44FF2A7A), Color(0x22E91E63), Color(0xFF140B13)),
                 center = Offset(w * 0.5f, h * 0.5f),
-                radius = w * 0.7f
+                radius = w * 0.75f
             )
         )
 
-        // Floating Shopping Bag outlines & Product Cards
-        val bagLeft = w * 0.22f
-        val bagTop = h * 0.35f + floatY
+        // Floating Shopping Bag (Left)
+        val bagLeft = w * 0.18f
+        val bagTop = h * 0.32f + floatY
         drawRoundRect(
-            color = Color(0xFFFF4081),
+            brush = Brush.linearGradient(listOf(Color(0xFFFF2A7A), Color(0xFFE91E63))),
             topLeft = Offset(bagLeft, bagTop),
-            size = Size(36f, 44f),
-            cornerRadius = CornerRadius(6f),
-            style = Stroke(width = 2f)
-        )
-        // Bag handle
-        drawArc(
-            color = Color(0xFFFF4081),
-            startAngle = 180f,
-            sweepAngle = 180f,
-            useCenter = false,
-            topLeft = Offset(bagLeft + 9f, bagTop - 10f),
-            size = Size(18f, 16f),
-            style = Stroke(width = 2f)
-        )
-
-        // Center Product Card
-        val cardX = w * 0.5f - 24f
-        val cardY = h * 0.3f - floatY * 0.8f
-        drawRoundRect(
-            color = Color(0x44FF4081),
-            topLeft = Offset(cardX, cardY),
-            size = Size(48f, 56f),
+            size = Size(42f, 50f),
             cornerRadius = CornerRadius(8f)
         )
         drawRoundRect(
-            color = Color(0xFFFF4081),
-            topLeft = Offset(cardX, cardY),
-            size = Size(48f, 56f),
+            color = Color(0xFFFFFFFF),
+            topLeft = Offset(bagLeft, bagTop),
+            size = Size(42f, 50f),
             cornerRadius = CornerRadius(8f),
             style = Stroke(width = 1.5f)
         )
-        // Product tag inside
-        drawCircle(color = Color(0xFFFF4081), radius = 6f, center = Offset(cardX + 24f, cardY + 20f))
+        // Bag Handles
+        drawArc(
+            color = Color(0xFFFFFFFF),
+            startAngle = 180f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(bagLeft + 11f, bagTop - 12f),
+            size = Size(20f, 18f),
+            style = Stroke(width = 2f, cap = StrokeCap.Round)
+        )
 
-        // Affiliate Coins ($ / ₹) floating on right
-        val coinX = w * 0.76f
-        val coinY = h * 0.42f + floatY
-        drawCircle(color = Color(0xFFE91E63), radius = 16f, center = Offset(coinX, coinY), style = Stroke(width = 2f))
-        drawCircle(color = Color(0x33FF4081), radius = 14f, center = Offset(coinX, coinY))
+        // Center Product Box / Gift Box (With Cross Ribbon)
+        val cardX = w * 0.5f - 28f
+        val cardY = h * 0.28f - floatY * 0.8f
+        drawRoundRect(
+            brush = Brush.linearGradient(listOf(Color(0x66FF2A7A), Color(0x33E91E63))),
+            topLeft = Offset(cardX, cardY),
+            size = Size(56f, 62f),
+            cornerRadius = CornerRadius(10f)
+        )
+        drawRoundRect(
+            color = Color(0xFFFF2A7A),
+            topLeft = Offset(cardX, cardY),
+            size = Size(56f, 62f),
+            cornerRadius = CornerRadius(10f),
+            style = Stroke(width = 1.8f)
+        )
+        // Ribbon Vertical
+        drawLine(
+            color = Color(0xFFFFFFFF),
+            start = Offset(cardX + 28f, cardY),
+            end = Offset(cardX + 28f, cardY + 62f),
+            strokeWidth = 3f
+        )
+        // Ribbon Horizontal
+        drawLine(
+            color = Color(0xFFFFFFFF),
+            start = Offset(cardX, cardY + 31f),
+            end = Offset(cardX + 56f, cardY + 31f),
+            strokeWidth = 3f
+        )
+        // Bow tie at top
+        drawCircle(color = Color(0xFFFF2A7A), radius = 6f, center = Offset(cardX + 28f, cardY + 31f))
 
-        // Pink light particles
-        for (i in 0..8) {
-            val px = (w * (0.1f + 0.8f * ((i * 41) % 100) / 100f))
-            val py = (h * (0.2f + 0.6f * ((i * 67) % 100) / 100f) + cos((pulse * 6.28f + i).toDouble()).toFloat() * 5f)
+        // Right Floating Commission Coins & Tag (Right)
+        val coinX = w * 0.80f
+        val coinY = h * 0.38f + floatY * 0.9f
+        drawCircle(
+            brush = Brush.radialGradient(listOf(Color(0xFFFF2A7A), Color(0xFFE91E63))),
+            radius = 18f,
+            center = Offset(coinX, coinY)
+        )
+        drawCircle(
+            color = Color(0xFFFFFFFF),
+            radius = 18f,
+            center = Offset(coinX, coinY),
+            style = Stroke(width = 1.5f)
+        )
+        drawCircle(
+            color = Color(0x55FF2A7A),
+            radius = 12f,
+            center = Offset(coinX, coinY)
+        )
+
+        // Smaller secondary Coin
+        drawCircle(
+            brush = Brush.radialGradient(listOf(Color(0xFFFF5252), Color(0xFFE91E63))),
+            radius = 12f,
+            center = Offset(coinX - 18f, coinY + 22f)
+        )
+        drawCircle(
+            color = Color(0xFFFFFFFF),
+            radius = 12f,
+            center = Offset(coinX - 18f, coinY + 22f),
+            style = Stroke(width = 1.2f)
+        )
+
+        // Pink Glowing Particle Stars
+        for (i in 0..12) {
+            val px = (w * (0.08f + 0.84f * ((i * 37) % 100) / 100f))
+            val py = (h * (0.15f + 0.7f * ((i * 59) % 100) / 100f) + cos((pulse * 6.28f + i).toDouble()).toFloat() * 6f)
+            val alpha = 0.25f + 0.65f * sin((pulse * 3.14f + i).toDouble()).toFloat().coerceIn(0f, 1f)
             drawCircle(
-                color = Color(0xFFFF4081).copy(alpha = 0.3f + 0.5f * sin((pulse * 3.14f + i).toDouble()).toFloat()),
-                radius = 3f,
+                color = Color(0xFFFF2A7A).copy(alpha = alpha),
+                radius = if (i % 2 == 0) 3.5f else 2f,
                 center = Offset(px, py)
             )
         }
+
+        // Luxury Pink Sweep Shine Effect
+        val shineX = -w * 0.5f + (w * 2f) * sweepProgress
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = listOf(Color.Transparent, Color(0x40FF2A7A), Color(0x60FFFFFF), Color(0x40FF2A7A), Color.Transparent),
+                start = Offset(shineX, 0f),
+                end = Offset(shineX + 120f, h)
+            )
+        )
     }
 }
 
@@ -707,5 +827,113 @@ private fun InstagramEditsHeroCanvas() {
             drawCircle(color = Color.White, radius = 3f, center = Offset(sparkleX + 10f, boxY + 15f))
             drawCircle(color = Color.White, radius = 2f, center = Offset(sparkleX + 30f, boxY + 30f))
         }
+    }
+}
+
+/** 9. AI Video & Image Generator Hero: Animated soft AI particles, glowing futuristic light waves, purple/violet motion rings */
+@Composable
+private fun AiVideoImageHeroCanvas() {
+    val transition = rememberInfiniteTransition(label = "aiVideoImage")
+    val pulse by transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(3200, easing = LinearEasing), RepeatMode.Restart),
+        label = "pulse"
+    )
+    val floatY by transition.animateFloat(
+        initialValue = -8f, targetValue = 8f,
+        animationSpec = infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "float"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Deep Violet Futuristic Backdrop
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0x448B5CF6), Color(0x227C3AED), Color(0xFF100B1E)),
+                center = Offset(w * 0.5f, h * 0.5f),
+                radius = w * 0.75f
+            )
+        )
+
+        // Pulsing Futuristic Glowing Aperture Rings in Center
+        val centerX = w * 0.5f
+        val centerY = h * 0.45f + floatY
+
+        drawCircle(
+            brush = Brush.radialGradient(
+                listOf(Color(0x668B5CF6), Color(0x22A78BFA), Color.Transparent),
+                center = Offset(centerX, centerY),
+                radius = 60f
+            ),
+            radius = 60f,
+            center = Offset(centerX, centerY)
+        )
+
+        drawCircle(
+            color = Color(0xFFA78BFA),
+            radius = 32f,
+            center = Offset(centerX, centerY),
+            style = Stroke(width = 2f)
+        )
+
+        drawCircle(
+            color = Color(0xFF8B5CF6),
+            radius = 22f,
+            center = Offset(centerX, centerY),
+            style = Stroke(width = 1.5f)
+        )
+
+        drawCircle(
+            color = Color(0xFFC084FC),
+            radius = 12f,
+            center = Offset(centerX, centerY)
+        )
+
+        // Floating Lens/Frame Rectangles on Left & Right
+        val frameLeftX = w * 0.2f
+        val frameLeftY = h * 0.35f - floatY * 0.7f
+        drawRoundRect(
+            brush = Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFFA855F7))),
+            topLeft = Offset(frameLeftX, frameLeftY),
+            size = Size(40f, 48f),
+            cornerRadius = CornerRadius(8f),
+            style = Stroke(width = 1.8f)
+        )
+
+        val frameRightX = w * 0.78f
+        val frameRightY = h * 0.38f + floatY * 0.8f
+        drawRoundRect(
+            brush = Brush.linearGradient(listOf(Color(0xFFA78BFA), Color(0xFFC084FC))),
+            topLeft = Offset(frameRightX, frameRightY),
+            size = Size(42f, 28f),
+            cornerRadius = CornerRadius(6f),
+            style = Stroke(width = 1.8f)
+        )
+
+        // Soft AI Particles & Glowing Light Orbs
+        for (i in 0..15) {
+            val px = (w * (0.05f + 0.9f * ((i * 43) % 100) / 100f))
+            val py = (h * (0.15f + 0.7f * ((i * 61) % 100) / 100f) + sin((pulse * 6.28f + i).toDouble()).toFloat() * 6f)
+            val alpha = (0.3f + 0.6f * sin((pulse * 3.14f + i * 0.5f).toDouble()).toFloat()).coerceIn(0.1f, 1f)
+            
+            drawCircle(
+                color = if (i % 2 == 0) Color(0xFF8B5CF6).copy(alpha = alpha) else Color(0xFFC084FC).copy(alpha = alpha),
+                radius = if (i % 3 == 0) 3.5f else 2f,
+                center = Offset(px, py)
+            )
+        }
+
+        // Futuristic Sweep Shine Effect
+        val shineX = -w * 0.5f + (w * 2f) * pulse
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = listOf(Color.Transparent, Color(0x338B5CF6), Color(0x60A78BFA), Color(0x338B5CF6), Color.Transparent),
+                start = Offset(shineX, 0f),
+                end = Offset(shineX + 130f, h)
+            )
+        )
     }
 }

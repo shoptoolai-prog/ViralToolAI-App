@@ -146,15 +146,15 @@ fun ViralToolAiStudioDialog(
                                 1.5.dp,
                                 Brush.linearGradient(
                                     listOf(
-                                        EmeraldGlow,
+                                        Color(0xFFA78BFA),
                                         ElectricPurple,
-                                        EmeraldPrimary
+                                        Color(0xFF8B5CF6)
                                     )
                                 )
                             ),
                             RoundedCornerShape(26.dp)
                         ),
-                    color = Color(0xFF0F1412),
+                    color = Color(0xFF100B1E),
                     shape = RoundedCornerShape(26.dp)
                 ) {
                     Column(
@@ -171,54 +171,65 @@ fun ViralToolAiStudioDialog(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
                                     modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(
-                                            Brush.linearGradient(
-                                                listOf(EmeraldPrimary, ElectricPurple)
-                                            )
-                                        ),
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0x338B5CF6))
+                                        .border(BorderStroke(1.dp, Color(0xFF8B5CF6)), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.AutoAwesome,
                                         contentDescription = "Prompt Extractor Icon",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                        tint = Color(0xFFA78BFA),
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = "AI Prompt Extractor",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = TextWhite
-                                    )
-                                    Text(
-                                        text = "AI Vision Image-to-Prompt Analysis Engine",
-                                        fontSize = 10.5.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = EmeraldGlow
-                                    )
-                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "AI Prompt Extractor",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
                             }
 
-                            IconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onDismiss()
-                                },
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close",
-                                    tint = TextWhite
-                                )
+                                // Language Badge
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(Color(0x338B5CF6))
+                                        .border(BorderStroke(0.8.dp, Color(0xFF8B5CF6)), RoundedCornerShape(10.dp))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "🌍 Multi-Lang",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFA78BFA)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.08f))
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Close",
+                                        tint = TextWhite,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -231,11 +242,11 @@ fun ViralToolAiStudioDialog(
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(Color(0xFF14241C), Color(0xFF18152B))
+                                        listOf(Color(0xFF1B142E), Color(0xFF18152B))
                                     )
                                 )
                                 .border(
-                                    BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)),
+                                    BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.4f)),
                                     RoundedCornerShape(14.dp)
                                 )
                                 .padding(10.dp)
@@ -261,7 +272,7 @@ fun ViralToolAiStudioDialog(
                                     text = "Apni baat kisi bhi language mein likhiye. AI automatically samajh lega.",
                                     fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = EmeraldGlow
+                                    color = Color(0xFFA78BFA)
                                 )
                             }
                         }
@@ -310,7 +321,7 @@ fun ViralToolAiStudioDialog(
                                 text = "1. Upload AI Image or Screenshot",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = EmeraldGlow
+                                color = Color(0xFFA78BFA)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
 
@@ -319,13 +330,13 @@ fun ViralToolAiStudioDialog(
                                     .fillMaxWidth()
                                     .height(130.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF131B18))
+                                    .background(Color(0xFF161026))
                                     .border(
                                         BorderStroke(
                                             1.2.dp,
                                             Brush.linearGradient(
                                                 listOf(
-                                                    EmeraldPrimary,
+                                                    Color(0xFF8B5CF6),
                                                     ElectricPurple
                                                 )
                                             )
@@ -371,7 +382,7 @@ fun ViralToolAiStudioDialog(
                                         Icon(
                                             imageVector = Icons.Default.AddPhotoAlternate,
                                             contentDescription = "Upload Photo",
-                                            tint = EmeraldGlow,
+                                            tint = Color(0xFFA78BFA),
                                             modifier = Modifier.size(32.dp)
                                         )
                                         Spacer(modifier = Modifier.height(6.dp))
@@ -400,7 +411,7 @@ fun ViralToolAiStudioDialog(
                                 text = "2. Additional Idea or Notes (Optional)",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = EmeraldGlow
+                                color = Color(0xFFA78BFA)
                             )
                             Spacer(modifier = Modifier.height(4.dp))
 
@@ -419,9 +430,9 @@ fun ViralToolAiStudioDialog(
                                     .height(72.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = Color(0xFF141A17),
-                                    unfocusedContainerColor = Color(0xFF101513),
-                                    focusedBorderColor = EmeraldGlow,
+                                    focusedContainerColor = Color(0xFF1B142E),
+                                    unfocusedContainerColor = Color(0xFF161026),
+                                    focusedBorderColor = Color(0xFFA78BFA),
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = TextWhite,
                                     unfocusedTextColor = TextWhite
@@ -448,10 +459,10 @@ fun ViralToolAiStudioDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(46.dp)
-                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldGlow),
+                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFA78BFA)),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = EmeraldPrimary,
+                                    containerColor = Color(0xFF8B5CF6),
                                     disabledContainerColor = Color.Gray
                                 )
                             ) {
@@ -499,7 +510,7 @@ fun ViralToolAiStudioDialog(
                                             .clip(RoundedCornerShape(14.dp))
                                             .background(
                                                 Brush.horizontalGradient(
-                                                    listOf(EmeraldPrimary, ElectricPurple)
+                                                    listOf(Color(0xFF8B5CF6), ElectricPurple)
                                                 )
                                             )
                                             .padding(12.dp),
@@ -533,9 +544,9 @@ fun ViralToolAiStudioDialog(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(16.dp))
-                                            .background(Color(0xFF142019))
+                                            .background(Color(0xFF1B122E))
                                             .border(
-                                                BorderStroke(1.dp, EmeraldGlow),
+                                                BorderStroke(1.dp, Color(0xFFA78BFA)),
                                                 RoundedCornerShape(16.dp)
                                             )
                                             .padding(14.dp)
@@ -550,7 +561,7 @@ fun ViralToolAiStudioDialog(
                                                     Icon(
                                                         imageVector = Icons.Default.ContentCopy,
                                                         contentDescription = null,
-                                                        tint = EmeraldGlow,
+                                                        tint = Color(0xFFA78BFA),
                                                         modifier = Modifier.size(18.dp)
                                                     )
                                                     Spacer(modifier = Modifier.width(6.dp))
@@ -558,14 +569,14 @@ fun ViralToolAiStudioDialog(
                                                         text = "Detailed Recreation Prompt",
                                                         fontSize = 13.sp,
                                                         fontWeight = FontWeight.Bold,
-                                                        color = EmeraldGlow
+                                                        color = Color(0xFFA78BFA)
                                                     )
                                                 }
 
                                                 Box(
                                                     modifier = Modifier
                                                         .clip(RoundedCornerShape(8.dp))
-                                                        .background(EmeraldPrimary)
+                                                        .background(Color(0xFF8B5CF6))
                                                         .clickable {
                                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                             clipboardManager.setText(AnnotatedString(result.recreationPrompt))
@@ -707,9 +718,9 @@ fun ViralToolAiStudioDialog(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .clip(RoundedCornerShape(12.dp))
-                                                .background(Color(0xFF1A1F18))
+                                                .background(Color(0xFF1B142E))
                                                 .border(
-                                                    BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f)),
+                                                    BorderStroke(1.dp, Color(0xFFA78BFA).copy(alpha = 0.4f)),
                                                     RoundedCornerShape(12.dp)
                                                 )
                                                 .padding(10.dp)
@@ -719,7 +730,7 @@ fun ViralToolAiStudioDialog(
                                                     text = "Aspect Ratio",
                                                     fontSize = 9.5.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = EmeraldGlow
+                                                    color = Color(0xFFA78BFA)
                                                 )
                                                 Spacer(modifier = Modifier.height(2.dp))
                                                 Text(
@@ -743,9 +754,9 @@ fun ViralToolAiStudioDialog(
                                             Box(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color(0xFF1E2822))
+                                                    .background(Color(0x338B5CF6))
                                                     .border(
-                                                        BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)),
+                                                        BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f)),
                                                         RoundedCornerShape(8.dp)
                                                     )
                                                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -754,7 +765,7 @@ fun ViralToolAiStudioDialog(
                                                     text = "#$kw",
                                                     fontSize = 10.sp,
                                                     fontWeight = FontWeight.Medium,
-                                                    color = EmeraldGlow
+                                                    color = Color(0xFFA78BFA)
                                                 )
                                             }
                                         }
@@ -767,7 +778,7 @@ fun ViralToolAiStudioDialog(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(14.dp))
-                                            .background(Color(0xFF131917))
+                                            .background(Color(0xFF18122B))
                                             .border(
                                                 BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
                                                 RoundedCornerShape(14.dp)
@@ -779,7 +790,7 @@ fun ViralToolAiStudioDialog(
                                                 Icon(
                                                     imageVector = Icons.Default.Visibility,
                                                     contentDescription = null,
-                                                    tint = EmeraldGlow,
+                                                    tint = Color(0xFFA78BFA),
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
@@ -817,7 +828,7 @@ fun ViralToolAiStudioDialog(
                                                         text = "$label: ",
                                                         fontSize = 10.sp,
                                                         fontWeight = FontWeight.Bold,
-                                                        color = EmeraldGlow
+                                                        color = Color(0xFFA78BFA)
                                                     )
                                                     Text(
                                                         text = value,
@@ -854,7 +865,7 @@ fun ViralToolAiStudioDialog(
                                                     .weight(1f)
                                                     .height(42.dp),
                                                 shape = RoundedCornerShape(12.dp),
-                                                colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.ContentCopy,
@@ -995,10 +1006,10 @@ fun ViralToolAiStudioDialog(
                         .fillMaxHeight(0.85f)
                         .clip(RoundedCornerShape(24.dp))
                         .border(
-                            BorderStroke(1.5.dp, Brush.linearGradient(listOf(ElectricPurple, EmeraldGlow))),
+                            BorderStroke(1.5.dp, Brush.linearGradient(listOf(ElectricPurple, Color(0xFFA78BFA)))),
                             RoundedCornerShape(24.dp)
                         ),
-                    color = Color(0xFF101714)
+                    color = Color(0xFF141022)
                 ) {
                     Column(
                         modifier = Modifier
@@ -1108,7 +1119,7 @@ fun ViralToolAiStudioDialog(
                                 .fillMaxWidth()
                                 .height(44.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
                         ) {
                             Text(
                                 text = "Got it! Back to AI Prompt Extractor",
@@ -1134,8 +1145,8 @@ private fun GuideTopicCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF16201B))
-            .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.35f)), RoundedCornerShape(14.dp))
+            .background(Color(0xFF1A132B))
+            .border(BorderStroke(1.dp, Color(0xFFA78BFA).copy(alpha = 0.35f)), RoundedCornerShape(14.dp))
             .padding(12.dp)
     ) {
         Column {
@@ -1143,7 +1154,7 @@ private fun GuideTopicCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = EmeraldGlow,
+                    tint = Color(0xFFA78BFA),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -1151,7 +1162,7 @@ private fun GuideTopicCard(
                     text = title,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = EmeraldGlow
+                    color = Color(0xFFA78BFA)
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))

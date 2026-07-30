@@ -5166,8 +5166,8 @@ fun BrandCollaborationAiCard(
         label = "brandCollabBtnScale"
     )
 
-            val GoldYellowPrimary = Color(0xFFFFD700)
-            val GoldYellowSecondary = Color(0xFFFFA000)
+            val TitaniumGreyPrimary = Color(0xFFE2E8F0)
+            val TitaniumGreySecondary = Color(0xFF94A3B8)
 
             Box(
                 modifier = modifier
@@ -5175,187 +5175,200 @@ fun BrandCollaborationAiCard(
                     .shadow(
                         elevation = 12.dp,
                         shape = RoundedCornerShape(24.dp),
-                        spotColor = GoldYellowPrimary,
+                        spotColor = TitaniumGreyPrimary,
                         ambientColor = Color(0x22000000)
                     )
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFF14141E))
+                    .background(Color(0xFF12141C))
                     .border(
-                        BorderStroke(1.2.dp, Brush.linearGradient(listOf(GoldYellowPrimary.copy(alpha = 0.5f), Color(0x22FFFFFF)))),
+                        BorderStroke(1.2.dp, Brush.linearGradient(listOf(TitaniumGreyPrimary.copy(alpha = 0.5f), Color(0x22FFFFFF)))),
                         RoundedCornerShape(24.dp)
                     )
-                    .padding(18.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Animated Luxury Hero Banner at Top of Card
+                    com.example.ui.components.ToolHeroBanner(
+                        toolType = com.example.ui.components.ToolHeroType.BRAND_COLLAB,
+                        height = 110.dp,
+                        badgeText = null,
+                        subtitleText = null
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp)
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(CircleShape)
-                                    .background(GoldYellowPrimary.copy(alpha = 0.15f))
-                                    .border(BorderStroke(1.dp, GoldYellowPrimary.copy(alpha = 0.4f)), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Campaign,
-                                    contentDescription = "Brand Collaboration AI",
-                                    tint = GoldYellowPrimary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .clip(CircleShape)
+                                        .background(TitaniumGreyPrimary.copy(alpha = 0.15f))
+                                        .border(BorderStroke(1.dp, TitaniumGreyPrimary.copy(alpha = 0.4f)), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Campaign,
+                                        contentDescription = "Brand Collaboration AI",
+                                        tint = TitaniumGreyPrimary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
 
-                            Column {
-                                Text(
-                                    text = "Brand Collaboration AI",
-                                    fontSize = 17.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite,
-                                    letterSpacing = 0.3.sp
-                                )
-                                Text(
-                                    text = "Pitch, negotiate & close deal emails with top brands.",
-                                    fontSize = 11.5.sp,
-                                    color = TextWhite.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(GoldYellowPrimary.copy(alpha = 0.15f))
-                                .border(BorderStroke(1.dp, GoldYellowPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "FREE",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = GoldYellowPrimary,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Grid of Preview Features
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0x0CFFFFFF))
-                    .border(BorderStroke(1.dp, Color(0x15FFFFFF)), RoundedCornerShape(16.dp))
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val features = listOf(
-                    "💼 Brand Pitch Generator" to "Generate tailored pitch decks",
-                    "🔍 Collaboration Finder" to "Discover high-paying brands",
-                    "✉️ Brand Email Generator" to "Professional outreach templates",
-                    "💰 Pricing Guide" to "Real market rate calculator",
-                    "🤝 Negotiation Tips" to "Secure higher campaign rates",
-                    "📊 Campaign Tracker" to "Track deal pipelines & payouts"
-                )
-
-                features.chunked(2).forEach { row ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        row.forEach { (title, desc) ->
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0x0AFFFFFF))
-                                    .border(BorderStroke(0.8.dp, Color(0x1AFFFFFF)), RoundedCornerShape(10.dp))
-                                    .padding(8.dp)
-                            ) {
                                 Column {
                                     Text(
-                                        text = title,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
+                                        text = "Brand Collaboration AI",
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.Bold,
                                         color = TextWhite,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        letterSpacing = 0.3.sp
                                     )
                                     Text(
-                                        text = desc,
-                                        fontSize = 9.5.sp,
-                                        color = TextWhite.copy(alpha = 0.6f),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        text = "Pitch, negotiate & close deal emails with top brands.",
+                                        fontSize = 11.5.sp,
+                                        color = TextWhite.copy(alpha = 0.7f)
                                     )
                                 }
                             }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(TitaniumGreyPrimary.copy(alpha = 0.15f))
+                                    .border(BorderStroke(1.dp, TitaniumGreyPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "FREE",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TitaniumGreyPrimary,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Grid of Preview Features
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color(0x0CFFFFFF))
+                                .border(BorderStroke(1.dp, Color(0x15FFFFFF)), RoundedCornerShape(16.dp))
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val features = listOf(
+                                "💼 Brand Pitch Generator" to "Generate tailored pitch decks",
+                                "🔍 Collaboration Finder" to "Discover high-paying brands",
+                                "✉️ Brand Email Generator" to "Professional outreach templates",
+                                "💰 Pricing Guide" to "Real market rate calculator",
+                                "🤝 Negotiation Tips" to "Secure higher campaign rates",
+                                "📊 Campaign Tracker" to "Track deal pipelines & payouts"
+                            )
+
+                            features.chunked(2).forEach { row ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    row.forEach { (title, desc) ->
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .background(Color(0x0AFFFFFF))
+                                                .border(BorderStroke(0.8.dp, Color(0x1AFFFFFF)), RoundedCornerShape(10.dp))
+                                                .padding(8.dp)
+                                        ) {
+                                            Column {
+                                                Text(
+                                                    text = title,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = TextWhite,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                    text = desc,
+                                                    fontSize = 9.5.sp,
+                                                    color = TextWhite.copy(alpha = 0.6f),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp)
+                                .graphicsLayer {
+                                    scaleX = buttonScale
+                                    scaleY = buttonScale
+                                }
+                                .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = TitaniumGreyPrimary)
+                                .clip(RoundedCornerShape(23.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(Color(0xFFF1F5F9), Color(0xFFCBD5E1), Color(0xFF94A3B8))
+                                    )
+                                )
+                                .clickable(
+                                    interactionSource = buttonInteractionSource,
+                                    indication = androidx.compose.foundation.LocalIndication.current,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onComingSoonClick()
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Open AI Mentor",
+                                    tint = Color(0xFF0F1117),
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Launch AI Mentor 🚀",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F1117),
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         }
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(46.dp)
-                    .graphicsLayer {
-                        scaleX = buttonScale
-                        scaleY = buttonScale
-                    }
-                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = GoldYellowPrimary)
-                    .clip(RoundedCornerShape(23.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(GoldYellowPrimary, GoldYellowSecondary)
-                        )
-                    )
-                    .clickable(
-                        interactionSource = buttonInteractionSource,
-                        indication = androidx.compose.foundation.LocalIndication.current,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onComingSoonClick()
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = "Open AI Mentor",
-                        tint = TextWhite,
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Launch AI Mentor 🚀",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite,
-                        letterSpacing = 0.5.sp
-                    )
                 }
             }
         }
-    }
-}
 
 
 

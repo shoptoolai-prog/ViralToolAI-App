@@ -74,10 +74,10 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
         // Preload poster image & home carousel banners in background for instant display
         try {
             val bannerUrls = listOf(
-                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/1785321241752.png",
-                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-45-35-887.jpg",
-                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-04-094.jpg",
-                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-40-738.jpg"
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-45-35-887.jpg",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-04-094.jpg",
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-40-738.jpg"
             )
             bannerUrls.forEach { url ->
                 val preloadRequest = ImageRequest.Builder(context)

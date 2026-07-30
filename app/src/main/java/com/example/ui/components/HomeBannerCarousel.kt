@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -22,7 +23,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.SubcomposeAsyncImage
 import coil.imageLoader
 import coil.request.CachePolicy
@@ -33,20 +37,57 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 val HOME_BANNER_IMAGES = listOf(
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-45-35-887.jpg",
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-04-094.jpg",
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/Picsart_26-07-29_23-46-40-738.jpg"
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-45-35-887.jpg",
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-04-094.jpg",
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-40-738.jpg"
 )
 
 @Composable
 fun HomeBannerCarousel(
     modifier: Modifier = Modifier,
     bannerUrls: List<String> = HOME_BANNER_IMAGES,
-    autoScrollDelayMillis: Long = 4000L
+    autoScrollDelayMillis: Long = 3500L
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { bannerUrls.size })
+
+    // Track user dragging state via DragInteraction
+    var isUserDragging by remember { mutableStateOf(false) }
+    var lastUserInteractionTime by remember { mutableLongStateOf(0L) }
+
+    LaunchedEffect(pagerState.interactionSource) {
+        pagerState.interactionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is DragInteraction.Start -> {
+                    isUserDragging = true
+                    lastUserInteractionTime = System.currentTimeMillis()
+                }
+                is DragInteraction.Stop, is DragInteraction.Cancel -> {
+                    isUserDragging = false
+                    lastUserInteractionTime = System.currentTimeMillis()
+                }
+            }
+        }
+    }
+
+    // Lifecycle-aware state to pause auto-scroll when app is in background or screen is not visible
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isResumed by remember { mutableStateOf(true) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> isResumed = true
+                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> isResumed = false
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Preload banner images for instant rendering & zero lag
     LaunchedEffect(bannerUrls) {
@@ -64,10 +105,21 @@ fun HomeBannerCarousel(
         }
     }
 
-    // Auto-slide continuous loop (1 -> 2 -> 3 -> 1...)
-    LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
-        if (!pagerState.isScrollInProgress && bannerUrls.isNotEmpty()) {
-            delay(autoScrollDelayMillis)
+    // Infinite loop auto-slide (Banner 1 -> Banner 2 -> Banner 3 -> Banner 1...)
+    // Pauses for 5 seconds on manual swipe, auto-scrolls every 3.5s otherwise
+    LaunchedEffect(pagerState.currentPage, isUserDragging, isResumed, bannerUrls.size) {
+        if (!isResumed || isUserDragging || bannerUrls.isEmpty()) return@LaunchedEffect
+
+        val timeSinceSwipe = System.currentTimeMillis() - lastUserInteractionTime
+        val currentDelay = if (timeSinceSwipe < 5000L) {
+            5000L - timeSinceSwipe
+        } else {
+            autoScrollDelayMillis
+        }
+
+        delay(currentDelay.coerceAtLeast(100L))
+
+        if (!isUserDragging && isResumed && bannerUrls.isNotEmpty()) {
             val nextPage = (pagerState.currentPage + 1) % bannerUrls.size
             pagerState.animateScrollToPage(
                 page = nextPage,
@@ -197,6 +249,7 @@ fun HomeBannerCarousel(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
+                            lastUserInteractionTime = System.currentTimeMillis()
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(
                                     page = index,

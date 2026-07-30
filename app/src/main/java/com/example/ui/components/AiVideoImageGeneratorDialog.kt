@@ -441,7 +441,7 @@ fun AiVideoImageGeneratorDialog(
         ) {
             CommonPopupAnimation(visible = true) {
                 Surface(
-                    color = Color(0xFF0F1A14),
+                    color = Color(0xFF100B1E),
                     shape = RoundedCornerShape(24.dp),
                     border = BorderStroke(1.dp, Color(0x338B5CF6)),
                     modifier = Modifier
@@ -467,50 +467,146 @@ fun AiVideoImageGeneratorDialog(
 
                     // DIALOG CONTENT SWITCHER
                     if (showIntro) {
-                        val aiGenIntroCards = remember {
-                            listOf(
-                                ToolIntroCardData(
-                                    title = "AI Video & Image Masterclass",
-                                    subtitle = "Generate Photorealistic Art & Cinema Videos",
-                                    icon = Icons.Default.AutoAwesome,
-                                    highlightTag = "AI Studio Engine",
-                                    bulletPoints = listOf(
-                                        "4K Photorealistic Image Prompts",
-                                        "Text-to-Video & Image-to-Video Motion",
-                                        "YouTube Thumbnail & Banner Mastery",
-                                        "Top FREE AI Tools Setup Guides"
-                                    )
-                                ),
-                                ToolIntroCardData(
-                                    title = "AI Image Generator",
-                                    subtitle = "Create High-CTR Thumbnails & Digital Art",
-                                    icon = Icons.Default.Image,
-                                    highlightTag = "DALL-E & Midjourney",
-                                    bulletPoints = listOf(
-                                        "Custom Aspect Ratio Control (16:9, 9:16)",
-                                        "Lighting, Mood & Camera Angle Controls",
-                                        "Leonardo AI & Bing Creator Setup",
-                                        "One-Tap Prompt Copying"
-                                    )
-                                ),
-                                ToolIntroCardData(
-                                    title = "AI Video Generation",
-                                    subtitle = "Animate Photos & Text into 60fps Clips",
-                                    icon = Icons.Default.Videocam,
-                                    highlightTag = "Sora & Luma Engine",
-                                    bulletPoints = listOf(
-                                        "Cinematic Camera Motion Vectors",
-                                        "Personal Photo Animation Guide",
-                                        "Google Flow & Runway Workflows",
-                                        "Social Reel & Short Format Exports"
-                                    )
-                                )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Animated Violet Hero Banner (No text inside)
+                            ToolHeroBanner(
+                                toolType = ToolHeroType.AI_VIDEO_IMAGE,
+                                height = 130.dp,
+                                badgeText = null,
+                                subtitleText = null
                             )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Tag Badge
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0x228B5CF6))
+                                    .border(BorderStroke(1.dp, Color(0xFF8B5CF6)), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = "⚡ VIOLET AI STUDIO ENGINE",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFA78BFA),
+                                    letterSpacing = 0.8.sp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "AI Video & Image Masterclass",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                color = TextWhite,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "Generate Photorealistic Art, 4K Thumbnails & Cinema Motion Videos",
+                                fontSize = 12.sp,
+                                color = TextWhite.copy(alpha = 0.75f),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Apple-Style Onboarding Features
+                            val features = listOf(
+                                Triple(Icons.Default.Image, "4K Photorealistic Prompts", "Midjourney & DALL-E 3 prompt engineering with lighting & camera controls"),
+                                Triple(Icons.Default.Videocam, "Text & Photo-to-Video Motion", "Animate photos & text into cinematic 60fps video clips with camera vectors"),
+                                Triple(Icons.Default.AutoAwesome, "High-CTR Thumbnails", "Design viral YouTube thumbnails with proven visual psychology principles"),
+                                Triple(Icons.Default.RocketLaunch, "Top FREE AI Tools", "Step-by-step setup guides for Leonardo AI, Bing Creator & Runway")
+                            )
+
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                features.forEach { (icon, featureTitle, desc) ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(Color(0x1A24103A))
+                                            .border(BorderStroke(1.dp, Color(0x338B5CF6)), RoundedCornerShape(16.dp))
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(38.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0x338B5CF6))
+                                                .border(BorderStroke(1.dp, Color(0xFF8B5CF6)), CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = null,
+                                                tint = Color(0xFFA78BFA),
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(12.dp))
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = featureTitle,
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextWhite
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = desc,
+                                                fontSize = 11.sp,
+                                                color = TextWhite.copy(alpha = 0.7f),
+                                                lineHeight = 15.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            // Start Button - Violet Gradient
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(Color(0xFF8B5CF6), Color(0xFFA855F7), Color(0xFFC084FC))
+                                        )
+                                    )
+                                    .clickable { showIntro = false },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Get Started 🚀",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         }
-                        CommonToolIntroContainer(
-                            cards = aiGenIntroCards,
-                            onCompleteIntro = { showIntro = false }
-                        )
                     } else if (showLangSelector) {
                         // STEP 1: LANGUAGE SELECTION POPUP
                         LanguageSelectionStep(
@@ -661,8 +757,8 @@ private fun TopHeaderBar(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .background(Color(0xFF0D1611))
-            .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)))
+            .background(Color(0xFF130E22))
+            .border(BorderStroke(0.8.dp, Color(0x338B5CF6)))
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
@@ -676,34 +772,27 @@ private fun TopHeaderBar(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
-                        .background(EmeraldPrimary.copy(alpha = 0.2f))
-                        .border(BorderStroke(1.dp, EmeraldGlow), CircleShape),
+                        .background(Color(0x338B5CF6))
+                        .border(BorderStroke(1.dp, Color(0xFF8B5CF6)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.AutoAwesome,
                         contentDescription = null,
-                        tint = EmeraldGlow,
-                        modifier = Modifier.size(20.dp)
+                        tint = Color(0xFFA78BFA),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
-                Column {
-                    Text(
-                        text = "AI Video & Images Generator",
-                        fontSize = 14.5.sp,
-                        fontWeight = FontWeight.Black,
-                        color = TextWhite
-                    )
-                    Text(
-                        text = if (selectedPath == null) "Choose Learning Path" else "${selectedPath.name} MASTERCLASS • Step ${currentStep + 1}/$totalSteps",
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
-                    )
-                }
+                Text(
+                    text = "AI Video & Image Generator",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextWhite,
+                    maxLines = 1
+                )
             }
 
             Row(
@@ -714,10 +803,10 @@ private fun TopHeaderBar(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
-                        .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(10.dp))
+                        .background(Color(0x338B5CF6))
+                        .border(BorderStroke(0.8.dp, Color(0xFF8B5CF6)), RoundedCornerShape(10.dp))
                         .clickable { onChangeLang() }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Text(
                         text = when (selectedLang) {
@@ -725,68 +814,29 @@ private fun TopHeaderBar(
                             MentorLanguageChoice.ENGLISH -> "🇬🇧 EN"
                             MentorLanguageChoice.HINGLISH -> "🗣️ HING"
                         },
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
+                        color = Color(0xFFA78BFA)
                     )
                 }
 
-                if (selectedPath != null) {
-                    // Path Switcher Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x1A8B5CF6))
-                            .border(BorderStroke(0.8.dp, ElectricPurple.copy(alpha = 0.5f)), RoundedCornerShape(10.dp))
-                            .clickable { onChangePath() }
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Switch Path",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFA78BFA)
-                        )
-                    }
-
-                    // Prompt History Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22FFFFFF))
-                            .clickable { onOpenPromptHistory() }
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "History",
-                            tint = TextWhite,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
-
                 // Close Button
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier.size(32.dp)
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x22FFFFFF))
+                        .clickable { onClose() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = TextWhite
+                        tint = TextWhite,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ToolHeroBanner(
-                toolType = ToolHeroType.AI_PROMPT_EXTRACTOR,
-                height = 105.dp,
-                badgeText = "🔮 AI PROMPT EXTRACTOR",
-                subtitleText = "Vision Analysis & Prompt Engineering"
-            )
         }
     }
 }
@@ -815,7 +865,7 @@ private fun LanguageSelectionStep(
                     BorderStroke(
                         1.5.dp,
                         Brush.linearGradient(
-                            listOf(EmeraldGlow, ElectricPurple, EmeraldPrimary)
+                            listOf(Color(0xFF8B5CF6), ElectricPurple, Color(0xFFA78BFA))
                         )
                     ),
                     RoundedCornerShape(28.dp)
@@ -832,14 +882,14 @@ private fun LanguageSelectionStep(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(CircleShape)
-                        .background(EmeraldPrimary.copy(alpha = 0.2f))
-                        .border(BorderStroke(1.2.dp, EmeraldGlow), CircleShape),
+                        .background(Color(0x338B5CF6))
+                        .border(BorderStroke(1.2.dp, Color(0xFFA78BFA)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Translate,
                         contentDescription = null,
-                        tint = EmeraldGlow,
+                        tint = Color(0xFFA78BFA),
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -901,13 +951,13 @@ private fun LanguageSelectionStep(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
                 ) {
                     Text(
                         text = "Continue",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmoledBlack
+                        color = Color.White
                     )
                 }
             }
@@ -930,7 +980,7 @@ private fun LanguageOptionRow(
             .border(
                 BorderStroke(
                     1.2.dp,
-                    if (isSelected) EmeraldGlow else Color(0x22FFFFFF)
+                    if (isSelected) Color(0xFFA78BFA) else Color(0x22FFFFFF)
                 ),
                 RoundedCornerShape(16.dp)
             )
@@ -959,7 +1009,7 @@ private fun LanguageOptionRow(
             RadioButton(
                 selected = isSelected,
                 onClick = onClick,
-                colors = RadioButtonDefaults.colors(selectedColor = EmeraldGlow)
+                colors = RadioButtonDefaults.colors(selectedColor = Color(0xFFA78BFA))
             )
         }
     }
@@ -1001,7 +1051,7 @@ private fun LearningPathSelectionStep(
         PathCardItem(
             title = "🎥 AI Video Generation",
             subtitle = "Learn to create AI videos from zero using free AI tools.",
-            accentColor = EmeraldGlow,
+            accentColor = Color(0xFFA78BFA),
             features = listOf(
                 "Text to 4K Video Synthesis",
                 "Talking AI Avatars & Animate Photos",
@@ -1065,7 +1115,7 @@ private fun PathCardItem(
                 BorderStroke(
                     1.2.dp,
                     Brush.linearGradient(
-                        listOf(accentColor, EmeraldPrimary, Color(0x33FFFFFF))
+                        listOf(accentColor, Color(0xFF8B5CF6), Color(0x33FFFFFF))
                     )
                 ),
                 RoundedCornerShape(24.dp)
@@ -1148,7 +1198,7 @@ private fun StepProgressIndicator(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF09120C))
+            .background(Color(0xFF0F091A))
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -1164,8 +1214,8 @@ private fun StepProgressIndicator(
                     .clip(CircleShape)
                     .background(
                         when {
-                            isCompleted -> EmeraldGlow
-                            isCurrent -> EmeraldPrimary
+                            isCompleted -> Color(0xFFA78BFA)
+                            isCurrent -> Color(0xFF8B5CF6)
                             else -> Color(0x22FFFFFF)
                         }
                     )
@@ -1192,14 +1242,14 @@ private fun ChatMessageItem(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(EmeraldPrimary)
-                    .border(BorderStroke(1.dp, EmeraldGlow), CircleShape),
+                    .background(Color(0xFF8B5CF6))
+                    .border(BorderStroke(1.dp, Color(0xFFA78BFA)), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    tint = AmoledBlack,
+                    tint = Color.White,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -1219,9 +1269,9 @@ private fun ChatMessageItem(
                 )
                 .background(
                     if (isMentor) Brush.linearGradient(
-                        listOf(Color(0xFF14241B), Color(0xFF0C1811))
+                        listOf(Color(0xFF1E1530), Color(0xFF140D22))
                     ) else Brush.linearGradient(
-                        listOf(EmeraldPrimary, Color(0xFF059669))
+                        listOf(Color(0xFF8B5CF6), Color(0xFF6D28D9))
                     )
                 )
                 .border(
@@ -1242,7 +1292,7 @@ private fun ChatMessageItem(
                 Text(
                     text = message.text,
                     fontSize = 13.sp,
-                    color = if (isMentor) TextWhite else AmoledBlack,
+                    color = if (isMentor) TextWhite else Color.White,
                     fontWeight = if (isMentor) FontWeight.Normal else FontWeight.Bold,
                     lineHeight = 18.sp
                 )
@@ -1256,8 +1306,8 @@ private fun ChatMessageItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
-                                    .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                                    .background(Color(0x338B5CF6))
+                                    .border(BorderStroke(0.8.dp, Color(0x668B5CF6)), RoundedCornerShape(12.dp))
                                     .padding(10.dp)
                             ) {
                                 Column {
@@ -1268,14 +1318,14 @@ private fun ChatMessageItem(
                                         Icon(
                                             imageVector = tool.logo,
                                             contentDescription = null,
-                                            tint = EmeraldGlow,
+                                            tint = Color(0xFFA78BFA),
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Text(
                                             text = tool.name,
                                             fontSize = 12.5.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = EmeraldGlow
+                                            color = Color(0xFFA78BFA)
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
@@ -1292,7 +1342,7 @@ private fun ChatMessageItem(
                                     Text(
                                         text = "📍 Location: ${tool.generateButtonLocation}",
                                         fontSize = 10.sp,
-                                        color = EmeraldGlow.copy(alpha = 0.9f)
+                                        color = Color(0xFFA78BFA).copy(alpha = 0.9f)
                                     )
                                 }
                             }
@@ -1307,8 +1357,8 @@ private fun ChatMessageItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF09120C))
-                            .border(BorderStroke(1.dp, EmeraldGlow), RoundedCornerShape(12.dp))
+                            .background(Color(0xFF0F091A))
+                            .border(BorderStroke(1.dp, Color(0xFFA78BFA)), RoundedCornerShape(12.dp))
                             .padding(10.dp)
                     ) {
                         Column {
@@ -1321,13 +1371,13 @@ private fun ChatMessageItem(
                                     text = "✨ READY AI PROMPT",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = EmeraldGlow
+                                    color = Color(0xFFA78BFA)
                                 )
 
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(EmeraldPrimary)
+                                        .background(Color(0xFF8B5CF6))
                                         .clickable { onCopyPrompt(message.generatedPrompt) }
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 ) {
@@ -1335,7 +1385,7 @@ private fun ChatMessageItem(
                                         text = "Copy Prompt",
                                         fontSize = 9.5.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = AmoledBlack
+                                        color = Color.White
                                     )
                                 }
                             }
@@ -1369,14 +1419,14 @@ private fun ThinkingBubble() {
         Icon(
             imageVector = Icons.Default.AutoAwesome,
             contentDescription = null,
-            tint = EmeraldGlow,
+            tint = Color(0xFFA78BFA),
             modifier = Modifier.size(16.dp)
         )
         Text(
             text = "AI Mentor is typing...",
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = EmeraldGlow
+            color = Color(0xFFA78BFA)
         )
     }
 }
@@ -1407,8 +1457,8 @@ private fun InteractiveControlPanel(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF0C1610))
-            .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)))
+            .background(Color(0xFF130E22))
+            .border(BorderStroke(0.8.dp, Color(0x338B5CF6)))
             .padding(14.dp)
     ) {
         Column(
@@ -1422,7 +1472,7 @@ private fun InteractiveControlPanel(
                     text = "Aap kis type ki video banana chahte hain?",
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = EmeraldGlow
+                    color = Color(0xFFA78BFA)
                 )
 
                 val types = listOf(
@@ -1443,8 +1493,8 @@ private fun InteractiveControlPanel(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
+                                .background(Color(0x338B5CF6))
+                                .border(BorderStroke(1.dp, Color(0xFF8B5CF6)), RoundedCornerShape(12.dp))
                                 .clickable { onVideoTypeSelected(type) }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
@@ -1466,7 +1516,7 @@ private fun InteractiveControlPanel(
                         text = "🎨 Custom Prompt Inputs:",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
+                        color = Color(0xFFA78BFA)
                     )
 
                     Row(
@@ -1521,13 +1571,13 @@ private fun InteractiveControlPanel(
                             .fillMaxWidth()
                             .height(42.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
                     ) {
                         Text(
                             text = "✨ Aur Better Prompt Banayein (New Variant)",
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.Black,
-                            color = AmoledBlack
+                            color = Color.White
                         )
                     }
                 }
@@ -1555,13 +1605,13 @@ private fun InteractiveControlPanel(
                             .weight(1f)
                             .height(44.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
                     ) {
                         Text(
                             text = "YES, Aage Chalo 🚀",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
-                            color = AmoledBlack
+                            color = Color.White
                         )
                     }
 
@@ -1601,8 +1651,8 @@ private fun PromptHistoryDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1B14))
-                .border(BorderStroke(1.2.dp, EmeraldGlow), RoundedCornerShape(24.dp))
+                .background(Color(0xFF130E22))
+                .border(BorderStroke(1.2.dp, Color(0xFFA78BFA)), RoundedCornerShape(24.dp))
                 .padding(20.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -1653,7 +1703,7 @@ private fun PromptHistoryDialog(
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
                                     TextButton(onClick = { onCopy(item) }) {
-                                        Text("Copy Prompt", fontSize = 10.sp, color = EmeraldGlow)
+                                        Text("Copy Prompt", fontSize = 10.sp, color = Color(0xFFA78BFA))
                                     }
                                 }
                             }

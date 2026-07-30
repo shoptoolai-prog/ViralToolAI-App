@@ -153,19 +153,19 @@ data class MentorToolTheme(
 ) {
     companion object {
         val BrandCollab = MentorToolTheme(
-            primaryColor = Color(0xFFFFD700),
-            secondaryColor = Color(0xFFFFA000),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFFD700), Color(0xFFFFA000))),
-            glassBorderColor = Color(0x66FFD700),
-            glowColor = Color(0x33FFD700),
+            primaryColor = Color(0xFFE2E8F0),
+            secondaryColor = Color(0xFF94A3B8),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFF1F5F9), Color(0xFFCBD5E1), Color(0xFF94A3B8))),
+            glassBorderColor = Color(0x88E2E8F0),
+            glowColor = Color(0x40CBD5E1),
             badgeLabel = "Brand Collab AI"
         )
         val MeeshoCreator = MentorToolTheme(
-            primaryColor = Color(0xFFFF4081),
+            primaryColor = Color(0xFFFF2A7A),
             secondaryColor = Color(0xFFE91E63),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFF4081), Color(0xFFE91E63))),
-            glassBorderColor = Color(0x66FF4081),
-            glowColor = Color(0x33FF4081),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFF2A7A), Color(0xFFFF4081), Color(0xFFE91E63))),
+            glassBorderColor = Color(0x88FF2A7A),
+            glowColor = Color(0x40FF2A7A),
             badgeLabel = "Meesho Creator AI"
         )
         val InstagramCreator = MentorToolTheme(
