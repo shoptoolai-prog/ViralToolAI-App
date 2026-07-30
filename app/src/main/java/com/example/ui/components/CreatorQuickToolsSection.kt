@@ -68,10 +68,19 @@ enum class QuickToolType {
     GOOGLE_FLOW,
     PROMPT_HERO,
     GEMINI_AI,
-    VIDEO_ENHANCER
+    VIDEO_ENHANCER,
+    KALAKAR_CAPTION
 }
 
 val CREATOR_QUICK_TOOLS = listOf(
+    QuickToolItem(
+        id = "kalakar_caption",
+        title = "Caption Generator",
+        description = "AI Instagram & social media caption generator.",
+        url = "https://www.kalakar.io/",
+        gradientColors = listOf(Color(0xFFFF4E50), Color(0xFFF9D423)),
+        toolType = QuickToolType.KALAKAR_CAPTION
+    ),
     QuickToolItem(
         id = "remove_bg",
         title = "Remove Background",
@@ -190,7 +199,7 @@ private fun QuickToolCard(
     var isPressed by remember { mutableStateOf(false) }
 
     val scaleAnim by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
+        targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "pressScale"
     )
@@ -200,25 +209,32 @@ private fun QuickToolCard(
             .fillMaxWidth()
             .scale(scaleAnim)
             .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(18.dp),
-                ambientColor = tool.gradientColors.first().copy(alpha = 0.25f),
-                spotColor = tool.gradientColors.first().copy(alpha = 0.35f)
+                elevation = 10.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = tool.gradientColors.first().copy(alpha = 0.3f),
+                spotColor = tool.gradientColors.first().copy(alpha = 0.45f)
             )
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF13151D))
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0x28222636),
+                        Color(0x1C161924)
+                    )
+                )
+            )
             .border(
                 BorderStroke(
                     1.2.dp,
                     Brush.horizontalGradient(
                         colors = listOf(
-                            tool.gradientColors.first().copy(alpha = 0.6f),
-                            tool.gradientColors.last().copy(alpha = 0.25f),
-                            Color.White.copy(alpha = 0.15f)
+                            tool.gradientColors.first().copy(alpha = 0.75f),
+                            tool.gradientColors.last().copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.2f)
                         )
                     )
                 ),
-                RoundedCornerShape(18.dp)
+                RoundedCornerShape(20.dp)
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -228,10 +244,10 @@ private fun QuickToolCard(
                     scope.launch {
                         isPressed = true
                         isLoading = true
-                        delay(350)
+                        delay(250)
                         isPressed = false
                         onToolClick()
-                        delay(200)
+                        delay(150)
                         isLoading = false
                     }
                 }
@@ -243,18 +259,18 @@ private fun QuickToolCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left: Official Logo Icon
+            // Left: Official Logo Icon Container (48dp with 36dp icon = 75% fill)
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            colors = tool.gradientColors.map { it.copy(alpha = 0.2f) }
+                            colors = tool.gradientColors.map { it.copy(alpha = 0.25f) }
                         )
                     )
                     .border(
-                        BorderStroke(1.2.dp, tool.gradientColors.first().copy(alpha = 0.7f)),
+                        BorderStroke(1.4.dp, tool.gradientColors.first().copy(alpha = 0.85f)),
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -289,7 +305,7 @@ private fun QuickToolCard(
                     Icon(
                         imageVector = Icons.Default.OpenInNew,
                         contentDescription = "External Link",
-                        tint = tool.gradientColors.first().copy(alpha = 0.85f),
+                        tint = tool.gradientColors.first().copy(alpha = 0.9f),
                         modifier = Modifier.size(15.dp)
                     )
                 }
@@ -299,7 +315,7 @@ private fun QuickToolCard(
                 Text(
                     text = tool.description,
                     fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Color.White.copy(alpha = 0.75f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 16.sp
@@ -313,8 +329,8 @@ private fun QuickToolCard(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .background(tool.gradientColors.first().copy(alpha = 0.15f))
-                    .border(BorderStroke(1.dp, tool.gradientColors.first().copy(alpha = 0.4f)), CircleShape),
+                    .background(tool.gradientColors.first().copy(alpha = 0.2f))
+                    .border(BorderStroke(1.dp, tool.gradientColors.first().copy(alpha = 0.5f)), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
@@ -341,69 +357,116 @@ private fun QuickToolIcon(
     type: QuickToolType,
     primaryColor: Color
 ) {
+    // Icons sized to 36dp inside 48dp circle = ~75-80% fill ratio, perfectly centered
     when (type) {
+        QuickToolType.KALAKAR_CAPTION -> {
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val width = size.width
+                val height = size.height
+
+                // Kalakar Quote / Caption Card Base
+                drawRoundRect(
+                    brush = Brush.linearGradient(listOf(Color(0xFFFF4E50), Color(0xFFF9D423))),
+                    topLeft = Offset(width * 0.1f, height * 0.12f),
+                    size = Size(width * 0.8f, height * 0.76f),
+                    cornerRadius = CornerRadius(width * 0.18f)
+                )
+                // Inside Quote Mark " "
+                drawCircle(color = Color.White, radius = width * 0.07f, center = Offset(width * 0.35f, height * 0.42f))
+                drawCircle(color = Color.White, radius = width * 0.07f, center = Offset(width * 0.65f, height * 0.42f))
+                // Text Caption Lines
+                drawLine(
+                    color = Color.White.copy(alpha = 0.9f),
+                    start = Offset(width * 0.28f, height * 0.65f),
+                    end = Offset(width * 0.72f, height * 0.65f),
+                    strokeWidth = width * 0.07f,
+                    cap = StrokeCap.Round
+                )
+            }
+        }
         QuickToolType.REMOVE_BG -> {
-            Canvas(modifier = Modifier.size(24.dp)) {
-                // Background removal grid symbol
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val w = size.width
+                val h = size.height
+
+                // Checkerboard background squares
                 drawRect(
-                    color = primaryColor.copy(alpha = 0.3f),
-                    topLeft = Offset(2f, 2f),
-                    size = Size(10f, 10f)
+                    color = primaryColor.copy(alpha = 0.4f),
+                    topLeft = Offset(w * 0.12f, h * 0.12f),
+                    size = Size(w * 0.35f, h * 0.35f)
                 )
                 drawRect(
-                    color = primaryColor.copy(alpha = 0.3f),
-                    topLeft = Offset(12f, 12f),
-                    size = Size(10f, 10f)
+                    color = primaryColor.copy(alpha = 0.4f),
+                    topLeft = Offset(w * 0.52f, h * 0.52f),
+                    size = Size(w * 0.35f, h * 0.35f)
                 )
-                // Scissors overlay
-                drawCircle(color = primaryColor, radius = 3.5f, center = Offset(7f, 17f), style = Stroke(width = 2f))
-                drawCircle(color = primaryColor, radius = 3.5f, center = Offset(17f, 17f), style = Stroke(width = 2f))
-                drawLine(color = primaryColor, start = Offset(7f, 14f), end = Offset(17f, 6f), strokeWidth = 2f)
-                drawLine(color = primaryColor, start = Offset(17f, 14f), end = Offset(7f, 6f), strokeWidth = 2f)
+
+                // Scissors
+                drawCircle(color = Color.White, radius = w * 0.12f, center = Offset(w * 0.32f, h * 0.72f), style = Stroke(width = w * 0.06f))
+                drawCircle(color = Color.White, radius = w * 0.12f, center = Offset(w * 0.68f, h * 0.72f), style = Stroke(width = w * 0.06f))
+                drawLine(color = Color.White, start = Offset(w * 0.32f, h * 0.62f), end = Offset(w * 0.68f, h * 0.25f), strokeWidth = w * 0.06f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.68f, h * 0.62f), end = Offset(w * 0.32f, h * 0.25f), strokeWidth = w * 0.06f, cap = StrokeCap.Round)
             }
         }
         QuickToolType.INSTAGRAM_DOWNLOADER -> {
-            Canvas(modifier = Modifier.size(24.dp)) {
-                // Insta camera box
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val w = size.width
+                val h = size.height
+
+                // Insta rounded camera outer box
                 drawRoundRect(
-                    brush = Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C))),
-                    topLeft = Offset(2f, 2f),
-                    size = Size(20f, 20f),
-                    cornerRadius = CornerRadius(5f),
-                    style = Stroke(width = 2f)
+                    brush = Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D))),
+                    topLeft = Offset(w * 0.08f, h * 0.08f),
+                    size = Size(w * 0.84f, h * 0.84f),
+                    cornerRadius = CornerRadius(w * 0.22f),
+                    style = Stroke(width = w * 0.07f)
                 )
-                // Down Arrow
-                drawLine(color = Color.White, start = Offset(12f, 7f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
-                drawLine(color = Color.White, start = Offset(8f, 12f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
-                drawLine(color = Color.White, start = Offset(16f, 12f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
+                // Lens Circle
+                drawCircle(
+                    color = Color.White,
+                    radius = w * 0.18f,
+                    center = Offset(w * 0.5f, h * 0.5f),
+                    style = Stroke(width = w * 0.06f)
+                )
+                // Down Arrow Overlay
+                drawLine(color = Color.White, start = Offset(w * 0.5f, h * 0.32f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.35f, h * 0.54f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.65f, h * 0.54f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
             }
         }
         QuickToolType.YOUTUBE_DOWNLOADER -> {
-            Canvas(modifier = Modifier.size(24.dp)) {
-                // YouTube play shape
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val w = size.width
+                val h = size.height
+
+                // YouTube red play badge
                 drawRoundRect(
                     color = Color(0xFFFF0000),
-                    topLeft = Offset(2f, 4f),
-                    size = Size(20f, 16f),
-                    cornerRadius = CornerRadius(4f)
+                    topLeft = Offset(w * 0.06f, h * 0.16f),
+                    size = Size(w * 0.88f, h * 0.68f),
+                    cornerRadius = CornerRadius(w * 0.18f)
                 )
                 // Down arrow white
-                drawLine(color = Color.White, start = Offset(12f, 7f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
-                drawLine(color = Color.White, start = Offset(8f, 12f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
-                drawLine(color = Color.White, start = Offset(16f, 12f), end = Offset(12f, 15f), strokeWidth = 2f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.5f, h * 0.30f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.35f, h * 0.52f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
+                drawLine(color = Color.White, start = Offset(w * 0.65f, h * 0.52f), end = Offset(w * 0.5f, h * 0.68f), strokeWidth = w * 0.08f, cap = StrokeCap.Round)
             }
         }
         QuickToolType.GOOGLE_FLOW -> {
-            Canvas(modifier = Modifier.size(24.dp)) {
-                // Google FX quadrupled color wave flow
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val w = size.width
+                val h = size.height
+
+                // Google FX flow path
                 val path = Path().apply {
-                    moveTo(2f, 12f)
-                    cubicTo(6f, 4f, 10f, 20f, 14f, 12f)
-                    cubicTo(18f, 4f, 22f, 20f, 22f, 12f)
+                    moveTo(w * 0.1f, h * 0.5f)
+                    cubicTo(w * 0.3f, h * 0.15f, w * 0.45f, h * 0.85f, w * 0.65f, h * 0.5f)
+                    cubicTo(w * 0.8f, h * 0.15f, w * 0.95f, h * 0.85f, w * 0.95f, h * 0.5f)
                 }
-                drawPath(path = path, color = Color(0xFF4285F4), style = Stroke(width = 3f, cap = StrokeCap.Round))
-                drawCircle(color = Color(0xFFEA4335), radius = 3f, center = Offset(6f, 8f))
-                drawCircle(color = Color(0xFF34A853), radius = 3f, center = Offset(14f, 16f))
+                drawPath(path = path, color = Color(0xFF4285F4), style = Stroke(width = w * 0.09f, cap = StrokeCap.Round))
+                drawCircle(color = Color(0xFFEA4335), radius = w * 0.11f, center = Offset(w * 0.3f, h * 0.3f))
+                drawCircle(color = Color(0xFF34A853), radius = w * 0.11f, center = Offset(w * 0.65f, h * 0.7f))
+                drawCircle(color = Color(0xFFFBBC05), radius = w * 0.09f, center = Offset(w * 0.9f, h * 0.35f))
             }
         }
         QuickToolType.PROMPT_HERO -> {
@@ -411,18 +474,21 @@ private fun QuickToolIcon(
                 imageVector = Icons.Default.AutoAwesome,
                 contentDescription = "PromptHero",
                 tint = primaryColor,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(34.dp)
             )
         }
         QuickToolType.GEMINI_AI -> {
-            Canvas(modifier = Modifier.size(24.dp)) {
+            Canvas(modifier = Modifier.size(36.dp)) {
+                val w = size.width
+                val h = size.height
+
                 // Gemini 4-point glowing star
                 val starPath = Path().apply {
-                    moveTo(12f, 2f)
-                    cubicTo(12f, 8f, 16f, 12f, 22f, 12f)
-                    cubicTo(16f, 12f, 12f, 16f, 12f, 22f)
-                    cubicTo(12f, 16f, 8f, 12f, 2f, 12f)
-                    cubicTo(8f, 12f, 12f, 8f, 12f, 2f)
+                    moveTo(w * 0.5f, h * 0.06f)
+                    cubicTo(w * 0.5f, h * 0.35f, w * 0.65f, h * 0.5f, w * 0.94f, h * 0.5f)
+                    cubicTo(w * 0.65f, h * 0.5f, w * 0.5f, h * 0.65f, w * 0.5f, h * 0.94f)
+                    cubicTo(w * 0.5f, h * 0.65f, w * 0.35f, h * 0.5f, w * 0.06f, h * 0.5f)
+                    cubicTo(w * 0.35f, h * 0.5f, w * 0.5f, h * 0.35f, w * 0.5f, h * 0.06f)
                     close()
                 }
                 drawPath(
@@ -436,7 +502,7 @@ private fun QuickToolIcon(
                 imageVector = Icons.Default.Hd,
                 contentDescription = "AI Video Enhancer",
                 tint = primaryColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(36.dp)
             )
         }
     }

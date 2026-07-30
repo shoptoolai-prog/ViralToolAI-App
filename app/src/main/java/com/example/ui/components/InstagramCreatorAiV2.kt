@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -370,7 +372,6 @@ fun InstagramCreatorAiV2Dialog(
     // Interactive Dialog Overlays
     var showScriptGeneratorSheet by remember { mutableStateOf(false) }
     var showEditingCourseSheet by remember { mutableStateOf(false) }
-    var showCaptionGeneratorSheet by remember { mutableStateOf(false) }
     var showChecklistSheet by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
@@ -664,7 +665,7 @@ fun InstagramCreatorAiV2Dialog(
                                         },
                                         onExplainAgain = { handleExplainAgain() },
                                         onOpenScriptTool = { showScriptGeneratorSheet = true },
-                                        onOpenCaptionTool = { showCaptionGeneratorSheet = true },
+                                        onOpenCaptionTool = { },
                                         onOpenChecklistTool = { showChecklistSheet = true },
                                         onOpenEditingCourse = { showEditingCourseSheet = true },
                                         onSendMessage = { txt ->
@@ -716,20 +717,6 @@ fun InstagramCreatorAiV2Dialog(
                     EditingCourseDialog(
                         language = currentLang,
                         onDismiss = { showEditingCourseSheet = false }
-                    )
-                }
-
-                // CAPTION GENERATOR SHEET OVERLAY
-                if (showCaptionGeneratorSheet) {
-                    CaptionGeneratorDialog(
-                        creatorType = selectedCreatorType ?: "Creator",
-                        language = currentLang,
-                        onDismiss = { showCaptionGeneratorSheet = false },
-                        onCaptionGenerated = { result ->
-                            showCaptionGeneratorSheet = false
-                            val capText = "✍️ AI CAPTION & HASHTAGS\n\n${result.caption}\n\n🏷️ HASHTAGS:\n${result.hashtags.joinToString(" ")}"
-                            addMentorMessage(text = capText, caption = result)
-                        }
                     )
                 }
 
@@ -798,6 +785,7 @@ private fun InstagramLuxuryIntroCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -1134,7 +1122,9 @@ private fun LanguageSelectionOverlay(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -1642,7 +1632,9 @@ private fun ScriptGeneratorDialog(
             modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -1761,7 +1753,9 @@ private fun EditingCourseDialog(
             modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -1823,78 +1817,6 @@ private fun EditingCourseDialog(
 }
 
 @Composable
-private fun CaptionGeneratorDialog(
-    creatorType: String,
-    language: MentorLanguage,
-    onDismiss: () -> Unit,
-    onCaptionGenerated: (CaptionResult) -> Unit
-) {
-    var topic by remember { mutableStateOf("") }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "✍️ AI Caption & Hashtag Generator",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                OutlinedTextField(
-                    value = topic,
-                    onValueChange = { topic = it },
-                    placeholder = { Text("Enter Reel topic for Caption & Hashtags...", fontSize = 12.sp, color = TextWhite.copy(0.4f)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = EmeraldGlow,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(
-                            if (topic.isNotBlank()) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                            else SolidColor(Color.Gray)
-                        )
-                        .clickable(enabled = topic.isNotBlank()) {
-                            val cap = generateCaptionAndHashtags(topic, creatorType, language)
-                            onCaptionGenerated(cap)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "GENERATE CAPTION & HASHTAGS ✨",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun PrePostChecklistDialog(
     language: MentorLanguage,
     onDismiss: () -> Unit
@@ -1919,7 +1841,9 @@ private fun PrePostChecklistDialog(
             modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(

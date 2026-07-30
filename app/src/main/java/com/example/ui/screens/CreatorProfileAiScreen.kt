@@ -64,8 +64,6 @@ fun CreatorProfileAiScreen(
     val haptic = LocalHapticFeedback.current
 
     val setupData = remember { CreatorAcademyPrefs.getSetupData(context) }
-    var activeToolDialog by remember { mutableStateOf<String?>(null) }
-    var activeLinkDialog by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -211,41 +209,6 @@ fun CreatorProfileAiScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // AI Creator Toolkit
-            AiCreatorToolsSection(
-                setupData = setupData,
-                onOpenTool = { toolName ->
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    activeToolDialog = toolName
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Future Ready Link Analysis
-            FutureReadySection(
-                onOpenLinkAnalysis = { type ->
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    activeLinkDialog = type
-                }
-            )
-        }
-
-        // Tool Dialogs
-        when (activeToolDialog) {
-            "Caption Generator" -> CaptionGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Hashtag Generator" -> HashtagGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Hook Generator" -> HookGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Content Planner" -> ContentPlannerDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Posting Checklist" -> PostingChecklistDialog(onDismiss = { activeToolDialog = null })
-            "Brand Pitch Guide" -> BrandPitchGuideDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-        }
-
-        if (activeLinkDialog != null) {
-            LinkAnalysisDialog(type = activeLinkDialog!!, onDismiss = { activeLinkDialog = null })
         }
     }
 }

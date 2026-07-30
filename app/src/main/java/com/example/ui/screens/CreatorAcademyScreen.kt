@@ -141,8 +141,6 @@ fun CreatorAcademyScreen(
     var showBrandCollabDialog by remember { mutableStateOf(false) }
     var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
 
-    var activeToolDialog by remember { mutableStateOf<String?>(null) }
-    var activeLinkDialog by remember { mutableStateOf<String?>(null) }
     var coursePlaceholderTitle by remember { mutableStateOf<String?>(null) }
     var showInstagramCreatorV2Dialog by remember { mutableStateOf(false) }
     var showYouTubeCreatorV2Dialog by remember { mutableStateOf(false) }
@@ -492,7 +490,7 @@ fun CreatorAcademyScreen(
                 AcademyCourseCard(
                     title = "AI Prompt Extractor",
                     subtitleText = "AI Vision Analysis & Style Recreation Prompts",
-                    tagText = "✨ AI VISION",
+                    tagText = null,
                     logoName = "chatgpt",
                     accentColor = Color(0xFF8B5CF6),
                     features = listOf(
@@ -507,34 +505,6 @@ fun CreatorAcademyScreen(
                     }
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ==================================================
-            // 5. AI CREATOR TOOLKIT (CONTEXT-AWARE)
-            // ==================================================
-            AiCreatorToolsSection(
-                setupData = setupData,
-                onOpenTool = { toolName ->
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    activeToolDialog = toolName
-                }
-            )
-        }
-
-        // Active Tool Dialogs
-        when (activeToolDialog) {
-            "Caption Generator" -> CaptionGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Hashtag Generator" -> HashtagGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Hook Generator" -> HookGeneratorDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Content Planner" -> ContentPlannerDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-            "Posting Checklist" -> PostingChecklistDialog(onDismiss = { activeToolDialog = null })
-            "Brand Pitch Guide" -> BrandPitchGuideDialog(setupData = setupData, onDismiss = { activeToolDialog = null })
-        }
-
-        // Active Link Analysis Dialogs
-        if (activeLinkDialog != null) {
-            LinkAnalysisDialog(type = activeLinkDialog!!, onDismiss = { activeLinkDialog = null })
         }
 
         // Instagram Creator AI V2 Personal Mentor Dialog
@@ -2084,7 +2054,7 @@ private fun AcademyCourseCard(
     accentColor: Color,
     features: List<String>,
     subtitleText: String = "PREMIUM COURSE",
-    tagText: String = "✨ FEATURED",
+    tagText: String? = "✨ FEATURED",
     onStartLearning: () -> Unit
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -2228,19 +2198,21 @@ private fun AcademyCourseCard(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x2210B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = tagText,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
-                    )
+                if (tagText != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x2210B981))
+                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = tagText,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldGlow
+                        )
+                    }
                 }
             }
 

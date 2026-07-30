@@ -46,26 +46,35 @@ val HOME_BANNER_IMAGES = listOf(
 fun HomeBannerCarousel(
     modifier: Modifier = Modifier,
     bannerUrls: List<String> = HOME_BANNER_IMAGES,
-    autoScrollDelayMillis: Long = 3500L
+    autoScrollDelayMillis: Long = 3000L
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { bannerUrls.size })
+    val itemCount = bannerUrls.size
+
+    val initialPage = remember(itemCount) {
+        if (itemCount > 0) {
+            val middle = Int.MAX_VALUE / 2
+            middle - (middle % itemCount)
+        } else 0
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = { if (itemCount > 0) Int.MAX_VALUE else 0 }
+    )
 
     // Track user dragging state via DragInteraction
     var isUserDragging by remember { mutableStateOf(false) }
-    var lastUserInteractionTime by remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(pagerState.interactionSource) {
         pagerState.interactionSource.interactions.collect { interaction ->
             when (interaction) {
                 is DragInteraction.Start -> {
                     isUserDragging = true
-                    lastUserInteractionTime = System.currentTimeMillis()
                 }
                 is DragInteraction.Stop, is DragInteraction.Cancel -> {
                     isUserDragging = false
-                    lastUserInteractionTime = System.currentTimeMillis()
                 }
             }
         }
@@ -105,26 +114,24 @@ fun HomeBannerCarousel(
         }
     }
 
-    // Infinite loop auto-slide (Banner 1 -> Banner 2 -> Banner 3 -> Banner 1...)
-    // Pauses for 5 seconds on manual swipe, auto-scrolls every 3.5s otherwise
-    LaunchedEffect(pagerState.currentPage, isUserDragging, isResumed, bannerUrls.size) {
-        if (!isResumed || isUserDragging || bannerUrls.isEmpty()) return@LaunchedEffect
+    // Smooth Infinite Forward Auto-Slide Loop (1 -> 2 -> 3 -> 1 -> 2 -> 3...)
+    // Always scrolls forward, never reverses, never stops automatically
+    LaunchedEffect(pagerState, isUserDragging, isResumed, itemCount) {
+        if (!isResumed || itemCount <= 0) return@LaunchedEffect
 
-        val timeSinceSwipe = System.currentTimeMillis() - lastUserInteractionTime
-        val currentDelay = if (timeSinceSwipe < 5000L) {
-            5000L - timeSinceSwipe
-        } else {
-            autoScrollDelayMillis
-        }
+        while (true) {
+            delay(autoScrollDelayMillis)
 
-        delay(currentDelay.coerceAtLeast(100L))
-
-        if (!isUserDragging && isResumed && bannerUrls.isNotEmpty()) {
-            val nextPage = (pagerState.currentPage + 1) % bannerUrls.size
-            pagerState.animateScrollToPage(
-                page = nextPage,
-                animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
-            )
+            if (!isUserDragging && isResumed && itemCount > 0) {
+                val targetNextPage = pagerState.currentPage + 1
+                pagerState.animateScrollToPage(
+                    page = targetNextPage,
+                    animationSpec = tween(
+                        durationMillis = 450,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
         }
     }
 
@@ -169,9 +176,12 @@ fun HomeBannerCarousel(
         ) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                pageSpacing = 0.dp,
+                userScrollEnabled = true
             ) { page ->
-                val imageUrl = bannerUrls[page]
+                val realIndex = if (itemCount > 0) page % itemCount else 0
+                val imageUrl = bannerUrls.getOrElse(realIndex) { "" }
 
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -181,11 +191,11 @@ fun HomeBannerCarousel(
                         model = ImageRequest.Builder(context)
                             .data(imageUrl)
                             .crossfade(true)
-                            .crossfade(400)
+                            .crossfade(300)
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .build(),
-                        contentDescription = "ViralToolAI Banner ${page + 1}",
+                        contentDescription = "ViralToolAI Banner ${realIndex + 1}",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                         loading = {
@@ -217,13 +227,15 @@ fun HomeBannerCarousel(
         Spacer(modifier = Modifier.height(10.dp))
 
         // Page Indicator Dots
+        val currentRealIndex = if (itemCount > 0) pagerState.currentPage % itemCount else 0
+
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
-            repeat(bannerUrls.size) { index ->
-                val isSelected = pagerState.currentPage == index
+            repeat(itemCount) { index ->
+                val isSelected = currentRealIndex == index
 
                 // Animated dot width and color
                 val width by animateDpAsState(
@@ -249,11 +261,12 @@ fun HomeBannerCarousel(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            lastUserInteractionTime = System.currentTimeMillis()
                             coroutineScope.launch {
+                                val currentReal = pagerState.currentPage % itemCount
+                                val delta = index - currentReal
                                 pagerState.animateScrollToPage(
-                                    page = index,
-                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    page = pagerState.currentPage + delta,
+                                    animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing)
                                 )
                             }
                         }

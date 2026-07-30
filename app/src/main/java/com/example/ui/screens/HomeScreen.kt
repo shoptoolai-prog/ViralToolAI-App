@@ -579,37 +579,6 @@ fun HomeScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // Supported Shopping Platforms Pills Row
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = "Supported:",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White.copy(alpha = 0.55f)
-                            )
-                            listOf("Amazon", "Flipkart", "Meesho", "Myntra", "AJIO", "Nykaa").forEach { storeName ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(Color(0x22FFFFFF))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = storeName,
-                                        fontSize = 9.5.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White.copy(alpha = 0.9f)
-                                    )
-                                }
-                            }
-                        }
-
                         Spacer(modifier = Modifier.height(14.dp))
 
                         // Link Input Box Polish
@@ -1399,13 +1368,13 @@ fun PremiumDialog(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.88f)
+                .responsiveDialogBounds(LocalResponsiveMetrics.current)
                 .responsiveImeAndNavPadding()
                 .background(AmoledBlack, RoundedCornerShape(22.dp))
                 .border(BorderStroke(1.2.dp, Color(0x33FF2E44)), RoundedCornerShape(22.dp))
                 .padding(20.dp)
         ) {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically

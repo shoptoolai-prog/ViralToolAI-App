@@ -1166,7 +1166,9 @@ fun CommonPopupCard(
                     // Body Content
                     Column(
                         modifier = Modifier
+                            .weight(1f, fill = false)
                             .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
                             .padding(responsiveMetrics.horizontalPadding)
                     ) {
                         content()
