@@ -443,7 +443,7 @@ fun AiVideoImageGeneratorDialog(
                 Surface(
                     color = Color(0xFF0F1A14),
                     shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, Color(0x3310B981)),
+                    border = BorderStroke(1.dp, Color(0x338B5CF6)),
                     modifier = Modifier
                         .responsiveDialogBounds(responsiveMetrics)
                 ) {
@@ -588,7 +588,7 @@ fun AiVideoImageGeneratorDialog(
                                                 chatMessages.clear()
                                                 if (selectedPath == LearningPath.VIDEO) initVideoStep(0) else initImageStep(0)
                                             },
-                                            theme = MentorToolTheme.InstagramCreator
+                                            theme = MentorToolTheme.AiVideoImage
                                         )
                                     }
                                 }
@@ -657,7 +657,7 @@ private fun TopHeaderBar(
     onOpenPromptHistory: () -> Unit,
     onClose: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
@@ -714,7 +714,7 @@ private fun TopHeaderBar(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0x1A10B981))
+                        .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
                         .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(10.dp))
                         .clickable { onChangeLang() }
                         .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -778,6 +778,15 @@ private fun TopHeaderBar(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ToolHeroBanner(
+                toolType = ToolHeroType.AI_PROMPT_EXTRACTOR,
+                height = 105.dp,
+                badgeText = "🔮 AI PROMPT EXTRACTOR",
+                subtitleText = "Vision Analysis & Prompt Engineering"
+            )
         }
     }
 }
@@ -917,7 +926,7 @@ private fun LanguageOptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) Color(0x2210B981) else Color(0x0AFFFFFF))
+            .background(if (isSelected) Color(0x228B5CF6) else Color(0x0AFFFFFF))
             .border(
                 BorderStroke(
                     1.2.dp,
@@ -1218,7 +1227,7 @@ private fun ChatMessageItem(
                 .border(
                     BorderStroke(
                         0.8.dp,
-                        if (isMentor) Color(0x3310B981) else Color.White.copy(alpha = 0.4f)
+                        if (isMentor) Color(0x338B5CF6) else Color.White.copy(alpha = 0.4f)
                     ),
                     RoundedCornerShape(
                         topStart = 18.dp,
@@ -1247,7 +1256,7 @@ private fun ChatMessageItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0x1A10B981))
+                                    .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
                                     .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
                                     .padding(10.dp)
                             ) {
@@ -1434,7 +1443,7 @@ private fun InteractiveControlPanel(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x1A10B981))
+                                .background(Color(0xFF8B5CF6).copy(alpha = 0.18f))
                                 .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
                                 .clickable { onVideoTypeSelected(type) }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)

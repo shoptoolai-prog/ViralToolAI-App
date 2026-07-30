@@ -41,6 +41,10 @@ object CreatorAcademyPrefs {
     private const val KEY_MEESHO_CREATOR_LANG = "meesho_creator_language"
     private const val KEY_MEESHO_CREATOR_STEP_INDEX = "meesho_creator_step_index"
 
+    private const val KEY_WISHLINK_LANG = "wishlink_creator_language"
+    private const val KEY_WISHLINK_STEP_INDEX = "wishlink_creator_step_index"
+    private const val KEY_WISHLINK_COMPLETED_STEPS = "wishlink_creator_completed_steps"
+
     private const val KEY_YOUTUBE_LANG = "youtube_creator_v2_language"
     private const val KEY_YOUTUBE_CREATOR_TYPE = "youtube_creator_v2_type"
     private const val KEY_YOUTUBE_CURRENT_STEP = "youtube_creator_v2_current_step"
@@ -169,6 +173,38 @@ object CreatorAcademyPrefs {
     fun setMeeshoStepIndex(context: Context, stepIndex: Int) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().putInt(KEY_MEESHO_CREATOR_STEP_INDEX, stepIndex).apply()
+    }
+
+    fun getWishlinkLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LANG, "") ?: ""
+    }
+
+    fun setWishlinkLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_WISHLINK_LANG, lang).apply()
+    }
+
+    fun getWishlinkStepIndex(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_WISHLINK_STEP_INDEX, 0)
+    }
+
+    fun setWishlinkStepIndex(context: Context, stepIndex: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_WISHLINK_STEP_INDEX, stepIndex).apply()
+    }
+
+    fun getWishlinkCompletedSteps(context: Context): List<Int> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = prefs.getStringSet(KEY_WISHLINK_COMPLETED_STEPS, emptySet()) ?: emptySet()
+        return strSet.mapNotNull { it.toIntOrNull() }
+    }
+
+    fun saveWishlinkCompletedSteps(context: Context, steps: Set<Int>) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = steps.map { it.toString() }.toSet()
+        prefs.edit().putStringSet(KEY_WISHLINK_COMPLETED_STEPS, strSet).apply()
     }
 
     fun isLanguageSelected(context: Context): Boolean {

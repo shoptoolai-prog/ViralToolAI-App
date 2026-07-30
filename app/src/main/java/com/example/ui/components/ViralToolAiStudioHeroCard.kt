@@ -168,7 +168,7 @@ fun ViralToolAiStudioHeroCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Gemini 3.1 & Veo Powered",
+                            text = "AI Vision Extraction Powered",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = EmeraldGlow
@@ -194,7 +194,7 @@ fun ViralToolAiStudioHeroCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = "Studio Icon",
+                            contentDescription = "Prompt Extractor Icon",
                             tint = Color.White,
                             modifier = Modifier.size(28.dp)
                         )
@@ -204,13 +204,13 @@ fun ViralToolAiStudioHeroCard(
 
                     Column {
                         Text(
-                            text = "ViralToolAI Studio",
+                            text = "AI Prompt Extractor",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite
                         )
                         Text(
-                            text = "All-In-One AI Studio: Image, Veo Video & Grounded Intelligence",
+                            text = "Extract 8K Recreation Prompts from any AI Image or Screenshot",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextWhite.copy(alpha = 0.75f)
@@ -226,13 +226,11 @@ fun ViralToolAiStudioHeroCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     val chips = listOf(
-                        "🖼️ Create & Edit Images",
-                        "🎬 Animate Image to Video",
-                        "🎥 Text to Veo Video",
-                        "🎨 1K/2K/4K Images",
-                        "🧠 High Thinking Mode",
-                        "🌐 Search Grounding",
-                        "⚡ Low Latency"
+                        "📸 Upload Screenshot",
+                        "🔍 Auto AI Vision Analysis",
+                        "🎨 Midjourney / Flux / DALL-E Ready",
+                        "🌍 Multi-Language Support",
+                        "✨ Copy Prompt & Negative Prompt"
                     )
                     items(chips) { chip ->
                         Box(
@@ -270,7 +268,7 @@ fun ViralToolAiStudioHeroCard(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Open ViralToolAI Studio",
+                            text = "Open AI Prompt Extractor",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

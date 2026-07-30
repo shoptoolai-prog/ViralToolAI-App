@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -10,6 +11,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -26,8 +28,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,26 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.ai.GeminiStudioNativeEngine
-import com.example.ai.ImageGenerationResult
-import com.example.ai.VeoVideoResult
+import com.example.ai.AiPromptExtractorEngine
+import com.example.ai.PromptExtractorResult
 import com.example.ui.theme.*
 import kotlinx.coroutines.launch
-
-enum class StudioCapability(
-    val title: String,
-    val subtitle: String,
-    val iconName: String
-) {
-    CREATE_EDIT_IMAGE("Create & Edit Image", "Text & image guided creation", "image"),
-    ANIMATE_IMAGE_TO_VIDEO("Animate Image to Video", "Veo photo motion synthesis", "movie"),
-    GENERATE_VIDEO_FROM_TEXT("Text to Video (Veo)", "AI cinematic video creation", "video_spark"),
-    AI_IMAGE_GEN("AI Image Generation", "1K/2K/4K with custom aspect ratios", "palette"),
-    AI_IMAGE_EDIT("AI Image Editing", "Style transfer & background edit", "edit"),
-    AI_VIDEO_GEN("AI Video Generation", "1080p Veo rendering engine", "videocam"),
-    AI_VIDEO_ENHANCE("AI Video Enhancement", "Script, hook & audio enhancer", "auto_awesome"),
-    AI_CONTENT_CREATION("AI Content Creation", "Thinking, Grounding & Low-Latency", "psychology")
-}
 
 @Composable
 fun ViralToolAiStudioDialog(
@@ -62,20 +50,42 @@ fun ViralToolAiStudioDialog(
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
     val responsiveMetrics = LocalResponsiveMetrics.current
-
-    var activeCapability by remember { mutableStateOf(StudioCapability.CREATE_EDIT_IMAGE) }
-
-    // Controls
-    var promptInput by remember { mutableStateOf("") }
-    var selectedAspectRatio by remember { mutableStateOf("1:1") }
-    var selectedResolution by remember { mutableStateOf("1K") }
-    var selectedModelMode by remember { mutableStateOf("HIGH_THINKING") } // HIGH_THINKING, LOW_LATENCY, SEARCH_GROUNDED
 
     // Media input state
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var promptInput by remember { mutableStateOf("") }
+
+    // Analysis output state
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var extractionResult by remember { mutableStateOf<PromptExtractorResult?>(null) }
+
+    // Creator Academy Guide Modal State
+    var showCreatorAcademyGuide by remember { mutableStateOf(false) }
+
+    // Auto-analysis trigger upon picking image
+    fun triggerAutoVisionAnalysis(bmp: Bitmap?, textNotes: String?) {
+        if (bmp == null && textNotes.isNullOrBlank()) return
+        isAnalyzing = true
+        extractionResult = null
+        coroutineScope.launch {
+            try {
+                val res = AiPromptExtractorEngine.extractPromptFromImage(
+                    bitmap = bmp,
+                    userNotes = textNotes
+                )
+                extractionResult = res
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                Toast.makeText(context, "Vision analysis fallback applied: ${e.localizedMessage ?: "Done"}", Toast.LENGTH_SHORT).show()
+            } finally {
+                isAnalyzing = false
+            }
+        }
+    }
 
     // Launcher for image pick
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -86,37 +96,28 @@ fun ViralToolAiStudioDialog(
             try {
                 context.contentResolver.openInputStream(uri)?.use { stream ->
                     val bytes = stream.readBytes()
-                    val options = BitmapFactory.Options().apply {
-                        inJustDecodeBounds = true
-                    }
+                    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                     BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
                     var sampleSize = 1
                     while (options.outWidth / sampleSize > 1024 || options.outHeight / sampleSize > 1024) {
                         sampleSize *= 2
                     }
-                    val decodeOpts = BitmapFactory.Options().apply {
-                        inSampleSize = sampleSize
-                    }
-                    selectedImageBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts)
+                    val decodeOpts = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+                    val loadedBmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts)
+                    selectedImageBitmap = loadedBmp
+
+                    // Automatically analyze immediately after upload!
+                    triggerAutoVisionAnalysis(loadedBmp, promptInput)
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()
-                Toast.makeText(context, "Image load error: ${e.localizedMessage ?: "Failed"}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to load image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // Output states
-    var isGenerating by remember { mutableStateOf(false) }
-    var textOutputResult by remember { mutableStateOf<String?>(null) }
-    var imageOutputResult by remember { mutableStateOf<ImageGenerationResult?>(null) }
-    var videoOutputResult by remember { mutableStateOf<VeoVideoResult?>(null) }
-
-    val aspectRatios = listOf("1:1", "4:5", "3:4", "9:16", "16:9", "2:3", "21:9")
-    val resolutions = listOf("1K", "2K", "4K")
-
     val isSmallPhone = responsiveMetrics.isSmallPhone
-    val dialogPadding = if (isSmallPhone) 10.dp else 16.dp
+    val dialogPadding = if (isSmallPhone) 8.dp else 14.dp
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -129,7 +130,7 @@ fun ViralToolAiStudioDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.85f))
+                .background(Color.Black.copy(alpha = 0.88f))
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(dialogPadding),
@@ -156,184 +157,157 @@ fun ViralToolAiStudioDialog(
                     color = Color(0xFF0F1412),
                     shape = RoundedCornerShape(26.dp)
                 ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 16.dp)
-                ) {
-                    // HEADER ROW
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp, horizontal = 14.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
+                        // HEADER ROW
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            Brush.linearGradient(
+                                                listOf(EmeraldPrimary, ElectricPurple)
+                                            )
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "Prompt Extractor Icon",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = "AI Prompt Extractor",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextWhite
+                                    )
+                                    Text(
+                                        text = "AI Vision Image-to-Prompt Analysis Engine",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = EmeraldGlow
+                                    )
+                                }
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onDismiss()
+                                },
                                 modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(EmeraldPrimary, ElectricPurple)
-                                        )
-                                    ),
-                                contentAlignment = Alignment.Center
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Studio Icon",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close",
+                                    tint = TextWhite
                                 )
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "ViralToolAI Studio",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = TextWhite
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // LANGUAGE SUPPORT BANNER
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(Color(0xFF14241C), Color(0xFF18152B))
+                                    )
                                 )
+                                .border(
+                                    BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)),
+                                    RoundedCornerShape(14.dp)
+                                )
+                                .padding(10.dp)
+                        ) {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "🌍 Write in any language.",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "Flagship Native Gemini & Veo Intelligence",
-                                    fontSize = 10.5.sp,
+                                    text = "Hindi, English, Hinglish, Urdu, Bengali, Tamil, Telugu, Marathi, Gujarati, Punjabi and many more are supported.",
+                                    fontSize = 10.sp,
+                                    color = TextWhite.copy(alpha = 0.85f),
+                                    lineHeight = 13.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Apni baat kisi bhi language mein likhiye. AI automatically samajh lega.",
+                                    fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = EmeraldGlow
                                 )
                             }
                         }
 
-                        IconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onDismiss()
-                            },
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.08f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = TextWhite
-                            )
-                        }
-                    }
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // CAPABILITY TAB SELECTOR
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(StudioCapability.entries.toTypedArray()) { capability ->
-                            val isSelected = capability == activeCapability
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(
-                                        if (isSelected) Brush.horizontalGradient(
-                                            listOf(EmeraldPrimary, ElectricPurple)
-                                        ) else Brush.horizontalGradient(
-                                            listOf(Color(0xFF1B2320), Color(0xFF141A17))
-                                        )
-                                    )
-                                    .border(
-                                        BorderStroke(
-                                            1.dp,
-                                            if (isSelected) EmeraldGlow else Color.White.copy(alpha = 0.12f)
-                                        ),
-                                        RoundedCornerShape(14.dp)
-                                    )
-                                    .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        activeCapability = capability
-                                        textOutputResult = null
-                                        imageOutputResult = null
-                                        videoOutputResult = null
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = when (capability) {
-                                            StudioCapability.CREATE_EDIT_IMAGE -> Icons.Default.Image
-                                            StudioCapability.ANIMATE_IMAGE_TO_VIDEO -> Icons.Default.Movie
-                                            StudioCapability.GENERATE_VIDEO_FROM_TEXT -> Icons.Default.VideoCall
-                                            StudioCapability.AI_IMAGE_GEN -> Icons.Default.Palette
-                                            StudioCapability.AI_IMAGE_EDIT -> Icons.Default.Edit
-                                            StudioCapability.AI_VIDEO_GEN -> Icons.Default.Videocam
-                                            StudioCapability.AI_VIDEO_ENHANCE -> Icons.Default.AutoAwesome
-                                            StudioCapability.AI_CONTENT_CREATION -> Icons.Default.Psychology
-                                        },
-                                        contentDescription = capability.title,
-                                        tint = if (isSelected) Color.White else TextWhite.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = capability.title,
-                                        fontSize = 11.5.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else TextWhite.copy(alpha = 0.85f)
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // MAIN SCROLLABLE CONTROLS & WORKSPACE
-                    Column(
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        // CAPABILITY DESCRIPTION BANNER
+                        // IMPORTANT NOTICE NOTE
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFF151D1A))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)), RoundedCornerShape(14.dp))
-                                .padding(12.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFF1A1724))
+                                .border(
+                                    BorderStroke(1.dp, ElectricPurple.copy(alpha = 0.35f)),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
+                                    imageVector = Icons.Default.Info,
                                     contentDescription = null,
-                                    tint = EmeraldGlow,
-                                    modifier = Modifier.size(20.dp)
+                                    tint = ElectricPurple,
+                                    modifier = Modifier.size(14.dp)
                                 )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Text(
-                                        text = activeCapability.title,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextWhite
-                                    )
-                                    Text(
-                                        text = activeCapability.subtitle,
-                                        fontSize = 10.5.sp,
-                                        color = TextWhite.copy(alpha = 0.7f)
-                                    )
-                                }
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "This tool creates the best possible recreation prompt based on AI analysis. Results may vary depending on the AI model.",
+                                    fontSize = 9.5.sp,
+                                    color = TextWhite.copy(alpha = 0.8f),
+                                    lineHeight = 13.sp
+                                )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        // IMAGE INPUT SECTION FOR EDIT / ANIMATE
-                        if (activeCapability == StudioCapability.CREATE_EDIT_IMAGE ||
-                            activeCapability == StudioCapability.ANIMATE_IMAGE_TO_VIDEO ||
-                            activeCapability == StudioCapability.AI_IMAGE_EDIT
+                        // MAIN SCROLLABLE CONTROLS & RESULTS
+                        Column(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState())
                         ) {
+                            // IMAGE UPLOAD SECTION
                             Text(
-                                text = "Input Image / Photo",
+                                text = "1. Upload AI Image or Screenshot",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = EmeraldGlow
@@ -343,11 +317,19 @@ fun ViralToolAiStudioDialog(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(110.dp)
+                                    .height(130.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF141C19))
+                                    .background(Color(0xFF131B18))
                                     .border(
-                                        BorderStroke(1.dp, Brush.linearGradient(listOf(EmeraldPrimary, ElectricPurple))),
+                                        BorderStroke(
+                                            1.2.dp,
+                                            Brush.linearGradient(
+                                                listOf(
+                                                    EmeraldPrimary,
+                                                    ElectricPurple
+                                                )
+                                            )
+                                        ),
                                         RoundedCornerShape(16.dp)
                                     )
                                     .clickable {
@@ -359,7 +341,7 @@ fun ViralToolAiStudioDialog(
                                 if (bmp != null && !bmp.isRecycled) {
                                     Image(
                                         bitmap = bmp.asImageBitmap(),
-                                        contentDescription = "Selected Photo",
+                                        contentDescription = "Uploaded AI Photo",
                                         modifier = Modifier.fillMaxSize()
                                     )
                                     Box(
@@ -367,9 +349,12 @@ fun ViralToolAiStudioDialog(
                                             .align(Alignment.TopEnd)
                                             .padding(6.dp)
                                             .clip(CircleShape)
-                                            .background(Color.Black.copy(alpha = 0.7f))
-                                            .clickable { selectedImageBitmap = null }
-                                            .padding(4.dp)
+                                            .background(Color.Black.copy(alpha = 0.75f))
+                                            .clickable {
+                                                selectedImageBitmap = null
+                                                extractionResult = null
+                                            }
+                                            .padding(6.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Close,
@@ -379,420 +364,609 @@ fun ViralToolAiStudioDialog(
                                         )
                                     }
                                 } else {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(12.dp)
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.AddPhotoAlternate,
                                             contentDescription = "Upload Photo",
                                             tint = EmeraldGlow,
-                                            modifier = Modifier.size(28.dp)
+                                            modifier = Modifier.size(32.dp)
                                         )
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = "Tap to choose photo from gallery",
-                                            fontSize = 11.sp,
-                                            color = TextWhite.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
-
-                        // ASPECT RATIO SELECTOR (For Image & Video tools)
-                        if (activeCapability != StudioCapability.AI_CONTENT_CREATION &&
-                            activeCapability != StudioCapability.AI_VIDEO_ENHANCE
-                        ) {
-                            Text(
-                                text = "Select Aspect Ratio",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldGlow
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(aspectRatios) { ratio ->
-                                    val isSelected = ratio == selectedAspectRatio
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(if (isSelected) EmeraldPrimary else Color(0xFF1B2320))
-                                            .border(
-                                                BorderStroke(1.dp, if (isSelected) EmeraldGlow else Color.White.copy(alpha = 0.1f)),
-                                                RoundedCornerShape(10.dp)
-                                            )
-                                            .clickable {
-                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                selectedAspectRatio = ratio
-                                            }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = ratio,
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) Color.White else TextWhite.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
-
-                        // RESOLUTION SELECTOR (For AI Image Gen)
-                        if (activeCapability == StudioCapability.AI_IMAGE_GEN) {
-                            Text(
-                                text = "Resolution Quality",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldGlow
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                resolutions.forEach { res ->
-                                    val isSelected = res == selectedResolution
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(if (isSelected) ElectricPurple else Color(0xFF1B2320))
-                                            .border(
-                                                BorderStroke(1.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.1f)),
-                                                RoundedCornerShape(10.dp)
-                                            )
-                                            .clickable {
-                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                selectedResolution = res
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = res,
-                                            fontSize = 11.sp,
+                                            text = "Tap to upload AI image or screenshot from gallery",
+                                            fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color.White
+                                            color = TextWhite,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "AI vision will automatically analyze immediately upon upload",
+                                            fontSize = 9.5.sp,
+                                            color = TextWhite.copy(alpha = 0.65f),
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
 
-                        // MODEL / INTELLIGENCE MODE SELECTOR (For AI Content Creation)
-                        if (activeCapability == StudioCapability.AI_CONTENT_CREATION) {
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // OPTIONAL USER TEXT IDEA FIELD
                             Text(
-                                text = "Gemini Intelligence Engine Mode",
+                                text = "2. Additional Idea or Notes (Optional)",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = EmeraldGlow
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            OutlinedTextField(
+                                value = promptInput,
+                                onValueChange = { promptInput = it },
+                                placeholder = {
+                                    Text(
+                                        text = "Describe your idea in any language...",
+                                        fontSize = 11.sp,
+                                        color = TextWhite.copy(alpha = 0.45f)
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(72.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = Color(0xFF141A17),
+                                    unfocusedContainerColor = Color(0xFF101513),
+                                    focusedBorderColor = EmeraldGlow,
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    focusedTextColor = TextWhite,
+                                    unfocusedTextColor = TextWhite
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // EXTRACT ACTION BUTTON
+                            Button(
+                                onClick = {
+                                    if (selectedImageBitmap == null && promptInput.isBlank()) {
+                                        Toast.makeText(
+                                            context,
+                                            "Please upload an image or describe your idea",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        return@Button
+                                    }
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    triggerAutoVisionAnalysis(selectedImageBitmap, promptInput)
+                                },
+                                enabled = !isAnalyzing,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp)
+                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldGlow),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = EmeraldPrimary,
+                                    disabledContainerColor = Color.Gray
+                                )
                             ) {
-                                listOf(
-                                    Triple("HIGH_THINKING", "🧠 High Thinking Mode", "gemini-3.1-pro-preview"),
-                                    Triple("SEARCH_GROUNDED", "🌐 Search Grounding", "gemini-3.5-flash"),
-                                    Triple("LOW_LATENCY", "⚡ Low Latency", "gemini-3.1-flash-lite")
-                                ).forEach { (modeKey, modeLabel, _) ->
-                                    val isSelected = modeKey == selectedModelMode
+                                if (isAnalyzing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Analyzing Vision & Generating Prompt...",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "Extract Prompt",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (extractionResult != null) "Re-Analyze & Extract Prompt ✦" else "Extract Recreation Prompt ✦",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // EXTRACTION RESULTS VIEW
+                            val result = extractionResult
+                            if (result != null) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+
+                                    // FINAL USER MESSAGE BANNER
                                     Box(
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(if (isSelected) EmeraldPrimary else Color(0xFF1B2320))
-                                            .border(
-                                                BorderStroke(1.dp, if (isSelected) EmeraldGlow else Color.White.copy(alpha = 0.1f)),
-                                                RoundedCornerShape(10.dp)
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(
+                                                Brush.horizontalGradient(
+                                                    listOf(EmeraldPrimary, ElectricPurple)
+                                                )
                                             )
-                                            .clickable {
-                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                selectedModelMode = modeKey
-                                            }
-                                            .padding(vertical = 8.dp, horizontal = 4.dp),
+                                            .padding(12.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            text = modeLabel,
-                                            fontSize = 9.5.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) Color.White else TextWhite.copy(alpha = 0.8f),
-                                            textAlign = TextAlign.Center,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.CheckCircle,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Now copy this prompt and generate your image using Gemini or ChatGPT.",
+                                                fontSize = 11.5.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color.White,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
                                     }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
 
-                        // PROMPT TEXT FIELD
-                        Text(
-                            text = "AI Prompt Instruction",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldGlow
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
 
-                        OutlinedTextField(
-                            value = promptInput,
-                            onValueChange = { promptInput = it },
-                            placeholder = {
-                                Text(
-                                    text = when (activeCapability) {
-                                        StudioCapability.CREATE_EDIT_IMAGE -> "Describe what to generate or edit..."
-                                        StudioCapability.ANIMATE_IMAGE_TO_VIDEO -> "Describe video motion (e.g., slow cinematic camera sweep)..."
-                                        StudioCapability.GENERATE_VIDEO_FROM_TEXT -> "Describe the video scene (e.g., cyber futuristic city in rain)..."
-                                        StudioCapability.AI_IMAGE_GEN -> "Enter detailed image prompt..."
-                                        StudioCapability.AI_IMAGE_EDIT -> "Describe photo edit changes..."
-                                        StudioCapability.AI_VIDEO_GEN -> "Describe Veo 3D video sequence..."
-                                        StudioCapability.AI_VIDEO_ENHANCE -> "Paste video script or title to enhance..."
-                                        StudioCapability.AI_CONTENT_CREATION -> "Ask Gemini anything or describe content to create..."
-                                    },
-                                    fontSize = 11.5.sp,
-                                    color = TextWhite.copy(alpha = 0.4f)
-                                )
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(95.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFF141A17),
-                                unfocusedContainerColor = Color(0xFF101513),
-                                focusedBorderColor = EmeraldGlow,
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                                focusedTextColor = TextWhite,
-                                unfocusedTextColor = TextWhite
-                            )
-                        )
+                                    // RECREATION PROMPT CARD
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(Color(0xFF142019))
+                                            .border(
+                                                BorderStroke(1.dp, EmeraldGlow),
+                                                RoundedCornerShape(16.dp)
+                                            )
+                                            .padding(14.dp)
+                                    ) {
+                                        Column {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.ContentCopy,
+                                                        contentDescription = null,
+                                                        tint = EmeraldGlow,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Detailed Recreation Prompt",
+                                                        fontSize = 13.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = EmeraldGlow
+                                                    )
+                                                }
 
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // EXECUTE ACTION BUTTON
-                        Button(
-                            onClick = {
-                                if (promptInput.isBlank()) {
-                                    Toast.makeText(context, "Please enter an AI prompt instruction", Toast.LENGTH_SHORT).show()
-                                    return@Button
-                                }
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                isGenerating = true
-                                textOutputResult = null
-                                imageOutputResult = null
-                                videoOutputResult = null
-
-                                coroutineScope.launch {
-                                    try {
-                                        when (activeCapability) {
-                                            StudioCapability.CREATE_EDIT_IMAGE,
-                                            StudioCapability.AI_IMAGE_EDIT -> {
-                                                val res = GeminiStudioNativeEngine.editImage(
-                                                    prompt = promptInput,
-                                                    inputBitmap = selectedImageBitmap,
-                                                    aspectRatio = selectedAspectRatio
-                                                )
-                                                imageOutputResult = res
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(EmeraldPrimary)
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            clipboardManager.setText(AnnotatedString(result.recreationPrompt))
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Recreation Prompt Copied!",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "Copy Prompt",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
+                                                    )
+                                                }
                                             }
 
-                                            StudioCapability.AI_IMAGE_GEN -> {
-                                                val res = GeminiStudioNativeEngine.generateImage(
-                                                    prompt = promptInput,
-                                                    aspectRatio = selectedAspectRatio,
-                                                    imageSize = selectedResolution
-                                                )
-                                                imageOutputResult = res
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            Text(
+                                                text = result.recreationPrompt,
+                                                fontSize = 11.5.sp,
+                                                color = TextWhite,
+                                                lineHeight = 17.sp
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // NEGATIVE PROMPT CARD
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(Color(0xFF22161A))
+                                            .border(
+                                                BorderStroke(1.dp, Color(0xFFFF5252).copy(alpha = 0.5f)),
+                                                RoundedCornerShape(14.dp)
+                                            )
+                                            .padding(12.dp)
+                                    ) {
+                                        Column {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Block,
+                                                        contentDescription = null,
+                                                        tint = Color(0xFFFF5252),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Negative Prompt",
+                                                        fontSize = 12.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color(0xFFFF5252)
+                                                    )
+                                                }
+
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(Color(0xFFD32F2F))
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            clipboardManager.setText(AnnotatedString(result.negativePrompt))
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Negative Prompt Copied!",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "Copy Negative",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
+                                                    )
+                                                }
                                             }
 
-                                            StudioCapability.ANIMATE_IMAGE_TO_VIDEO,
-                                            StudioCapability.GENERATE_VIDEO_FROM_TEXT,
-                                            StudioCapability.AI_VIDEO_GEN -> {
-                                                val res = GeminiStudioNativeEngine.generateVeoVideo(
-                                                    prompt = promptInput,
-                                                    aspectRatio = if (selectedAspectRatio in listOf("16:9", "9:16")) selectedAspectRatio else "16:9",
-                                                    resolution = "1080p",
-                                                    inputImageBitmap = if (activeCapability == StudioCapability.ANIMATE_IMAGE_TO_VIDEO) selectedImageBitmap else null
-                                                )
-                                                videoOutputResult = res
-                                            }
+                                            Spacer(modifier = Modifier.height(6.dp))
 
-                                            StudioCapability.AI_VIDEO_ENHANCE -> {
-                                                val res = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
-                                                    domain = com.example.creatoracademy.MentorToolDomain.AI_VIDEO_IMAGE_GENERATOR,
-                                                    userQuery = "Enhance video script, hooks & audio directions for: $promptInput",
-                                                    userContext = "ViralToolAI Video Studio Enhancement",
-                                                    language = "English"
-                                                )
-                                                textOutputResult = res
-                                            }
+                                            Text(
+                                                text = result.negativePrompt,
+                                                fontSize = 10.5.sp,
+                                                color = TextWhite.copy(alpha = 0.9f),
+                                                lineHeight = 15.sp
+                                            )
+                                        }
+                                    }
 
-                                            StudioCapability.AI_CONTENT_CREATION -> {
-                                                val res = com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
-                                                    domain = com.example.creatoracademy.MentorToolDomain.AI_VIDEO_IMAGE_GENERATOR,
-                                                    userQuery = promptInput,
-                                                    userContext = "ViralToolAI Studio Content Creation - Mode: $selectedModelMode",
-                                                    language = "English"
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // KEY METRICS & STYLE KEYWORDS
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color(0xFF161E23))
+                                                .border(
+                                                    BorderStroke(1.dp, ElectricPurple.copy(alpha = 0.4f)),
+                                                    RoundedCornerShape(12.dp)
                                                 )
-                                                textOutputResult = res
+                                                .padding(10.dp)
+                                        ) {
+                                            Column {
+                                                Text(
+                                                    text = "Best AI Model",
+                                                    fontSize = 9.5.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = ElectricPurple
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = result.recommendedModel,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = TextWhite
+                                                )
                                             }
                                         }
-                                    } catch (e: Throwable) {
-                                        e.printStackTrace()
-                                        textOutputResult = "⚠️ AI Studio Notice:\n${e.localizedMessage ?: "Processing completed with offline AI guidance fallback."}"
-                                    } finally {
-                                        isGenerating = false
-                                    }
-                                }
-                            },
-                            enabled = !isGenerating,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
-                                .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldGlow),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = EmeraldPrimary,
-                                disabledContainerColor = Color.Gray
-                            )
-                        ) {
-                            if (isGenerating) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Processing AI Request...",
-                                    fontSize = 12.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Generate",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Generate with ViralToolAI Studio",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // OUTPUT RESULTS DISPLAY AREA
-                        if (textOutputResult != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF141E1A))
-                                    .border(BorderStroke(1.dp, EmeraldGlow), RoundedCornerShape(16.dp))
-                                    .padding(14.dp)
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.CheckCircle,
-                                            contentDescription = null,
-                                            tint = EmeraldGlow,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Gemini Intelligence Response",
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = EmeraldGlow
-                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color(0xFF1A1F18))
+                                                .border(
+                                                    BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f)),
+                                                    RoundedCornerShape(12.dp)
+                                                )
+                                                .padding(10.dp)
+                                        ) {
+                                            Column {
+                                                Text(
+                                                    text = "Aspect Ratio",
+                                                    fontSize = 9.5.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = EmeraldGlow
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = result.recommendedAspectRatio,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = TextWhite
+                                                )
+                                            }
+                                        }
                                     }
+
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = textOutputResult!!,
-                                        fontSize = 12.sp,
-                                        color = TextWhite,
-                                        lineHeight = 18.sp
-                                    )
-                                }
-                            }
-                        }
 
-                        if (imageOutputResult != null) {
-                            val imgRes = imageOutputResult!!
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF141E1A))
-                                    .border(BorderStroke(1.dp, ElectricPurple), RoundedCornerShape(16.dp))
-                                    .padding(14.dp)
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Palette,
-                                            contentDescription = null,
-                                            tint = ElectricPurple,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "AI Image Generation Result (${imgRes.aspectRatio} | ${imgRes.imageSize})",
-                                            fontSize = 12.5.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = ElectricPurple
-                                        )
+                                    // STYLE CHIPS
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        items(result.styleKeywords) { kw ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(Color(0xFF1E2822))
+                                                    .border(
+                                                        BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)),
+                                                        RoundedCornerShape(8.dp)
+                                                    )
+                                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            ) {
+                                                Text(
+                                                    text = "#$kw",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = EmeraldGlow
+                                                )
+                                            }
+                                        }
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = imgRes.summaryText,
-                                        fontSize = 11.5.sp,
-                                        color = TextWhite
-                                    )
-                                }
-                            }
-                        }
 
-                        if (videoOutputResult != null) {
-                            val vidRes = videoOutputResult!!
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF191324))
-                                    .border(BorderStroke(1.dp, ElectricPurple), RoundedCornerShape(16.dp))
-                                    .padding(14.dp)
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Movie,
-                                            contentDescription = null,
-                                            tint = ElectricPurple,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Veo 3.1 Fast Video Output (${vidRes.aspectRatio} | ${vidRes.resolution})",
-                                            fontSize = 12.5.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = ElectricPurple
-                                        )
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // DETECTED DETAILS BREAKDOWN CARD
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(Color(0xFF131917))
+                                            .border(
+                                                BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
+                                                RoundedCornerShape(14.dp)
+                                            )
+                                            .padding(12.dp)
+                                    ) {
+                                        Column {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Visibility,
+                                                    contentDescription = null,
+                                                    tint = EmeraldGlow,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "AI Vision Detected Breakdown",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = TextWhite
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            val det = result.detectedDetails
+                                            val itemsList = listOf(
+                                                "• Main Subject" to det.mainSubject,
+                                                "• Composition" to det.composition,
+                                                "• Camera Angle" to det.cameraAngle,
+                                                "• Pose" to det.pose,
+                                                "• Facial Expression" to det.facialExpression,
+                                                "• Lighting" to det.lighting,
+                                                "• Colors" to det.colors,
+                                                "• Background" to det.background,
+                                                "• Mood" to det.mood,
+                                                "• Style" to det.style,
+                                                "• Materials" to det.materials,
+                                                "• Rendering Quality" to det.renderingQuality,
+                                                "• Lens/Camera Style" to det.lensCameraStyle,
+                                                "• Fine Details" to det.fineArtisticDetails
+                                            )
+
+                                            itemsList.forEach { (label, value) ->
+                                                Row(modifier = Modifier.padding(vertical = 2.dp)) {
+                                                    Text(
+                                                        text = "$label: ",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = EmeraldGlow
+                                                    )
+                                                    Text(
+                                                        text = value,
+                                                        fontSize = 10.sp,
+                                                        color = TextWhite.copy(alpha = 0.85f)
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = vidRes.videoSummary,
-                                        fontSize = 11.5.sp,
-                                        color = TextWhite
-                                    )
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    // ACTION BUTTONS ROW
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    clipboardManager.setText(AnnotatedString(result.recreationPrompt))
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Prompt Copied to Clipboard!",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(42.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ContentCopy,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Copy Prompt",
+                                                    fontSize = 11.5.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+                                            Button(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    clipboardManager.setText(AnnotatedString(result.negativePrompt))
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Negative Prompt Copied!",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(42.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Block,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Copy Negative",
+                                                    fontSize = 11.5.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    try {
+                                                        val sendIntent: Intent = Intent().apply {
+                                                            action = Intent.ACTION_SEND
+                                                            putExtra(
+                                                                Intent.EXTRA_TEXT,
+                                                                "🔥 Extracted AI Recreation Prompt via ViralToolAI:\n\n${result.recreationPrompt}\n\nNegative Prompt:\n${result.negativePrompt}"
+                                                            )
+                                                            type = "text/plain"
+                                                        }
+                                                        val shareIntent = Intent.createChooser(sendIntent, "Share Prompt")
+                                                        context.startActivity(shareIntent)
+                                                    } catch (_: Exception) {
+                                                        Toast.makeText(context, "Sharing unavailable", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(42.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Share,
+                                                    contentDescription = null,
+                                                    tint = TextWhite,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Share",
+                                                    fontSize = 11.5.sp,
+                                                    color = TextWhite,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+                                            Button(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    showCreatorAcademyGuide = true
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(42.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = ElectricPurple)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.School,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Creator Academy",
+                                                    fontSize = 11.5.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -801,5 +975,192 @@ fun ViralToolAiStudioDialog(
             }
         }
     }
+
+    // CREATOR ACADEMY GUIDE MODAL
+    if (showCreatorAcademyGuide) {
+        Dialog(
+            onDismissRequest = { showCreatorAcademyGuide = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.9f))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.85f)
+                        .clip(RoundedCornerShape(24.dp))
+                        .border(
+                            BorderStroke(1.5.dp, Brush.linearGradient(listOf(ElectricPurple, EmeraldGlow))),
+                            RoundedCornerShape(24.dp)
+                        ),
+                    color = Color(0xFF101714)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(18.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = null,
+                                    tint = ElectricPurple,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Creator Academy Guide",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextWhite
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { showCreatorAcademyGuide = false },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.1f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close",
+                                    tint = Color.White
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            GuideTopicCard(
+                                title = "1. Which AI Model to Use",
+                                icon = Icons.Default.PrecisionManufacturing,
+                                content = "• Midjourney v6.1: Best for hyper-realistic photos, 3D character art & complex textures.\n" +
+                                        "• Flux.1 Schnell / Dev: Best open-source model with crisp text rendering and photorealism.\n" +
+                                        "• DALL-E 3 (ChatGPT Plus): Best for vibrant creative compositions, posters & surreal art.\n" +
+                                        "• Gemini Imagen 3: Fast, realistic photography with natural lighting."
+                            )
+
+                            GuideTopicCard(
+                                title = "2. Which Generation Mode to Select",
+                                icon = Icons.Default.Tune,
+                                content = "• Raw Mode (--style raw): Disables default AI smooth filters for camera grain realism.\n" +
+                                        "• Stylize (--stylize 250 - 750): Increases artistic flair and dramatic lighting.\n" +
+                                        "• Quality (--quality 2): Max rendering steps for razor-sharp micro details."
+                            )
+
+                            GuideTopicCard(
+                                title = "3. Which Aspect Ratio to Choose",
+                                icon = Icons.Default.AspectRatio,
+                                content = "• 16:9 (--ar 16:9): Perfect for YouTube Thumbnails, Banners & Desktop Wallpapers.\n" +
+                                        "• 9:16 (--ar 9:16): Essential for Instagram Reels, TikTok & YouTube Shorts.\n" +
+                                        "• 1:1 or 4:5 (--ar 1:1): Ideal for Instagram Posts & Profile Feeds."
+                            )
+
+                            GuideTopicCard(
+                                title = "4. Where to Paste the Generated Prompt",
+                                icon = Icons.Default.ContentPaste,
+                                content = "1. Copy the Recreation Prompt using the 'Copy Prompt' button above.\n" +
+                                        "2. Open ChatGPT (DALL-E 3), Midjourney (/imagine prompt: ...), or Flux.1 UI.\n" +
+                                        "3. Paste the prompt directly into the input box.\n" +
+                                        "4. Paste the Negative Prompt into the negative/exclude box."
+                            )
+
+                            GuideTopicCard(
+                                title = "5. How to Get a Very Similar Result",
+                                icon = Icons.Default.AutoAwesome,
+                                content = "• Keep the Negative Prompt active to remove blurry artifacts or distorted hands.\n" +
+                                        "• If using Midjourney, attach your screenshot image as an Image Weight prompt (--iw 2.0).\n" +
+                                        "• Maintain camera lens specifications (e.g. 85mm f/1.4 prime lens) in the prompt."
+                            )
+
+                            GuideTopicCard(
+                                title = "6. Quality Improvement Tips",
+                                icon = Icons.Default.Star,
+                                content = "• Include lighting cues: 'volumetric rim light', 'dual-tone key lighting', 'softbox studio'.\n" +
+                                        "• Include render engines: 'Octane Render', 'Unreal Engine 5', '8K Ray Tracing'.\n" +
+                                        "• Specify material details: 'subsurface scattering', 'brushed aluminum', 'soft silk texture'."
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Button(
+                            onClick = { showCreatorAcademyGuide = false },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
+                        ) {
+                            Text(
+                                text = "Got it! Back to AI Prompt Extractor",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
+@Composable
+private fun GuideTopicCard(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    content: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF16201B))
+            .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.35f)), RoundedCornerShape(14.dp))
+            .padding(12.dp)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = EmeraldGlow,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EmeraldGlow
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = content,
+                fontSize = 11.sp,
+                color = TextWhite,
+                lineHeight = 16.sp
+            )
+        }
+    }
 }

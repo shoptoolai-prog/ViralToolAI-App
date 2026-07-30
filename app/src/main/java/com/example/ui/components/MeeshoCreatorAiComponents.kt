@@ -141,8 +141,8 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-private val EmeraldPrimary = Color(0xFFF43F5E) // Pink theme for Meesho Creator AI
-private val EmeraldGlow = Color(0x33F43F5E) // Pink Glow Effect
+private val EmeraldPrimary = Color(0xFFFF4081) // Premium Pink theme for Meesho Creator AI
+private val EmeraldGlow = Color(0x33FF4081) // Pink Glow Effect
 private val meeshoTheme = MentorToolTheme.MeeshoCreator
 
 /**
@@ -513,8 +513,8 @@ fun MeeshoCreatorAiCard(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF18221D),
-                        Color(0xFF0C1410)
+                        Color(0xFF24131D),
+                        Color(0xFF140B12)
                     )
                 )
             )
@@ -567,6 +567,15 @@ fun MeeshoCreatorAiCard(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
+            ToolHeroBanner(
+                toolType = ToolHeroType.MEESHO_CREATOR,
+                height = 100.dp,
+                badgeText = "🔥 MEESHO CREATOR AI",
+                subtitleText = "Reseller Commission & Growth Mentor"
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // Top Row Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1031,6 +1040,15 @@ fun MeeshoCreatorAiDialog(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
+                        ToolHeroBanner(
+                            toolType = ToolHeroType.MEESHO_CREATOR,
+                            height = 110.dp,
+                            badgeText = "🛍️ MEESHO AI",
+                            subtitleText = "Reseller Commission & Growth Mentor"
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
                         if (!isWelcomeCompleted) {
                             // ==================================================
                             // 1. WELCOME SCREEN CARD
@@ -1332,7 +1350,7 @@ private fun MeeshoWelcomeScreenView(
             modifier = Modifier
                 .size(72.dp)
                 .clip(CircleShape)
-                .background(Color(0x2210B981))
+                .background(EmeraldPrimary.copy(alpha = 0.18f))
                 .border(BorderStroke(2.dp, EmeraldPrimary), CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -1344,7 +1362,7 @@ private fun MeeshoWelcomeScreenView(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0x2210B981))
+                .background(EmeraldPrimary.copy(alpha = 0.18f))
                 .border(BorderStroke(1.dp, EmeraldPrimary), RoundedCornerShape(12.dp))
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
@@ -1514,7 +1532,7 @@ private fun MeeshoLanguageSelectionView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .background(if (isSelected) Color(0x2510B981) else Color(0x12FFFFFF))
+                    .background(if (isSelected) EmeraldPrimary.copy(alpha = 0.18f) else Color(0x12FFFFFF))
                     .border(
                         BorderStroke(if (isSelected) 1.5.dp else 0.8.dp, if (isSelected) EmeraldPrimary else Color(0x22FFFFFF)),
                         RoundedCornerShape(18.dp)
@@ -1625,7 +1643,7 @@ private fun MeeshoChatMessageItem(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0x2210B981))
+                    .background(EmeraldPrimary.copy(alpha = 0.18f))
                     .border(BorderStroke(1.dp, EmeraldPrimary), RoundedCornerShape(10.dp))
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
@@ -2276,7 +2294,7 @@ private fun MeeshoThinkingBubble(text: String) {
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(Color(0x2210B981)),
+                .background(EmeraldPrimary.copy(alpha = 0.18f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(

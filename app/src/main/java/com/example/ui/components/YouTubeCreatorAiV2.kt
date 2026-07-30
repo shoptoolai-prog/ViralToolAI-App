@@ -107,8 +107,8 @@ import com.example.ui.theme.TextWhite
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val EmeraldPrimary = Color(0xFFEF4444) // YouTube Red Theme
-private val EmeraldGlow = Color(0x33EF4444) // Red Glow Effect
+private val EmeraldPrimary = Color(0xFFFF0000) // Premium Red Theme for YouTube Creator AI
+private val EmeraldGlow = Color(0x33FF0000) // Pure Red Glow Effect
 private val ytTheme = MentorToolTheme.YouTubeCreator
 
 /**
@@ -1236,6 +1236,14 @@ private fun YouTubeMentorChatScreen(
             totalSteps = YOUTUBE_ROADMAP_STEPS.size,
             onChangeLangClick = onChangeLangClick,
             onClose = onClose
+        )
+
+        com.example.ui.components.ToolHeroBanner(
+            toolType = com.example.ui.components.ToolHeroType.YOUTUBE_CREATOR,
+            height = 110.dp,
+            badgeText = "▶️ YOUTUBE CREATOR AI",
+            subtitleText = "Shorts & SEO Growth Accelerator",
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
         )
 
         // STEP PROGRESS INDICATOR STRIP

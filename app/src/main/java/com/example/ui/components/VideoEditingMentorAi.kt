@@ -119,9 +119,9 @@ import kotlinx.coroutines.launch
  */
 
 enum class EditingToolType(val key: String, val title: String, val color: Color, val logoType: String) {
-    CAPCUT("capcut", "CapCut Master AI Mentor", Color(0xFFFF6B00), "capcut"),
-    VN("vn", "VN Video Editor AI Mentor", Color(0xFF00B2FF), "vn"),
-    INSTAGRAM_EDITS("instagram_edits", "Instagram Edits AI Mentor", Color(0xFFA855F7), "instagram")
+    CAPCUT("capcut", "CapCut Master AI Mentor", Color(0xFF00E5FF), "capcut"),
+    VN("vn", "VN Video Editor AI Mentor", Color(0xFF0288D1), "vn"),
+    INSTAGRAM_EDITS("instagram_edits", "Instagram Edits AI Mentor", Color(0xFFCFD8DC), "instagram")
 }
 
 enum class EditingLanguage { HINDI, ENGLISH, HINGLISH }
@@ -1183,6 +1183,33 @@ private fun EditingMentorChatScreen(
             }
         }
 
+        val heroType = when (toolType) {
+            EditingToolType.CAPCUT -> ToolHeroType.CAPCUT_MASTER
+            EditingToolType.VN -> ToolHeroType.VN_EDITOR
+            EditingToolType.INSTAGRAM_EDITS -> ToolHeroType.INSTAGRAM_EDITS
+            else -> ToolHeroType.CAPCUT_MASTER
+        }
+        val heroBadge = when (toolType) {
+            EditingToolType.CAPCUT -> "⚡ CAPCUT MASTER AI"
+            EditingToolType.VN -> "🎬 VN EDITOR AI"
+            EditingToolType.INSTAGRAM_EDITS -> "📸 INSTAGRAM EDITS AI"
+            else -> "⚡ CAPCUT MASTER AI"
+        }
+        val heroSub = when (toolType) {
+            EditingToolType.CAPCUT -> "Keyframe & Velocity Accelerator"
+            EditingToolType.VN -> "Cinematic Timeline & Color Grading"
+            EditingToolType.INSTAGRAM_EDITS -> "In-App Reels Studio & Transition Hacks"
+            else -> "Keyframe & Velocity Accelerator"
+        }
+
+        ToolHeroBanner(
+            toolType = heroType,
+            height = 110.dp,
+            badgeText = heroBadge,
+            subtitleText = heroSub,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+        )
+
         // STEP PROGRESS BAR
         Box(
             modifier = Modifier
@@ -1368,7 +1395,12 @@ private fun EditingMentorChatScreen(
                         ),
                         onContinue = { onClose?.invoke() },
                         onResetCourse = { onResetCourse?.invoke() },
-                        theme = MentorToolTheme.InstagramCreator
+                        theme = when (toolType) {
+                            EditingToolType.CAPCUT -> MentorToolTheme.CapCutMaster
+                            EditingToolType.VN -> MentorToolTheme.VnEditor
+                            EditingToolType.INSTAGRAM_EDITS -> MentorToolTheme.InstaAutoDm
+                            else -> MentorToolTheme.CapCutMaster
+                        }
                     )
                 }
             }

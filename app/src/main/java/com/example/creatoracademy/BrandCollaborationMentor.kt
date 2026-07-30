@@ -147,8 +147,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
 
-private val EmeraldPrimary = Color(0xFFFACC15) // Gold Yellow for Brand Collab AI
-private val EmeraldGlow = Color(0x33FACC15) // Gold Glow Glass Effect
+private val EmeraldPrimary = Color(0xFFFFD700) // Gold Yellow for Brand Collab AI
+private val EmeraldGlow = Color(0x33FFD700) // Gold Glow Glass Effect
 private val brandCollabTheme = MentorToolTheme.BrandCollab
 
 /**
@@ -698,6 +698,15 @@ fun BrandCollaborationAiDialog(
                             onCloseClick = onDismiss
                         )
 
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        com.example.ui.components.ToolHeroBanner(
+                            toolType = com.example.ui.components.ToolHeroType.BRAND_COLLAB,
+                            height = 110.dp,
+                            badgeText = "✨ BRAND COLLAB AI",
+                            subtitleText = "Golden Sponsorship & Pitching Suite"
+                        )
+
                         Spacer(modifier = Modifier.height(12.dp))
 
                         if (!isLanguageSelected) {
@@ -836,7 +845,7 @@ fun BrandCollaborationAiDialog(
                                                     Box(
                                                         modifier = Modifier
                                                             .clip(RoundedCornerShape(12.dp))
-                                                            .background(Color(0x2210B981))
+                                                            .background(EmeraldPrimary.copy(alpha = 0.15f))
                                                             .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
                                                             .padding(horizontal = 10.dp, vertical = 5.dp)
                                                     ) {
@@ -1430,7 +1439,7 @@ private fun SessionResumeCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0x2210B981))
+                    .background(EmeraldPrimary.copy(alpha = 0.15f))
                     .padding(10.dp)
             ) {
                 Text(
@@ -1533,7 +1542,7 @@ private fun DynamicIslandHeader(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x2210B981))
+                        .background(EmeraldPrimary.copy(alpha = 0.15f))
                         .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
                         .clickable { onOpenLanguageSelector() }
                         .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -1646,7 +1655,7 @@ private fun IntroCardsView(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x2210B981))
+                        .background(EmeraldPrimary.copy(alpha = 0.15f))
                         .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
@@ -1710,7 +1719,7 @@ private fun IntroCardsView(
                             modifier = Modifier
                                 .size(58.dp)
                                 .clip(CircleShape)
-                                .background(Color(0x2210B981))
+                                .background(EmeraldPrimary.copy(alpha = 0.15f))
                                 .border(BorderStroke(1.5.dp, EmeraldPrimary), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
@@ -1727,7 +1736,7 @@ private fun IntroCardsView(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0x2210B981))
+                                .background(EmeraldPrimary.copy(alpha = 0.15f))
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
@@ -2003,7 +2012,7 @@ private fun ChatMessageItem(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(Color(0x2E10B981))
+                        .background(EmeraldPrimary.copy(alpha = 0.18f))
                         .border(BorderStroke(1.dp, EmeraldPrimary), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -2029,12 +2038,12 @@ private fun ChatMessageItem(
 
                 Surface(
                     shape = bubbleShape,
-                    color = if (isUser) Color(0x3B10B981) else Color(0x2E14241C),
+                    color = if (isUser) EmeraldPrimary.copy(alpha = 0.22f) else Color(0x2E14241C),
                     border = BorderStroke(1.dp, if (isUser) EmeraldPrimary.copy(alpha = 0.6f) else EmeraldPrimary.copy(alpha = 0.35f)),
                     modifier = Modifier.shadow(
                         elevation = 8.dp,
                         shape = bubbleShape,
-                        spotColor = if (isUser) EmeraldPrimary.copy(alpha = 0.3f) else Color(0x2210B981)
+                        spotColor = if (isUser) EmeraldPrimary.copy(alpha = 0.3f) else EmeraldPrimary.copy(alpha = 0.15f)
                     )
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -2071,7 +2080,7 @@ private fun ChatMessageItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0x2210B981))
+                                    .background(EmeraldPrimary.copy(alpha = 0.15f))
                                     .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
                                     .padding(10.dp)
                             ) {
@@ -2119,7 +2128,7 @@ private fun ChatMessageItem(
                     // Progress Updated ✓ Chip
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0x2210B981),
+                        color = EmeraldPrimary.copy(alpha = 0.15f),
                         border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -2153,7 +2162,7 @@ private fun ChatMessageItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0x1C10B981))
+                            .background(EmeraldPrimary.copy(alpha = 0.12f))
                             .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(16.dp))
                             .padding(10.dp)
                     ) {
@@ -2291,7 +2300,7 @@ private fun ChatMessageItem(
                         val isLast = message.stepNumber >= totalSteps
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = Color(0x2210B981),
+                            color = EmeraldPrimary.copy(alpha = 0.15f),
                             border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)),
                             modifier = Modifier
                                 .weight(1f)
@@ -2346,7 +2355,7 @@ private fun AiThinkingIndicator(message: String) {
 
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = Color(0x2810B981),
+        color = EmeraldPrimary.copy(alpha = 0.16f),
         border = BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.45f)),
         modifier = Modifier
             .fillMaxWidth()
@@ -2363,7 +2372,7 @@ private fun AiThinkingIndicator(message: String) {
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .background(Color(0x3310B981)),
+                    .background(EmeraldPrimary.copy(alpha = 0.20f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -2427,7 +2436,7 @@ private fun RealPlatformCardItem(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0x2210B981))
+                        .background(EmeraldPrimary.copy(alpha = 0.15f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(text = app.badgeText, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = EmeraldPrimary)
@@ -2576,7 +2585,7 @@ private fun AiPitchCoachGeneratorView(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0x2210B981))
+                                .background(EmeraldPrimary.copy(alpha = 0.15f))
                                 .clickable {
                                     clipboardManager.setText(AnnotatedString(generatedPitch))
                                     Toast.makeText(context, "Copied Pitch to Clipboard!", Toast.LENGTH_SHORT).show()

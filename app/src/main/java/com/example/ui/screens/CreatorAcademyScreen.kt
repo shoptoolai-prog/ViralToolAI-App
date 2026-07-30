@@ -490,11 +490,11 @@ fun CreatorAcademyScreen(
                     }
             ) {
                 AcademyCourseCard(
-                    title = "🎬 AI Video & Images Generator",
-                    subtitleText = "Learn AI Video, AI Images, Prompts & Viral Thumbnail Creation",
-                    tagText = "✨ NEW",
-                    logoName = "video_generator",
-                    accentColor = EmeraldGlow,
+                    title = "AI Prompt Extractor",
+                    subtitleText = "AI Vision Analysis & Style Recreation Prompts",
+                    tagText = "✨ AI VISION",
+                    logoName = "chatgpt",
+                    accentColor = Color(0xFF8B5CF6),
                     features = listOf(
                         "AI Video Generation from Zero using Free AI Tools",
                         "Professional AI Image Creation & Prompt Writing",
@@ -2124,8 +2124,8 @@ private fun AcademyCourseCard(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0xFF18221D),
-                        Color(0xFF0C1410)
+                        Color(0xFF181824),
+                        Color(0xFF10101A)
                     )
                 )
             )
@@ -2134,9 +2134,9 @@ private fun AcademyCourseCard(
                     1.2.dp,
                     Brush.linearGradient(
                         colors = listOf(
-                            accentColor.copy(alpha = 0.8f),
-                            EmeraldPrimary.copy(alpha = 0.5f),
-                            EmeraldGlow.copy(alpha = 0.8f)
+                            accentColor.copy(alpha = 0.85f),
+                            accentColor.copy(alpha = 0.35f),
+                            accentColor.copy(alpha = 0.75f)
                         ),
                         start = Offset(shimmerOffset, 0f),
                         end = Offset(shimmerOffset + 400f, 300f)
@@ -2168,7 +2168,26 @@ private fun AcademyCourseCard(
             )
         }
 
+        val heroType = when (logoName) {
+            "instagram" -> com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR
+            "youtube" -> com.example.ui.components.ToolHeroType.YOUTUBE_CREATOR
+            "chatgpt" -> com.example.ui.components.ToolHeroType.AI_PROMPT_EXTRACTOR
+            "capcut" -> com.example.ui.components.ToolHeroType.CAPCUT_MASTER
+            "vn" -> com.example.ui.components.ToolHeroType.VN_EDITOR
+            "meesho" -> com.example.ui.components.ToolHeroType.MEESHO_CREATOR
+            else -> com.example.ui.components.ToolHeroType.BRAND_COLLAB
+        }
+
         Column(modifier = Modifier.fillMaxWidth()) {
+            com.example.ui.components.ToolHeroBanner(
+                toolType = heroType,
+                height = 110.dp,
+                badgeText = tagText,
+                subtitleText = subtitleText
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
             // Header Row: Logo + Title + Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),

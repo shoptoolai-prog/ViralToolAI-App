@@ -99,15 +99,14 @@ fun HomeScreen(
     }
     var showSuccessDialog by remember { mutableStateOf<ShoppingItem?>(null) }
     var toastMessage by remember { mutableStateOf<String?>(null) }
-    var showInstagramBottomSheet by remember { mutableStateOf(false) }
     var showCreatorProfileBottomSheet by remember { mutableStateOf(false) }
     var showCreatorProfileScreen by remember { mutableStateOf(false) }
     var invalidUrlPopupResult by remember { mutableStateOf<com.example.data.ShoppingValidationResult?>(null) }
     var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
     var showViralToolAiStudioDialog by remember { mutableStateOf(false) }
     var showBrandCollabDialog by remember { mutableStateOf(false) }
-    var showInstaAutoDmDialog by remember { mutableStateOf(false) }
     var showMeeshoCreatorDialog by remember { mutableStateOf(false) }
+    var showWishlinkCreatorDialog by remember { mutableStateOf(false) }
     var showSmartRedirectionDialog by remember { mutableStateOf(false) }
     var lockedToolInfo by remember { mutableStateOf<Pair<String, ToolStatus>?>(null) }
 
@@ -950,177 +949,24 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // 4. INSTAGRAM SHOPPING AI
+            // 3B. WISHLINK CREATOR ACADEMY
             // ==================================================
-            PremiumFeatureComingSoonCard(
-                onComingSoonClick = {
-                    checkAndLaunchTool("tool_instagram", "Instagram Shopping AI") {
-                        showInstagramBottomSheet = true
+            com.example.ui.components.WishlinkCreatorAiCard(
+                onCardClick = {
+                    checkAndLaunchTool("tool_wishlink_academy", "Wishlink Creator Academy") {
+                        showWishlinkCreatorDialog = true
                     }
                 }
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // ==================================================
-            // 5. INSTA AUTO DM AI CARD
+            // CREATOR QUICK TOOLS SECTION
             // ==================================================
-            com.example.ui.components.InstaAutoDmAiCard(
-                onComingSoonClick = {
-                    checkAndLaunchTool("tool_instagram", "Insta Auto DM AI") {
-                        showInstaAutoDmDialog = true
-                    }
-                }
-            )
+            com.example.ui.components.CreatorQuickToolsSection()
 
             Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // 3. Sliding Premium Bottom Sheet for Instagram Shopping AI
-        AnimatedVisibility(
-            visible = showInstagramBottomSheet,
-            enter = fadeIn(animationSpec = tween(250)),
-            exit = fadeOut(animationSpec = tween(250))
-        ) {
-            val sheetScrollState = rememberScrollState()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xB3000000))
-                    .clickable { showInstagramBottomSheet = false }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .widthIn(max = 600.dp)
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-                        .background(
-                            color = Color(0xF90A0A0A),
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                        .border(
-                            BorderStroke(1.2.dp, Color(0x33FF2E44)),
-                            RoundedCornerShape(24.dp)
-                        )
-                        .padding(24.dp)
-                        .clickable(enabled = false) { }
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(sheetScrollState)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(44.dp)
-                                .height(4.dp)
-                                .background(Color(0x33FFFFFF), RoundedCornerShape(2.dp))
-                        )
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(
-                                            Color(0xFF833AB4),
-                                            Color(0xFFFD1D1D),
-                                            Color(0xFFFCB045)
-                                        )
-                                    ),
-                                    CircleShape
-                                )
-                                .shadow(elevation = 12.dp, shape = CircleShape, spotColor = Color(0xFFFD1D1D)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            OfficialLogo(name = "instagram", modifier = Modifier.size(36.dp))
-                        }
-                        
-                        Spacer(modifier = Modifier.height(18.dp))
-                        
-                        Text(
-                            text = "Instagram Shopping AI",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite,
-                            letterSpacing = 0.5.sp
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Text(
-                            text = "UNDER DEVELOPMENT",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CrimsonLight,
-                            letterSpacing = 1.5.sp
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Text(
-                            text = "Instagram Shopping AI is currently under development.\n\nIt will be available in a future update with AI Reel Analysis, automatic product detection and instant shopping comparison.\n\nThank you for your patience.",
-                            fontSize = 13.sp,
-                            color = TextGray,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 20.sp,
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.height(28.dp))
-                        
-                        val sheetBtnInteractionSource = remember { MutableInteractionSource() }
-                        val isSheetBtnPressed by sheetBtnInteractionSource.collectIsPressedAsState()
-                        val sheetBtnScale by animateFloatAsState(
-                            targetValue = if (isSheetBtnPressed) 0.95f else 1.0f,
-                            label = "SheetBtnScale"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp)
-                                .graphicsLayer {
-                                    scaleX = sheetBtnScale
-                                    scaleY = sheetBtnScale
-                                }
-                                .shadow(
-                                    elevation = 8.dp,
-                                    shape = RoundedCornerShape(12.dp),
-                                    clip = false,
-                                    ambientColor = CrimsonRed,
-                                    spotColor = CrimsonLight
-                                )
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(CrimsonRed, Color(0xFF990000))
-                                    ),
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .border(BorderStroke(1.dp, Color(0x33FFFFFF)), RoundedCornerShape(12.dp))
-                                .clickable(
-                                    interactionSource = sheetBtnInteractionSource,
-                                    indication = androidx.compose.foundation.LocalIndication.current
-                                ) {
-                                    showInstagramBottomSheet = false
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Got it",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-                }
-            }
         }
 
         // 5. Creator Profile AI Flagship LIVE Overlay Screen (Phase 6D)
@@ -1335,13 +1181,6 @@ fun HomeScreen(
         )
     }
 
-    // Insta Auto DM AI Dialog (MASTER PHASE 15E)
-    if (showInstaAutoDmDialog) {
-        com.example.ui.components.InstaAutoDmAiDialog(
-            onDismiss = { showInstaAutoDmDialog = false }
-        )
-    }
-
     // Meesho Creator AI Dialog (MEESHO CREATOR AI V3 - ZERO TO HERO)
     if (showMeeshoCreatorDialog) {
         com.example.ui.components.MeeshoCreatorAiDialog(
@@ -1350,6 +1189,13 @@ fun HomeScreen(
                 showMeeshoCreatorDialog = false
                 showBrandCollabDialog = true
             }
+        )
+    }
+
+    // Wishlink Creator Academy Dialog
+    if (showWishlinkCreatorDialog) {
+        com.example.creatoracademy.WishlinkCreatorAiDialog(
+            onDismiss = { showWishlinkCreatorDialog = false }
         )
     }
 
@@ -1599,7 +1445,7 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
     val cleanName = name.trim().lowercase()
     val merchant = remember(name) { detectMerchant(name) }
     
-    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales", "instagram", "google", "youtube", "capcut", "vn", "snapchat", "telegram", "whatsapp", "chrome", "chatgpt", "gemini")
+    val knownCanvasBrands = listOf("amazon", "flipkart", "meesho", "myntra", "ajio", "nykaa", "snapdeal", "tatacliq", "jiomart", "croma", "reliancedigital", "reliance", "firstcry", "nike", "adidas", "puma", "apple", "samsung", "zara", "hm", "snitch", "allensolly", "vijaysales", "instagram", "google", "youtube", "capcut", "vn", "snapchat", "telegram", "whatsapp", "chrome", "chatgpt", "gemini", "wishlink", "viraltool")
     val hasCanvas = knownCanvasBrands.any { cleanName.contains(it) }
     
     if (hasCanvas) {
@@ -1610,6 +1456,62 @@ fun OfficialLogo(name: String, modifier: Modifier = Modifier) {
             val radius = width / 2f
             
             when {
+                cleanName.contains("viraltool") -> {
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFF8B5CF6), Color(0xFFEC4899), Color(0xFFFF5722))
+                        ),
+                        radius = radius
+                    )
+                    val vPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.28f, height * 0.32f)
+                        lineTo(width * 0.50f, height * 0.70f)
+                        lineTo(width * 0.72f, height * 0.32f)
+                    }
+                    drawPath(
+                        path = vPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = 3.dp.toPx(),
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                            join = androidx.compose.ui.graphics.StrokeJoin.Round
+                        )
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = width * 0.06f,
+                        center = androidx.compose.ui.geometry.Offset(width * 0.50f, height * 0.30f)
+                    )
+                }
+                cleanName.contains("wishlink") -> {
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFFFF6D00), Color(0xFFE64A19))
+                        ),
+                        radius = radius
+                    )
+                    val wPath = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(width * 0.22f, height * 0.35f)
+                        lineTo(width * 0.36f, height * 0.65f)
+                        lineTo(width * 0.50f, height * 0.45f)
+                        lineTo(width * 0.64f, height * 0.65f)
+                        lineTo(width * 0.78f, height * 0.35f)
+                    }
+                    drawPath(
+                        path = wPath,
+                        color = Color.White,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = 2.8.dp.toPx(),
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                            join = androidx.compose.ui.graphics.StrokeJoin.Round
+                        )
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = width * 0.05f,
+                        center = androidx.compose.ui.geometry.Offset(width * 0.50f, height * 0.32f)
+                    )
+                }
                 cleanName.contains("youtube") -> {
                     drawCircle(color = Color(0xFFFF0000), radius = radius)
                     val playPath = androidx.compose.ui.graphics.Path().apply {
@@ -5264,84 +5166,87 @@ fun BrandCollaborationAiCard(
         label = "brandCollabBtnScale"
     )
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = EmeraldPrimary,
-                ambientColor = Color(0x22000000)
-            )
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFF14141E))
-            .border(
-                BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary.copy(alpha = 0.5f), Color(0x22FFFFFF)))),
-                RoundedCornerShape(24.dp)
-            )
-            .padding(18.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x1110B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Campaign,
-                            contentDescription = "Brand Collaboration AI",
-                            tint = EmeraldPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
+            val GoldYellowPrimary = Color(0xFFFFD700)
+            val GoldYellowSecondary = Color(0xFFFFA000)
 
-                    Column {
-                        Text(
-                            text = "Brand Collaboration AI",
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite,
-                            letterSpacing = 0.3.sp
-                        )
-                        Text(
-                            text = "Pitch, negotiate & close deal emails with top brands.",
-                            fontSize = 11.5.sp,
-                            color = TextWhite.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x2210B981))
-                        .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = "FREE",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary,
-                        letterSpacing = 0.5.sp
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = GoldYellowPrimary,
+                        ambientColor = Color(0x22000000)
                     )
-                }
-            }
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFF14141E))
+                    .border(
+                        BorderStroke(1.2.dp, Brush.linearGradient(listOf(GoldYellowPrimary.copy(alpha = 0.5f), Color(0x22FFFFFF)))),
+                        RoundedCornerShape(24.dp)
+                    )
+                    .padding(18.dp)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(GoldYellowPrimary.copy(alpha = 0.15f))
+                                    .border(BorderStroke(1.dp, GoldYellowPrimary.copy(alpha = 0.4f)), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Campaign,
+                                    contentDescription = "Brand Collaboration AI",
+                                    tint = GoldYellowPrimary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            Column {
+                                Text(
+                                    text = "Brand Collaboration AI",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite,
+                                    letterSpacing = 0.3.sp
+                                )
+                                Text(
+                                    text = "Pitch, negotiate & close deal emails with top brands.",
+                                    fontSize = 11.5.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(GoldYellowPrimary.copy(alpha = 0.15f))
+                                .border(BorderStroke(1.dp, GoldYellowPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "FREE",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GoldYellowPrimary,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -5411,11 +5316,11 @@ fun BrandCollaborationAiCard(
                         scaleX = buttonScale
                         scaleY = buttonScale
                     }
-                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = EmeraldPrimary)
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = GoldYellowPrimary)
                     .clip(RoundedCornerShape(23.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF10B981), Color(0xFF059669))
+                            listOf(GoldYellowPrimary, GoldYellowSecondary)
                         )
                     )
                     .clickable(

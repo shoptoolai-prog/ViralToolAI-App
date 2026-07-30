@@ -153,68 +153,76 @@ data class MentorToolTheme(
 ) {
     companion object {
         val BrandCollab = MentorToolTheme(
-            primaryColor = Color(0xFFFACC15),
-            secondaryColor = Color(0xFFEAB308),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFACC15), Color(0xFFEAB308))),
-            glassBorderColor = Color(0x66FACC15),
-            glowColor = Color(0x33FACC15),
+            primaryColor = Color(0xFFFFD700),
+            secondaryColor = Color(0xFFFFA000),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFFD700), Color(0xFFFFA000))),
+            glassBorderColor = Color(0x66FFD700),
+            glowColor = Color(0x33FFD700),
             badgeLabel = "Brand Collab AI"
         )
         val MeeshoCreator = MentorToolTheme(
-            primaryColor = Color(0xFFF43F5E),
+            primaryColor = Color(0xFFFF4081),
             secondaryColor = Color(0xFFE91E63),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFF43F5E), Color(0xFFE91E63))),
-            glassBorderColor = Color(0x66F43F5E),
-            glowColor = Color(0x33F43F5E),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFF4081), Color(0xFFE91E63))),
+            glassBorderColor = Color(0x66FF4081),
+            glowColor = Color(0x33FF4081),
             badgeLabel = "Meesho Creator AI"
         )
         val InstagramCreator = MentorToolTheme(
             primaryColor = Color(0xFFE1306C),
             secondaryColor = Color(0xFF833AB4),
-            gradientBrush = Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFF77737))),
+            gradientBrush = Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D))),
             glassBorderColor = Color(0x66E1306C),
             glowColor = Color(0x33E1306C),
             badgeLabel = "Instagram Creator AI"
         )
         val YouTubeCreator = MentorToolTheme(
-            primaryColor = Color(0xFFEF4444),
-            secondaryColor = Color(0xFFDC2626),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFEF4444), Color(0xFFB91C1C))),
-            glassBorderColor = Color(0x66EF4444),
-            glowColor = Color(0x33EF4444),
+            primaryColor = Color(0xFFFF0000),
+            secondaryColor = Color(0xFFE50914),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFF0000), Color(0xFFE50914))),
+            glassBorderColor = Color(0x66FF0000),
+            glowColor = Color(0x33FF0000),
             badgeLabel = "YouTube Creator AI"
         )
         val AiVideoImage = MentorToolTheme(
-            primaryColor = Color(0xFF06B6D4),
-            secondaryColor = Color(0xFFA855F7),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF06B6D4), Color(0xFFA855F7))),
-            glassBorderColor = Color(0x6606B6D4),
-            glowColor = Color(0x3306B6D4),
-            badgeLabel = "AI Video & Image AI"
+            primaryColor = Color(0xFF8B5CF6),
+            secondaryColor = Color(0xFF9C27B0),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF8B5CF6), Color(0xFF9C27B0))),
+            glassBorderColor = Color(0x668B5CF6),
+            glowColor = Color(0x338B5CF6),
+            badgeLabel = "AI Prompt Extractor"
         )
         val CapCutMaster = MentorToolTheme(
-            primaryColor = Color(0xFF38BDF8),
-            secondaryColor = Color(0xFF0284C7),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF38BDF8), Color(0xFF0284C7))),
-            glassBorderColor = Color(0x6638BDF8),
-            glowColor = Color(0x3338BDF8),
-            badgeLabel = "CapCut Video Mentor"
+            primaryColor = Color(0xFF00E5FF),
+            secondaryColor = Color(0xFF2979FF),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF00E5FF), Color(0xFF2979FF))),
+            glassBorderColor = Color(0x6600E5FF),
+            glowColor = Color(0x3300E5FF),
+            badgeLabel = "CapCut Master"
         )
         val VnEditor = MentorToolTheme(
-            primaryColor = Color(0xFF3B82F6),
-            secondaryColor = Color(0xFF1D4ED8),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8))),
-            glassBorderColor = Color(0x663B82F6),
-            glowColor = Color(0x333B82F6),
+            primaryColor = Color(0xFF0288D1),
+            secondaryColor = Color(0xFF00ACC1),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF0288D1), Color(0xFF00ACC1))),
+            glassBorderColor = Color(0x660288D1),
+            glowColor = Color(0x330288D1),
             badgeLabel = "VN Video Editor AI"
         )
         val InstaAutoDm = MentorToolTheme(
-            primaryColor = Color(0xFF10B981),
-            secondaryColor = Color(0xFF059669),
-            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFF10B981), Color(0xFF059669))),
-            glassBorderColor = Color(0x6610B981),
-            glowColor = Color(0x3310B981),
-            badgeLabel = "Insta Auto DM AI"
+            primaryColor = Color(0xFFCFD8DC),
+            secondaryColor = Color(0xFF90A4AE),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFECEFF1), Color(0xFF78909C))),
+            glassBorderColor = Color(0x66CFD8DC),
+            glowColor = Color(0x33CFD8DC),
+            badgeLabel = "Instagram Edits AI"
+        )
+        val WishlinkCreator = MentorToolTheme(
+            primaryColor = Color(0xFFFF5722),
+            secondaryColor = Color(0xFFE64A19),
+            gradientBrush = Brush.horizontalGradient(listOf(Color(0xFFFF5722), Color(0xFFFF7043))),
+            glassBorderColor = Color(0x66FF5722),
+            glowColor = Color(0x33FF5722),
+            badgeLabel = "Wishlink Academy"
         )
     }
 }

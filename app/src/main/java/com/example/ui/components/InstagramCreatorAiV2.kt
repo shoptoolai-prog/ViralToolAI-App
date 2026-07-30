@@ -522,6 +522,17 @@ fun InstagramCreatorAiV2Dialog(
                         onClose = onDismiss
                     )
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    com.example.ui.components.ToolHeroBanner(
+                        toolType = com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR,
+                        height = 110.dp,
+                        badgeText = "📸 INSTA CREATOR AI",
+                        subtitleText = "Viral Reels & Growth Blueprint"
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     // STEP PROGRESS HORIZONTAL BAR
                     if (!showLanguagePicker && !showCreatorTypePicker) {
                         StepProgressBar(
