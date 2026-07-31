@@ -2,94 +2,30 @@ package com.example.ui.components
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import com.example.ui.theme.responsiveImeAndNavPadding
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.ui.draw.shadow
-import com.example.ui.theme.ElectricPurple
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Subtitles
-import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -99,396 +35,449 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.screens.OfficialLogo
-import com.example.ui.theme.AmoledBlack
-import com.example.ui.theme.EmeraldGlow
-import com.example.ui.theme.EmeraldPrimary
-import com.example.ui.theme.TextWhite
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * PHASE — INSTAGRAM CREATOR AI V2 (ZERO TO HERO PERSONAL AI MENTOR)
- *
- * An interactive, personal AI mentor that guides users step-by-step from zero to a professional
- * Instagram creator.
- *
- * Core Features:
- * 1. Language Selection (हिन्दी, English, Hinglish)
- * 2. Creator Type Selection (Influencer, Tech, Food, Vlogger, etc.)
- * 3. Step Lock System (Next step unlocks ONLY when current is confirmed)
- * 4. Friendly Conversational AI Personality (No robotic lectures)
- * 5. Smart "Explain Again" Engine (Fresh explanations with real analogies, never repeated)
- * 6. Interactive Script Generator (15s, 30s, 45s, 60s, 90s duration with fresh hooks)
- * 7. Editing Detection & Video Editing Course (VN, CapCut, Premiere)
- * 8. Trending Audio Guide (Voice clarity & audio volume mixing)
- * 9. AI Caption & 3-Tier Hashtag Generator
- * 10. Pre-Upload 9-Point Checklist
- * 11. Post-Upload Analytics & Reply Strategy
- * 12. Complete Session Memory & State Persistence
- */
+// =========================================================
+// COLOR PALETTE & THEME CONSTANTS (BLACK + VIOLET)
+// =========================================================
+private val DarkCanvasBg = Color(0xFF08030C)
+private val CardSurfaceBg = Color(0xFF13091E)
+private val CardBorderColor = Color(0x33A855F7)
+private val VioletPrimary = Color(0xFF8B5CF6)
+private val VioletGlow = Color(0xFFA855F7)
+private val VioletDeep = Color(0xFF6D28D9)
+private val MagentaAccent = Color(0xFFD946EF)
+private val TextWhite = Color(0xFFFFFFFF)
+private val TextMuted = Color(0xFFB3A1C9)
+private val SuccessGreen = Color(0xFF10B981)
+private val ErrorRed = Color(0xFFEF4444)
 
-enum class MentorLanguage(val code: String, val label: String, val nativeName: String) {
-    HINDI("HI", "हिन्दी", "Hindi"),
-    ENGLISH("EN", "English", "English"),
-    HINGLISH("HINGLISH", "Hinglish", "Hinglish")
-}
-
-data class MentorStep(
+// =========================================================
+// LESSON MODEL
+// =========================================================
+data class InstagramLessonData(
     val id: Int,
-    val title: String,
-    val shortDesc: String,
-    val mentorPromptHi: String,
-    val mentorPromptEn: String,
-    val mentorPromptHinglish: String,
-    val smartQuestionHi: String,
-    val smartQuestionEn: String,
-    val smartQuestionHinglish: String
+    val icon: ImageVector,
+    val badge: String,
+    val titleEn: String,
+    val titleHi: String,
+    val subtitleEn: String,
+    val subtitleHi: String,
+    val conceptEn: String,
+    val conceptHi: String,
+    val exampleEn: String,
+    val exampleHi: String,
+    val checklistEn: List<String>,
+    val checklistHi: List<String>,
+    val quizQuestionEn: String,
+    val quizQuestionHi: String,
+    val quizOptionsEn: List<String>,
+    val quizOptionsHi: List<String>,
+    val quizCorrectIndex: Int,
+    val quizExplanationEn: String,
+    val quizExplanationHi: String,
+    val summaryEn: String,
+    val summaryHi: String
 )
 
-data class ChatMessage(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val sender: String, // "AI_MENTOR" or "CREATOR"
-    val text: String,
-    val stepIndex: Int = 0,
-    val timestamp: String = "Just now",
-    val isFreshExplanation: Boolean = false,
-    val scriptData: ScriptResult? = null,
-    val captionData: CaptionResult? = null
-)
-
-data class ScriptResult(
-    val topic: String,
-    val duration: String,
-    val hook: String,
-    val flow: String,
-    val cta: String
-)
-
-data class CaptionResult(
-    val caption: String,
-    val hashtags: List<String>
-)
-
-val CREATOR_TYPES = listOf(
-    "Influencer",
-    "Vlogger",
-    "Tech Creator",
-    "Gaming Creator",
-    "Education Creator",
-    "Comedy Creator",
-    "Lifestyle Creator",
-    "Fashion Creator",
-    "Business Creator",
-    "Fitness Creator",
-    "Food Creator",
-    "Other"
-)
-
-val INSTAGRAM_ROADMAP_STEPS = listOf(
-    MentorStep(
+// =========================================================
+// OFFICIAL LESSONS DATABASE
+// =========================================================
+val INSTAGRAM_LESSONS = listOf(
+    InstagramLessonData(
         id = 1,
-        title = "1. Instagram Download & Setup",
-        shortDesc = "App installation & initial account creation",
-        mentorPromptHi = "👋 Namaste Creator! Sabse pehle Instagram Play Store/App Store se download karke ek fresh account banao. Kya app install ho gaya?",
-        mentorPromptEn = "👋 Welcome Creator! First, download Instagram from the App Store/Play Store and create a fresh account. Is the app installed?",
-        mentorPromptHinglish = "👋 Hey Creator! Sabse pehle Instagram download karke fresh account create kar lo. Kya app install ho gaya?",
-        smartQuestionHi = "App install ho gaya?",
-        smartQuestionEn = "Is the app installed?",
-        smartQuestionHinglish = "App install ho gaya?"
+        icon = Icons.Default.AccountCircle,
+        badge = "FOUNDATION",
+        titleEn = "Profile & Bio Masterclass",
+        titleHi = "प्रोफाइल और बायो मास्टरक्लास",
+        subtitleEn = "Turn your Instagram profile into a high-converting creator billboard",
+        subtitleHi = "अपने इंस्टाग्राम प्रोफाइल को हाई-कन्वर्टिंग क्रिएटर बिलबोर्ड बनाएं",
+        conceptEn = "Your profile is your digital storefront. Within 2 seconds, a visitor decides whether to follow you or leave. A high-converting profile requires 5 elements: a searchable HD handle, clear high-contrast profile picture, a 3-line value bio, social proof, and a single targeted call-to-action link.",
+        conceptHi = "आपकी प्रोफाइल आपकी डिजिटल दुकान है। 2 सेकंड के भीतर, एक विजिटर यह तय करता है कि आपको फॉलो करना है या छोड़ना है। एक सफल प्रोफाइल के लिए 5 चीजें ज़रूरी हैं: सर्च योग्य हैंडल, एचडी प्रोफाइल फोटो, 3-लाइन वैल्यू बायो, सोशल प्रूफ और 1 डायरेक्ट लिंक।",
+        exampleEn = "Line 1: 🚀 AI Tech Creator | Line 2: 💡 Daily AI Hacks & Reel Growth | Line 3: ⬇️ Free Creator Growth Kit below",
+        exampleHi = "लाइन 1: 🚀 AI टेक क्रिएटर | लाइन 2: 💡 डेली AI हैक्स और रील ग्रोथ | लाइन 3: ⬇️ फ्री क्रिएटर टूलकिट के लिए नीचे क्लिक करें",
+        checklistEn = listOf(
+            "Clean & searchable handle without extra numbers or symbols",
+            "High contrast face DP with bright solid background",
+            "3-line value proposition bio stating who you serve",
+            "One active call-to-action link pointing to your target destination"
+        ),
+        checklistHi = listOf(
+            "बिना किसी उलझन वाला सर्च-फ्रेंडली यूजरनेम",
+            "साफ चेहरा और ब्राइट बैकग्राउंड वाली HD डीपी",
+            "स्पष्ट 3-लाइन वैल्यू बायो जो बताती है आप क्या वैल्यू देते हैं",
+            "1 चालू कॉल-टू-एक्शन लिंक"
+        ),
+        quizQuestionEn = "What is the primary function of the first line of your Instagram Bio?",
+        quizQuestionHi = "इंस्टाग्राम बायो की पहली लाइन का मुख्य उद्देश्य क्या है?",
+        quizOptionsEn = listOf(
+            "Clearly state who you are & your exact content niche",
+            "Write random aesthetic symbols and emojis",
+            "Put your phone number for public viewing",
+            "Copy paste random song lyrics"
+        ),
+        quizOptionsHi = listOf(
+            "आप कौन हैं और आपकी नीच क्या है, यह साफ़ बताना",
+            "सिर्फ स्टाइलिश चिन्ह लगाना",
+            "अपना फोन नंबर लिखना",
+            "कोई भी यादृच्छिक गाना लिखना"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "The first line acts as your headline. Visitors need to immediately know what value they will receive by tapping Follow!",
+        quizExplanationHi = "पहली लाइन आपकी हेडलाइन है। विजिटर्स को तुरंत पता चलना चाहिए कि आपको फॉलो करने से उन्हें क्या फायदा होगा!",
+        summaryEn = "Focus on clarity over cleverness. A crisp DP, clear bio, and active link convert 3x more profile visits into followers.",
+        summaryHi = "बायो को हमेशा साफ़ और सीधा रखें। एक बेहतरीन डीपी और वैल्यू बायो आपकी रीच और फॉलोअर्स 3 गुना बढ़ाता है।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 2,
-        title = "2. Switch to Professional Account",
-        shortDesc = "Unlock creator dashboard & insights",
-        mentorPromptHi = "Mast! Ab Settings ⚙️ me jao → Account → Switch to Professional/Creator Account par tap karo. Isse aapko insights aur brand tools milenge. Ban gaya Creator Account?",
-        mentorPromptEn = "Great! Now go to Settings ⚙️ → Account → Switch to Professional/Creator Account. This unlocks analytics & monetization tools. Switched to Creator Account?",
-        mentorPromptHinglish = "Awesome! Ab Settings ⚙️ -> Account -> Switch to Professional/Creator Account kar lo. Isse real Insights aur Monetization tools unlock ho jaayenge. Switching ho gayi?",
-        smartQuestionHi = "Professional account ON hua?",
-        smartQuestionEn = "Switched to Professional Account?",
-        smartQuestionHinglish = "Professional account ON ho gaya?"
+        icon = Icons.Default.Dashboard,
+        badge = "CREATOR DASHBOARD",
+        titleEn = "Professional Account & Creator Insights",
+        titleHi = "प्रोफेशनल अकाउंट और क्रिएटर इनसाइट्स",
+        subtitleEn = "Unlock analytics, monetization tools, and royalty-free creator audio",
+        subtitleHi = "एनालिटिक्स, मोनेटाइजेशन टूल और क्रिएटर ऑडियो अनलॉक करें",
+        conceptEn = "Personal accounts hide crucial growth data. Switching to a Professional Creator Account unlocks the Professional Dashboard. This gives you exact metrics on Reached Accounts, Engaged Accounts, Follower Active Hours, and Top Performing Reels.",
+        conceptHi = "पर्सनल अकाउंट में रीच का डाटा नहीं दिखता। प्रोफेशनल क्रिएटर अकाउंट में स्विच करने पर आपको 'प्रोफेशनल डैशबोर्ड' मिलता है। इससे आपको रीच, एक्टिव फॉलोअर्स टाइम और वायरल रील्स का सही आँकड़ा मिलता है।",
+        exampleEn = "Go to Settings ⚙️ -> Account -> Switch to Professional Account -> Select 'Digital Creator' -> Complete Setup!",
+        exampleHi = "सेटिंग्स ⚙️ -> अकाउंट -> स्विच टू प्रोफेशनल अकाउंट -> 'डिजिटल क्रिएटर' चुनें -> ओके करें!",
+        checklistEn = listOf(
+            "Switch account category to Digital Creator or Video Creator",
+            "Enable Professional Dashboard access in profile settings",
+            "Inspect Follower Active Hours chart to find peak posting windows",
+            "Review Reached Accounts breakdown for non-follower discovery"
+        ),
+        checklistHi = listOf(
+            "अकाउंट टाइप डिजिटल क्रिएटर में बदलें",
+            "प्रोफेशनल डैशबोर्ड ऑन करें",
+            "फॉलोअर्स एक्टिव रहने का समय देखें",
+            "रीच ग्राफ और इनसाइट्स चेक करें"
+        ),
+        quizQuestionEn = "Why is switching to a Professional Creator Account essential for growth?",
+        quizQuestionHi = "ग्रोथ के लिए प्रोफेशनल क्रिएटर अकाउंट पर स्विच करना क्यों ज़रूरी है?",
+        quizOptionsEn = listOf(
+            "It unlocks Analytics, Insights, and Creator Monetization tools",
+            "It automatically makes all your uploaded videos private",
+            "It deletes old posts automatically after 30 days",
+            "It blocks non-followers from viewing your content"
+        ),
+        quizOptionsHi = listOf(
+            "यह एनालिटिक्स, इनसाइट्स और क्रिएटर टूल्स अनलॉक करता है",
+            "यह वीडियो को प्राइवेट कर देता है",
+            "यह पुराने पोस्ट डिलीट कर देता है",
+            "यह लोगों को ब्लॉक करता है"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "Insights allow you to measure what content works best and double down on high-performing video formats!",
+        quizExplanationHi = "इनसाइट्स की मदद से आपको पता चलता है कि कौन सी वीडियो वायरल हो रही है ताकि आप वैसी ही और वीडियो बना सकें!",
+        summaryEn = "Always monitor your Professional Dashboard to publish content when your audience is most active.",
+        summaryHi = "हमेशा प्रोफेशनल डैशबोर्ड चेक करें और फॉलोअर्स के एक्टिव टाइम पर ही पोस्ट करें।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 3,
-        title = "3. Profile & Bio Optimization",
-        shortDesc = "Username, Bio line, Category & DP",
-        mentorPromptHi = "Aapka Bio aapka digital visiting card hai! 1st Line: Aap kaun hain. 2nd Line: Aap kya sikhaate/dikhate hain. 3rd Line: Call To Action + Link. DP clear aur high resolution rakho.",
-        mentorPromptEn = "Your Bio is your billboard! Line 1: Who you are. Line 2: What value you offer. Line 3: Call to Action + Link. Keep a sharp, clear DP.",
-        mentorPromptHinglish = "Bio aapka main visiting card hai! Line 1: Main kaun hu. Line 2: Viewer ko kya milega. Line 3: Call to Action + Link. Clear profile picture lagao.",
-        smartQuestionHi = "Bio & Profile Pic set ho gaye?",
-        smartQuestionEn = "Is Bio & Profile Picture updated?",
-        smartQuestionHinglish = "Bio & DP set kar liya?"
+        icon = Icons.Default.HighQuality,
+        badge = "QUALITY SETTINGS",
+        titleEn = "1080p Crystal Clear HD Uploads",
+        titleHi = "1080p क्रिस्टल क्लियर HD रील्स",
+        subtitleEn = "Stop Instagram compression from destroying your video crispness",
+        subtitleHi = "इंस्टाग्राम कंप्रेशन को अपनी वीडियो की क्वालिटी खराब करने से रोकें",
+        conceptEn = "By default, Instagram compresses high-resolution videos to save server bandwidth. If your video appears blurry, the algorithm stops pushing it to the Explore page. Toggling 'Upload at Highest Quality' forces Instagram to render your content in full crisp 1080p resolution.",
+        conceptHi = "डिफ़ॉल्ट रूप से इंस्टाग्राम डेटा बचाने के लिए वीडियो की क्वालिटी घटा देता है। धुंधली वीडियो को इंस्टाग्राम का एल्गोरिदम आगे नहीं बढ़ाता। 'अपलोड एट हाईएस्ट क्वालिटी' सेटिंग ऑन करने पर आपकी रील फुल HD में रेंडर होती है।",
+        exampleEn = "Settings & Privacy ⚙️ -> Media Quality -> Turn ON 'Upload at Highest Quality'.",
+        exampleHi = "सेटिंग्स एंड प्राइवेसी ⚙️ -> मीडिया क्वालिटी -> 'अपलोड एट हाईएस्ट क्वालिटी' बटन चालू करें।",
+        checklistEn = listOf(
+            "Enable 'Upload at Highest Quality' in Instagram Settings",
+            "Record & export videos in 1080p at 60 FPS bitrate",
+            "Ensure bright, even facial lighting while filming",
+            "Avoid applying heavy Instagram filters that introduce noise"
+        ),
+        checklistHi = listOf(
+            "इंस्टाग्राम सेटिंग्स में 'हाईएस्ट क्वालिटी' ऑन करें",
+            "1080p 60FPS पर वीडियो एक्सपोर्ट करें",
+            "शूटिंग के समय अच्छी लाइट का इस्तेमाल करें",
+            "ज्यादा हैवी फिल्टर से बचें जो वीडियो धुंधली करे"
+        ),
+        quizQuestionEn = "Which setting prevents Instagram from compressing and blurring your uploaded Reels?",
+        quizQuestionHi = "कौन सी सेटिंग इंस्टाग्राम को आपकी अपलोड की गई रील्स को धुंधला करने से रोकती है?",
+        quizOptionsEn = listOf(
+            "Upload at Highest Quality",
+            "Data Saver Mode",
+            "Auto Archive Posts",
+            "Mute Audio Clips"
+        ),
+        quizOptionsHi = listOf(
+            "अपलोड एट हाईएस्ट क्वालिटी (Upload at Highest Quality)",
+            "डेटा सेवर मोड",
+            "ऑटो आर्काइव",
+            "म्यूट ऑडियो"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "High visual quality retains viewers for longer watch time, driving significantly higher algorithmic reach!",
+        quizExplanationHi = "साफ और HD वीडियो देखने में लोग ज्यादा रुकते हैं, जिससे वॉच टाइम और रीच बढ़ती है!",
+        summaryEn = "HD clarity is non-negotiable. Crisp 1080p resolution significantly boosts initial watch retention.",
+        summaryHi = "हमेशा HD 1080p में ही वीडियो पोस्ट करें। इससे आपकी रील का फर्स्ट इम्प्रेशन बहुत बढ़िया पड़ता है।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 4,
-        title = "4. High Quality Upload Settings",
-        shortDesc = "Crystal clear HD Reels config",
-        mentorPromptHi = "Bohot zaroori setting! Settings ⚙️ → Media Quality → Turn ON 'Upload at Highest Quality'. Isse aapke videos blurry nahi honge.",
-        mentorPromptEn = "Crucial setting! Settings ⚙️ → Account / Media Quality → Enable 'Upload at Highest Quality'. This prevents pixelated Reels.",
-        mentorPromptHinglish = "Super important step! Settings ⚙️ -> Data Usage & Media Quality -> 'Upload at Highest Quality' ON kar do. Reel quality solid rahegi!",
-        smartQuestionHi = "Highest quality upload ON kar diya?",
-        smartQuestionEn = "Enabled Highest Quality Upload?",
-        smartQuestionHinglish = "Highest Quality Upload ON ho gaya?"
+        icon = Icons.Default.AutoAwesome,
+        badge = "VIRAL HOOKS",
+        titleEn = "The 3-Second Viral Hook System",
+        titleHi = "3-सेकंड वायरल हुक मास्टरक्लास",
+        subtitleEn = "Master visual and verbal hooks that stop the thumb instantly",
+        subtitleHi = "वीडियो की शुरुआत में ही दर्शक को रोकने का अनोखा फॉर्मूला",
+        conceptEn = "Average attention spans on Instagram Reels are under 3 seconds. If your Reel doesn't create immediate curiosity or visual tension in the first 3 seconds, viewers swipe away. Use a combination of bold text overlay, energetic voiceover, and visual movement.",
+        conceptHi = "इंस्टाग्राम पर लोगों का ध्यान सिर्फ 3 सेकंड का होता है। अगर शुरुआत में ही कोई मजबूत हुक या बड़ा सवाल नहीं है, तो यूजर तुरंत स्वाइप कर देगा। पहली 3 सेकंड में स्क्रीन पर बड़ा टेक्स्ट और दमदार वॉइस दें।",
+        exampleEn = "Verbal Hook: 'Stop making this 1 mistake on Reels if you want 100k views!' + On-screen text: 'WRONG REEL MISTAKE 🚨'",
+        exampleHi = "वॉइस हुक: 'अगर 1 लाख व्यूज चाहिए तो रील में यह 1 गलती करना बंद करो!' + स्क्रीन टेक्स्ट: 'बड़ी रील गलती 🚨'",
+        checklistEn = listOf(
+            "Place bold contrast on-screen text in frame 1",
+            "Ask a compelling curiosity gap question",
+            "Use visual movement or gesture immediately",
+            "Keep the opening hook line under 6 words"
+        ),
+        checklistHi = listOf(
+            "पहले फ्रेम में ही बड़ा और साफ टेक्स्ट रखें",
+            "उत्सुकता बढ़ाने वाला सवाल पूछें",
+            "शुरुआत में ही कुछ मूवमेंट या इशारा करें",
+            "शुरुआती लाइन 6 शब्दों से छोटी रखें"
+        ),
+        quizQuestionEn = "What happens if your Reel lacks a strong hook in the first 3 seconds?",
+        quizQuestionHi = "अगर आपकी रील में शुरुआती 3 सेकंड में हुक नहीं है तो क्या होगा?",
+        quizOptionsEn = listOf(
+            "Viewers swipe away, dropping watch time and algorithm distribution",
+            "Instagram gives you free views automatically",
+            "The video plays 5x slower",
+            "It automatically gets pinned to top"
+        ),
+        quizOptionsHi = listOf(
+            "व्यूअर्स स्वाइप कर देंगे, जिससे वॉच टाइम और रीच गिर जाएगी",
+            "इंस्टाग्राम फ्री व्यूज देगा",
+            "वीडियो अपने आप रुक जाएगी",
+            "वीडियो पिन हो जाएगी"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "Watch retention in the first 3 seconds is the #1 metric Instagram uses to decide whether to push a Reel to 10k+ people!",
+        quizExplanationHi = "शुरुआती 3 सेकंड का वॉच टाइम ही इंस्टाग्राम का सबसे बड़ा सिग्नल है जो आपकी रील को वायरल करता है!",
+        summaryEn = "Every viral Reel wins or loses in the first 3 seconds. Hook the viewer visually and verbally!",
+        summaryHi = "आपकी रील वायरल होगी या नहीं, यह शुरुआती 3 सेकंड में ही तय हो जाता है।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 5,
-        title = "5. Creator Dashboard & Analytics",
-        shortDesc = "Insights, reach & audience demographics",
-        mentorPromptHi = "Professional Dashboard open karo. Yahan 'Accounts Reached', 'Engagement', aur 'Total Followers' ki country/age breakdown dikhti hai.",
-        mentorPromptEn = "Open your Professional Dashboard. Here you can track Accounts Reached, Engagement Rate, and Follower Demographics.",
-        mentorPromptHinglish = "Professional Dashboard check karo. Yahan Reached Accounts, Active Followers aur Top Cities ka breakdown milta hai.",
-        smartQuestionHi = "Dashboard me insights dikh rahe hain?",
-        smartQuestionEn = "Can you see Insights in Dashboard?",
-        smartQuestionHinglish = "Dashboard me insights dikh rahe hain?"
+        icon = Icons.Default.VolumeUp,
+        badge = "AUDIO & SOUND",
+        titleEn = "Trending Audio & Voice Balancing",
+        titleHi = "ट्रेंडिंग ऑडियो और वॉइस मिक्सिंग",
+        subtitleEn = "Leverage viral audio arrows with balanced crisp voiceovers",
+        subtitleHi = "वायरल ट्रेंडिंग ऑडियो एरो और साफ़ वॉइस का परफेक्ट बैलेंस",
+        conceptEn = "Reels using audio with a small ↗️ arrow get algorithm priority because Instagram boosts trending audio clips. However, when doing a voiceover, background music must be turned down to 10-15% while keeping your spoken voice at 100% so viewers can hear every word clearly.",
+        conceptHi = "जिस ऑडियो के साथ छोटा ↗️ तीर (Trending Arrow) होता है, इंस्टाग्राम उसे ज़्यादा प्रमोट करता है। वॉइसओवर रील बनाते समय बैकग्राउंड म्यूजिक की आवाज़ 10-15% रखें और अपनी आवाज़ 100% पर रखें।",
+        exampleEn = "In Audio Controls: Original Audio (Voiceover) = 100%, Added Trending Audio = 12%.",
+        exampleHi = "ऑडियो कंट्रोल्स में: ओरिजिनल वॉइस = 100%, ट्रेंडिंग बैकग्राउंड म्यूजिक = 12%.",
+        checklistEn = listOf(
+            "Look for the small ↗️ trending audio arrow icon",
+            "Record spoken voiceover in a quiet, echoes-free room",
+            "Set Voiceover volume to 100% and Background Music to 10-15%",
+            "Preview audio mix with headphones before publishing"
+        ),
+        checklistHi = listOf(
+            "ऑडियो नाम के पास छोटा ↗️ ट्रेंडिंग तीर देखें",
+            "शांत जगह पर क्लियर आवाज रिकॉर्ड करें",
+            "वॉइसओवर 100% और बैकग्राउंड म्यूजिक 10-15% रखें",
+            "पोस्ट करने से पहले हेडफोन लगाकर आवाज़ चेक करें"
+        ),
+        quizQuestionEn = "What is the recommended volume balance for background trending audio during a voiceover Reel?",
+        quizQuestionHi = "वॉइसओवर वाली रील में बैकग्राउंड ट्रेंडिंग म्यूजिक की आवाज़ कितनी होनी चाहिए?",
+        quizOptionsEn = listOf(
+            "10% to 15%",
+            "100%",
+            "75%",
+            "0% (Completely muted)"
+        ),
+        quizOptionsHi = listOf(
+            "10% से 15%",
+            "100%",
+            "75%",
+            "0% (बिलकुल बंद)"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "10-15% volume allows the trending audio algorithm tag to trigger while keeping your voiceover 100% clear!",
+        quizExplanationHi = "10-15% म्यूजिक से ट्रेंडिंग ऑडियो का टैग भी लग जाता है और आपकी आवाज़ भी बिलकुल साफ सुनाई देती है!",
+        summaryEn = "Combine trending audio tags with crystal clear voiceovers for maximum discoverability.",
+        summaryHi = "ट्रेंडिंग ऑडियो टैग का इस्तेमाल करें और अपनी आवाज को हमेशा साफ रखें।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 6,
-        title = "6. Content Formats Masterclass",
-        shortDesc = "Reels, Stories, Highlights & Trial Reels",
-        mentorPromptHi = "Reels = Growth & Reach. Stories = Trust & Connection. Highlights = Permanent Portfolio. Trial Reels = Non-follower test playground!",
-        mentorPromptEn = "Reels bring new audience. Stories build trust. Highlights serve as permanent showcase. Trial Reels test content with non-followers!",
-        mentorPromptHinglish = "Reels se new audience aati hai. Stories se trust banta hai. Highlights portfolio hain. Trial Reels se non-followers test hote hain!",
-        smartQuestionHi = "Sabhi formats samajh aa gaye?",
-        smartQuestionEn = "Understood all content formats?",
-        smartQuestionHinglish = "Content formats clear hain?"
+        icon = Icons.Default.School,
+        badge = "SCRIPT MASTERCLASS",
+        titleEn = "AI Scripting & High-Retention Reel Flow",
+        titleHi = "AI स्क्रिप्ट और रील स्ट्रक्चर",
+        subtitleEn = "Build 30-second viral scripts with high watch completion rates",
+        subtitleHi = "30-सेकंड की हाई-रिटेंशन वायरल रील स्क्रिप्ट बनाना सीखें",
+        conceptEn = "High retention requires a proven 3-part script structure: 1) Visual/Verbal Hook (0-3s), 2) Value Delivery / Story (3-25s), and 3) Targeted Call to Action (25-30s). Keep sentence structure short and change on-screen visuals every 2-3 seconds using jump cuts.",
+        conceptHi = "वीडियो को पूरा दिखाने के लिए 3-स्टेप स्क्रिप्ट का उपयोग करें: 1) हुक (0-3 सेकंड), 2) मुख्य जानकारी (3-25 सेकंड), और 3) कॉल टू एक्शन (25-30 सेकंड)। हर 2-3 सेकंड में टेक्स्ट या कट बदलें।",
+        exampleEn = "Part 1: 'Here is how to get 10k views in 7 days.' | Part 2: 'Step 1: Fix Bio, Step 2: Enable HD Uploads.' | Part 3: 'Comment GUIDE for the full PDF!'",
+        exampleHi = "पार्ट 1: '7 दिनों में 10k व्यूज पाने का सीक्रेट।' | पार्ट 2: 'स्टेप 1: बायो सही करो, स्टेप 2: HD ऑन करो।' | पार्ट 3: 'फ्री गाइड के लिए नीचे COMMENT करें!'",
+        checklistEn = listOf(
+            "Follow the Hook + Core Value + Call to Action script framework",
+            "Use fast jump cuts or visual text changes every 2-3 seconds",
+            "Add high-contrast auto-caption subtitles on screen",
+            "End with a clear Call To Action encouraging comments or saves"
+        ),
+        checklistHi = listOf(
+            "हुक + मुख्य जानकारी + CTA ढांचा फॉलो करें",
+            "हर 2-3 सेकंड में कट या टेक्स्ट बदलें",
+            "स्क्रीन पर कैप्शन सबटाइटल जोड़ें",
+            "अंत में स्पष्ट कमेंट या फॉलो का CTA दें"
+        ),
+        quizQuestionEn = "What are the 3 mandatory components of a high-retention viral Reel script?",
+        quizQuestionHi = "वायरल रील स्क्रिप्ट के 3 सबसे महत्वपूर्ण भाग कौन से हैं?",
+        quizOptionsEn = listOf(
+            "Hook (0-3s) + Core Value (3-25s) + Call to Action (25-30s)",
+            "Intro + Credits + Music",
+            "Silent video + Logos + Background Song",
+            "Random clips without voice"
+        ),
+        quizOptionsHi = listOf(
+            "हुक (0-3s) + मुख्य जानकारी (3-25s) + कॉल टू एक्शन (25-30s)",
+            "इंट्रो + क्रेडिट्स + म्यूजिक",
+            "बिना आवाज के रैंडम वीडियो",
+            "सिर्फ गानों के क्लिप्स"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "Structuring your Reel with Hook, Value, and CTA ensures viewers watch to the end and take action!",
+        quizExplanationHi = "इस 3-स्टेप स्ट्रक्चर से लोग वीडियो पूरा देखते हैं और कमेंट या फॉलो भी करते हैं!",
+        summaryEn = "Always write your script before filming. High retention = high algorithm distribution!",
+        summaryHi = "शूटिंग से पहले स्क्रिप्ट तैयार करें। पूरा वीडियो देखे जाने पर इंस्टाग्राम उसे लाखों लोगों तक पहुँचाता है।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 7,
-        title = "7. Reels Algorithm & Viral Hook Formulas",
-        shortDesc = "First 3-seconds watch time engine",
-        mentorPromptHi = "Instagram pehle 3 seconds me watch time dekhta hai. Video start karo strong Visual Hook ya Question se (e.g. 'Rukno! Ye secret galti mat karo...').",
-        mentorPromptEn = "Instagram measures 3-second retention. Start every video with a punchy Visual or Verbal Hook (e.g., 'Stop! Don't make this mistake...').",
-        mentorPromptHinglish = "Reel me pehle 3 seconds sabse main hain! Pehle 3 second me strong Visual or Text Hook do jisse viewer ruk jaye.",
-        smartQuestionHi = "3-second Hook formula clear hai?",
-        smartQuestionEn = "Got the 3-second Hook formula?",
-        smartQuestionHinglish = "Hook formula samajh aa gaya?"
+        icon = Icons.Default.Star,
+        badge = "SEO & HASHTAGS",
+        titleEn = "SEO Captions & 3-Tier Hashtag Strategy",
+        titleHi = "SEO कैप्शन और 3-टियर हैशटैग स्ट्रेटजी",
+        subtitleEn = "Rank on Instagram Search and Explore pages effortlessly",
+        subtitleHi = "इंस्टाग्राम सर्च और एक्सप्लोर पेज पर टॉप रैंक करें",
+        conceptEn = "Instagram is now a keyword-based search engine. Include your primary niche keywords in the first sentence of your caption. Combine this with the 3-Tier Hashtag Mix: 3 Niche Specific tags (10k-50k posts), 3 Medium Competition tags (100k-500k posts), and 2 High Reach tags (1M+ posts).",
+        conceptHi = "इंस्टाग्राम अब सर्च इंजन की तरह काम करता है। अपने टॉपिक का मुख्य कीवर्ड कैप्शन की पहली लाइन में लिखें। इसके साथ 3-टियर हैशटैग मिक्स यूज़ करें: 3 नीच हैशटैग, 3 मीडियम हैशटैग और 2 बड़े हैशटैग।",
+        exampleEn = "Caption Line 1: 'Here is the best Instagram Reel growth strategy for creators in 2026.' | Tags: #TechCreator #ReelTips #InstagramGrowth #ViralReels",
+        exampleHi = "कैप्शन लाइन 1: '2026 में इंस्टाग्राम रील्स वायरल करने का सबसे आसान तरीका।' | टैग्स: #TechCreator #ReelTips #InstagramGrowth",
+        checklistEn = listOf(
+            "Include primary topic keyword in sentence 1 of caption",
+            "Use 3 Niche + 3 Medium + 2 Broad hashtag mix (8-10 total tags)",
+            "Add precise location tag for local regional reach boost",
+            "Include ALT text description in Advanced Settings"
+        ),
+        checklistHi = listOf(
+            "कैप्शन की पहली लाइन में मुख्य कीवर्ड डालें",
+            "3 नीच + 3 मीडियम + 2 बड़े हैशटैग का मिक्स बनाएं",
+            "लोकेशन टैग लगाएं",
+            "एडवांस्ड सेटिंग्स में Alt Text जोड़ें"
+        ),
+        quizQuestionEn = "How does the 3-Tier Hashtag strategy maximize Reel reach?",
+        quizQuestionHi = "3-टियर हैशटैग मिक्स आपकी रील की रीच कैसे बढ़ाता है?",
+        quizOptionsEn = listOf(
+            "Combines Niche Specific, Medium Competition, and High Reach tags for step-by-step ranking",
+            "Spams 100 identical tags",
+            "Uses celebrity names",
+            "Deletes all tags after posting"
+        ),
+        quizOptionsHi = listOf(
+            "यह नीच, मीडियम और बड़े हैशटैग्स को मिलाकर स्टेप-बाय-स्टेप रैंकिंग देता है",
+            "एक ही टैग 100 बार लगाता है",
+            "फेमस स्टार्स का नाम लिखता है",
+            "सारे टैग डिलीट कर देता है"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "Niche tags get you early ranking, medium tags expand reach, and high reach tags trigger Explore page exposure!",
+        quizExplanationHi = "छोटे हैशटैग्स से शुरुआत में रैंक मिलती है और फिर बड़े हैशटैग्स से वीडियो एक्सप्लोर पेज पर वायरल होती है!",
+        summaryEn = "Write captions for humans first and search engine keywords second.",
+        summaryHi = "कैप्शन ऐसा लिखें जो पढ़ने में आसान हो और जिसमें मुख्य कीवर्ड्स भी शामिल हों।"
     ),
-    MentorStep(
+    InstagramLessonData(
         id = 8,
-        title = "8. Trending Audio & Voice Balancing",
-        shortDesc = "Background music vs clear voiceover",
-        mentorPromptHi = "Trending Audio ka arrow ↗️ dekho. Volume Mixing: Voiceover 100%, Trending Audio 10-15% background me. Voice crystal clear honi chahiye!",
-        mentorPromptEn = "Look for the trending arrow ↗️. Audio Balance: Voiceover at 100%, Background Trending Music at 10-15%. Keep voice crisp!",
-        mentorPromptHinglish = "Trending Audio sign ↗️ search karo. Audio Mix: Apni Voice 100% aur Trending Sound 10-15% background me rakho.",
-        smartQuestionHi = "Audio volume balance samajh aaya?",
-        smartQuestionEn = "Clear on audio volume mixing?",
-        smartQuestionHinglish = "Audio mixing clear hai?"
-    ),
-    MentorStep(
-        id = 9,
-        title = "9. AI Script Generator",
-        shortDesc = "Generate high-converting Reel scripts",
-        mentorPromptHi = "Ab chalo pehli viral Reel ka script banate hain! Niche Script Generator button par tap karo ya Topic aur Duration batao.",
-        mentorPromptEn = "Let's write your first viral Reel script! Use the Script Generator tool below or tell me your topic and length.",
-        mentorPromptHinglish = "Chalo ab ek mast Reel script banate hain! Niche Script Generator button tap karo ya topic aur duration batao.",
-        smartQuestionHi = "Script ready karein?",
-        smartQuestionEn = "Ready to generate script?",
-        smartQuestionHinglish = "Script generate karein?"
-    ),
-    MentorStep(
-        id = 10,
-        title = "10. Video Editing Skills Check",
-        shortDesc = "Editing app workflow & tools",
-        mentorPromptHi = "Kya aapko video editing (VN, CapCut, Premiere) aati hai?",
-        mentorPromptEn = "Do you know video editing using tools like VN, CapCut, or Premiere?",
-        mentorPromptHinglish = "Kya aapko video editing (VN, CapCut, Premiere) aati hai?",
-        smartQuestionHi = "Editing aati hai?",
-        smartQuestionEn = "Do you know video editing?",
-        smartQuestionHinglish = "Editing aati hai?"
-    ),
-    MentorStep(
-        id = 11,
-        title = "11. AI Caption & 3-Tier Hashtags",
-        shortDesc = "SEO Keywords + Low/Med/High Hashtag Mix",
-        mentorPromptHi = "SEO Captions search results me rank karate hain. Hashtags Mix: 3 Niche Specific + 3 Medium Competition + 2 High Reach.",
-        mentorPromptEn = "SEO Captions help rank in search. Use 3-Tier Hashtags: 3 Niche Specific + 3 Medium + 2 Broad tags.",
-        mentorPromptHinglish = "SEO Captions Search engine me rank karate hain. Hashtag Mix: 3 Niche + 3 Medium + 2 High Reach tags.",
-        smartQuestionHi = "Caption aur Hashtags chahiye?",
-        smartQuestionEn = "Need Caption & Hashtag generator?",
-        smartQuestionHinglish = "Caption & Hashtag ready karein?"
-    ),
-    MentorStep(
-        id = 12,
-        title = "12. Pre-Upload 9-Point Checklist",
-        shortDesc = "Final verification before tapping Share",
-        mentorPromptHi = "Upload se pehle: ✔️ HD Cover, ✔️ Hook Caption, ✔️ Audio Mix, ✔️ Hashtags, ✔️ Location, ✔️ Alt Text Check kar lo!",
-        mentorPromptEn = "Before publishing: ✔️ Clear Cover, ✔️ Hook Caption, ✔️ Audio Balance, ✔️ Hashtags, ✔️ Location, ✔️ Alt Text!",
-        mentorPromptHinglish = "Posting se pehle: ✔️ Cover Photo, ✔️ Captions, ✔️ Audio Mix, ✔️ Hashtags, ✔️ Location check kar lo!",
-        smartQuestionHi = "Checklist poori ho gayi?",
-        smartQuestionEn = "Checklist verified?",
-        smartQuestionHinglish = "Checklist done?"
-    ),
-    MentorStep(
-        id = 13,
-        title = "13. Post-Upload Growth & Analytics",
-        shortDesc = "Reply strategy, pinned comments & 24h analysis",
-        mentorPromptHi = "Reel post hone ke pehle 1 ghante me aane wale har comment par reply karo aur pin karo. 24h baad Insights check karke watch time analyze karo!",
-        mentorPromptEn = "In the first hour after posting, reply to all comments immediately and pin top comments. Analyze 24h watch time in Insights!",
-        mentorPromptHinglish = "Post karte hi pehle 1 hour me sabhi comments ka reply aur pin karo. 24h baad Insights analyze karke next Reel planner banao!",
-        smartQuestionHi = "Aap Zero to Hero Creator ready ho! 🚀",
-        smartQuestionEn = "You are now a Zero to Hero Creator! 🚀",
-        smartQuestionHinglish = "Congratulations! Aap Zero to Hero Creator ban gaye! 🚀"
+        icon = Icons.Default.EmojiEvents,
+        badge = "ALGORITHM ENGINE",
+        titleEn = "Pre-Upload Checklist & Engagement Boost",
+        titleHi = "प्री-अपलोड चेकलिस्ट और 24h ग्रोथ बूस्ट",
+        subtitleEn = "Execute the 9-point checklist and trigger the 1-hour engagement algorithm",
+        subtitleHi = "9-पॉइंट चेकलिस्ट और 1-घंटे का पावरफुल कमेंट रिप्लाई सीक्रेट",
+        conceptEn = "Before clicking Share, run through a 9-point pre-publish checklist: HD cover thumbnail, 1080p toggle, SEO caption, 3-tier tags, audio balance, and location tag. Once published, reply to all comments within the first 60 minutes and pin top engaging comments to trigger algorithm distribution.",
+        conceptHi = "अपलोड बटन दबाने से पहले 9-पॉइंट चेकलिस्ट चेक करें: HD थंबनेल, 1080p ऑन, SEO कैप्शन, हैशटैग्स और लोकेशन। पोस्ट करने के पहले 1 घंटे के भीतर आए सभी कमेंट्स का रिप्लाई करें और बेस्ट कमेंट पिन करें।",
+        exampleEn = "Publish -> Share to Story with 'New Reel' sticker -> Reply to first 10 comments in 15 mins -> Pin best comment.",
+        exampleHi = "पोस्ट करें -> स्टोरी पर शेयर करें -> पहले 15 मिनट में आए कमेंट्स का रिप्लाई करें -> बेस्ट कमेंट को PIN करें।",
+        checklistEn = listOf(
+            "Selected a clear high-CTR cover frame or custom thumbnail",
+            "Verified 'Upload at Highest Quality' is turned ON in settings",
+            "SEO caption & 3-tier hashtags attached",
+            "Replied to early comments within 1 hour of publishing"
+        ),
+        checklistHi = listOf(
+            "साफ और आकर्षक कवर थंबनेल चुना",
+            "'हाईएस्ट क्वालिटी' ऑन होना कन्फर्म किया",
+            "SEO कैप्शन और हैशटैग्स जोड़े",
+            "1 घंटे के अंदर कमेंट्स का रिप्लाई किया"
+        ),
+        quizQuestionEn = "Why is replying to comments within the first 60 minutes after posting crucial?",
+        quizQuestionHi = "पोस्ट करने के पहले 60 मिनट के भीतर कमेंट्स का रिप्लाई करना क्यों बहुत ज़रूरी है?",
+        quizOptionsEn = listOf(
+            "It signals strong early engagement velocity to the Instagram algorithm to boost reach",
+            "It gives you a free verified blue badge",
+            "It hides the Reel from non-followers",
+            "It lowers video resolution"
+        ),
+        quizOptionsHi = listOf(
+            "यह इंस्टाग्राम एल्गोरिदम को शुरुआती सगाई का सिग्नल देता है जिससे रीच तेजी से बढ़ती है",
+            "यह फ्री ब्लू टिक देता है",
+            "यह वीडियो छुपा देता है",
+            "यह क्वालिटी कम करता है"
+        ),
+        quizCorrectIndex = 0,
+        quizExplanationEn = "Early engagement velocity in the first 60 minutes is the key indicator Instagram uses to push Reels to new non-follower audiences!",
+        quizExplanationHi = "पहले 60 मिनट की सगाई (Engagement) से इंस्टाग्राम को सिग्नल मिलता है कि कंटेंट लोगों को पसंद आ रहा है!",
+        summaryEn = "Never post and ghost. Execute the 1-hour engagement strategy to maximize viral velocity.",
+        summaryHi = "पोस्ट करके कभी गायब न हों। पहले 1 घंटे में एक्टिव रहकर रील की वायरल स्पीड बढ़ाएं!"
     )
 )
 
+// =========================================================
+// MAIN ENTRY POINT DIALOG
+// =========================================================
 @Composable
 fun InstagramCreatorAiV2Dialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
 
-    // Session Persistence
-    var savedLangCode by remember {
-        mutableStateOf(CreatorAcademyPrefs.getBrandCollabLanguage(context).ifBlank { "" })
+    // Preferences & State
+    var isIntroCompleted by remember {
+        mutableStateOf(CreatorAcademyPrefs.isInstagramIntroCompleted(context))
     }
     var currentLang by remember {
-        mutableStateOf(
-            when (savedLangCode) {
-                "HI" -> MentorLanguage.HINDI
-                "EN" -> MentorLanguage.ENGLISH
-                else -> MentorLanguage.HINGLISH
-            }
-        )
+        mutableStateOf(CreatorAcademyPrefs.getInstagramLanguage(context).ifBlank { "EN" })
+    }
+    var completedLessons by remember {
+        mutableStateOf(CreatorAcademyPrefs.getInstagramCompletedSteps(context).toSet())
+    }
+    var activeLessonId by remember { mutableStateOf<Int?>(null) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+
+    // Helper: Save Lesson Completion
+    fun markLessonCompleted(lessonId: Int) {
+        val updated = completedLessons + lessonId
+        completedLessons = updated
+        CreatorAcademyPrefs.saveInstagramCompletedSteps(context, updated)
+        CreatorAcademyPrefs.saveInstagramCurrentStep(context, (lessonId).coerceAtMost(INSTAGRAM_LESSONS.size))
     }
 
-    var selectedCreatorType by remember { mutableStateOf<String?>(null) }
-    var currentStepIndex by remember { mutableIntStateOf(0) }
-    var completedSteps by remember { mutableStateOf(setOf<Int>()) }
-
-    var showLanguagePicker by remember { mutableStateOf(savedLangCode.isBlank()) }
-    var showCreatorTypePicker by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType == null) }
-
-    var showWelcomeBack by remember { mutableStateOf(!showLanguagePicker && selectedCreatorType != null && (currentStepIndex > 0 || completedSteps.isNotEmpty())) }
-    var showIntro by remember { mutableStateOf(!showWelcomeBack) }
-    var showRestartConfirm by remember { mutableStateOf(false) }
-
-    // Chat Feed State
-    val chatMessages = remember { mutableStateListOf<ChatMessage>() }
-    var userTextInput by remember { mutableStateOf("") }
-    var isThinking by remember { mutableStateOf(false) }
-    var reExplainCount by remember { mutableIntStateOf(0) }
-
-    // Interactive Dialog Overlays
-    var showScriptGeneratorSheet by remember { mutableStateOf(false) }
-    var showEditingCourseSheet by remember { mutableStateOf(false) }
-    var showChecklistSheet by remember { mutableStateOf(false) }
-
-    val lazyListState = rememberLazyListState()
-
-    // Helper: Push AI Mentor Message
-    fun addMentorMessage(
-        text: String,
-        isFresh: Boolean = false,
-        script: ScriptResult? = null,
-        caption: CaptionResult? = null
-    ) {
-        chatMessages.add(
-            ChatMessage(
-                sender = "AI_MENTOR",
-                text = text,
-                stepIndex = currentStepIndex,
-                isFreshExplanation = isFresh,
-                scriptData = script,
-                captionData = caption
-            )
-        )
-        coroutineScope.launch {
-            delay(100)
-            if (chatMessages.isNotEmpty()) {
-                lazyListState.animateScrollToItem(chatMessages.size - 1)
-            }
-        }
-    }
-
-    // Initialize Mentor Welcome
-    fun initMentorForStep(stepIdx: Int, isFreshExplanation: Boolean = false) {
-        val step = INSTAGRAM_ROADMAP_STEPS.getOrNull(stepIdx) ?: return
-        val mentorMsg = if (isFreshExplanation) {
-            com.example.creatoracademy.AiTeachingVariationsEngine.getMultiStyleExplanation(
-                stepTitle = step.title,
-                coreConcept = step.mentorPromptEn,
-                lang = currentLang.name,
-                variationCount = reExplainCount
-            )
-        } else {
-            when (currentLang) {
-                MentorLanguage.HINDI -> step.mentorPromptHi
-                MentorLanguage.ENGLISH -> step.mentorPromptEn
-                MentorLanguage.HINGLISH -> step.mentorPromptHinglish
-            }
-        }
-        addMentorMessage(text = mentorMsg, isFresh = isFreshExplanation)
-    }
-
-    // Handle User Action
-    fun handleUserConfirmation(userText: String, isDone: Boolean = true) {
-        chatMessages.add(
-            ChatMessage(
-                sender = "CREATOR",
-                text = userText,
-                stepIndex = currentStepIndex
-            )
-        )
-
-        if (isDone) {
-            completedSteps = completedSteps + currentStepIndex
-            if (currentStepIndex < INSTAGRAM_ROADMAP_STEPS.size - 1) {
-                currentStepIndex += 1
-                coroutineScope.launch {
-                    isThinking = true
-                    delay(500)
-                    isThinking = false
-                    val stepObj = INSTAGRAM_ROADMAP_STEPS[currentStepIndex]
-                    val introText = when (currentLang) {
-                        MentorLanguage.HINDI -> "Bahut badiya! 🎉 Chalo STEP ${stepObj.id} par chalte hain: ${stepObj.title}"
-                        MentorLanguage.ENGLISH -> "Awesome! 🎉 Moving to STEP ${stepObj.id}: ${stepObj.title}"
-                        MentorLanguage.HINGLISH -> "Chalo mast! 😄 Ab aagaye STEP ${stepObj.id}: ${stepObj.title}"
-                    }
-                    addMentorMessage(introText)
-                    delay(300)
-                    initMentorForStep(currentStepIndex)
-                }
-            } else {
-                addMentorMessage(
-                    when (currentLang) {
-                        MentorLanguage.HINDI -> "🎉 Badhai ho! Aapne poora Instagram Zero to Hero course complete kar liya hai!"
-                        MentorLanguage.ENGLISH -> "🎉 Congratulations! You have completed the full Instagram Zero to Hero course!"
-                        MentorLanguage.HINGLISH -> "🎉 Badhai ho! Aapne saare steps complete karke Instagram Zero to Hero path master kar liya!"
-                    }
-                )
-            }
-        }
-    }
-
-    // Handle "Explain Again" request
-    fun handleExplainAgain() {
-        reExplainCount += 1
-        chatMessages.add(
-            ChatMessage(
-                sender = "CREATOR",
-                text = when (currentLang) {
-                    MentorLanguage.HINDI -> "❓ Mujhe samajh nahi aaya. Dubara samjhao."
-                    MentorLanguage.ENGLISH -> "❓ I didn't understand. Please explain again with another style."
-                    MentorLanguage.HINGLISH -> "❓ Samajh nahi aaya, please ek aur tareeke se batao."
-                },
-                stepIndex = currentStepIndex
-            )
-        )
-        coroutineScope.launch {
-            isThinking = true
-            delay(500)
-            isThinking = false
-            initMentorForStep(currentStepIndex, isFreshExplanation = true)
-        }
-    }
-
-    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    LaunchedEffect(chatMessages.size, isThinking, userTextInput, imeBottomPadding) {
-        if (chatMessages.isNotEmpty()) {
-            delay(60)
-            lazyListState.animateScrollToItem(chatMessages.size - 1)
-        }
+    // Helper: Reset Course
+    fun handleResetCourse() {
+        CreatorAcademyPrefs.resetCourseProgress(context, "instagram")
+        completedLessons = emptySet()
+        isIntroCompleted = false
+        activeLessonId = null
+        showResetConfirm = false
+        Toast.makeText(context, if (currentLang == "HI") "कोर्स रीसेट हो गया है!" else "Course progress reset!", Toast.LENGTH_SHORT).show()
     }
 
     Dialog(
@@ -497,430 +486,160 @@ fun InstagramCreatorAiV2Dialog(
             usePlatformDefaultWidth = false,
             decorFitsSystemWindows = false,
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
+            dismissOnClickOutside = false
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AmoledBlack)
+                .background(DarkCanvasBg)
                 .statusBarsPadding()
-                .responsiveImeAndNavPadding()
+                .navigationBarsPadding()
         ) {
-            Surface(
-                color = Color(0xFF140D1A),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // TOP NAVBAR
-                    TopNavBar(
-                        selectedLanguage = currentLang,
-                        onChangeLanguage = { showLanguagePicker = true },
+            when {
+                !isIntroCompleted -> {
+                    // FIRST TIME INTRO SCREEN
+                    InstagramFirstTimeIntroScreen(
+                        currentLang = currentLang,
+                        onLanguageChange = { lang ->
+                            currentLang = lang
+                            CreatorAcademyPrefs.saveInstagramLanguage(context, lang)
+                        },
+                        onStartCourse = {
+                            isIntroCompleted = true
+                            CreatorAcademyPrefs.setInstagramIntroCompleted(context, true)
+                        },
                         onClose = onDismiss
                     )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // STEP PROGRESS HORIZONTAL BAR
-                    if (!showLanguagePicker && !showCreatorTypePicker) {
-                        StepProgressBar(
-                            steps = INSTAGRAM_ROADMAP_STEPS,
-                            currentStepIndex = currentStepIndex,
-                            completedSteps = completedSteps,
-                            onStepClick = { stepIdx ->
-                                if (stepIdx <= currentStepIndex || completedSteps.contains(stepIdx)) {
-                                    currentStepIndex = stepIdx
-                                    initMentorForStep(stepIdx)
-                                } else {
-                                    Toast.makeText(context, "🔒 Complete current step first!", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        )
-                    }
-
-                    // MAIN CONTENT AREA
-                    Box(modifier = Modifier.weight(1f)) {
-                        when {
-                            showIntro -> {
-                                InstagramLuxuryIntroCard(
-                                    onStart = { showIntro = false }
-                                )
-                            }
-                            showWelcomeBack -> {
-                                SmartWelcomeBackDialog(
-                                    courseTitle = "Instagram Creator Course",
-                                    currentStep = currentStepIndex + 1,
-                                    totalSteps = INSTAGRAM_ROADMAP_STEPS.size,
-                                    onContinue = { showWelcomeBack = false },
-                                    onRestart = { showRestartConfirm = true },
-                                    onDismiss = onDismiss
-                                )
-                            }
-                            showLanguagePicker -> {
-                                LanguageSelectionOverlay(
-                                    selectedLang = currentLang,
-                                    onLanguageSelected = { lang ->
-                                        currentLang = lang
-                                        savedLangCode = lang.code
-                                        CreatorAcademyPrefs.setBrandCollabLanguage(context, lang.code)
-                                        showLanguagePicker = false
-                                        if (selectedCreatorType == null) {
-                                            showCreatorTypePicker = true
-                                        } else if (chatMessages.isEmpty()) {
-                                            initMentorForStep(0)
-                                        }
-                                    }
-                                )
-                            }
-                            showCreatorTypePicker -> {
-                                CreatorTypeSelectionOverlay(
-                                    selectedType = selectedCreatorType,
-                                    language = currentLang,
-                                    onTypeSelected = { type ->
-                                        selectedCreatorType = type
-                                        showCreatorTypePicker = false
-                                        if (chatMessages.isEmpty()) {
-                                            val welcomeText = when (currentLang) {
-                                                MentorLanguage.HINDI -> "Wah! $type ke roop me aapka Instagram safar shuru hota hai! 🚀"
-                                                MentorLanguage.ENGLISH -> "Awesome! Starting your Instagram journey as a $type! 🚀"
-                                                MentorLanguage.HINGLISH -> "Mast choice! $type ke liye personalized Instagram roadmap ready hai! 🚀"
-                                            }
-                                            addMentorMessage(welcomeText)
-                                            initMentorForStep(0)
-                                        }
-                                    }
-                                )
-                            }
-                            else -> {
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    // LEARNING PROGRESS CARD
-                                    LearningProgressIndicatorCard(
-                                        currentStep = currentStepIndex + 1,
-                                        totalSteps = INSTAGRAM_ROADMAP_STEPS.size,
-                                        stepTitle = INSTAGRAM_ROADMAP_STEPS.getOrNull(currentStepIndex)?.title ?: "Lesson ${currentStepIndex + 1}",
-                                        onResetClick = { showRestartConfirm = true },
-                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
-                                    )
-
-                                    // CHAT FEED
-                                    LazyColumn(
-                                        state = lazyListState,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        item { Spacer(modifier = Modifier.height(10.dp)) }
-
-                                        itemsIndexed(chatMessages) { idx, msg ->
-                                            ChatMessageBubble(
-                                                message = msg,
-                                                onCopyText = { txt ->
-                                                    clipboardManager.setText(AnnotatedString(txt))
-                                                    Toast.makeText(context, "Copied to Clipboard! 📋", Toast.LENGTH_SHORT).show()
-                                                }
-                                            )
-                                        }
-
-                                        if (isThinking) {
-                                            item {
-                                                AiThinkingIndicator()
-                                            }
-                                        }
-
-                                        if (completedSteps.size >= INSTAGRAM_ROADMAP_STEPS.size) {
-                                            item {
-                                                CourseCompletionCard(
-                                                    courseTitle = "Instagram Zero to Hero Course",
-                                                    skillsLearned = listOf(
-                                                        "Viral Reel Hooks & Scripting",
-                                                        "Hashtag & SEO Strategy",
-                                                        "High-CTR Thumbnail Design",
-                                                        "Audience Engagement & Monetization"
-                                                    ),
-                                                    onContinue = onDismiss,
-                                                    onResetCourse = { showRestartConfirm = true },
-                                                    theme = MentorToolTheme.InstagramCreator
-                                                )
-                                            }
-                                        }
-
-                                        item { Spacer(modifier = Modifier.height(16.dp)) }
-                                    }
-
-                                    // QUICK ACTIONS BAR & INPUT
-                                    MentorActionBar(
-                                        currentLang = currentLang,
-                                        currentStepIndex = currentStepIndex,
-                                        userTextInput = userTextInput,
-                                        onUserTextInputChange = { userTextInput = it },
-                                        onConfirmDone = {
-                                            val label = when (currentLang) {
-                                                MentorLanguage.HINDI -> "✅ Ho gaya! Agla step batao."
-                                                MentorLanguage.ENGLISH -> "✅ Done! Let's move to the next step."
-                                                MentorLanguage.HINGLISH -> "✅ Ho gaya! Next step unlock karo."
-                                            }
-                                            handleUserConfirmation(label, isDone = true)
-                                        },
-                                        onExplainAgain = { handleExplainAgain() },
-                                        onOpenScriptTool = { showScriptGeneratorSheet = true },
-                                        onOpenCaptionTool = { },
-                                        onOpenChecklistTool = { showChecklistSheet = true },
-                                        onOpenEditingCourse = { showEditingCourseSheet = true },
-                                        onSendMessage = { txt ->
-                                            if (txt.isNotBlank()) {
-                                                val lower = txt.lowercase()
-                                                val isExplainReq = lower.contains("nahi samjha") || lower.contains("dubara") || lower.contains("explain") || lower.contains("confused")
-                                                val isDoneReq = lower.contains("done") || lower.contains("ho gaya") || lower.contains("samajh aa gaya") || lower.contains("ok")
-
-                                                userTextInput = ""
-                                                if (isExplainReq) {
-                                                    handleExplainAgain()
-                                                } else if (isDoneReq) {
-                                                    handleUserConfirmation(txt, isDone = true)
-                                                } else {
-                                                    chatMessages.add(ChatMessage(sender = "CREATOR", text = txt, stepIndex = currentStepIndex))
-                                                    coroutineScope.launch {
-                                                        isThinking = true
-                                                        delay(500)
-                                                        isThinking = false
-                                                        val reply = generateDynamicAiReply(txt, currentLang, currentStepIndex)
-                                                        addMentorMessage(reply)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
-
-                // SCRIPT GENERATOR SHEET OVERLAY
-                if (showScriptGeneratorSheet) {
-                    ScriptGeneratorDialog(
-                        creatorType = selectedCreatorType ?: "Creator",
-                        language = currentLang,
-                        onDismiss = { showScriptGeneratorSheet = false },
-                        onScriptGenerated = { script ->
-                            showScriptGeneratorSheet = false
-                            val scriptText = "🎬 AI SCRIPT GENERATED (${script.duration})\n\nTopic: ${script.topic}\n\n🪝 HOOK:\n\"${script.hook}\"\n\n⚡ BODY/FLOW:\n${script.flow}\n\n🚀 CALL TO ACTION:\n\"${script.cta}\""
-                            addMentorMessage(text = scriptText, script = script)
-                        }
-                    )
-                }
-
-                // EDITING COURSE OVERLAY SHEET
-                if (showEditingCourseSheet) {
-                    EditingCourseDialog(
-                        language = currentLang,
-                        onDismiss = { showEditingCourseSheet = false }
-                    )
-                }
-
-                // PRE-POST CHECKLIST SHEET OVERLAY
-                if (showChecklistSheet) {
-                    PrePostChecklistDialog(
-                        language = currentLang,
-                        onDismiss = { showChecklistSheet = false }
-                    )
-                }
-
-                if (showRestartConfirm) {
-                    RestartCourseConfirmDialog(
-                        courseTitle = "Instagram Creator Course",
-                        onConfirmRestart = {
-                            CreatorAcademyPrefs.resetCourseProgress(context, "instagram")
-                            savedLangCode = ""
-                            currentLang = MentorLanguage.HINGLISH
-                            selectedCreatorType = null
-                            currentStepIndex = 0
-                            completedSteps = emptySet()
-                            chatMessages.clear()
-                            showLanguagePicker = true
-                            showCreatorTypePicker = false
-                            showWelcomeBack = false
-                            showRestartConfirm = false
-                        },
-                        onDismiss = { showRestartConfirm = false }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun InstagramLuxuryIntroCard(
-    onStart: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .border(
-                    BorderStroke(
-                        1.5.dp,
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF833AB4),
-                                Color(0xFFE1306C),
-                                Color(0xFFFD1D1D)
-                            )
-                        )
-                    ),
-                    RoundedCornerShape(24.dp)
-                )
-                .shadow(16.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFFE1306C)),
-            color = Color(0xEE1A0E22)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Animated Hero Banner at Top - NO TEXT
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .border(
-                            BorderStroke(1.dp, Color(0xFFE1306C).copy(alpha = 0.4f)),
-                            RoundedCornerShape(18.dp)
-                        )
-                ) {
-                    com.example.ui.components.ToolHeroBanner(
-                        toolType = com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR,
-                        height = 130.dp,
-                        badgeText = null,
-                        subtitleText = null
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Text(
-                    text = "Instagram Mentor AI",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Zero to Hero Creator Growth Masterclass",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFFE1306C)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Luxury Glass Feature Bullets
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val features = listOf(
-                        "📸 Viral Reel Scripts, Hooks & AI Audio Sync",
-                        "⚡ 3-Tier SEO Hashtags & Bio Optimization",
-                        "🔥 Pre-Publish 9-Point Virality Checklist",
-                        "🚀 Step-by-Step Personal AI Mentor Guidance"
-                    )
-                    features.forEach { feature ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x33833AB4))
-                                .border(
-                                    BorderStroke(0.8.dp, Color(0xFFE1306C).copy(alpha = 0.3f)),
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = feature,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Instagram Gradient Start Button
-                androidx.compose.material3.Button(
-                    onClick = onStart,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFE1306C)),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
-                ) {
-                    Box(
+                else -> {
+                    // MAIN COURSE DASHBOARD
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color(0xFF833AB4),
-                                        Color(0xFFE1306C),
-                                        Color(0xFFFD1D1D)
-                                    )
-                                ),
-                                shape = RoundedCornerShape(14.dp)
-                            ),
-                        contentAlignment = Alignment.Center
+                            .background(DarkCanvasBg)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Start Instagram Journey",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
+                        // TOP TOOLBAR
+                        InstagramTopBar(
+                            currentLang = currentLang,
+                            onLanguageToggle = {
+                                val nextLang = if (currentLang == "EN") "HI" else "EN"
+                                currentLang = nextLang
+                                CreatorAcademyPrefs.saveInstagramLanguage(context, nextLang)
+                            },
+                            onClose = onDismiss
+                        )
+
+                        // DASHBOARD CONTENT
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentPadding = PaddingValues(bottom = 24.dp)
+                        ) {
+                            // HERO BANNER & PROGRESS
+                            item {
+                                CourseProgressHeaderCard(
+                                    completedCount = completedLessons.size,
+                                    totalCount = INSTAGRAM_LESSONS.size,
+                                    currentLang = currentLang,
+                                    onResetCourse = { showResetConfirm = true },
+                                    onReplayIntro = { isIntroCompleted = false }
+                                )
+                            }
+
+                            // LESSONS SECTION HEADER
+                            item {
+                                SectionTitleHeader(
+                                    title = if (currentLang == "HI") "रील्स ग्रोथ रोडमैप (8 पाठ)" else "Reels Growth Roadmap (8 Lessons)",
+                                    subtitle = if (currentLang == "HI") "स्टेप-बाय-स्टेप सीखें और क्विज़ पास करें" else "Learn step-by-step and clear the quick quiz"
+                                )
+                            }
+
+                            // LESSON CARDS
+                            itemsIndexed(INSTAGRAM_LESSONS) { idx, lesson ->
+                                val isCompleted = completedLessons.contains(lesson.id)
+                                LessonListItemCard(
+                                    lesson = lesson,
+                                    index = idx,
+                                    isCompleted = isCompleted,
+                                    currentLang = currentLang,
+                                    onClick = { activeLessonId = lesson.id }
+                                )
+                            }
+
+                            // COURSE COMPLETION CERTIFICATE
+                            if (completedLessons.size >= INSTAGRAM_LESSONS.size) {
+                                item {
+                                    CourseCompletionCertificateCard(
+                                        currentLang = currentLang,
+                                        onResetCourse = { showResetConfirm = true }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+            }
+
+            // FULLSCREEN LESSON POPUP DIALOG
+            activeLessonId?.let { lessonId ->
+                val lessonObj = INSTAGRAM_LESSONS.find { it.id == lessonId }
+                if (lessonObj != null) {
+                    FullscreenLessonPopup(
+                        lesson = lessonObj,
+                        totalLessons = INSTAGRAM_LESSONS.size,
+                        isCompleted = completedLessons.contains(lessonId),
+                        currentLang = currentLang,
+                        onLanguageToggle = {
+                            val nextLang = if (currentLang == "EN") "HI" else "EN"
+                            currentLang = nextLang
+                            CreatorAcademyPrefs.saveInstagramLanguage(context, nextLang)
+                        },
+                        onLessonCompleted = {
+                            markLessonCompleted(lessonId)
+                        },
+                        onNextLesson = {
+                            if (lessonId < INSTAGRAM_LESSONS.size) {
+                                activeLessonId = lessonId + 1
+                            } else {
+                                activeLessonId = null
+                            }
+                        },
+                        onPrevLesson = {
+                            if (lessonId > 1) {
+                                activeLessonId = lessonId - 1
+                            }
+                        },
+                        onDismiss = { activeLessonId = null }
+                    )
+                }
+            }
+
+            // RESET CONFIRMATION DIALOG
+            if (showResetConfirm) {
+                ResetConfirmModal(
+                    currentLang = currentLang,
+                    onConfirm = { handleResetCourse() },
+                    onDismiss = { showResetConfirm = false }
+                )
             }
         }
     }
 }
 
+// =========================================================
+// TOP TOOLBAR COMPONENT
+// =========================================================
 @Composable
-private fun TopNavBar(
-    selectedLanguage: MentorLanguage,
-    onChangeLanguage: () -> Unit,
+private fun InstagramTopBar(
+    currentLang: String,
+    onLanguageToggle: () -> Unit,
     onClose: () -> Unit
 ) {
     Surface(
-        color = Color(0xFF190F24),
-        border = BorderStroke(0.8.dp, Color(0x33E1306C))
+        color = CardSurfaceBg,
+        border = BorderStroke(1.dp, CardBorderColor)
     ) {
         Row(
             modifier = Modifier
@@ -937,46 +656,64 @@ private fun TopNavBar(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color(0x33E1306C))
-                        .border(BorderStroke(1.dp, Color(0xFFE1306C)), CircleShape),
+                        .background(Brush.radialGradient(listOf(VioletGlow, VioletDeep)))
+                        .border(BorderStroke(1.dp, MagentaAccent), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     OfficialLogo(name = "instagram", modifier = Modifier.size(20.dp))
                 }
 
-                Text(
-                    text = "Instagram Mentor AI",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite
-                )
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "Instagram Creator Guide",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite
+                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(VioletPrimary.copy(alpha = 0.3f))
+                                .padding(horizontal = 5.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = "ViralToolAi",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VioletGlow
+                            )
+                        }
+                    }
+                    Text(
+                        text = if (currentLang == "HI") "100% ओरिजिनल मास्टरक्लास" else "100% Original Creator Masterclass",
+                        fontSize = 10.5.sp,
+                        color = TextMuted
+                    )
+                }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Language Switch Pill
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Dynamic Language Toggle Button
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x33E1306C))
-                        .border(BorderStroke(0.8.dp, Color(0xFFE1306C).copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                        .clickable { onChangeLanguage() }
+                        .background(Brush.horizontalGradient(listOf(VioletDeep, VioletGlow)))
+                        .border(BorderStroke(1.dp, MagentaAccent), RoundedCornerShape(12.dp))
+                        .clickable { onLanguageToggle() }
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(
                             imageVector = Icons.Default.Language,
-                            contentDescription = "Lang",
-                            tint = Color(0xFFE1306C),
+                            contentDescription = "Language",
+                            tint = TextWhite,
                             modifier = Modifier.size(14.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = selectedLanguage.code,
+                            text = if (currentLang == "EN") "🇬🇧 EN" else "🇮🇳 हिन्दी",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Black,
                             color = TextWhite
                         )
                     }
@@ -1003,393 +740,190 @@ private fun TopNavBar(
     }
 }
 
+// =========================================================
+// FIRST TIME INTRO SCREEN
+// =========================================================
 @Composable
-private fun StepProgressBar(
-    steps: List<MentorStep>,
-    currentStepIndex: Int,
-    completedSteps: Set<Int>,
-    onStepClick: (Int) -> Unit
-) {
-    Surface(
-        color = Color(0xFF190F24),
-        border = BorderStroke(0.5.dp, Color(0x33E1306C))
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "ROADMAP PROGRESS",
-                    fontSize = 9.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE1306C),
-                    letterSpacing = 1.sp
-                )
-                Text(
-                    text = "Step ${currentStepIndex + 1} of ${steps.size}",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite.copy(alpha = 0.8f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
-            ) {
-                itemsIndexed(steps) { idx, step ->
-                    val isCurrent = idx == currentStepIndex
-                    val isDone = completedSteps.contains(idx)
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                when {
-                                    isCurrent -> Brush.horizontalGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D)))
-                                    isDone -> SolidColor(Color(0x33E1306C))
-                                    else -> SolidColor(Color(0x18FFFFFF))
-                                }
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    when {
-                                        isCurrent -> Color(0xFFE1306C)
-                                        isDone -> Color(0xFFE1306C).copy(alpha = 0.5f)
-                                        else -> Color(0x22FFFFFF)
-                                    }
-                                ),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable { onStepClick(idx) }
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isDone) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Done",
-                                    tint = if (isCurrent) Color.White else Color(0xFFE1306C),
-                                    modifier = Modifier.size(11.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                            } else if (!isCurrent && idx > currentStepIndex) {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = "Locked",
-                                    tint = TextWhite.copy(alpha = 0.4f),
-                                    modifier = Modifier.size(10.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                            }
-                            Text(
-                                text = "S${step.id}",
-                                fontSize = 10.sp,
-                                fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
-                                color = if (isCurrent) Color.White else TextWhite.copy(alpha = if (isDone) 0.9f else 0.5f)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LanguageSelectionOverlay(
-    selectedLang: MentorLanguage,
-    onLanguageSelected: (MentorLanguage) -> Unit
+private fun InstagramFirstTimeIntroScreen(
+    currentLang: String,
+    onLanguageChange: (String) -> Unit,
+    onStartCourse: () -> Unit,
+    onClose: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF1A0E22),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C)))),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .border(
+                    BorderStroke(
+                        1.5.dp,
+                        Brush.horizontalGradient(listOf(VioletPrimary, VioletGlow, MagentaAccent))
+                    ),
+                    RoundedCornerShape(24.dp)
+                )
+                .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = VioletGlow),
+            color = CardSurfaceBg
         ) {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Top Action Row (Close + Language)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Language Switch Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x33A855F7))
+                            .border(BorderStroke(1.dp, VioletGlow), RoundedCornerShape(12.dp))
+                            .clickable { onLanguageChange(if (currentLang == "EN") "HI" else "EN") }
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Icon(Icons.Default.Language, contentDescription = null, tint = VioletGlow, modifier = Modifier.size(14.dp))
+                            Text(
+                                text = if (currentLang == "EN") "English" else "हिन्दी",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x22FFFFFF))
+                            .clickable { onClose() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Hero Visual Banner
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(BorderStroke(1.dp, VioletGlow.copy(alpha = 0.5f)), RoundedCornerShape(18.dp))
+                ) {
+                    ToolHeroBanner(
+                        toolType = ToolHeroType.INSTAGRAM_CREATOR,
+                        height = 130.dp,
+                        badgeText = null,
+                        subtitleText = null
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
                 Text(
-                    text = "👋 Welcome Creator!",
+                    text = if (currentLang == "HI") "इंस्टाग्राम क्रिएटर गाइड" else "Instagram Creator Guide",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
                     color = TextWhite,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "Aap kis language me seekhna chahenge?",
-                    fontSize = 13.5.sp,
-                    color = Color(0xFFE1306C),
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                MentorLanguage.values().forEach { lang ->
-                    val isSelected = selectedLang == lang
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSelected) Brush.horizontalGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D)))
-                                else SolidColor(Color(0x18FFFFFF))
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    if (isSelected) Color(0xFFE1306C) else Color(0x22FFFFFF)
-                                ),
-                                RoundedCornerShape(16.dp)
-                            )
-                            .clickable { onLanguageSelected(lang) }
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "○  ${lang.label} (${lang.nativeName})",
-                                fontSize = 15.sp,
-                                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = TextWhite
-                            )
-
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CreatorTypeSelectionOverlay(
-    selectedType: String?,
-    language: MentorLanguage,
-    onTypeSelected: (String) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF1A0E22),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFF833AB4), Color(0xFFE1306C)))),
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.85f)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = when (language) {
-                        MentorLanguage.HINDI -> "Aap kya banna chahte ho?"
-                        MentorLanguage.ENGLISH -> "What type of Creator do you want to be?"
-                        MentorLanguage.HINGLISH -> "Aap kya banna chahte ho?"
-                    },
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite,
-                    textAlign = TextAlign.Center
-                )
-
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Personalized Roadmap for your Creator Niche",
-                    fontSize = 11.5.sp,
-                    color = Color(0xFFE1306C),
-                    fontWeight = FontWeight.SemiBold
+                    text = if (currentLang == "HI") "जीरो से हीरो रील्स ग्रोथ मास्टरक्लास" else "Zero to Hero Creator Growth Masterclass",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = VioletGlow,
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(CREATOR_TYPES) { type ->
-                        val isSelected = selectedType == type
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(
-                                    if (isSelected) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                    else SolidColor(Color(0x18FFFFFF))
-                                )
-                                .border(
-                                    BorderStroke(
-                                        1.dp,
-                                        if (isSelected) EmeraldGlow else Color(0x22FFFFFF)
-                                    ),
-                                    RoundedCornerShape(14.dp)
-                                )
-                                .clickable { onTypeSelected(type) }
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "🎯 $type",
-                                    fontSize = 14.sp,
-                                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                                    color = if (isSelected) AmoledBlack else TextWhite
-                                )
-
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Select",
-                                    tint = if (isSelected) AmoledBlack else Color.White.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChatMessageBubble(
-    message: ChatMessage,
-    onCopyText: (String) -> Unit
-) {
-    val isMentor = message.sender == "AI_MENTOR"
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isMentor) Arrangement.Start else Arrangement.End
-    ) {
-        if (isMentor) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(EmeraldPrimary.copy(alpha = 0.2f))
-                    .border(BorderStroke(1.dp, EmeraldGlow), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                OfficialLogo(name = "instagram", modifier = Modifier.size(18.dp))
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        Surface(
-            shape = RoundedCornerShape(
-                topStart = 18.dp,
-                topEnd = 18.dp,
-                bottomStart = if (isMentor) 4.dp else 18.dp,
-                bottomEnd = if (isMentor) 18.dp else 4.dp
-            ),
-            color = if (isMentor) Color(0xFF131D16) else EmeraldPrimary,
-            border = if (isMentor) BorderStroke(1.dp, Color(0x3310B981)) else null,
-            modifier = Modifier.widthIn(max = 290.dp)
-        ) {
-            Column(modifier = Modifier.padding(14.dp)) {
-                if (isMentor && message.isFreshExplanation) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0x3310B981))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "💡 FRESH EXPLANATION",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = EmeraldGlow
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                }
-
-                Text(
-                    text = message.text,
-                    fontSize = 13.5.sp,
-                    color = if (isMentor) TextWhite else AmoledBlack,
-                    lineHeight = 19.sp,
-                    fontWeight = if (isMentor) FontWeight.Normal else FontWeight.Bold
+                // Feature Highlights
+                val features = if (currentLang == "HI") listOf(
+                    "📸 प्रोफाइल & बायो ऑप्टिमाइजेशन",
+                    "⚡ 1080p HD रेंडरिंग & 3-सेकंड वायरल हुक्स",
+                    "🎵 ↗️ ट्रेंडिंग ऑडियो मिक्सिंग तकनीक",
+                    "🎯 SEO कैप्शन, 3-टियर हैशटैग्स & 1h एल्गो बूस्ट"
+                ) else listOf(
+                    "📸 Profile & Bio Optimization Framework",
+                    "⚡ 1080p HD Rendering & 3-Sec Viral Hooks",
+                    "🎵 ↗️ Trending Audio Mixing Secret",
+                    "🎯 SEO Captions, 3-Tier Tags & 1h Algo Boost"
                 )
 
-                if (isMentor) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Box(
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    features.forEach { ft ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { onCopyText(message.text) }
-                                .padding(horizontal = 6.dp, vertical = 3.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0x1FA855F7))
+                                .border(BorderStroke(0.8.dp, CardBorderColor), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 12.dp, vertical = 9.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = "Copy",
-                                    tint = EmeraldGlow,
-                                    modifier = Modifier.size(11.dp)
-                                )
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text(
-                                    text = "Copy",
-                                    fontSize = 9.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EmeraldGlow
-                                )
-                            }
+                            Text(
+                                text = ft,
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextWhite
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Start Course CTA Button
+                Button(
+                    onClick = onStartCourse,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .shadow(10.dp, RoundedCornerShape(14.dp), spotColor = VioletGlow),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(VioletDeep, VioletGlow, MagentaAccent)
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = TextWhite, modifier = Modifier.size(20.dp))
+                            Text(
+                                text = if (currentLang == "HI") "कोर्स शुरू करें (8 पाठ)" else "Start Instagram Journey (8 Lessons)",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Black,
+                                color = TextWhite
+                            )
                         }
                     }
                 }
@@ -1398,505 +932,767 @@ private fun ChatMessageBubble(
     }
 }
 
+// =========================================================
+// COURSE PROGRESS HEADER CARD
+// =========================================================
 @Composable
-private fun MentorActionBar(
-    currentLang: MentorLanguage,
-    currentStepIndex: Int,
-    userTextInput: String,
-    onUserTextInputChange: (String) -> Unit,
-    onConfirmDone: () -> Unit,
-    onExplainAgain: () -> Unit,
-    onOpenScriptTool: () -> Unit,
-    onOpenCaptionTool: () -> Unit,
-    onOpenChecklistTool: () -> Unit,
-    onOpenEditingCourse: () -> Unit,
-    onSendMessage: (String) -> Unit
+private fun CourseProgressHeaderCard(
+    completedCount: Int,
+    totalCount: Int,
+    currentLang: String,
+    onResetCourse: () -> Unit,
+    onReplayIntro: () -> Unit
 ) {
+    val progressPercent = if (totalCount > 0) (completedCount * 100) / totalCount else 0
+    val animatedProgress by animateFloatAsState(
+        targetValue = progressPercent / 100f,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "progressAnim"
+    )
+
     Surface(
-        color = Color(0xFF0D1610),
-        border = BorderStroke(0.8.dp, Color(0x3310B981))
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .border(BorderStroke(1.2.dp, Brush.horizontalGradient(listOf(VioletPrimary, MagentaAccent))), RoundedCornerShape(20.dp)),
+        color = CardSurfaceBg
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(18.dp)
         ) {
-            // QUICK ACTION CHIPS ROW
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                item {
-                    ActionPill(
-                        label = when (currentLang) {
-                            MentorLanguage.HINDI -> "✅ Ho gaya (Next Step)"
-                            MentorLanguage.ENGLISH -> "✅ Done (Next Step)"
-                            MentorLanguage.HINGLISH -> "✅ Ho Gaya (Next Step)"
-                        },
-                        isPrimary = true,
-                        onClick = onConfirmDone
+                Column {
+                    Text(
+                        text = if (currentLang == "HI") "आपकी प्रगति" else "Course Progress",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextMuted
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "$completedCount / $totalCount ${if (currentLang == "HI") "पाठ पूर्ण" else "Lessons Completed"}",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black,
+                        color = TextWhite
                     )
                 }
 
-                item {
-                    ActionPill(
-                        label = when (currentLang) {
-                            MentorLanguage.HINDI -> "❓ Samajh nahi aaya (Dubara batao)"
-                            MentorLanguage.ENGLISH -> "❓ Explain Again (New Example)"
-                            MentorLanguage.HINGLISH -> "❓ Samajh Nahi Aaya (Fresh Example)"
+                // Progress Badge Pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (progressPercent == 100) SuccessGreen.copy(alpha = 0.2f)
+                            else VioletPrimary.copy(alpha = 0.2f)
+                        )
+                        .border(
+                            BorderStroke(
+                                1.dp,
+                                if (progressPercent == 100) SuccessGreen else VioletGlow
+                            ),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = when {
+                            progressPercent == 100 -> if (currentLang == "HI") "पूर्ण 🎉" else "Completed 🎉"
+                            progressPercent > 0 -> "$progressPercent% ${if (currentLang == "HI") "पूर्ण" else "Done"}"
+                            else -> if (currentLang == "HI") "शुरू नहीं हुआ" else "Not Started"
                         },
-                        isPrimary = false,
-                        onClick = onExplainAgain
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = if (progressPercent == 100) SuccessGreen else VioletGlow
                     )
-                }
-
-                if (currentStepIndex == 8 || currentStepIndex == 6) {
-                    item {
-                        ActionPill(
-                            label = "🎬 AI Script Generator",
-                            isPrimary = false,
-                            onClick = onOpenScriptTool
-                        )
-                    }
-                }
-
-                if (currentStepIndex == 9) {
-                    item {
-                        ActionPill(
-                            label = "🎥 Video Editing Course",
-                            isPrimary = false,
-                            onClick = onOpenEditingCourse
-                        )
-                    }
-                }
-
-                if (currentStepIndex == 10) {
-                    item {
-                        ActionPill(
-                            label = "✍️ Caption & Hashtags",
-                            isPrimary = false,
-                            onClick = onOpenCaptionTool
-                        )
-                    }
-                }
-
-                if (currentStepIndex == 11) {
-                    item {
-                        ActionPill(
-                            label = "📋 Pre-Post Checklist",
-                            isPrimary = false,
-                            onClick = onOpenChecklistTool
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // TEXT INPUT BAR
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            // Progress Bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x33FFFFFF))
             ) {
-                OutlinedTextField(
-                    value = userTextInput,
-                    onValueChange = onUserTextInputChange,
-                    placeholder = {
-                        Text(
-                            text = when (currentLang) {
-                                MentorLanguage.HINDI -> "Apna question ya 'Ho gaya' likhein..."
-                                MentorLanguage.ENGLISH -> "Ask your mentor or type 'Done'..."
-                                MentorLanguage.HINGLISH -> "Apna doubt likhein ya 'Ho gaya' bolein..."
-                            },
-                            fontSize = 12.sp,
-                            color = TextWhite.copy(alpha = 0.4f)
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = EmeraldGlow,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedContainerColor = Color(0x18FFFFFF),
-                        unfocusedContainerColor = Color(0x12FFFFFF),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    ),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .fillMaxHeight()
+                        .fillMaxWidth(animatedProgress)
                         .clip(CircleShape)
-                        .background(Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow)))
-                        .clickable { onSendMessage(userTextInput) },
-                    contentAlignment = Alignment.Center
+                        .background(Brush.horizontalGradient(listOf(VioletPrimary, VioletGlow, MagentaAccent)))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Action Buttons Row (Replay Intro & Reset)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clickable { onReplayIntro() }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = AmoledBlack,
-                        modifier = Modifier.size(20.dp)
+                    Icon(Icons.Default.School, contentDescription = null, tint = VioletGlow, modifier = Modifier.size(14.dp))
+                    Text(
+                        text = if (currentLang == "HI") "इंट्रो देखें" else "Replay Intro",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = VioletGlow
                     )
+                }
+
+                if (completedCount > 0) {
+                    Row(
+                        modifier = Modifier
+                            .clickable { onResetCourse() }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = null, tint = TextMuted, modifier = Modifier.size(14.dp))
+                        Text(
+                            text = if (currentLang == "HI") "रीसेट करें" else "Reset Progress",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextMuted
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+// =========================================================
+// SECTION TITLE HEADER
+// =========================================================
 @Composable
-private fun ActionPill(
-    label: String,
-    isPrimary: Boolean,
+private fun SectionTitleHeader(title: String, subtitle: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Black,
+            color = TextWhite
+        )
+        Text(
+            text = subtitle,
+            fontSize = 11.5.sp,
+            color = TextMuted
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+    }
+}
+
+// =========================================================
+// LESSON LIST ITEM CARD
+// =========================================================
+@Composable
+private fun LessonListItemCard(
+    lesson: InstagramLessonData,
+    index: Int,
+    isCompleted: Boolean,
+    currentLang: String,
     onClick: () -> Unit
 ) {
-    Box(
+    val title = if (currentLang == "HI") lesson.titleHi else lesson.titleEn
+    val subtitle = if (currentLang == "HI") lesson.subtitleHi else lesson.subtitleEn
+
+    Surface(
         modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(
-                if (isPrimary) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                else SolidColor(Color(0x2210B981))
-            )
             .border(
                 BorderStroke(
                     1.dp,
-                    if (isPrimary) EmeraldGlow else EmeraldPrimary.copy(alpha = 0.5f)
+                    if (isCompleted) SuccessGreen.copy(alpha = 0.5f) else CardBorderColor
                 ),
                 RoundedCornerShape(16.dp)
             )
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 7.dp)
+            .clickable { onClick() },
+        color = CardSurfaceBg
     ) {
-        Text(
-            text = label,
-            fontSize = 11.5.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isPrimary) AmoledBlack else TextWhite
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Icon Badge Box
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        brush = if (isCompleted) SolidColor(SuccessGreen.copy(alpha = 0.2f))
+                        else Brush.radialGradient(listOf(VioletDeep, CardSurfaceBg))
+                    )
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            if (isCompleted) SuccessGreen else VioletPrimary
+                        ),
+                        RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isCompleted) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = "Done", tint = SuccessGreen, modifier = Modifier.size(24.dp))
+                } else {
+                    Icon(lesson.icon, contentDescription = null, tint = VioletGlow, modifier = Modifier.size(22.dp))
+                }
+            }
+
+            // Title & Subtitle Info
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "LESSON 0${lesson.id}",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = VioletGlow,
+                        letterSpacing = 0.8.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x22FFFFFF))
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = lesson.badge,
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextWhite,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = TextMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Arrow button
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isCompleted) SuccessGreen.copy(alpha = 0.15f)
+                        else Color(0x1FFFFFFF)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "Open",
+                    tint = if (isCompleted) SuccessGreen else TextWhite,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
     }
 }
 
+// =========================================================
+// FULLSCREEN LESSON POPUP DIALOG
+// =========================================================
 @Composable
-private fun AiThinkingIndicator() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(vertical = 4.dp)
+private fun FullscreenLessonPopup(
+    lesson: InstagramLessonData,
+    totalLessons: Int,
+    isCompleted: Boolean,
+    currentLang: String,
+    onLanguageToggle: () -> Unit,
+    onLessonCompleted: () -> Unit,
+    onNextLesson: () -> Unit,
+    onPrevLesson: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val title = if (currentLang == "HI") lesson.titleHi else lesson.titleEn
+    val concept = if (currentLang == "HI") lesson.conceptHi else lesson.conceptEn
+    val example = if (currentLang == "HI") lesson.exampleHi else lesson.exampleEn
+    val checklist = if (currentLang == "HI") lesson.checklistHi else lesson.checklistEn
+    val quizQuestion = if (currentLang == "HI") lesson.quizQuestionHi else lesson.quizQuestionEn
+    val quizOptions = if (currentLang == "HI") lesson.quizOptionsHi else lesson.quizOptionsEn
+    val quizExplanation = if (currentLang == "HI") lesson.quizExplanationHi else lesson.quizExplanationEn
+    val summary = if (currentLang == "HI") lesson.summaryHi else lesson.summaryEn
+
+    // Quiz State
+    var selectedQuizOption by remember(lesson.id) { mutableStateOf<Int?>(null) }
+    var quizSubmitted by remember(lesson.id) { mutableStateOf(false) }
+    var isQuizCorrect by remember(lesson.id) { mutableStateOf(false) }
+
+    // Interactive Checklist Checks State
+    val checkedState = remember(lesson.id) {
+        mutableStateListOf(*Array(checklist.size) { false })
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
     ) {
         Box(
             modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(EmeraldPrimary.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .background(DarkCanvasBg)
+                .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
-            Icon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = EmeraldGlow,
-                modifier = Modifier.size(14.dp)
-            )
-        }
-        Text(
-            text = "AI Mentor is typing...",
-            fontSize = 12.sp,
-            color = EmeraldGlow,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-// =========================================================
-// INTERACTIVE DIALOG OVERLAYS
-// =========================================================
-
-@Composable
-private fun ScriptGeneratorDialog(
-    creatorType: String,
-    language: MentorLanguage,
-    onDismiss: () -> Unit,
-    onScriptGenerated: (ScriptResult) -> Unit
-) {
-    var topic by remember { mutableStateOf("") }
-    var selectedDuration by remember { mutableStateOf("30s") }
-    var isGenerating by remember { mutableStateOf(false) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "🎬 AI Reel Script Generator",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Personalized for $creatorType",
-                    fontSize = 11.sp,
-                    color = EmeraldGlow,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = topic,
-                    onValueChange = { topic = it },
-                    placeholder = { Text("Video topic (e.g., Top 3 AI Hacks, Daily Vlog)...", fontSize = 12.sp, color = TextWhite.copy(0.4f)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = EmeraldGlow,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Text(
-                    text = "Select Duration:",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(modifier = Modifier.fillMaxSize()) {
+                // POPUP HEADER BAR
+                Surface(
+                    color = CardSurfaceBg,
+                    border = BorderStroke(1.dp, CardBorderColor)
                 ) {
-                    listOf("15s", "30s", "45s", "60s", "90s").forEach { dur ->
-                        val isSel = selectedDuration == dur
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(38.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    if (isSel) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                                    else SolidColor(Color(0x18FFFFFF))
-                                )
-                                .clickable { selectedDuration = dur },
-                            contentAlignment = Alignment.Center
-                        ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
                             Text(
-                                text = dur,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isSel) AmoledBlack else TextWhite
+                                text = "LESSON ${lesson.id} OF $totalLessons",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                color = VioletGlow,
+                                letterSpacing = 1.sp
                             )
+                            Text(
+                                text = title,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Language Switcher
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0x33A855F7))
+                                    .border(BorderStroke(1.dp, VioletGlow), RoundedCornerShape(12.dp))
+                                    .clickable { onLanguageToggle() }
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = if (currentLang == "EN") "🇬🇧 EN" else "🇮🇳 हिन्दी",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                            }
+
+                            // Close Button
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0x22FFFFFF))
+                                    .clickable { onDismiss() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Close", tint = TextWhite, modifier = Modifier.size(16.dp))
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(
+                // LESSON BODY SCROLLABLE CONTENT
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp)
-                        .clip(RoundedCornerShape(23.dp))
-                        .background(
-                            if (topic.isNotBlank()) Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow))
-                            else SolidColor(Color.Gray)
-                        )
-                        .clickable(enabled = topic.isNotBlank() && !isGenerating) {
-                            isGenerating = true
-                            val script = generateReelScript(topic, selectedDuration, creatorType, language)
-                            onScriptGenerated(script)
-                        },
-                    contentAlignment = Alignment.Center
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = if (isGenerating) "GENERATING..." else "GENERATE SCRIPT ✨",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack,
-                        letterSpacing = 0.8.sp
-                    )
-                }
-            }
-        }
-    }
-}
+                    // CONCEPT EXPLANATION CARD
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .border(BorderStroke(1.dp, CardBorderColor), RoundedCornerShape(18.dp)),
+                            color = CardSurfaceBg
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(lesson.icon, contentDescription = null, tint = VioletGlow, modifier = Modifier.size(20.dp))
+                                    Text(
+                                        text = if (currentLang == "HI") "मुख्य अवधारणा (Key Concept)" else "Key Concept & Strategy",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = VioletGlow
+                                    )
+                                }
 
-@Composable
-private fun EditingCourseDialog(
-    language: MentorLanguage,
-    onDismiss: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "🎥 Video Editing Crash Course",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite
-                )
+                                Spacer(modifier = Modifier.height(10.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                val lessons = listOf(
-                    "1. VN Code / CapCut Basics (Trim, Split & Cut)",
-                    "2. Auto-Captions & Animated Text Presets",
-                    "3. Sound Effects (Whoosh, Pop, Click)",
-                    "4. Color Grading & Lighting Enhancers",
-                    "5. Exporting in 1080p 60FPS Bitrate Settings"
-                )
-
-                lessons.forEach { lesson ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x18FFFFFF))
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = lesson,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextWhite
-                        )
+                                Text(
+                                    text = concept,
+                                    fontSize = 13.5.sp,
+                                    color = TextWhite,
+                                    lineHeight = 20.sp
+                                )
+                            }
+                        }
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // REAL EXAMPLE CARD
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .border(BorderStroke(1.dp, Color(0x3310B981)), RoundedCornerShape(18.dp)),
+                            color = Color(0xFF091712)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(18.dp))
+                                    Text(
+                                        text = if (currentLang == "HI") "वास्तविक उदाहरण (Real-World Example)" else "Real-World Example",
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = SuccessGreen
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    text = example,
+                                    fontSize = 13.sp,
+                                    color = TextWhite.copy(alpha = 0.95f),
+                                    lineHeight = 19.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+
+                    // PRACTICAL CHECKLIST CARD
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .border(BorderStroke(1.dp, CardBorderColor), RoundedCornerShape(18.dp)),
+                            color = CardSurfaceBg
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = if (currentLang == "HI") "📋 प्रैक्टिकल चेकलिस्ट" else "📋 Practical Checklist",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextWhite
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                checklist.forEachIndexed { idx, chk ->
+                                    val isChecked = checkedState.getOrElse(idx) { false }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                if (idx < checkedState.size) {
+                                                    checkedState[idx] = !isChecked
+                                                }
+                                            }
+                                            .padding(vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Checkbox(
+                                            checked = isChecked,
+                                            onCheckedChange = { checkedState[idx] = it },
+                                            colors = CheckboxDefaults.colors(
+                                                checkedColor = VioletGlow,
+                                                checkmarkColor = Color.White,
+                                                uncheckedColor = TextMuted
+                                            )
+                                        )
+                                        Text(
+                                            text = chk,
+                                            fontSize = 12.5.sp,
+                                            color = if (isChecked) SuccessGreen else TextWhite,
+                                            fontWeight = if (isChecked) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // INTERACTIVE QUIZ CARD
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        when {
+                                            quizSubmitted && isQuizCorrect -> SuccessGreen
+                                            quizSubmitted && !isQuizCorrect -> ErrorRed
+                                            else -> MagentaAccent.copy(alpha = 0.5f)
+                                        }
+                                    ),
+                                    RoundedCornerShape(18.dp)
+                                ),
+                            color = CardSurfaceBg
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.HelpOutline, contentDescription = null, tint = MagentaAccent, modifier = Modifier.size(20.dp))
+                                    Text(
+                                        text = if (currentLang == "HI") "⚡ त्वरित क्विज़ (Quick Quiz)" else "⚡ Quick Knowledge Check",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = MagentaAccent
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    text = quizQuestion,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Quiz Options
+                                quizOptions.forEachIndexed { optIdx, optText ->
+                                    val isSelected = selectedQuizOption == optIdx
+                                    val isCorrectOpt = optIdx == lesson.quizCorrectIndex
+
+                                    val optionBg = when {
+                                        quizSubmitted && isCorrectOpt -> SuccessGreen.copy(alpha = 0.25f)
+                                        quizSubmitted && isSelected && !isCorrectOpt -> ErrorRed.copy(alpha = 0.25f)
+                                        isSelected -> VioletPrimary.copy(alpha = 0.25f)
+                                        else -> Color(0x15FFFFFF)
+                                    }
+
+                                    val optionBorder = when {
+                                        quizSubmitted && isCorrectOpt -> SuccessGreen
+                                        quizSubmitted && isSelected && !isCorrectOpt -> ErrorRed
+                                        isSelected -> VioletGlow
+                                        else -> CardBorderColor
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(optionBg)
+                                            .border(BorderStroke(1.dp, optionBorder), RoundedCornerShape(12.dp))
+                                            .clickable(!quizSubmitted) {
+                                                selectedQuizOption = optIdx
+                                                quizSubmitted = true
+                                                isQuizCorrect = (optIdx == lesson.quizCorrectIndex)
+                                                if (optIdx == lesson.quizCorrectIndex) {
+                                                    onLessonCompleted()
+                                                }
+                                            }
+                                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "${('A' + optIdx)}.  $optText",
+                                                fontSize = 12.5.sp,
+                                                fontWeight = if (isSelected || (quizSubmitted && isCorrectOpt)) FontWeight.Bold else FontWeight.Medium,
+                                                color = TextWhite,
+                                                modifier = Modifier.weight(1f)
+                                            )
+
+                                            if (quizSubmitted && isCorrectOpt) {
+                                                Icon(Icons.Default.Check, contentDescription = "Correct", tint = SuccessGreen, modifier = Modifier.size(16.dp))
+                                            } else if (quizSubmitted && isSelected && !isCorrectOpt) {
+                                                Icon(Icons.Default.Close, contentDescription = "Wrong", tint = ErrorRed, modifier = Modifier.size(16.dp))
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+
+                                // Quiz Feedback Message
+                                if (quizSubmitted) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(10.dp)),
+                                        color = if (isQuizCorrect) SuccessGreen.copy(alpha = 0.15f) else ErrorRed.copy(alpha = 0.15f)
+                                    ) {
+                                        Column(modifier = Modifier.padding(10.dp)) {
+                                            Text(
+                                                text = if (isQuizCorrect) {
+                                                    if (currentLang == "HI") "✅ बिल्कुल सही उत्तर! पाठ पूर्ण हुआ!" else "✅ Correct Answer! Lesson Completed!"
+                                                } else {
+                                                    if (currentLang == "HI") "❌ गलत उत्तर। दोबारा प्रयास करें।" else "❌ Incorrect. Try again!"
+                                                },
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = if (isQuizCorrect) SuccessGreen else ErrorRed
+                                            )
+                                            Text(
+                                                text = quizExplanation,
+                                                fontSize = 11.5.sp,
+                                                color = TextWhite.copy(alpha = 0.9f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // LESSON SUMMARY CARD
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .border(BorderStroke(1.dp, CardBorderColor), RoundedCornerShape(18.dp)),
+                            color = CardSurfaceBg
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = if (currentLang == "HI") "📌 मुख्य निष्कर्ष (Takeaway)" else "📌 Main Takeaway",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = summary,
+                                    fontSize = 12.5.sp,
+                                    color = TextMuted,
+                                    lineHeight = 18.sp
+                                )
+                            }
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .clip(RoundedCornerShape(21.dp))
-                        .background(Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow)))
-                        .clickable { onDismiss() },
-                    contentAlignment = Alignment.Center
+                // BOTTOM ACTION BAR (PREV / NEXT / SAVE)
+                Surface(
+                    color = CardSurfaceBg,
+                    border = BorderStroke(1.dp, CardBorderColor)
                 ) {
-                    Text(
-                        text = "GOT IT • CONTINUE LESSON",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PrePostChecklistDialog(
-    language: MentorLanguage,
-    onDismiss: () -> Unit
-) {
-    val items = remember {
-        mutableStateListOf(
-            "Clear HD Cover Photo / Thumbnail selected" to false,
-            "Highest Quality Upload toggled ON in Settings" to false,
-            "Hook sentence in First Line of Caption" to false,
-            "3-Tier Hashtag Mix added" to false,
-            "Location tagged for local reach" to false,
-            "Trending Audio Volume mixed (10-15%)" to false,
-            "Alt Text & Product Tags added" to false
-        )
-    }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF121B15),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "📋 Pre-Post Checklist",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                items.forEachIndexed { idx, item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { items[idx] = item.first to !item.second }
-                            .padding(vertical = 4.dp),
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = item.second,
-                            onCheckedChange = { chk -> items[idx] = item.first to chk },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = EmeraldGlow,
-                                checkmarkColor = AmoledBlack
-                            )
-                        )
-                        Text(
-                            text = item.first,
-                            fontSize = 12.sp,
-                            color = if (item.second) EmeraldGlow else TextWhite,
-                            fontWeight = if (item.second) FontWeight.Bold else FontWeight.Normal
-                        )
+                        // Previous Button
+                        if (lesson.id > 1) {
+                            OutlinedButton(
+                                onClick = onPrevLesson,
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, CardBorderColor)
+                            ) {
+                                Icon(Icons.Default.ChevronLeft, contentDescription = null, tint = TextWhite, modifier = Modifier.size(16.dp))
+                                Text(if (currentLang == "HI") "पिछला" else "Previous", fontSize = 12.sp, color = TextWhite)
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(1.dp))
+                        }
+
+                        // Complete & Next Button
+                        Button(
+                            onClick = {
+                                onLessonCompleted()
+                                if (lesson.id < totalLessons) {
+                                    onNextLesson()
+                                } else {
+                                    onDismiss()
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = VioletPrimary)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = when {
+                                        lesson.id < totalLessons -> if (currentLang == "HI") "अगला पाठ 🚀" else "Next Lesson 🚀"
+                                        else -> if (currentLang == "HI") "कोर्स समाप्त करें 🎉" else "Finish Course 🎉"
+                                    },
+                                    fontSize = 12.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = TextWhite, modifier = Modifier.size(16.dp))
+                            }
+                        }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .clip(RoundedCornerShape(21.dp))
-                        .background(Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow)))
-                        .clickable { onDismiss() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "READY TO POST 🚀",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack
-                    )
                 }
             }
         }
@@ -1904,78 +1700,115 @@ private fun PrePostChecklistDialog(
 }
 
 // =========================================================
-// GENERATION HELPERS (DYNAMIC & FRESH EXPLANATION GENERATORS)
+// COURSE COMPLETION CERTIFICATE CARD
 // =========================================================
+@Composable
+private fun CourseCompletionCertificateCard(
+    currentLang: String,
+    onResetCourse: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .border(BorderStroke(1.5.dp, Brush.horizontalGradient(listOf(VioletGlow, MagentaAccent, SuccessGreen))), RoundedCornerShape(20.dp)),
+        color = CardSurfaceBg
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .background(SuccessGreen.copy(alpha = 0.2f))
+                    .border(BorderStroke(1.dp, SuccessGreen), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(30.dp))
+            }
 
-private fun getFreshExplanationHi(stepIdx: Int): String {
-    return when (stepIdx) {
-        0 -> "💡 Aao ise aur aasan sabdo me samjhte hain: Instagram bilkul aapki dukan ki tarah hai. App download karna matlab dukan ki chabi lena! Pehle app install karke basic profile kholo."
-        1 -> "💡 Simpler Example: Normal Instagram account personal diary jaisa hota hai. Switch to Creator/Professional matlab dukan ka board lagana, jisse aapko kitne grahak (viewers) aaye wo count dikhe!"
-        2 -> "💡 Profile Bio Example: Maan lo aap Restaurant ke bahar ho. Board pe likha hai 'Best Butter Chicken & Fast Delivery'. Viewer aapka bio dekh ke 2 second me samajhna chahiye ki aap kya dikhate ho."
-        3 -> "💡 Quality Settings Example: Dhundli (blurry) video koi nahi dekhta. Instagram ka algorithm blurry video ki reach rok deta hai. Highest Quality toggle karne se video crystal clear HD render hoti hai."
-        4 -> "💡 Insights Example: Dashboard ek Report Card ki tarah hai. Isse pata chalta hai ki kis time aapke viewers online hain aur kis video pe sabse zyada log ruke."
-        5 -> "💡 Content Formats Analogy: Reel = Advertisement poster (naye logon ko lane ke liye). Story = Dost se baatcheet (jo pehle se followers hain unko active rakhne ke liye)."
-        6 -> "💡 Hook Example: Agar aapki Reel 3 second me kisi ko pasand nahi aayi toh wo swipe kar dega. Pehle 3 second me screen pe bada text likho ya koi energetic sawaal puchho!"
-        7 -> "💡 Audio Balance Example: Apni aawaz ko 100% rakho aur Background music ko 10%. Jaise FM Radio pe RJ ki aawaz clear aati hai aur music peeche dheere bajta hai!"
-        8 -> "💡 Scripting Formula: Video me 3 parts hote hain: 1. Hook (0-3s), 2. Main Value / Story (3-25s), 3. Call to Action ('Follow for Part 2') (25-30s)."
-        9 -> "💡 Video Editing Rule: Video me har 2-3 second me text ya jump cut hona chahiye jisse viewer bore na ho."
-        10 -> "💡 Hashtag Mix Formula: 3 Small tags (10k-50k posts), 3 Medium tags (100k-500k posts), 2 Big tags (1M+ posts)."
-        11 -> "💡 Pre-Post Check: Posting se pehle hamesha ek baar flight mode off-on karke internet speed verify karo taaki HD upload fail na ho."
-        else -> "💡 Post Strategy: Video post karte hi story par share karo aur 'New Reel' sticker lagao!"
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = if (currentLang == "HI") "🎉 बधाई हो! आपने कोर्स पूरा कर लिया!" else "🎉 Congratulations! Course Mastered!",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                color = TextWhite,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = if (currentLang == "HI")
+                    "आपने इंस्टाग्राम रील्स ग्रोथ, 1080p HD अपलोड, 3s वायरल हुक्स और SEO की सभी रणनीतियाँ मास्टर कर ली हैं।"
+                else
+                    "You have successfully mastered Profile Optimization, 1080p HD Uploads, 3s Viral Hooks, Trending Audio, and SEO Captions.",
+                fontSize = 12.5.sp,
+                color = TextMuted,
+                textAlign = TextAlign.Center,
+                lineHeight = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = onResetCourse,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, CardBorderColor)
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = null, tint = TextWhite, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (currentLang == "HI") "पुनः अभ्यास करने के लिए रीसेट करें" else "Restart Course for Practice",
+                    fontSize = 12.sp,
+                    color = TextWhite
+                )
+            }
+        }
     }
 }
 
-private fun getFreshExplanationEn(stepIdx: Int): String {
-    return when (stepIdx) {
-        0 -> "💡 Let's break it down simply: Downloading Instagram is like opening the front door to your new creator digital studio. Start by downloading the official app!"
-        1 -> "💡 Analogy: A Personal Account is a private diary. A Creator Account puts up a store sign and hands you a free analytics dashboard to track viewers!"
-        2 -> "💡 Bio Rule: Think of your Bio as a 3-second elevator pitch. Mention who you serve, what value you deliver, and where to click next."
-        3 -> "💡 HD Setting Rule: Instagram compresses blurry videos. Toggling 'Highest Quality Upload' ensures your camera's native crispness is preserved."
-        4 -> "💡 Analytics Analogy: Insights are your report card! They reveal peak active hours and exactly which age groups watch your content."
-        5 -> "💡 Formats Strategy: Reels capture new audience reach. Stories build personal trust. Highlights serve as your permanent portfolio showcase."
-        6 -> "💡 Hook Strategy: If the first 3 seconds don't grab attention, viewers swipe away. Use visual movement or a intriguing bold text overlay!"
-        7 -> "💡 Audio Mix Rule: Keep your spoken Voiceover at 100% and Background Trending Audio at 10-15% for optimal clarity."
-        else -> "💡 Engagement Rule: Reply to all comments within 1 hour of publishing to trigger Instagram's early engagement algorithm boost!"
-    }
-}
-
-private fun getFreshExplanationHinglish(stepIdx: Int): String {
-    return when (stepIdx) {
-        0 -> "💡 Aao ek simple example se samjhte hain: Instagram download karna matlab aapne apni creator shop ka shutter khola. Sabse pehle official app install kar lo!"
-        1 -> "💡 Professional Account Analogy: Personal account ek private room hai. Switch to Creator matlab dukan ka board lagana jisse aapko viewer counts mil sakein!"
-        2 -> "💡 Bio Formula: Bio aapka billboard hai. 2 second me viewer ko pata chalna chahiye ki aap kya value dete hain aur kahan click karna hai."
-        3 -> "💡 HD Upload Rule: Blurry video ki reach ruk jaati hai. Settings me 'Upload at Highest Quality' ON karne se video HD me render hoti hai."
-        4 -> "💡 Dashboard Example: Professional Dashboard aapka speedometer hai. Isse dikhta hai ki aapki reach fast ho rahi hai ya slow!"
-        5 -> "💡 Content Formats: Reels = Naye Followers ke liye. Stories = Purane Followers ke sath bonding ke liye!"
-        6 -> "💡 Hook Rule: First 3 seconds me visual motion ya strong question do taaki viewer ka thumb ruk jaye."
-        7 -> "💡 Audio Mixing: Voiceover 100% aur Trending Background Sound 10-15% pe balance karo."
-        else -> "💡 Post Growth Trick: Reel upload hote hi pehle 1 hour me aane wale sabhi comments ka reply karke top comment pin kar do!"
-    }
-}
-
-private suspend fun generateDynamicAiReply(input: String, lang: MentorLanguage, stepIdx: Int): String {
-    return com.example.creatoracademy.ViralAiMentorEngine.generateIntegratedMentorResponse(
-        domain = com.example.creatoracademy.MentorToolDomain.INSTAGRAM_CREATOR_AI,
-        userQuery = input,
-        userContext = "Instagram Creator Academy Step ${stepIdx + 1}",
-        language = lang.label
-    )
-}
-
-private fun generateReelScript(topic: String, duration: String, creatorType: String, language: MentorLanguage): ScriptResult {
-    return ScriptResult(
-        topic = topic,
-        duration = duration,
-        hook = "Wait! Don't scroll if you want to master $topic in 2026...",
-        flow = "1. Here is the secret mistake 90% of $creatorType creators make...\n2. Fix this by using this 1 simple trick...\n3. Watch your reach double instantly!",
-        cta = "Comment 'GUIDE' below & I'll send you the full breakdown in DM! Follow for daily $creatorType tips! 🚀"
-    )
-}
-
-private fun generateCaptionAndHashtags(topic: String, creatorType: String, language: MentorLanguage): CaptionResult {
-    val nTag = creatorType.replace(" ", "").lowercase()
-    return CaptionResult(
-        caption = "Stop making this $topic mistake! 🚨 Here is the exact step-by-step framework to scale your content strategy in 2026.\n\nSave this Reel for later & share with a friend who needs this! 📌",
-        hashtags = listOf("#$nTag", "#$nTag Tips", "#InstagramGrowth", "#ViralReels", "#CreatorEconomy", "#ReelsStrategy", "#TrendingReels")
+// =========================================================
+// RESET CONFIRMATION MODAL
+// =========================================================
+@Composable
+private fun ResetConfirmModal(
+    currentLang: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (currentLang == "HI") "कोर्स प्रगति रीसेट करें?" else "Reset Course Progress?",
+                fontWeight = FontWeight.Black,
+                color = TextWhite
+            )
+        },
+        text = {
+            Text(
+                text = if (currentLang == "HI") "क्या आप वाकई अपनी सभी पाठ प्रगतियों को हटाना चाहते हैं?" else "Are you sure you want to reset all completed lesson steps?",
+                color = TextMuted
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(if (currentLang == "HI") "हाँ, रीसेट करें" else "Yes, Reset", color = ErrorRed, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(if (currentLang == "HI") "रद्द करें" else "Cancel", color = TextWhite)
+            }
+        },
+        containerColor = CardSurfaceBg,
+        shape = RoundedCornerShape(20.dp)
     )
 }

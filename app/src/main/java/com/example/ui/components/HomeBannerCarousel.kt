@@ -37,9 +37,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 val HOME_BANNER_IMAGES = listOf(
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-45-35-887.jpg",
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-04-094.jpg",
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-40-738.jpg"
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-45-35-887.jpg",
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-04-094.jpg",
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/Picsart_26-07-29_23-46-40-738.jpg"
 )
 
 @Composable
@@ -195,7 +195,7 @@ fun HomeBannerCarousel(
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .build(),
-                        contentDescription = "ViralToolAI Banner ${realIndex + 1}",
+                        contentDescription = "ViralToolAi Banner ${realIndex + 1}",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                         loading = {

@@ -3317,12 +3317,12 @@ fun ReportContent(resultData: ShoppingResult, onShowToast: (String) -> Unit, onR
                     // Share Deal Button
                     Button(
                         onClick = {
-                            val shareText = "🔥 Check out this amazing deal found by ViralToolAI!\n\n" +
+                            val shareText = "🔥 Check out this amazing deal found by ViralToolAi!\n\n" +
                                     "📦 Product: ${resultData.productName}\n" +
                                     "💰 Lowest Price: ₹${String.format("%,.0f", resultData.bestPrice)}\n" +
                                     "🏪 Best Store: $bestStoreName\n" +
                                     "🔗 Direct Link: $bestProductUrl\n\n" +
-                                    "Shared via ViralToolAI — From Products to Popularity 🚀"
+                                    "Shared via ViralToolAi — From Products to Popularity 🚀"
                             
                             val sendIntent = android.content.Intent().apply {
                                 action = android.content.Intent.ACTION_SEND
@@ -5453,12 +5453,12 @@ fun PremiumShareSheetDialog(
 
                     Button(
                         onClick = {
-                            val shareText = "🔥 ViralToolAI Deal Alert:\n\n" +
+                            val shareText = "🔥 ViralToolAi Deal Alert:\n\n" +
                                     "📦 ${resultData.productName}\n" +
                                     "💰 Price: ₹${String.format("%,.0f", resultData.bestPrice)} on ${resultData.detectedStore}\n" +
                                     "🏷️ Deal Score: ${resultData.dealScore}/100\n" +
                                     "🔗 Link: ${resultData.url}\n\n" +
-                                    "Shared via ViralToolAI 🚀"
+                                    "Shared via ViralToolAi 🚀"
                             val sendIntent = android.content.Intent().apply {
                                 action = android.content.Intent.ACTION_SEND
                                 putExtra(android.content.Intent.EXTRA_TEXT, shareText)

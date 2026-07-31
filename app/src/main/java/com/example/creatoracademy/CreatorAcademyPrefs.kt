@@ -45,6 +45,11 @@ object CreatorAcademyPrefs {
     private const val KEY_WISHLINK_STEP_INDEX = "wishlink_creator_step_index"
     private const val KEY_WISHLINK_COMPLETED_STEPS = "wishlink_creator_completed_steps"
 
+    private const val KEY_INSTAGRAM_INTRO_COMPLETED = "instagram_creator_intro_completed"
+    private const val KEY_INSTAGRAM_LANG = "instagram_creator_language"
+    private const val KEY_INSTAGRAM_CURRENT_STEP = "instagram_creator_current_step"
+    private const val KEY_INSTAGRAM_COMPLETED_STEPS = "instagram_creator_completed_steps"
+
     private const val KEY_YOUTUBE_LANG = "youtube_creator_v2_language"
     private const val KEY_YOUTUBE_CREATOR_TYPE = "youtube_creator_v2_type"
     private const val KEY_YOUTUBE_CURRENT_STEP = "youtube_creator_v2_current_step"
@@ -133,6 +138,49 @@ object CreatorAcademyPrefs {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val strSet = steps.map { it.toString() }.toSet()
         prefs.edit().putStringSet(KEY_YOUTUBE_COMPLETED_STEPS, strSet).apply()
+    }
+
+    // Instagram Creator Guide Preferences
+    fun isInstagramIntroCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_INSTAGRAM_INTRO_COMPLETED, false)
+    }
+
+    fun setInstagramIntroCompleted(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_INSTAGRAM_INTRO_COMPLETED, completed).apply()
+    }
+
+    fun getInstagramLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_LANG, "EN") ?: "EN"
+    }
+
+    fun saveInstagramLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_LANG, lang).apply()
+    }
+
+    fun getInstagramCurrentStep(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_INSTAGRAM_CURRENT_STEP, 0)
+    }
+
+    fun saveInstagramCurrentStep(context: Context, step: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_INSTAGRAM_CURRENT_STEP, step).apply()
+    }
+
+    fun getInstagramCompletedSteps(context: Context): List<Int> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = prefs.getStringSet(KEY_INSTAGRAM_COMPLETED_STEPS, emptySet()) ?: emptySet()
+        return strSet.mapNotNull { it.toIntOrNull() }
+    }
+
+    fun saveInstagramCompletedSteps(context: Context, steps: Set<Int>) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val strSet = steps.map { it.toString() }.toSet()
+        prefs.edit().putStringSet(KEY_INSTAGRAM_COMPLETED_STEPS, strSet).apply()
     }
 
     fun getBrandCollabLanguage(context: Context): String {
@@ -332,6 +380,16 @@ object CreatorAcademyPrefs {
         return next
     }
 
+    fun getPreferredLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_PREFERRED_LANGUAGE, "English") ?: "English"
+    }
+
+    fun setPreferredLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_PREFERRED_LANGUAGE, lang).apply()
+    }
+
     fun isReminderDismissed(context: Context, path: String = "INSTAGRAM"): Boolean {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getBoolean("${KEY_REMINDER_DISMISSED}_$path", false)
@@ -361,9 +419,13 @@ object CreatorAcademyPrefs {
                 editor.remove(KEY_YOUTUBE_COMPLETED_STEPS)
             }
             "instagram" -> {
+                editor.remove(KEY_INSTAGRAM_INTRO_COMPLETED)
+                editor.remove(KEY_INSTAGRAM_LANG)
                 editor.remove("instagram_creator_language")
                 editor.remove("instagram_creator_type")
+                editor.remove(KEY_INSTAGRAM_CURRENT_STEP)
                 editor.remove("instagram_creator_current_step")
+                editor.remove(KEY_INSTAGRAM_COMPLETED_STEPS)
                 editor.remove("instagram_creator_completed_steps")
                 editor.remove(KEY_BRAND_COLLAB_STEP_INDEX)
             }
@@ -387,5 +449,168 @@ object CreatorAcademyPrefs {
             }
         }
         editor.apply()
+    }
+
+    // ==========================================
+    // REFER & REWARDS PHASE 4 PREFERENCES
+    // ==========================================
+    private const val KEY_REWARD_SUBMISSION_EXISTS = "reward_sub_exists"
+    private const val KEY_REWARD_EMAIL = "reward_sub_email"
+    private const val KEY_REWARD_NAME = "reward_sub_name"
+    private const val KEY_REWARD_IG_USERNAME = "reward_sub_ig_username"
+    private const val KEY_REWARD_IG_LINK = "reward_sub_ig_link"
+    private const val KEY_REWARD_CONTENT_TYPES = "reward_sub_content_types"
+    private const val KEY_REWARD_SCREENSHOT = "reward_sub_screenshot"
+    private const val KEY_REWARD_STATUS = "reward_sub_status"
+    private const val KEY_REWARD_DATE = "reward_sub_date"
+
+    // ==========================================
+    // PROFILE & SETTINGS PHASE 5 PREFERENCES
+    // ==========================================
+    private const val KEY_APP_THEME_MODE = "app_theme_mode" // "System", "Dark", "Light"
+    private const val KEY_APP_LANGUAGE = "app_setting_language" // "English", "Hindi", "Hinglish"
+    private const val KEY_APP_NOTIFICATIONS = "app_setting_notifications" // Boolean
+    private const val KEY_LAST_COURSE_NAME = "last_opened_course_name"
+    private const val KEY_LAST_COURSE_PROGRESS = "last_opened_course_progress"
+    private const val KEY_LAST_COURSE_TOTAL_LESSONS = "last_opened_course_total_lessons"
+    private const val KEY_LAST_COURSE_COMPLETED_LESSONS = "last_opened_course_completed_lessons"
+
+    // User Profile Display Name
+    private const val KEY_USER_DISPLAY_NAME = "user_display_name"
+
+    fun getUserDisplayName(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_USER_DISPLAY_NAME, "Creator Pro") ?: "Creator Pro"
+    }
+
+    fun saveUserDisplayName(context: Context, name: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_USER_DISPLAY_NAME, name).apply()
+    }
+
+    fun getAppThemeMode(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_APP_THEME_MODE, "Dark") ?: "Dark"
+    }
+
+    fun setAppThemeMode(context: Context, mode: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_APP_THEME_MODE, mode).apply()
+    }
+
+    fun getAppLanguage(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_APP_LANGUAGE, "English") ?: "English"
+    }
+
+    fun setAppLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_APP_LANGUAGE, lang).apply()
+    }
+
+    fun getNotificationsEnabled(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_APP_NOTIFICATIONS, true)
+    }
+
+    fun setNotificationsEnabled(context: Context, enabled: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_APP_NOTIFICATIONS, enabled).apply()
+    }
+
+    fun saveLastOpenedCourse(
+        context: Context,
+        courseName: String,
+        completedLessons: Int,
+        totalLessons: Int
+    ) {
+        val progressPercent = if (totalLessons > 0) ((completedLessons.toFloat() / totalLessons.toFloat()) * 100).toInt() else 0
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString(KEY_LAST_COURSE_NAME, courseName)
+            .putInt(KEY_LAST_COURSE_PROGRESS, progressPercent)
+            .putInt(KEY_LAST_COURSE_TOTAL_LESSONS, totalLessons)
+            .putInt(KEY_LAST_COURSE_COMPLETED_LESSONS, completedLessons)
+            .apply()
+    }
+
+    fun getLastOpenedCourse(context: Context): Map<String, Any>? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val name = prefs.getString(KEY_LAST_COURSE_NAME, null) ?: return null
+        val progress = prefs.getInt(KEY_LAST_COURSE_PROGRESS, 0)
+        val completed = prefs.getInt(KEY_LAST_COURSE_COMPLETED_LESSONS, 0)
+        val total = prefs.getInt(KEY_LAST_COURSE_TOTAL_LESSONS, 1)
+        return mapOf(
+            "name" to name,
+            "progress" to progress,
+            "completed" to completed,
+            "total" to total
+        )
+    }
+
+    fun saveRewardSubmission(
+        context: Context,
+        email: String,
+        name: String,
+        igUsername: String,
+        igLink: String,
+        contentTypes: String,
+        screenshotUri: String,
+        status: String = "Pending Review"
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val dateFormat = java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault())
+        val dateStr = dateFormat.format(java.util.Date())
+
+        prefs.edit()
+            .putBoolean(KEY_REWARD_SUBMISSION_EXISTS, true)
+            .putString(KEY_REWARD_EMAIL, email)
+            .putString(KEY_REWARD_NAME, name)
+            .putString(KEY_REWARD_IG_USERNAME, igUsername)
+            .putString(KEY_REWARD_IG_LINK, igLink)
+            .putString(KEY_REWARD_CONTENT_TYPES, contentTypes)
+            .putString(KEY_REWARD_SCREENSHOT, screenshotUri)
+            .putString(KEY_REWARD_STATUS, status)
+            .putString(KEY_REWARD_DATE, dateStr)
+            .apply()
+    }
+
+    fun hasRewardSubmission(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_REWARD_SUBMISSION_EXISTS, false)
+    }
+
+    fun getRewardSubmissionStatus(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_REWARD_STATUS, "Pending Review") ?: "Pending Review"
+    }
+
+    fun getRewardSubmissionDetails(context: Context): Map<String, String> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "email" to (prefs.getString(KEY_REWARD_EMAIL, "") ?: ""),
+            "name" to (prefs.getString(KEY_REWARD_NAME, "") ?: ""),
+            "igUsername" to (prefs.getString(KEY_REWARD_IG_USERNAME, "") ?: ""),
+            "igLink" to (prefs.getString(KEY_REWARD_IG_LINK, "") ?: ""),
+            "contentTypes" to (prefs.getString(KEY_REWARD_CONTENT_TYPES, "") ?: ""),
+            "screenshot" to (prefs.getString(KEY_REWARD_SCREENSHOT, "") ?: ""),
+            "status" to (prefs.getString(KEY_REWARD_STATUS, "Pending Review") ?: "Pending Review"),
+            "date" to (prefs.getString(KEY_REWARD_DATE, "") ?: "")
+        )
+    }
+
+    fun clearRewardSubmission(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .remove(KEY_REWARD_SUBMISSION_EXISTS)
+            .remove(KEY_REWARD_EMAIL)
+            .remove(KEY_REWARD_NAME)
+            .remove(KEY_REWARD_IG_USERNAME)
+            .remove(KEY_REWARD_IG_LINK)
+            .remove(KEY_REWARD_CONTENT_TYPES)
+            .remove(KEY_REWARD_SCREENSHOT)
+            .remove(KEY_REWARD_STATUS)
+            .remove(KEY_REWARD_DATE)
+            .apply()
     }
 }

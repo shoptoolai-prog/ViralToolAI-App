@@ -1,77 +1,24 @@
 package com.example.ui.screens
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.ThumbDown
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,116 +26,286 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.core.LanguageEngine
-import com.example.creatoracademy.AiMentorEngine
-import com.example.creatoracademy.AiMentorTask
+import com.example.creatoracademy.BrandCollaborationAiDialog
 import com.example.creatoracademy.CreatorAcademyPrefs
-import com.example.creatoracademy.CreatorLevel
-import com.example.creatoracademy.TaskState
-import com.example.creatoracademy.ViralMemoryEngine
-import com.example.ui.components.GlassCard
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.geometry.Offset
-import com.example.ui.theme.EmeraldGlow
-import com.example.ui.theme.ElectricPurple
+import com.example.creatoracademy.WishlinkCreatorAiDialog
+import com.example.ui.components.EditingToolType
+import com.example.ui.components.InstagramCreatorAiV2Dialog
+import com.example.ui.components.MeeshoCreatorAiDialog
+import com.example.ui.components.VideoEditingMentorAiDialog
+import com.example.ui.components.YouTubeCreatorAiV2Dialog
 import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.ElectricPurple
+import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextGray
 import com.example.ui.theme.TextWhite
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-/**
- * MASTER PHASE 15B — AI Mentor Engine v1
- * Transforms Creator Academy into an interactive AI Mentor:
- * - Dynamic Mentor Dashboard (Today's Mission, Level, XP, Streak, % Progress, Est. Time)
- * - Personalized Task Engine (Platform, Skill Level, Goal, Available Time)
- * - 4-State Task Engine (Locked, Current, Completed, Skipped)
- * - Interactive Task Verification (YES / NOT YET -> Explain, Example, Skip)
- * - Conversational AI Coach Mode
- * - Example Library (Good, Bad, Pro Tip, Common Mistake)
- * - Progress System with Creator Levels (Bronze, Silver, Gold, Diamond, Legend)
- * - Smart Welcome Back Reminders & Session Memory
- * - Premium Micro-Animations under 1 second
- */
+enum class CourseLaunchType {
+    INSTAGRAM_GROWTH,
+    YOUTUBE_GROWTH,
+    BRAND_COLLAB,
+    MEESHO_GUIDE,
+    WISHLINK_GUIDE,
+    CAPCUT,
+    VN_EDITOR,
+    INSTAGRAM_EDITS
+}
+
+data class CourseCardModel(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val category: String, // "Creator Growth" or "Video Editing Learning Hub"
+    val keywords: List<String>,
+    val totalLessons: Int,
+    val estimatedMinutes: Int,
+    val difficulty: String,
+    val primaryColor: Color,
+    val gradientColors: List<Color>,
+    val icon: ImageVector,
+    val launchType: CourseLaunchType
+)
+
+private val GoldPrimary = Color(0xFFFFD700)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatorAcademyScreen(
-    onSwitchExperience: () -> Unit,
-    onResetSetup: () -> Unit
+    onNavigateToHome: () -> Unit = {},
+    onSwitchExperience: () -> Unit = {},
+    onResetSetup: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val haptic = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
 
-    var setupData by remember { mutableStateOf(CreatorAcademyPrefs.getSetupData(context)) }
-    var selectedPlatform by remember { mutableStateOf("INSTAGRAM") } // INSTAGRAM, YOUTUBE, VIDEO_EDITING
-    var showVideoEditingLockedDialog by remember { mutableStateOf(false) }
-    var showBrandCollabDialog by remember { mutableStateOf(false) }
-    var selectedPremiumTool by remember { mutableStateOf<com.example.ui.components.PremiumToolData?>(null) }
+    // State
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedLanguage by remember {
+        mutableStateOf(CreatorAcademyPrefs.getPreferredLanguage(context).ifBlank { "English" })
+    }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    var activeCourseLaunch by remember { mutableStateOf<CourseLaunchType?>(null) }
 
-    var coursePlaceholderTitle by remember { mutableStateOf<String?>(null) }
-    var showInstagramCreatorV2Dialog by remember { mutableStateOf(false) }
-    var showYouTubeCreatorV2Dialog by remember { mutableStateOf(false) }
-    var showAiVideoImageGeneratorDialog by remember { mutableStateOf(false) }
-
-    val entranceAnimProgress = remember { Animatable(0f) }
+    // Initial Loading Skeleton Simulation
     LaunchedEffect(Unit) {
-        entranceAnimProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 900, easing = FastOutSlowInEasing)
+        delay(350)
+        isLoading = false
+    }
+
+    // List of All Educational Courses
+    val allCourses = remember {
+        listOf(
+            // SECTION 1: CREATOR GROWTH
+            CourseCardModel(
+                id = "course_instagram",
+                title = "Instagram Growth Guide",
+                subtitle = "Master Reels, viral hooks, algorithm secrets & monetization.",
+                category = "Creator Growth",
+                keywords = listOf("instagram", "ig", "reels", "growth", "followers", "hooks", "viral"),
+                totalLessons = 8,
+                estimatedMinutes = 30,
+                difficulty = "Beginner to Pro",
+                primaryColor = Color(0xFFE1306C),
+                gradientColors = listOf(Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFFD1D1D)),
+                icon = Icons.Default.TrendingUp,
+                launchType = CourseLaunchType.INSTAGRAM_GROWTH
+            ),
+            CourseCardModel(
+                id = "course_youtube",
+                title = "YouTube Growth Guide",
+                subtitle = "Shorts & Long-form growth, SEO titles, thumbnails & AdSense.",
+                category = "Creator Growth",
+                keywords = listOf("youtube", "yt", "shorts", "seo", "thumbnails", "adsense", "subscribers"),
+                totalLessons = 10,
+                estimatedMinutes = 40,
+                difficulty = "All Levels",
+                primaryColor = Color(0xFFFF0000),
+                gradientColors = listOf(Color(0xFFFF0000), Color(0xFFB71C1C)),
+                icon = Icons.Default.Videocam,
+                launchType = CourseLaunchType.YOUTUBE_GROWTH
+            ),
+            CourseCardModel(
+                id = "course_brand_collab",
+                title = "Brand Collaboration Hub",
+                subtitle = "Land paid brand deals, pitch sponsorships & write contracts.",
+                category = "Creator Growth",
+                keywords = listOf("brand", "sponsorship", "collaboration", "deals", "pitch", "monetization"),
+                totalLessons = 6,
+                estimatedMinutes = 25,
+                difficulty = "Intermediate",
+                primaryColor = GoldPrimary,
+                gradientColors = listOf(GoldPrimary, Color(0xFFFF8C00)),
+                icon = Icons.Default.Handshake,
+                launchType = CourseLaunchType.BRAND_COLLAB
+            ),
+            CourseCardModel(
+                id = "course_meesho",
+                title = "Meesho Creator Guide",
+                subtitle = "Reselling, fashion haul reels, product reviews & earning.",
+                category = "Creator Growth",
+                keywords = listOf("meesho", "reselling", "affiliate", "fashion", "guide", "shopping"),
+                totalLessons = 5,
+                estimatedMinutes = 20,
+                difficulty = "Beginner",
+                primaryColor = Color(0xFFE91E63),
+                gradientColors = listOf(Color(0xFFE91E63), Color(0xFF9C27B0)),
+                icon = Icons.Default.ShoppingBag,
+                launchType = CourseLaunchType.MEESHO_GUIDE
+            ),
+            CourseCardModel(
+                id = "course_wishlink",
+                title = "Wishlink Creator Guide",
+                subtitle = "Automate bio links, affiliate commissions & fashion storytelling.",
+                category = "Creator Growth",
+                keywords = listOf("wishlink", "affiliate", "bio link", "commissions", "fashion", "guide"),
+                totalLessons = 5,
+                estimatedMinutes = 18,
+                difficulty = "Beginner",
+                primaryColor = Color(0xFF00C9FF),
+                gradientColors = listOf(Color(0xFF00C9FF), Color(0xFF92FE9D)),
+                icon = Icons.Default.Link,
+                launchType = CourseLaunchType.WISHLINK_GUIDE
+            ),
+
+            // SECTION 2: VIDEO EDITING LEARNING HUB
+            CourseCardModel(
+                id = "course_capcut",
+                title = "CapCut Learning Hub",
+                subtitle = "Velocity edits, keyframes, auto-captions & 3D zoom effects.",
+                category = "Video Editing Learning Hub",
+                keywords = listOf("capcut", "video editing", "velocity", "keyframes", "effects", "capcut edits"),
+                totalLessons = 7,
+                estimatedMinutes = 25,
+                difficulty = "All Levels",
+                primaryColor = Color(0xFF00F2FE),
+                gradientColors = listOf(Color(0xFF00F2FE), Color(0xFF4FACFE)),
+                icon = Icons.Default.Movie,
+                launchType = CourseLaunchType.CAPCUT
+            ),
+            CourseCardModel(
+                id = "course_vn",
+                title = "VN Learning Hub",
+                subtitle = "Multi-track editing, LUT color grading & sound curve cuts.",
+                category = "Video Editing Learning Hub",
+                keywords = listOf("vn", "vn editor", "video editing", "lut", "color grade", "timeline"),
+                totalLessons = 6,
+                estimatedMinutes = 22,
+                difficulty = "Intermediate",
+                primaryColor = Color(0xFF8B5CF6),
+                gradientColors = listOf(Color(0xFF8B5CF6), Color(0xFF6366F1)),
+                icon = Icons.Default.Movie,
+                launchType = CourseLaunchType.VN_EDITOR
+            ),
+            CourseCardModel(
+                id = "course_instagram_edits",
+                title = "Instagram Edits Learning Hub",
+                subtitle = "Aesthetic Reel transitions, text overlays & beat sync cuts.",
+                category = "Video Editing Learning Hub",
+                keywords = listOf("instagram edits", "edits", "reels editing", "aesthetic", "transitions", "reels"),
+                totalLessons = 6,
+                estimatedMinutes = 20,
+                difficulty = "Beginner",
+                primaryColor = Color(0xFFFF4081),
+                gradientColors = listOf(Color(0xFFFF4081), Color(0xFF7C4DFF)),
+                icon = Icons.Default.AutoAwesome,
+                launchType = CourseLaunchType.INSTAGRAM_EDITS
+            )
         )
     }
-    val cardAnimVal = entranceAnimProgress.value
 
-    val instaAlpha = ((cardAnimVal - 0.25f) / 0.35f).coerceIn(0f, 1f)
-    val instaTranslationY = (30f * (1f - instaAlpha))
-
-    val ytAlpha = ((cardAnimVal - 0.45f) / 0.35f).coerceIn(0f, 1f)
-    val ytTranslationY = (30f * (1f - ytAlpha))
-
-    // Micro animation trigger for task verification
-    var showCelebration by remember { mutableStateOf(false) }
-    val celebrationScale = remember { Animatable(0.8f) }
-
-    fun triggerVerificationCelebration() {
-        coroutineScope.launch {
-            showCelebration = true
-            celebrationScale.snapTo(0.7f)
-            celebrationScale.animateTo(
-                targetValue = 1.15f,
-                animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessHigh)
-            )
-            celebrationScale.animateTo(
-                targetValue = 1.0f,
-                animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)
-            )
-            delay(800) // Under 1 second micro celebration
-            showCelebration = false
+    // Helper to calculate progress for a course
+    fun getCourseProgress(launchType: CourseLaunchType): CourseProgressInfo {
+        return when (launchType) {
+            CourseLaunchType.INSTAGRAM_GROWTH -> {
+                val currentStep = CreatorAcademyPrefs.getBrandCollabStepIndex(context).coerceAtLeast(0)
+                val completed = currentStep.coerceAtMost(8)
+                CourseProgressInfo(completed, 8)
+            }
+            CourseLaunchType.YOUTUBE_GROWTH -> {
+                val currentStep = CreatorAcademyPrefs.getYouTubeCurrentStep(context)
+                val completedList = CreatorAcademyPrefs.getYouTubeCompletedSteps(context)
+                val completed = completedList.size.coerceAtLeast(if (currentStep > 1) currentStep - 1 else 0)
+                CourseProgressInfo(completed, 10)
+            }
+            CourseLaunchType.BRAND_COLLAB -> {
+                val currentStep = CreatorAcademyPrefs.getBrandCollabStepIndex(context).coerceAtLeast(0)
+                CourseProgressInfo(currentStep, 6)
+            }
+            CourseLaunchType.MEESHO_GUIDE -> {
+                val currentStep = CreatorAcademyPrefs.getMeeshoStepIndex(context).coerceAtLeast(0)
+                CourseProgressInfo(currentStep, 5)
+            }
+            CourseLaunchType.WISHLINK_GUIDE -> {
+                val currentStep = CreatorAcademyPrefs.getWishlinkStepIndex(context).coerceAtLeast(0)
+                val completedList = CreatorAcademyPrefs.getWishlinkCompletedSteps(context)
+                val completed = completedList.size.coerceAtLeast(if (currentStep > 0) currentStep else 0)
+                CourseProgressInfo(completed, 5)
+            }
+            CourseLaunchType.CAPCUT -> {
+                val currentStep = CreatorAcademyPrefs.getEditingToolCurrentStep(context, "capcut")
+                val completedList = CreatorAcademyPrefs.getEditingToolCompletedSteps(context, "capcut")
+                val completed = completedList.size.coerceAtLeast(if (currentStep > 1) currentStep - 1 else 0)
+                CourseProgressInfo(completed, 7)
+            }
+            CourseLaunchType.VN_EDITOR -> {
+                val currentStep = CreatorAcademyPrefs.getEditingToolCurrentStep(context, "vn")
+                val completedList = CreatorAcademyPrefs.getEditingToolCompletedSteps(context, "vn")
+                val completed = completedList.size.coerceAtLeast(if (currentStep > 1) currentStep - 1 else 0)
+                CourseProgressInfo(completed, 6)
+            }
+            CourseLaunchType.INSTAGRAM_EDITS -> {
+                val currentStep = CreatorAcademyPrefs.getEditingToolCurrentStep(context, "instagram_edits")
+                val completedList = CreatorAcademyPrefs.getEditingToolCompletedSteps(context, "instagram_edits")
+                val completed = completedList.size.coerceAtLeast(if (currentStep > 1) currentStep - 1 else 0)
+                CourseProgressInfo(completed, 6)
+            }
         }
     }
 
-    // One-time entrance animation sequence
-    val headerAnimProgress = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        headerAnimProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
-        )
+    // Filter courses by search query
+    val queryTrimmed = searchQuery.trim().lowercase()
+    val filteredCourses = remember(queryTrimmed, allCourses) {
+        if (queryTrimmed.isEmpty()) {
+            allCourses
+        } else {
+            allCourses.filter { course ->
+                course.title.lowercase().contains(queryTrimmed) ||
+                course.subtitle.lowercase().contains(queryTrimmed) ||
+                course.category.lowercase().contains(queryTrimmed) ||
+                course.keywords.any { it.contains(queryTrimmed) }
+            }
+        }
+    }
+
+    val creatorGrowthCourses = filteredCourses.filter { it.category == "Creator Growth" }
+    val videoEditingCourses = filteredCourses.filter { it.category == "Video Editing Learning Hub" }
+
+    // Find course in progress for Continue Learning section
+    val continueLearningCourse = remember(allCourses) {
+        allCourses.map { course ->
+            Pair(course, getCourseProgress(course.launchType))
+        }.firstOrNull { (_, progress) ->
+            progress.completedCount > 0 && progress.completedCount < progress.totalCount
+        } ?: allCourses.map { course ->
+            Pair(course, getCourseProgress(course.launchType))
+        }.firstOrNull { (_, progress) ->
+            progress.completedCount > 0
+        }
     }
 
     Box(
@@ -201,2187 +318,786 @@ fun CreatorAcademyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 16.dp)
-                .graphicsLayer {
-                    alpha = headerAnimProgress.value
-                    translationY = (1f - headerAnimProgress.value) * 30f
-                }
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-
             // ==================================================
-            // 1. TOP HEADER & BRANDING BAR (PREMIUM UNIFIED GLASS HEADER)
-            // ==================================================
-            val animVal = headerAnimProgress.value
-
-            val logoScale = 0.75f + (0.25f * (animVal / 0.35f).coerceIn(0f, 1f))
-            val logoPulseGlow = if (animVal in 0.25f..0.65f) ((1f - Math.abs(animVal - 0.45f) / 0.2f) * 0.5f) else 0f
-            val titleAlpha = ((animVal - 0.2f) / 0.35f).coerceIn(0f, 1f)
-            val taglineAlpha = ((animVal - 0.35f) / 0.35f).coerceIn(0f, 1f)
-
-            // Continuous 60 FPS micro-animations
-            val headerInfiniteTransition = rememberInfiniteTransition(label = "academyHeaderAnims")
-            val logoBreathingAlpha by headerInfiniteTransition.animateFloat(
-                initialValue = 0.35f,
-                targetValue = 0.85f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2200, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "logoBreathingAlpha"
-            )
-            val headerShimmerOffset by headerInfiniteTransition.animateFloat(
-                initialValue = -300f,
-                targetValue = 900f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(3800, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                ),
-                label = "headerShimmerOffset"
-            )
-            val logoFloatY by headerInfiniteTransition.animateFloat(
-                initialValue = -1.5f,
-                targetValue = 1.5f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2600, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "logoFloatY"
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 12.dp)
-                    .shadow(
-                        elevation = 14.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        spotColor = EmeraldPrimary.copy(alpha = 0.35f),
-                        ambientColor = Color.Black
-                    )
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFF131A16), Color(0xFF0A0F0D))
-                        )
-                    )
-                    .border(
-                        BorderStroke(
-                            1.2.dp,
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                    ElectricPurple.copy(alpha = 0.45f),
-                                    EmeraldGlow.copy(alpha = logoBreathingAlpha)
-                                ),
-                                start = Offset(headerShimmerOffset, 0f),
-                                end = Offset(headerShimmerOffset + 400f, 250f)
-                            )
-                        ),
-                        RoundedCornerShape(24.dp)
-                    )
-                    .padding(horizontal = 18.dp, vertical = 14.dp)
-            ) {
-                // Glass reflection shimmer sweep line across container
-                Canvas(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(RoundedCornerShape(24.dp))
-                ) {
-                    val sweepX = headerShimmerOffset
-                    drawLine(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.White.copy(alpha = 0.03f),
-                                Color.White.copy(alpha = 0.12f),
-                                Color.White.copy(alpha = 0.03f),
-                                Color.Transparent
-                            )
-                        ),
-                        start = Offset(sweepX, 0f),
-                        end = Offset(sweepX + 180f, size.height),
-                        strokeWidth = 30.dp.toPx()
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Left branding: Logo + Title + Tagline
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // CREATOR ACADEMY AI LOGO WITH GLASS MORPHISM & GREEN GLOW
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.graphicsLayer {
-                                translationY = logoFloatY.dp.toPx()
-                            }
-                        ) {
-                            // Soft outer green neon aura ring
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        Brush.radialGradient(
-                                            listOf(
-                                                EmeraldPrimary.copy(alpha = (logoBreathingAlpha * 0.45f) + logoPulseGlow),
-                                                Color.Transparent
-                                            )
-                                        )
-                                    )
-                            )
-
-                            // High-resolution Glassmorphism Icon Box
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .graphicsLayer {
-                                        scaleX = logoScale
-                                        scaleY = logoScale
-                                    }
-                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldPrimary)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(Color(0xFF1B2820), Color(0xFF0D1610))
-                                        )
-                                    )
-                                    .border(
-                                        BorderStroke(
-                                            1.2.dp,
-                                            Brush.linearGradient(
-                                                listOf(
-                                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                                    EmeraldGlow
-                                                )
-                                            )
-                                        ),
-                                        RoundedCornerShape(14.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.School,
-                                    contentDescription = "Creator Academy AI Logo",
-                                    tint = EmeraldGlow,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        // CREATOR ACADEMY AI TITLE & TAGLINE
-                        Column {
-                            Text(
-                                text = "Creator Academy AI",
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Black,
-                                style = androidx.compose.ui.text.TextStyle(
-                                    brush = Brush.horizontalGradient(
-                                        listOf(
-                                            TextWhite,
-                                            Color(0xFFE2F3EB),
-                                            EmeraldGlow
-                                        )
-                                    )
-                                ),
-                                letterSpacing = (-0.3).sp,
-                                modifier = Modifier.graphicsLayer {
-                                    alpha = titleAlpha
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Learn. Create. Grow.",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = EmeraldPrimary,
-                                letterSpacing = 1.6.sp,
-                                modifier = Modifier.graphicsLayer {
-                                    alpha = taglineAlpha
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // ==================================================
-            // 2. FEATURED CREATOR COURSES (INSTAGRAM & YOUTUBE)
-            // ==================================================
-            Text(
-                text = "FEATURED CREATOR COURSES",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextWhite.copy(alpha = 0.5f),
-                letterSpacing = 1.5.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // CARD 1: INSTAGRAM CREATOR
-            Box(
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = instaAlpha
-                        translationY = instaTranslationY.dp.toPx()
-                    }
-            ) {
-                AcademyCourseCard(
-                    title = "Instagram Creator",
-                    logoName = "instagram",
-                    accentColor = Color(0xFFE1306C),
-                    features = listOf(
-                        "Learn Instagram Growth",
-                        "Reels & Viral Hooks",
-                        "Brand Deals & Sponsorships",
-                        "Creator Journey Blueprint",
-                        "Monetization Strategies"
-                    ),
-                    onStartLearning = {
-                        showInstagramCreatorV2Dialog = true
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // CARD 2: YOUTUBE CREATOR
-            Box(
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = ytAlpha
-                        translationY = ytTranslationY.dp.toPx()
-                    }
-            ) {
-                AcademyCourseCard(
-                    title = "YouTube Creator",
-                    logoName = "youtube",
-                    accentColor = Color(0xFFFF0000),
-                    features = listOf(
-                        "YouTube Growth & Algorithm",
-                        "SEO, Titles & Tagging",
-                        "Long Form & Thumbnail Secrets",
-                        "YouTube Shorts Strategy",
-                        "Monetization & AdSense"
-                    ),
-                    onStartLearning = {
-                        showYouTubeCreatorV2Dialog = true
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // CARD 3: AI VIDEO & IMAGES GENERATOR
-            Box(
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = ytAlpha
-                        translationY = ytTranslationY.dp.toPx()
-                    }
-            ) {
-                AcademyCourseCard(
-                    title = "AI Prompt Extractor",
-                    subtitleText = "AI Vision Analysis & Style Recreation Prompts",
-                    tagText = null,
-                    logoName = "chatgpt",
-                    accentColor = Color(0xFF8B5CF6),
-                    features = listOf(
-                        "AI Video Generation from Zero using Free AI Tools",
-                        "Professional AI Image Creation & Prompt Writing",
-                        "Talking AI Avatars, Animate Photos & Motion Controls",
-                        "Viral YouTube Thumbnail Psychology & High CTR Rules",
-                        "Step-by-Step Tool Setup & Beginner Guide"
-                    ),
-                    onStartLearning = {
-                        showAiVideoImageGeneratorDialog = true
-                    }
-                )
-            }
-        }
-
-        // Instagram Creator AI V2 Personal Mentor Dialog
-        if (showInstagramCreatorV2Dialog) {
-            com.example.ui.components.InstagramCreatorAiV2Dialog(
-                onDismiss = { showInstagramCreatorV2Dialog = false }
-            )
-        }
-
-        // YouTube Creator AI V2 Personal Mentor Dialog
-        if (showYouTubeCreatorV2Dialog) {
-            com.example.ui.components.YouTubeCreatorAiV2Dialog(
-                onDismiss = { showYouTubeCreatorV2Dialog = false }
-            )
-        }
-
-        // AI Video & Images Generator Dialog
-        if (showAiVideoImageGeneratorDialog) {
-            com.example.ui.components.AiVideoImageGeneratorDialog(
-                onDismiss = { showAiVideoImageGeneratorDialog = false }
-            )
-        }
-
-        // Placeholder Course Dialog
-        coursePlaceholderTitle?.let { title ->
-            CoursePlaceholderDialog(
-                courseName = title,
-                onDismiss = { coursePlaceholderTitle = null }
-            )
-        }
-
-        // ==================================================
-        // MICRO-CELEBRATION ANIMATION OVERLAY (<1s Apple-inspired)
-        // ==================================================
-        if (showCelebration) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x88000000)),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .scale(celebrationScale.value)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(
-                            Brush.radialGradient(
-                                listOf(EmeraldPrimary, Color(0xFF0F382A), Color(0xFF13131E))
-                            )
-                        )
-                        .border(BorderStroke(2.dp, EmeraldPrimary), RoundedCornerShape(24.dp))
-                        .padding(horizontal = 32.dp, vertical = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Success",
-                                tint = EmeraldPrimary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text(
-                            text = "+100 XP EARNED!",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite,
-                            letterSpacing = 1.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "🎯 Lesson Unlocked • Streak Active!",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-                }
-            }
-        }
-
-        // ==================================================
-        // LOCKED PREMIUM POPUP DIALOG
-        // ==================================================
-        if (showVideoEditingLockedDialog) {
-            VideoEditingLockedDialog(
-                onDismiss = { showVideoEditingLockedDialog = false }
-            )
-        }
-
-        if (showBrandCollabDialog) {
-            com.example.creatoracademy.BrandCollaborationAiDialog(
-                onDismiss = { showBrandCollabDialog = false }
-            )
-        }
-
-        selectedPremiumTool?.let { tool ->
-            if (tool.id == "brand_collab_ai") {
-                com.example.creatoracademy.BrandCollaborationAiDialog(
-                    onDismiss = { selectedPremiumTool = null }
-                )
-            } else {
-                com.example.ui.components.CommonPremiumToolPopupDialog(
-                    tool = tool,
-                    onDismiss = { selectedPremiumTool = null }
-                )
-            }
-        }
-    }
-}
-
-// ====================================================================
-// SMART REMINDER CARD
-// ====================================================================
-@Composable
-private fun SmartReminderCard(
-    taskNumber: Int,
-    taskTitle: String,
-    platform: String,
-    onContinue: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(18.dp), spotColor = EmeraldPrimary)
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(Color(0xFF0A2E23), Color(0xFF131322))
-                )
-            )
-            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(18.dp))
-            .padding(14.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(EmeraldPrimary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = "Welcome Back",
-                            tint = AmoledBlack,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "WELCOME BACK, CREATOR!",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = EmeraldPrimary,
-                        letterSpacing = 1.sp
-                    )
-                }
-
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = TextWhite.copy(alpha = 0.5f),
-                    modifier = Modifier
-                        .size(18.dp)
-                        .clickable { onDismiss() }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Ready to continue Lesson #$taskNumber ($platform)?",
-                fontSize = 13.5.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextWhite
-            )
-
-            Text(
-                text = taskTitle,
-                fontSize = 12.sp,
-                color = TextWhite.copy(alpha = 0.7f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(EmeraldPrimary)
-                        .clickable { onContinue() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "CONTINUE LESSON",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = AmoledBlack
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = null,
-                            tint = AmoledBlack,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0x15FFFFFF))
-                        .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(18.dp))
-                        .clickable { onDismiss() }
-                        .padding(horizontal = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "LATER",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-// ====================================================================
-// DYNAMIC AI MENTOR DASHBOARD CARD
-// ====================================================================
-@Composable
-private fun MentorDashboardCard(
-    xpPoints: Int,
-    streakDays: Int,
-    setupData: com.example.creatoracademy.CreatorSetupData,
-    selectedPlatform: String,
-    currentTaskIndex: Int,
-    totalTasks: Int,
-    currentTask: AiMentorTask?
-) {
-    val creatorLevel = CreatorLevel.getLevelForXp(xpPoints)
-    val levelProgress = ((xpPoints - creatorLevel.minXp).toFloat() / (creatorLevel.maxXp - creatorLevel.minXp).toFloat())
-        .coerceIn(0f, 1f)
-
-    val overallProgressPercent = if (totalTasks > 0) {
-        ((currentTaskIndex.toFloat() / totalTasks.toFloat()) * 100).toInt().coerceAtMost(100)
-    } else 0
-
-    val remainingTasks = (totalTasks - currentTaskIndex).coerceAtLeast(0)
-    val estCompletionText = if (remainingTasks > 0) "$remainingTasks lessons left (~${remainingTasks * 5} mins)" else "All lessons completed!"
-
-    GlassCard(
-        modifier = Modifier.fillMaxWidth(),
-        borderColor = creatorLevel.color.copy(alpha = 0.5f),
-        backgroundColor = Color(0x1210B981)
-    ) {
-        Column(modifier = Modifier.padding(6.dp)) {
-            // Header Row: Level Badge & XP
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(creatorLevel.color),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = creatorLevel.icon,
-                            contentDescription = creatorLevel.name,
-                            tint = AmoledBlack,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = creatorLevel.name,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextWhite
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "${creatorLevel.badgeName} • ${setupData.skillLevel}",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = creatorLevel.color,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Streak Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22FF9800))
-                            .border(BorderStroke(1.dp, Color(0x66FF9800)), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Streak",
-                                tint = Color(0xFFFF9800),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = "$streakDays Days",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color(0xFFFF9800)
-                            )
-                        }
-                    }
-
-                    // XP Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x2210B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "$xpPoints XP",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = EmeraldPrimary
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Mentor Dashboard Metrics Grid
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Today's Mission & Current Skill
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "TODAY'S MISSION",
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.5f),
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = currentTask?.title ?: "Mastery Achieved",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "CURRENT SKILL",
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.5f),
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = currentTask?.skillCategory ?: "Advanced Strategy",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldPrimary,
-                            maxLines = 1
-                        )
-                    }
-                }
-
-                // Goal & Est Completion
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Goal: ${setupData.primaryGoal}",
-                        fontSize = 11.sp,
-                        color = TextWhite.copy(alpha = 0.7f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = estCompletionText,
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = TextWhite.copy(alpha = 0.5f)
-                    )
-                }
-
-                // Overall Roadmap Progress Bar
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Roadmap Progress ($selectedPlatform)",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextWhite.copy(alpha = 0.6f)
-                    )
-                    Text(
-                        text = "$overallProgressPercent%",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = EmeraldPrimary
-                    )
-                }
-
-                LinearProgressIndicator(
-                    progress = { overallProgressPercent / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(CircleShape),
-                    color = EmeraldPrimary,
-                    trackColor = Color(0x22FFFFFF)
-                )
-            }
-        }
-    }
-}
-
-// ====================================================================
-// PLATFORM OPTION CARD
-// ====================================================================
-@Composable
-private fun PlatformOptionCard(
-    title: String,
-    subtitle: String,
-    badge: String,
-    isSelected: Boolean,
-    isLocked: Boolean,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
-        label = "platformOptScale"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (isSelected) Color(0x2210B981) else Color(0x0AFFFFFF))
-            .border(
-                BorderStroke(if (isSelected) 1.5.dp else 1.dp, if (isSelected) EmeraldPrimary else Color(0x1AFFFFFF)),
-                RoundedCornerShape(18.dp)
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = androidx.compose.foundation.LocalIndication.current,
-                onClick = onClick
-            )
-            .padding(14.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(if (isLocked) Color(0x11FFFFFF) else if (isSelected) EmeraldPrimary else Color(0x1AFFFFFF)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (isLocked) Icons.Default.Lock else if (isSelected) Icons.Default.Check else Icons.Default.Videocam,
-                    contentDescription = title,
-                    tint = if (isLocked) TextWhite.copy(alpha = 0.5f) else if (isSelected) AmoledBlack else TextWhite,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isLocked) TextWhite.copy(alpha = 0.7f) else TextWhite
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(if (isLocked) Color(0x22FF5252) else if (isSelected) Color(0x3310B981) else Color(0x1AFFFFFF))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = badge,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isLocked) Color(0xFFFF5252) else if (isSelected) EmeraldPrimary else TextWhite.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = TextWhite.copy(alpha = 0.6f)
-                )
-            }
-        }
-    }
-}
-
-// ====================================================================
-// AI COACH TASK & VERIFICATION ENGINE CARD
-// ====================================================================
-@Composable
-private fun AiCoachTaskCard(
-    task: AiMentorTask,
-    totalTasks: Int,
-    onVerifyYes: () -> Unit,
-    onSkipTask: () -> Unit
-) {
-    var showNotYetOptions by remember(task.id) { mutableStateOf(false) }
-    var showDetailedExplanation by remember(task.id) { mutableStateOf(false) }
-    var showExampleLibrary by remember(task.id) { mutableStateOf(true) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation = 12.dp, shape = RoundedCornerShape(22.dp), spotColor = EmeraldPrimary)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color(0xFF13131E))
-            .border(
-                BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary.copy(alpha = 0.6f), Color(0x1AFFFFFF)))),
-                RoundedCornerShape(22.dp)
-            )
-            .padding(18.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Header Bar: AI Coach Mode
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x2210B981)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Psychology,
-                            contentDescription = "AI Coach",
-                            tint = EmeraldPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = "AI Mentor Coach",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                        Text(
-                            text = "Step ${task.stepNumber} of $totalTasks • ${task.skillCategory}",
-                            fontSize = 10.5.sp,
-                            color = TextWhite.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0x2210B981))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = "CURRENT LESSON",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        color = EmeraldPrimary,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Conversational Mentor Speech Bubble
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0x0DFFFFFF))
-                    .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.3f)), RoundedCornerShape(16.dp))
-                    .padding(14.dp)
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = EmeraldPrimary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = task.title,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = task.coachMessage,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = TextWhite.copy(alpha = 0.9f),
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-
-            // Detailed Explanation Accordion (if expanded by Explain Again)
-            AnimatedVisibility(
-                visible = showDetailedExplanation,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(modifier = Modifier.padding(top = 10.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0x1800E5FF))
-                            .border(BorderStroke(1.dp, Color(0x4400E5FF)), RoundedCornerShape(14.dp))
-                            .padding(12.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.MenuBook,
-                                    contentDescription = null,
-                                    tint = Color(0xFF00E5FF),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Deep-Dive Mentor Explanation",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF00E5FF)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = task.detailExplanation,
-                                fontSize = 12.sp,
-                                color = TextWhite.copy(alpha = 0.85f),
-                                lineHeight = 16.sp
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ==================================================
-            // EXAMPLE LIBRARY (GOOD vs BAD, PRO TIP, COMMON MISTAKE)
+            // TOP HEADER: Page Title & Language Selector
             // ==================================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showExampleLibrary = !showExampleLibrary },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Lightbulb,
-                        contentDescription = "Example Library",
-                        tint = EmeraldPrimary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "EXAMPLE LIBRARY & PRO TIPS",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary,
-                        letterSpacing = 0.8.sp
-                    )
-                }
-
-                Icon(
-                    imageVector = if (showExampleLibrary) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = EmeraldPrimary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-
-            AnimatedVisibility(
-                visible = showExampleLibrary,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Good Example Box
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x1510B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
-                            .padding(10.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.ThumbUp,
-                                    contentDescription = "Good Example",
-                                    tint = EmeraldPrimary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "GOOD EXAMPLE",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = EmeraldPrimary
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = task.goodExample,
-                                fontSize = 11.5.sp,
-                                color = TextWhite,
-                                lineHeight = 15.sp
-                            )
-                        }
-                    }
-
-                    // Bad Example Box
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x15FF5252))
-                            .border(BorderStroke(1.dp, Color(0x44FF5252)), RoundedCornerShape(12.dp))
-                            .padding(10.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.ThumbDown,
-                                    contentDescription = "Bad Example",
-                                    tint = Color(0xFFFF5252),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "BAD EXAMPLE",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color(0xFFFF5252)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = task.badExample,
-                                fontSize = 11.5.sp,
-                                color = TextWhite.copy(alpha = 0.85f),
-                                lineHeight = 15.sp
-                            )
-                        }
-                    }
-
-                    // Pro Tip & Common Mistake Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Pro Tip
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x10FFD700))
-                                .border(BorderStroke(1.dp, Color(0x33FFD700)), RoundedCornerShape(12.dp))
-                                .padding(8.dp)
-                        ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = "Pro Tip",
-                                        tint = Color(0xFFFFD700),
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "PRO TIP",
-                                        fontSize = 9.5.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color(0xFFFFD700)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(3.dp))
-                                Text(
-                                    text = task.proTip,
-                                    fontSize = 10.5.sp,
-                                    color = TextWhite.copy(alpha = 0.9f),
-                                    lineHeight = 14.sp
-                                )
-                            }
-                        }
-
-                        // Common Mistake
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x10FF9800))
-                                .border(BorderStroke(1.dp, Color(0x33FF9800)), RoundedCornerShape(12.dp))
-                                .padding(8.dp)
-                        ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Warning,
-                                        contentDescription = "Common Mistake",
-                                        tint = Color(0xFFFF9800),
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "PITFALL TO AVOID",
-                                        fontSize = 9.5.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color(0xFFFF9800)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(3.dp))
-                                Text(
-                                    text = task.commonMistake,
-                                    fontSize = 10.5.sp,
-                                    color = TextWhite.copy(alpha = 0.9f),
-                                    lineHeight = 14.sp
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // ==================================================
-            // TASK VERIFICATION PROMPT
-            // ==================================================
-            Text(
-                text = "HAVE YOU COMPLETED THIS TASK?",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
-                color = TextWhite.copy(alpha = 0.8f),
-                letterSpacing = 1.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // YES DONE BUTTON (+100 XP)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(46.dp)
-                        .shadow(elevation = 6.dp, shape = RoundedCornerShape(23.dp), spotColor = EmeraldPrimary)
-                        .clip(RoundedCornerShape(23.dp))
-                        .background(EmeraldPrimary)
-                        .clickable { onVerifyYes() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Done",
-                            tint = AmoledBlack,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "YES, DONE! (+100 XP)",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            color = AmoledBlack
-                        )
-                    }
-                }
-
-                // NOT YET BUTTON
-                Box(
-                    modifier = Modifier
-                        .height(46.dp)
-                        .clip(RoundedCornerShape(23.dp))
-                        .background(Color(0x15FFFFFF))
-                        .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(23.dp))
-                        .clickable { showNotYetOptions = !showNotYetOptions }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (showNotYetOptions) "HIDE OPTIONS" else "NOT YET",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite.copy(alpha = 0.8f)
-                    )
-                }
-            }
-
-            // Expanded NOT YET options: Explain Again, Show Example, Skip
-            AnimatedVisibility(
-                visible = showNotYetOptions,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Need help or want to skip?",
-                        fontSize = 11.sp,
-                        color = TextWhite.copy(alpha = 0.6f)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Option 1: Explain Again
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x1A00E5FF))
-                                .border(BorderStroke(1.dp, Color(0x4400E5FF)), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    showDetailedExplanation = true
-                                    showNotYetOptions = false
-                                }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.HelpOutline,
-                                    contentDescription = null,
-                                    tint = Color(0xFF00E5FF),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Explain Again",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF00E5FF)
-                                )
-                            }
-                        }
-
-                        // Option 2: Show Example
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x1A10B981))
-                                .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    showExampleLibrary = true
-                                    showNotYetOptions = false
-                                }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Lightbulb,
-                                    contentDescription = null,
-                                    tint = EmeraldPrimary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Show Example",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EmeraldPrimary
-                                )
-                            }
-                        }
-
-                        // Option 3: Skip Task
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0x1AFFFFFF))
-                                .border(BorderStroke(1.dp, Color(0x22FFFFFF)), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    showNotYetOptions = false
-                                    onSkipTask()
-                                }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.FastForward,
-                                    contentDescription = null,
-                                    tint = TextWhite.copy(alpha = 0.8f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Skip Task",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ====================================================================
-// MASTERY COMPLETED CARD
-// ====================================================================
-@Composable
-private fun MasteryCompletedCard(selectedPlatform: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color(0x1510B981))
-            .border(BorderStroke(1.5.dp, EmeraldPrimary), RoundedCornerShape(22.dp))
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(EmeraldPrimary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = "Trophy",
-                    tint = AmoledBlack,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "🏆 MASTERY CLASS COMPLETED!",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = EmeraldPrimary,
-                letterSpacing = 1.sp
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "You have completed all foundational $selectedPlatform mentor lessons! Check back for advanced growth modules.",
-                fontSize = 12.sp,
-                color = TextWhite.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 16.sp
-            )
-        }
-    }
-}
-
-// ====================================================================
-// PERSONALIZED CREATOR ROADMAP SECTION (WITH TASK STATES)
-// ====================================================================
-@Composable
-private fun PersonalizedRoadmapSection(
-    mentorTasks: List<AiMentorTask>,
-    selectedPlatform: String,
-    currentTaskIndex: Int
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "PERSONALIZED MENTOR ROADMAP ($selectedPlatform)",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextWhite.copy(alpha = 0.5f),
-            letterSpacing = 1.5.sp
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Map tasks into 4 weeks
-        val weeks = listOf(
-            Triple("Week 1: Profile & Bio Positioning", "Foundation, High-converting Bio & Niche Focus", mentorTasks.take(2)),
-            Triple("Week 2: Content Strategy & Viral Hooks", "Pillars, 3-sec Hook Formulas & Scripts", mentorTasks.drop(2).take(2)),
-            Triple("Week 3: Algorithm & Research", "Competitor Audits, Audio Trends & Schedules", mentorTasks.drop(4).take(2)),
-            Triple("Week 4: SEO, Captions & Growth Pushes", "Metadata Stacks, Hashtags & Algorithm Mastery", mentorTasks.drop(6))
-        )
-
-        weeks.forEachIndexed { weekIndex, (weekTitle, weekDesc, weekTasks) ->
-            var isExpanded by remember { mutableStateOf(weekIndex == 0 || weekTasks.any { it.state == TaskState.CURRENT }) }
-            val isWeekCompleted = weekTasks.isNotEmpty() && weekTasks.all { it.state == TaskState.COMPLETED || it.state == TaskState.SKIPPED }
-
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
-                borderColor = if (isWeekCompleted) Color(0x4410B981) else Color(0x1F2C2C2C),
-                backgroundColor = if (isWeekCompleted) Color(0x1210B981) else Color(0x08FFFFFF),
-                onClick = { isExpanded = !isExpanded }
-            ) {
-                Column(modifier = Modifier.padding(4.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isWeekCompleted) EmeraldPrimary else Color(0x15FFFFFF)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isWeekCompleted) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Done",
-                                        tint = AmoledBlack,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                } else {
-                                    Text(
-                                        text = "${weekIndex + 1}",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextWhite
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = weekTitle,
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextWhite
-                                )
-                                Text(
-                                    text = weekDesc,
-                                    fontSize = 10.5.sp,
-                                    color = TextWhite.copy(alpha = 0.5f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-
-                        Icon(
-                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Expand",
-                            tint = TextWhite.copy(alpha = 0.6f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    AnimatedVisibility(visible = isExpanded) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            HorizontalDivider(color = Color(0x11FFFFFF), thickness = 1.dp)
-
-                            weekTasks.forEach { task ->
-                                TaskItemStateRow(task = task)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ====================================================================
-// TASK ITEM STATE ROW (SHOWS LOCKED, CURRENT, COMPLETED, SKIPPED)
-// ====================================================================
-@Composable
-private fun TaskItemStateRow(task: AiMentorTask) {
-    val (bgColor, borderColor, textColor, icon, stateLabel) = when (task.state) {
-        TaskState.COMPLETED -> Tuple5(
-            Color(0x1510B981), Color(0x3310B981), EmeraldPrimary, Icons.Default.Check, "COMPLETED"
-        )
-        TaskState.SKIPPED -> Tuple5(
-            Color(0x0AFFFFFF), Color(0x1AFFFFFF), TextWhite.copy(alpha = 0.5f), Icons.Default.FastForward, "SKIPPED"
-        )
-        TaskState.CURRENT -> Tuple5(
-            Color(0x2210B981), EmeraldPrimary, TextWhite, Icons.Default.AutoAwesome, "ACTIVE LESSON"
-        )
-        TaskState.LOCKED -> Tuple5(
-            Color(0x05FFFFFF), Color(0x10FFFFFF), TextWhite.copy(alpha = 0.4f), Icons.Default.Lock, "LOCKED"
-        )
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .border(BorderStroke(1.dp, borderColor), RoundedCornerShape(12.dp))
-            .padding(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(borderColor.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = stateLabel,
-                    tint = if (task.state == TaskState.CURRENT) EmeraldPrimary else textColor,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Lesson #${task.stepNumber}: ${task.title}",
-                    fontSize = 12.sp,
-                    fontWeight = if (task.state == TaskState.CURRENT) FontWeight.Bold else FontWeight.Medium,
-                    color = textColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "${task.skillCategory} • +${task.xpReward} XP",
-                    fontSize = 10.sp,
-                    color = textColor.copy(alpha = 0.6f)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(borderColor.copy(alpha = 0.2f))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = stateLabel,
-                    fontSize = 8.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
-            }
-        }
-    }
-}
-
-private data class Tuple5<A, B, C, D, E>(
-    val a: A, val b: B, val c: C, val d: D, val e: E
-)
-
-@Composable
-fun VideoEditingLockedDialog(
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
-    var selectedTab by remember { mutableStateOf("FEATURES") } // FEATURES, TERMS, PRIVACY, REFUND
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF141420),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(Color(0xFFFF5252), EmeraldPrimary))),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x22FF5252)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Locked",
-                        tint = Color(0xFFFF5252),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Mobile Video Editing AI",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite,
-                    textAlign = TextAlign.Center
-                )
-
-                Box(
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0x2210B981))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "🔒 Premium • Coming Soon",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x10FFFFFF))
-                        .padding(10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Early Access Price Placeholder: ₹99 / Lifetime Pass",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFD700)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Tabs for Terms, Privacy, Refund
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    val tabs = listOf("FEATURES", "TERMS", "PRIVACY", "REFUND")
-                    tabs.forEach { tab ->
-                        Text(
-                            text = tab,
-                            fontSize = 10.sp,
-                            fontWeight = if (selectedTab == tab) FontWeight.Black else FontWeight.Medium,
-                            color = if (selectedTab == tab) EmeraldPrimary else TextWhite.copy(alpha = 0.5f),
-                            modifier = Modifier
-                                .clickable { selectedTab = tab }
-                                .padding(horizontal = 4.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(90.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x0AFFFFFF))
-                        .padding(10.dp)
-                ) {
-                    val infoText = when (selectedTab) {
-                        "TERMS" -> "Terms of Service: Premium features will activate upon official release. Lifetime access covers all future AI mobile video updates."
-                        "PRIVACY" -> "Privacy Guarantee: No video recordings or personal media files are ever transmitted to third parties without permission."
-                        "REFUND" -> "100% 7-Day Money Back Refund Guarantee applies automatically upon release if unsatisfied with the tool."
-                        else -> "Features Preview: Pro CapCut Templates, AI Auto-Captioning Generator, Premiere LUTs, VN Speed Curves & One-tap Auto Cut."
-                    }
-                    Text(
-                        text = infoText,
-                        fontSize = 11.sp,
-                        color = TextWhite.copy(alpha = 0.8f),
-                        lineHeight = 15.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(EmeraldPrimary)
-                        .clickable {
-                            Toast.makeText(context, "🎉 Registered for Early Access Notification!", Toast.LENGTH_SHORT).show()
-                            onDismiss()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Notify Me On Release",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AmoledBlack
-                    )
-                }
-            }
-        }
-    }
-}
-
-// ====================================================================
-// ACADEMY COURSE CARD (PREMIUM GLASS & SHINE SWEEP)
-// ====================================================================
-@Composable
-private fun AcademyCourseCard(
-    title: String,
-    logoName: String,
-    accentColor: Color,
-    features: List<String>,
-    subtitleText: String = "PREMIUM COURSE",
-    tagText: String? = "✨ FEATURED",
-    onStartLearning: () -> Unit
-) {
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-        label = "courseCardScale"
-    )
-
-    val infiniteTransition = rememberInfiniteTransition(label = "courseCardShimmer")
-    val shimmerOffset by infiniteTransition.animateFloat(
-        initialValue = -300f,
-        targetValue = 900f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "courseCardShimmerOffset"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .shadow(
-                elevation = 14.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = accentColor.copy(alpha = 0.4f),
-                ambientColor = Color.Black
-            )
-            .clip(RoundedCornerShape(24.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF181824),
-                        Color(0xFF10101A)
-                    )
-                )
-            )
-            .border(
-                BorderStroke(
-                    1.2.dp,
-                    Brush.linearGradient(
-                        colors = listOf(
-                            accentColor.copy(alpha = 0.85f),
-                            accentColor.copy(alpha = 0.35f),
-                            accentColor.copy(alpha = 0.75f)
-                        ),
-                        start = Offset(shimmerOffset, 0f),
-                        end = Offset(shimmerOffset + 400f, 300f)
-                    )
-                ),
-                RoundedCornerShape(24.dp)
-            )
-            .padding(18.dp)
-    ) {
-        // Shine Sweep Overlay
-        Canvas(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(RoundedCornerShape(24.dp))
-        ) {
-            drawLine(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        Color.White.copy(alpha = 0.04f),
-                        Color.White.copy(alpha = 0.12f),
-                        Color.White.copy(alpha = 0.04f),
-                        Color.Transparent
-                    )
-                ),
-                start = Offset(shimmerOffset, 0f),
-                end = Offset(shimmerOffset + 180f, size.height),
-                strokeWidth = 32.dp.toPx()
-            )
-        }
-
-        val heroType = when (logoName) {
-            "instagram" -> com.example.ui.components.ToolHeroType.INSTAGRAM_CREATOR
-            "youtube" -> com.example.ui.components.ToolHeroType.YOUTUBE_CREATOR
-            "chatgpt" -> com.example.ui.components.ToolHeroType.AI_PROMPT_EXTRACTOR
-            "capcut" -> com.example.ui.components.ToolHeroType.CAPCUT_MASTER
-            "vn" -> com.example.ui.components.ToolHeroType.VN_EDITOR
-            "meesho" -> com.example.ui.components.ToolHeroType.MEESHO_CREATOR
-            else -> com.example.ui.components.ToolHeroType.BRAND_COLLAB
-        }
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            com.example.ui.components.ToolHeroBanner(
-                toolType = heroType,
-                height = 110.dp,
-                badgeText = tagText,
-                subtitleText = subtitleText
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Header Row: Logo + Title + Badge
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(accentColor.copy(alpha = 0.18f))
-                            .border(BorderStroke(1.dp, accentColor.copy(alpha = 0.6f)), CircleShape),
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(EmeraldPrimary.copy(alpha = 0.3f), EmeraldGlow.copy(alpha = 0.15f))
+                                )
+                            )
+                            .border(BorderStroke(1.2.dp, EmeraldGlow.copy(alpha = 0.6f)), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        OfficialLogo(name = logoName, modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = Icons.Default.School,
+                            contentDescription = "Creator Learning Hub",
+                            tint = EmeraldGlow,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
-
-                    Spacer(modifier = Modifier.width(10.dp))
 
                     Column {
                         Text(
-                            text = title,
-                            fontSize = 17.5.sp,
+                            text = "Creator Learning Hub",
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
                             letterSpacing = (-0.3).sp
                         )
                         Text(
-                            text = subtitleText,
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.ExtraBold,
+                            text = "Learn. Create. Grow.",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
                             color = EmeraldGlow,
-                            letterSpacing = 1.2.sp,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            letterSpacing = 1.2.sp
                         )
                     }
                 }
 
-                if (tagText != null) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x2210B981))
-                            .border(BorderStroke(1.dp, EmeraldPrimary.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                // Language Selector Button
+                Surface(
+                    onClick = { showLanguageDialog = true },
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFF1A1F2C),
+                    border = BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = "Language",
+                            tint = EmeraldGlow,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Text(
-                            text = tagText,
-                            fontSize = 9.sp,
+                            text = selectedLanguage,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = EmeraldGlow
+                            color = TextWhite
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Bullet points description
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                features.forEach { feature ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(EmeraldPrimary.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
+            // ==================================================
+            // INSTANT SEARCH BAR
+            // ==================================================
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = EmeraldGlow),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFF141824),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.12f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Courses",
+                        tint = EmeraldGlow,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = {
+                            Text(
+                                text = "Search Instagram, YouTube, CapCut, VN...",
+                                fontSize = 13.sp,
+                                color = TextGray
+                            )
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = TextWhite,
+                            unfocusedTextColor = TextWhite,
+                            cursorColor = EmeraldGlow
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(
+                            onClick = { searchQuery = "" },
+                            modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = EmeraldGlow,
-                                modifier = Modifier.size(11.dp)
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear",
+                                tint = TextGray,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = feature,
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextWhite.copy(alpha = 0.85f)
-                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Start Learning Button
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(46.dp)
-                    .shadow(8.dp, RoundedCornerShape(23.dp), spotColor = EmeraldPrimary)
-                    .clip(RoundedCornerShape(23.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(EmeraldPrimary, EmeraldGlow)
-                        )
-                    )
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                        onStartLearning()
-                    },
-                contentAlignment = Alignment.Center
+            // ==================================================
+            // SKELETON / LOADING ANIMATION
+            // ==================================================
+            AnimatedVisibility(
+                visible = isLoading,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = AmoledBlack,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    repeat(3) {
+                        SkeletonCourseCard()
+                    }
+                }
+            }
+
+            if (!isLoading) {
+                // ==================================================
+                // CONTINUE LEARNING SECTION (Top priority if started)
+                // ==================================================
+                if (continueLearningCourse != null && queryTrimmed.isEmpty()) {
+                    val (course, progress) = continueLearningCourse
+                    val percent = progress.percentInt
+                    val remainingMins = (course.estimatedMinutes * (1f - progress.fraction)).toInt().coerceAtLeast(2)
+
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 18.dp)
+                            .shadow(12.dp, RoundedCornerShape(20.dp), spotColor = course.primaryColor),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF151926),
+                        border = BorderStroke(
+                            1.5.dp,
+                            Brush.horizontalGradient(
+                                listOf(course.primaryColor, EmeraldGlow, Color.White.copy(alpha = 0.2f))
+                            )
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = "Continue",
+                                        tint = course.primaryColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = "CONTINUE LEARNING",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = course.primaryColor,
+                                        letterSpacing = 1.sp
+                                    )
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = course.primaryColor.copy(alpha = 0.2f),
+                                    border = BorderStroke(1.dp, course.primaryColor.copy(alpha = 0.5f))
+                                ) {
+                                    Text(
+                                        text = "⏳ $remainingMins mins left",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = course.title,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Progress Bar
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                LinearProgressIndicator(
+                                    progress = { progress.fraction },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = course.primaryColor,
+                                    trackColor = Color.White.copy(alpha = 0.1f)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "$percent%",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Button(
+                                onClick = { activeCourseLaunch = course.launchType },
+                                colors = ButtonDefaults.buttonColors(containerColor = course.primaryColor),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Resume",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Continue ${course.title}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.5.sp,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ==================================================
+                // EMPTY STATE
+                // ==================================================
+                if (filteredCourses.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(CircleShape)
+                                    .background(EmeraldGlow.copy(alpha = 0.15f))
+                                    .border(BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f)), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = "No courses",
+                                    tint = EmeraldGlow,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = "Start learning to grow as a creator.",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Text(
+                                text = "No courses found matching '$searchQuery'. Try searching 'Instagram', 'CapCut', or 'YouTube'.",
+                                fontSize = 12.sp,
+                                color = TextGray,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 17.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = { searchQuery = "" },
+                                colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Clear Search Filter", fontWeight = FontWeight.Bold, color = Color.Black)
+                            }
+                        }
+                    }
+                }
+
+                // ==================================================
+                // SECTION 1: CREATOR GROWTH
+                // ==================================================
+                if (creatorGrowthCourses.isNotEmpty()) {
                     Text(
-                        text = "START LEARNING",
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack,
-                        letterSpacing = 0.8.sp
+                        text = "🚀 CREATOR GROWTH",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = EmeraldGlow,
+                        letterSpacing = 1.2.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        creatorGrowthCourses.forEach { course ->
+                            val progress = getCourseProgress(course.launchType)
+                            CourseCardItem(
+                                course = course,
+                                progress = progress,
+                                onCourseClick = { activeCourseLaunch = course.launchType }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
+
+                // ==================================================
+                // SECTION 2: VIDEO EDITING LEARNING HUB
+                // ==================================================
+                if (videoEditingCourses.isNotEmpty()) {
+                    Text(
+                        text = "✂️ VIDEO EDITING LEARNING HUB",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = ElectricPurple,
+                        letterSpacing = 1.2.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        videoEditingCourses.forEach { course ->
+                            val progress = getCourseProgress(course.launchType)
+                            CourseCardItem(
+                                course = course,
+                                progress = progress,
+                                onCourseClick = { activeCourseLaunch = course.launchType }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(28.dp))
+                }
+            }
+        }
+
+        // ==================================================
+        // ACTIVE COURSE DIALOG LAUNCHERS
+        // ==================================================
+        when (activeCourseLaunch) {
+            CourseLaunchType.INSTAGRAM_GROWTH -> {
+                InstagramCreatorAiV2Dialog(onDismiss = { activeCourseLaunch = null })
+            }
+            CourseLaunchType.YOUTUBE_GROWTH -> {
+                YouTubeCreatorAiV2Dialog(onDismiss = { activeCourseLaunch = null })
+            }
+            CourseLaunchType.BRAND_COLLAB -> {
+                BrandCollaborationAiDialog(onDismiss = { activeCourseLaunch = null })
+            }
+            CourseLaunchType.MEESHO_GUIDE -> {
+                MeeshoCreatorAiDialog(onDismiss = { activeCourseLaunch = null })
+            }
+            CourseLaunchType.WISHLINK_GUIDE -> {
+                WishlinkCreatorAiDialog(onDismiss = { activeCourseLaunch = null })
+            }
+            CourseLaunchType.CAPCUT -> {
+                VideoEditingMentorAiDialog(
+                    toolType = EditingToolType.CAPCUT,
+                    onDismiss = { activeCourseLaunch = null }
+                )
+            }
+            CourseLaunchType.VN_EDITOR -> {
+                VideoEditingMentorAiDialog(
+                    toolType = EditingToolType.VN,
+                    onDismiss = { activeCourseLaunch = null }
+                )
+            }
+            CourseLaunchType.INSTAGRAM_EDITS -> {
+                VideoEditingMentorAiDialog(
+                    toolType = EditingToolType.INSTAGRAM_EDITS,
+                    onDismiss = { activeCourseLaunch = null }
+                )
+            }
+            null -> {}
+        }
+
+        // ==================================================
+        // LANGUAGE SELECTOR DIALOG
+        // ==================================================
+        if (showLanguageDialog) {
+            LanguageSelectorModal(
+                currentLanguage = selectedLanguage,
+                onLanguageSelected = { lang ->
+                    selectedLanguage = lang
+                    CreatorAcademyPrefs.setPreferredLanguage(context, lang)
+                    Toast.makeText(context, "Language updated to $lang", Toast.LENGTH_SHORT).show()
+                    showLanguageDialog = false
+                },
+                onDismiss = { showLanguageDialog = false }
+            )
+        }
+    }
+}
+
+data class CourseProgressInfo(
+    val completedCount: Int,
+    val totalCount: Int
+) {
+    val fraction: Float = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+    val percentInt: Int = (fraction * 100).toInt()
+    val isStarted: Boolean = completedCount > 0
+    val isCompleted: Boolean = completedCount >= totalCount && totalCount > 0
+}
+
+@Composable
+private fun CourseCardItem(
+    course: CourseCardModel,
+    progress: CourseProgressInfo,
+    onCourseClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(10.dp, shape = RoundedCornerShape(18.dp), spotColor = course.primaryColor)
+            .clip(RoundedCornerShape(18.dp))
+            .clickable { onCourseClick() },
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFF141824),
+        border = BorderStroke(
+            1.2.dp,
+            Brush.linearGradient(
+                listOf(
+                    course.primaryColor.copy(alpha = 0.7f),
+                    Color.White.copy(alpha = 0.12f)
+                )
+            )
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(course.gradientColors)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = course.icon,
+                            contentDescription = course.title,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    Column {
+                        Text(
+                            text = course.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "⏱️ ${course.estimatedMinutes} mins",
+                                fontSize = 11.sp,
+                                color = TextGray
+                            )
+                            Text(
+                                text = "•",
+                                fontSize = 11.sp,
+                                color = TextGray
+                            )
+                            Text(
+                                text = "🎯 ${course.difficulty}",
+                                fontSize = 11.sp,
+                                color = TextGray
+                            )
+                        }
+                    }
+                }
+
+                // Difficulty / Status Badge
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (progress.isCompleted) EmeraldGlow.copy(alpha = 0.2f) else course.primaryColor.copy(alpha = 0.15f),
+                    border = BorderStroke(
+                        1.dp,
+                        if (progress.isCompleted) EmeraldGlow.copy(alpha = 0.5f) else course.primaryColor.copy(alpha = 0.4f)
+                    )
+                ) {
+                    Text(
+                        text = if (progress.isCompleted) "✓ Completed" else if (progress.isStarted) "${progress.percentInt}%" else "New",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (progress.isCompleted) EmeraldGlow else TextWhite,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = course.subtitle,
+                fontSize = 12.5.sp,
+                color = TextWhite.copy(alpha = 0.8f),
+                lineHeight = 17.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Progress Bar if started
+            if (progress.isStarted) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    LinearProgressIndicator(
+                        progress = { progress.fraction },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(6.dp)
+                            .clip(CircleShape),
+                        color = course.primaryColor,
+                        trackColor = Color.White.copy(alpha = 0.1f)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "${progress.completedCount}/${progress.totalCount} Lessons",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextGray
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Action Button
+            Button(
+                onClick = onCourseClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (progress.isStarted) course.primaryColor else Color(0xFF222838)
+                ),
+                shape = RoundedCornerShape(10.dp),
+                border = if (!progress.isStarted) BorderStroke(1.dp, course.primaryColor.copy(alpha = 0.5f)) else null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            ) {
+                Icon(
+                    imageVector = if (progress.isCompleted) Icons.Default.CheckCircle else Icons.Default.PlayArrow,
+                    contentDescription = "Start",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (progress.isCompleted) "Review Course" else if (progress.isStarted) "Continue Lesson" else "Start Course",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.5.sp,
+                    color = Color.White
+                )
             }
         }
     }
 }
 
-// ====================================================================
-// COURSE PLACEHOLDER DIALOG
-// ====================================================================
 @Composable
-private fun CoursePlaceholderDialog(
-    courseName: String,
+private fun SkeletonCourseCard() {
+    val infiniteTransition = rememberInfiniteTransition(label = "skeleton")
+    val alphaAnim by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "skeletonAlpha"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(140.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFF141824).copy(alpha = alphaAnim),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+    ) {}
+}
+
+@Composable
+private fun LanguageSelectorModal(
+    currentLanguage: String,
+    onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+    val languages = listOf(
+        Pair("English", "International Standard English"),
+        Pair("Hinglish", "Hindi + English Creator Style"),
+        Pair("Hindi", "हिंदी - Complete Hindi Experience")
+    )
+
+    Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF141A16),
-            border = BorderStroke(1.2.dp, Brush.linearGradient(listOf(EmeraldPrimary, EmeraldGlow))),
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF161B26),
+            border = BorderStroke(1.5.dp, EmeraldGlow.copy(alpha = 0.5f)),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
             Column(
-                modifier = Modifier.padding(22.dp),
+                modifier = Modifier.padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(EmeraldPrimary.copy(alpha = 0.2f))
-                        .border(BorderStroke(1.dp, EmeraldGlow), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = null,
-                        tint = EmeraldGlow,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Text(
-                    text = "$courseName Course",
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Black,
-                    color = TextWhite,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(EmeraldPrimary.copy(alpha = 0.2f))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "🚀 NEXT PHASE LAUNCH",
-                        fontSize = 10.sp,
+                        text = "🌐 Choose Preferred Language",
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
+                        color = TextWhite
                     )
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = TextGray,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Interactive video lessons, growth blueprints, reels templates & monetization tools for $courseName will launch in the next phase! Your learning progress will be saved automatically.",
-                    fontSize = 12.5.sp,
-                    color = TextWhite.copy(alpha = 0.75f),
-                    textAlign = TextAlign.Center,
-                    lineHeight = 18.sp
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(Brush.horizontalGradient(listOf(EmeraldPrimary, EmeraldGlow)))
-                        .clickable { onDismiss() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "GOT IT",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = AmoledBlack,
-                        letterSpacing = 0.8.sp
-                    )
+                languages.forEach { (langName, langDesc) ->
+                    val isSelected = currentLanguage.equals(langName, ignoreCase = true)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onLanguageSelected(langName) },
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) EmeraldGlow.copy(alpha = 0.15f) else Color(0xFF0F131D),
+                        border = BorderStroke(
+                            1.dp,
+                            if (isSelected) EmeraldGlow else Color.White.copy(alpha = 0.1f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = langName,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) EmeraldGlow else TextWhite
+                                )
+                                Text(
+                                    text = langDesc,
+                                    fontSize = 11.sp,
+                                    color = TextGray
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = EmeraldGlow,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

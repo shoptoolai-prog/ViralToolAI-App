@@ -14,7 +14,7 @@ import java.util.Calendar
 
 /**
  * MASTER PHASE 16 — Viral Memory Engine™
- * Transforms ViralToolAI into a Personal AI Mentor that remembers every user's journey
+ * Transforms ViralToolAi into a Personal AI Mentor that remembers every user's journey
  * and restores state seamlessly across sessions.
  */
 

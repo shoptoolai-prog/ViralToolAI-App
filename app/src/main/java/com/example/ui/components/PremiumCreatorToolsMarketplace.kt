@@ -62,6 +62,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Icon
@@ -119,21 +120,32 @@ data class PremiumToolData(
 object PremiumCreatorMarketplaceData {
     val tools = listOf(
         PremiumToolData(
-            id = "brand_collab_ai",
-            title = "Brand Collaboration AI",
-            subtitle = "Sponsorship Deals, Pitching, Media Kit & Contracts",
-            icon = Icons.Default.Campaign,
-            overview = "An AI mentor dedicated to helping creators pitch top brands, calculate market pricing, design press kits, negotiate usage rights, and avoid deal scams.",
+            id = "affiliate_master_ai",
+            title = "Affiliate Master AI",
+            subtitle = "E-Commerce, Product Tagging & Link Monetization",
+            icon = Icons.Default.ShoppingBag,
+            overview = "An AI assistant that recommends high-converting affiliate products, automates bio link page setups, and analyzes conversion strategies across Amazon, Flipkart, Wishlink, and Meesho.",
             features = listOf(
-                "Personal Brand Strategy",
-                "Brand Pitch Generator",
-                "Instagram DM Templates",
-                "Professional Email Templates",
-                "Brand Outreach Roadmap",
-                "Brand Matching Guidance",
-                "Scam Detection Guide",
-                "Negotiation Guide",
-                "Collaboration Checklist"
+                "Niche Product Finder",
+                "Bio-Link Optimizer",
+                "High-Commission Alerts",
+                "Affiliate Conversion Strategy",
+                "Story & Reel Tagging Tips"
+            ),
+            futurePricePreview = "Included in Pro Pass"
+        ),
+        PremiumToolData(
+            id = "video_editing_academy",
+            title = "Video Editing Academy",
+            subtitle = "CapCut, VN, Premiere & Timeline Transitions",
+            icon = Icons.Default.VideoLibrary,
+            overview = "Comprehensive creator editing guides covering sound design, keyframe animations, trending reel transitions, color grading, and auto-captioning techniques.",
+            features = listOf(
+                "CapCut Mastery Guide",
+                "VN Video Editor Hacks",
+                "Trending Sound Design",
+                "Text Animation Presets",
+                "Color Grading Blueprints"
             ),
             futurePricePreview = "Included in Pro Pass"
         )

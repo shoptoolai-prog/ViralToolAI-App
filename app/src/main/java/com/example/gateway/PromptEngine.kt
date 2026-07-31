@@ -32,7 +32,7 @@ object PromptEngine {
         val langName = language.displayName
         return when (module) {
             AiPromptModule.SHOPPING_AI -> """
-                [SYSTEM: ViralToolAI Shopping Intelligence Engine v12.4]
+                [SYSTEM: ViralToolAi Shopping Intelligence Engine v12.4]
                 Target Module: SHOPPING_AI
                 Language Mode: $langName
                 
@@ -48,7 +48,7 @@ object PromptEngine {
             """.trimIndent()
 
             AiPromptModule.CREATOR_AI -> """
-                [SYSTEM: ViralToolAI Creator Intelligence Engine v12.4]
+                [SYSTEM: ViralToolAi Creator Intelligence Engine v12.4]
                 Target Module: CREATOR_AI
                 Language Mode: $langName
                 
@@ -63,7 +63,7 @@ object PromptEngine {
             """.trimIndent()
 
             AiPromptModule.OCR_AI -> """
-                [SYSTEM: ViralToolAI OCR Extraction Engine v12.4]
+                [SYSTEM: ViralToolAi OCR Extraction Engine v12.4]
                 Target Module: OCR_AI
                 
                 Input Image / Text Lines: $inputPayload
@@ -75,7 +75,7 @@ object PromptEngine {
             """.trimIndent()
 
             AiPromptModule.VISION_AI -> """
-                [SYSTEM: ViralToolAI Vision Intelligence Router v12.4]
+                [SYSTEM: ViralToolAi Vision Intelligence Router v12.4]
                 Target Module: VISION_AI
                 
                 Image URI / Path: $inputPayload
@@ -87,7 +87,7 @@ object PromptEngine {
             """.trimIndent()
 
             AiPromptModule.REPORTS_AI -> """
-                [SYSTEM: ViralToolAI Report Generation Engine v12.4]
+                [SYSTEM: ViralToolAi Report Generation Engine v12.4]
                 Target Module: REPORTS_AI
                 Language Mode: $langName
                 
@@ -99,7 +99,7 @@ object PromptEngine {
             """.trimIndent()
 
             AiPromptModule.RECOMMENDATIONS_AI -> """
-                [SYSTEM: ViralToolAI Recommendation Engine v12.4]
+                [SYSTEM: ViralToolAi Recommendation Engine v12.4]
                 
                 Context Payload: $inputPayload
                 

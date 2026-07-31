@@ -170,7 +170,7 @@ fun WishlinkCreatorAiCard(
 
                     Column {
                         Text(
-                            text = "Wishlink Creator Academy",
+                            text = "Wishlink Creator Guide",
                             fontSize = 17.5.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,

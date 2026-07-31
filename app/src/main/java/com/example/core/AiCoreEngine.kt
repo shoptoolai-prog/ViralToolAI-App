@@ -54,7 +54,7 @@ data class AiContext(
     val creatorContext: String? = null,
     val visionContext: String? = null,
     val merchantContext: String? = null,
-    val userContext: String? = "Verified ViralToolAI Member",
+    val userContext: String? = "Verified ViralToolAi Member",
     val languageContext: ReportLanguage = ReportLanguage.HINGLISH
 )
 

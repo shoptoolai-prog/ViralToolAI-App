@@ -21,7 +21,7 @@ data class DeveloperDiagnosticEntry(
 
 object AiDeveloperLogger {
 
-    private const val TAG = "ViralToolAI_Gateway"
+    private const val TAG = "ViralToolAi_Gateway"
     private val diagnosticLogs = mutableListOf<DeveloperDiagnosticEntry>()
     private const val MAX_LOGS = 200
 

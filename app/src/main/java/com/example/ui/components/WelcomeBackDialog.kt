@@ -66,7 +66,7 @@ import com.example.ui.theme.TextWhite
 
 /**
  * MASTER PHASE 16 — Welcome Back Experience Dialog
- * Premium Apple-style Glass Dialog shown when returning to ViralToolAI
+ * Premium Apple-style Glass Dialog shown when returning to ViralToolAi
  * displaying last completed lesson & today's next lesson.
  */
 @Composable

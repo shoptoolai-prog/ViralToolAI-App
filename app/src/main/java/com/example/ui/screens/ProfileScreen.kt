@@ -19,11 +19,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,23 +38,63 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.theme.*
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+private val GoldPrimary = Color(0xFFFFD700)
+private val GoldAccent = Color(0xFFFFA500)
+
+/**
+ * PROFILE & SETTINGS — PHASE 5 COMPLETE REDESIGN
+ * Flagship account, settings, performance & app information hub.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onSwitchExperience: () -> Unit = {}
+    onSwitchExperience: () -> Unit = {},
+    onNavigateToCourse: (String) -> Unit = {}
 ) {
-    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
+    // Preferences & State
+    val setupData = remember { CreatorAcademyPrefs.getSetupData(context) }
+    var userDisplayName by remember { mutableStateOf(CreatorAcademyPrefs.getUserDisplayName(context)) }
+
+    // App Settings State
+    var selectedThemeMode by remember { mutableStateOf(CreatorAcademyPrefs.getAppThemeMode(context)) }
+    var selectedLanguage by remember { mutableStateOf(CreatorAcademyPrefs.getAppLanguage(context)) }
+    var notificationsEnabled by remember { mutableStateOf(CreatorAcademyPrefs.getNotificationsEnabled(context)) }
+
+    // Last Course Data
+    val lastCourseData = remember { CreatorAcademyPrefs.getLastOpenedCourse(context) }
+
+    // Storage & Cache calculation
+    var cacheSizeBytes by remember { mutableLongStateOf(calculateCacheSize(context)) }
+    var isClearingCache by remember { mutableStateOf(false) }
+
+    // Dialog States
+    var showEditProfileDialog by remember { mutableStateOf(false) }
+    var showBugReportDialog by remember { mutableStateOf(false) }
+    var showFeatureRequestDialog by remember { mutableStateOf(false) }
+    var showFaqDialog by remember { mutableStateOf(false) }
+    var showFounderDialog by remember { mutableStateOf(false) }
+    var showWhatsNewDialog by remember { mutableStateOf(false) }
+    var activeLegalSheet by remember { mutableStateOf<String?>(null) }
+
+    // Links & Support
     val founderInstagramUrl = "https://www.instagram.com/asittttttttttttttttt?igsh=bjJlN3M2N3hzMWI1"
     val officialInstagramUrl = "https://www.instagram.com/viraltoolai?igsh=MXJjN2Q5ODJhd3RobQ=="
     val supportEmail = "asityadavteambusiness@gmail.com"
@@ -62,7 +102,9 @@ fun ProfileScreen(
     val openUrl = { url: String ->
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(context, "Opening link...", Toast.LENGTH_SHORT).show()
@@ -74,15 +116,16 @@ fun ProfileScreen(
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         val clip = ClipData.newPlainText("Support Email", supportEmail)
         clipboard?.setPrimaryClip(clip)
-        Toast.makeText(context, "Copied email: $supportEmail", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Copied support email: $supportEmail", Toast.LENGTH_SHORT).show()
     }
 
-    val openMailClient = { subject: String ->
+    val openMailClient = { subject: String, body: String ->
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         try {
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:$supportEmail")
                 putExtra(Intent.EXTRA_SUBJECT, subject)
+                putExtra(Intent.EXTRA_TEXT, body)
             }
             context.startActivity(emailIntent)
         } catch (e: Exception) {
@@ -90,100 +133,30 @@ fun ProfileScreen(
         }
     }
 
-    var showFounderDialog by remember { mutableStateOf(false) }
-    var showBugReportDialog by remember { mutableStateOf(false) }
-    var activeLegalSheet by remember { mutableStateOf<String?>(null) }
-
-    // Entrance Stagger Animations
-    var isLoaded by remember { mutableStateOf(false) }
+    // Launch Stagger Animation
+    val animProgress = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
-        isLoaded = true
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing)
+        )
     }
-
-    val headerAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 50, easing = FastOutSlowInEasing),
-        label = "headerAlpha"
-    )
-    val headerOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 50, easing = FastOutSlowInEasing),
-        label = "headerOffsetY"
-    )
-
-    val accountCardAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 130, easing = FastOutSlowInEasing),
-        label = "accountCardAlpha"
-    )
-    val accountCardOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 130, easing = FastOutSlowInEasing),
-        label = "accountCardOffsetY"
-    )
-
-    val followCardAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
-        label = "followCardAlpha"
-    )
-    val followCardOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
-        label = "followCardOffsetY"
-    )
-
-    val supportCardAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 270, easing = FastOutSlowInEasing),
-        label = "supportCardAlpha"
-    )
-    val supportCardOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 270, easing = FastOutSlowInEasing),
-        label = "supportCardOffsetY"
-    )
-
-    val legalCardAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 340, easing = FastOutSlowInEasing),
-        label = "legalCardAlpha"
-    )
-    val legalCardOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 340, easing = FastOutSlowInEasing),
-        label = "legalCardOffsetY"
-    )
-
-    val aboutCardAlpha by animateFloatAsState(
-        targetValue = if (isLoaded) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 410, easing = FastOutSlowInEasing),
-        label = "aboutCardAlpha"
-    )
-    val aboutCardOffsetY by animateDpAsState(
-        targetValue = if (isLoaded) 0.dp else 16.dp,
-        animationSpec = tween(400, delayMillis = 410, easing = FastOutSlowInEasing),
-        label = "aboutCardOffsetY"
-    )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(AmoledBlack)
     ) {
-        // Multi-layer Ambient Blur Background Gradients & Floating Light Particles
-        BackgroundFloatingParticles()
-
-        // Top Ambient Glow
+        // Multi-layered Ambient Background Glow
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp)
+                .height(340.dp)
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            EmeraldPrimary.copy(alpha = 0.16f),
-                            ElectricPurple.copy(alpha = 0.09f),
+                            EmeraldPrimary.copy(alpha = 0.18f),
+                            ElectricPurple.copy(alpha = 0.10f),
                             Color.Transparent
                         ),
                         center = Offset(400f, -50f)
@@ -191,328 +164,905 @@ fun ProfileScreen(
                 )
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp)
-                .padding(top = 12.dp, bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isWide = maxWidth > 600.dp
+            val isTablet = maxWidth > 900.dp
 
-            // ================= 1. HERO SECTION: ABOUT VIRALTOOLAI & PREMIUM MEMBERSHIP =================
-            PremiumHeroHeader(
-                alpha = headerAlpha,
-                offsetY = headerOffsetY
-            )
-
-            Spacer(modifier = Modifier.height(22.dp))
-
-            // ================= 2. ACCOUNT SECTION (FIXED: Tap opens About Founder) =================
-            PremiumGlassSectionCard(
-                title = "ACCOUNT",
-                subtitle = "User Profile & Founder Information",
-                headerIcon = Icons.Default.Person,
-                headerIconTint = EmeraldPrimary,
-                alpha = accountCardAlpha,
-                offsetY = accountCardOffsetY
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = if (isTablet) 32.dp else if (isWide) 24.dp else 16.dp)
+                    .padding(top = 12.dp, bottom = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                PremiumPressableRow(
-                    title = "About Founder",
-                    subtitle = "Asit Yadav • Founder, AI Creator & Influencer",
-                    icon = Icons.Default.AccountCircle,
-                    iconTint = EmeraldPrimary,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showFounderDialog = true
-                    }
-                )
-            }
+                // ==================================================
+                // TOP HEADER: PROFILE GLASSMORPHISM CARD
+                // ==================================================
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            alpha = animProgress.value
+                            translationY = (1f - animProgress.value) * 30f
+                        }
+                ) {
+                    TopHeaderProfileCard(
+                        displayName = userDisplayName,
+                        skillLevel = setupData.skillLevel,
+                        niche = setupData.niche,
+                        onEditProfile = { showEditProfileDialog = true }
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            // ================= 3. FOLLOW US SECTION (TWO GLASS CARDS) =================
-            PremiumGlassSectionCard(
-                title = "FOLLOW US",
-                subtitle = "Connect with Founder & Official Handles",
-                headerIcon = Icons.Default.Share,
-                headerIconTint = Color(0xFFE1306C),
-                alpha = followCardAlpha,
-                offsetY = followCardOffsetY
-            ) {
-                // Founder Instagram
-                FollowInstagramCardRow(
-                    handleName = "Asit Yadav",
-                    subtitle = "@asittttttttttttttttt • Founder & AI Creator",
-                    onClick = { openUrl(founderInstagramUrl) }
-                )
+                // ==================================================
+                // SECTION 1: CONTINUE LEARNING
+                // ==================================================
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            alpha = animProgress.value
+                            translationY = (1f - animProgress.value) * 25f
+                        }
+                ) {
+                    SectionHeader(title = "CONTINUE LEARNING", icon = Icons.Default.School, iconTint = EmeraldGlow)
 
-                SoftGlassDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // ViralToolAI Official
-                FollowInstagramCardRow(
-                    handleName = "ViralToolAI Official",
-                    subtitle = "@viraltoolai • Official AI Creator Hub",
-                    onClick = { openUrl(officialInstagramUrl) }
-                )
-            }
+                    if (lastCourseData != null) {
+                        val courseName = lastCourseData["name"] as? String ?: "Creator Masterclass"
+                        val progress = lastCourseData["progress"] as? Int ?: 0
+                        val completed = lastCourseData["completed"] as? Int ?: 0
+                        val total = lastCourseData["total"] as? Int ?: 1
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ================= 4. SUPPORT SECTION =================
-            PremiumGlassSectionCard(
-                title = "SUPPORT",
-                subtitle = "We're here to help",
-                headerIcon = Icons.Default.SupportAgent,
-                headerIconTint = EmeraldPrimary,
-                alpha = supportCardAlpha,
-                offsetY = supportCardOffsetY
-            ) {
-                // Contact Support Row
-                PremiumPressableRow(
-                    title = "Contact Support",
-                    subtitle = supportEmail,
-                    icon = Icons.Default.Email,
-                    iconTint = EmeraldPrimary,
-                    trailingContent = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(8.dp, RoundedCornerShape(22.dp)),
+                            shape = RoundedCornerShape(22.dp),
+                            color = Color(0xFF141824),
+                            border = BorderStroke(1.2.dp, EmeraldGlow.copy(alpha = 0.5f))
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0x1A10B981))
-                                    .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
-                                    .clickable { copyEmailToClipboard() }
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) {
+                            Column(modifier = Modifier.padding(18.dp)) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ContentCopy,
-                                        contentDescription = "Copy Email",
-                                        tint = EmeraldGlow,
-                                        modifier = Modifier.size(13.dp)
-                                    )
-                                    Text(
-                                        text = "Copy",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = EmeraldGlow
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(EmeraldGlow.copy(alpha = 0.2f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayCircle,
+                                                contentDescription = null,
+                                                tint = EmeraldGlow,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Column {
+                                            Text(
+                                                text = courseName,
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextWhite
+                                            )
+                                            Text(
+                                                text = "$completed of $total Lessons Completed",
+                                                fontSize = 11.5.sp,
+                                                color = TextGray
+                                            )
+                                        }
+                                    }
+
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = EmeraldGlow.copy(alpha = 0.2f),
+                                        border = BorderStroke(1.dp, EmeraldGlow)
+                                    ) {
+                                        Text(
+                                            text = "$progress%",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = EmeraldGlow,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                LinearProgressIndicator(
+                                    progress = { progress / 100f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = EmeraldGlow,
+                                    trackColor = Color.White.copy(alpha = 0.1f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        onNavigateToCourse(courseName)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = EmeraldGlow),
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(text = "Continue Learning", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                                    }
                                 }
                             }
                         }
-                    },
-                    onClick = { openMailClient("ViralToolAI Support Request") }
-                )
-
-                SoftGlassDivider()
-
-                // Report Bug Row
-                PremiumPressableRow(
-                    title = "Report a Bug",
-                    subtitle = supportEmail,
-                    icon = Icons.Default.BugReport,
-                    iconTint = CrimsonLight,
-                    trailingContent = {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0x1AF43F5E))
-                                .border(BorderStroke(0.8.dp, CrimsonLight.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
-                                .clickable {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showBugReportDialog = true
-                                }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                    } else {
+                        // EMPTY STATE: START YOUR CREATOR JOURNEY
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(22.dp),
+                            color = Color(0xFF131724),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
                         ) {
-                            Text(
-                                text = "Report",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = CrimsonLight
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(CircleShape)
+                                        .background(ElectricPurple.copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.RocketLaunch,
+                                        contentDescription = "Start Journey",
+                                        tint = ElectricPurple,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    text = "Start Your Creator Journey",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Text(
+                                    text = "Explore 10+ AI creator modules, brand deal guides, Meesho/Wishlink affiliate strategies, and video editing masterclasses.",
+                                    fontSize = 12.sp,
+                                    color = TextGray,
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 17.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        onSwitchExperience()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = ElectricPurple),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Explore Creator Courses", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
                         }
-                    },
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showBugReportDialog = true
                     }
-                )
+                }
 
-                SoftGlassDivider()
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Switch Workspace Experience
-                PremiumPressableRow(
-                    title = "Switch Workspace Experience",
-                    subtitle = "Shopping Intelligence vs Creator Academy",
-                    icon = Icons.Default.SwapHoriz,
-                    iconTint = EmeraldGlow,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onSwitchExperience()
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ================= 5. LEGAL SECTION =================
-            PremiumGlassSectionCard(
-                title = "LEGAL",
-                subtitle = "Privacy & Security",
-                headerIcon = Icons.Default.Gavel,
-                headerIconTint = CrimsonLight,
-                alpha = legalCardAlpha,
-                offsetY = legalCardOffsetY
-            ) {
-                PremiumPressableRow(
-                    title = "Privacy Policy",
-                    subtitle = "Zero Data Selling & Local Security",
-                    icon = Icons.Default.Security,
-                    iconTint = EmeraldPrimary,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        activeLegalSheet = "privacy"
-                    }
-                )
-
-                SoftGlassDivider()
-
-                PremiumPressableRow(
-                    title = "Terms of Service",
-                    subtitle = "Usage Terms & Community Rules",
-                    icon = Icons.Default.Description,
-                    iconTint = TextWhite,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        activeLegalSheet = "terms"
-                    }
-                )
-
-                SoftGlassDivider()
-
-                PremiumPressableRow(
-                    title = "Licenses",
-                    subtitle = "Open Source Software & Libraries",
-                    icon = Icons.Default.Code,
-                    iconTint = ElectricPurple,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        activeLegalSheet = "licenses"
-                    }
-                )
-
-                SoftGlassDivider()
-
-                PremiumPressableRow(
-                    title = "Disclaimer",
-                    subtitle = "AI Content Generation & Price Data Policy",
-                    icon = Icons.Default.AutoAwesome,
-                    iconTint = Color(0xFFFFB703),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        activeLegalSheet = "disclaimer"
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ================= 6. ABOUT VIRALTOOLAI SECTION =================
-            PremiumGlassSectionCard(
-                title = "ABOUT VIRALTOOLAI",
-                subtitle = "Application Information",
-                headerIcon = Icons.Default.Info,
-                headerIconTint = ElectricPurple,
-                alpha = aboutCardAlpha,
-                offsetY = aboutCardOffsetY
-            ) {
-                // Detailed About Text Box
-                Box(
+                // ==================================================
+                // SECTION 2: QUICK ACTIONS (GRID)
+                // ==================================================
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0x12FFFFFF))
-                        .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                        .graphicsLayer {
+                            alpha = animProgress.value
+                            translationY = (1f - animProgress.value) * 20f
+                        }
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "ViralToolAI is an AI-powered creator platform designed to help creators learn, create, shop smarter and grow faster.",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextWhite,
-                            lineHeight = 18.sp
-                        )
-                        Text(
-                            text = "From shopping intelligence to creator education and video editing, every feature is built to simplify the creator journey using AI.",
-                            fontSize = 12.sp,
-                            color = TextWhite.copy(alpha = 0.70f),
-                            lineHeight = 17.sp
-                        )
+                    SectionHeader(title = "QUICK ACTIONS", icon = Icons.Default.FlashOn, iconTint = GoldPrimary)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val gridColumns = if (isWide) 3 else 2
+                    val quickActions = listOf(
+                        QuickActionItem("Rate App", "Support on Play Store", Icons.Default.StarRate, GoldPrimary) {
+                            Toast.makeText(context, "Opening Play Store rating...", Toast.LENGTH_SHORT).show()
+                            openUrl("https://play.google.com/store/apps")
+                        },
+                        QuickActionItem("Share App", "Invite Fellow Creators", Icons.Default.Share, EmeraldGlow) {
+                            try {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "ViralToolAi App")
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "🚀 Learn creator strategies, generate viral scripts & earn rewards with ViralToolAi! Download now: https://play.google.com/store/apps"
+                                    )
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "Share ViralToolAi"))
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Could not launch share sheet", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        QuickActionItem("Contact Us", "Direct Founder Support", Icons.Default.Email, Color(0xFF3B82F6)) {
+                            openMailClient("ViralToolAi Direct Contact", "Hello Asit,\n\nI have a question regarding ViralToolAi:")
+                        },
+                        QuickActionItem("Report a Bug", "Help us fix issues", Icons.Default.BugReport, CrimsonLight) {
+                            showBugReportDialog = true
+                        },
+                        QuickActionItem("Request Feature", "Suggest new tools", Icons.Default.Lightbulb, GoldPrimary) {
+                            showFeatureRequestDialog = true
+                        },
+                        QuickActionItem("Join Community", "Instagram Creator Hub", Icons.Default.Groups, ElectricPurple) {
+                            openUrl(officialInstagramUrl)
+                        }
+                    )
+
+                    quickActions.chunked(gridColumns).forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowItems.forEach { action ->
+                                QuickActionCard(
+                                    modifier = Modifier.weight(1f),
+                                    item = action
+                                )
+                            }
+                            if (rowItems.size < gridColumns) {
+                                repeat(gridColumns - rowItems.size) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                PremiumPressableRow(
-                    title = "Version",
-                    subtitle = "v1.0.0 Stable • Production Build",
-                    icon = Icons.Default.SystemUpdateAlt,
-                    iconTint = EmeraldGlow
-                )
+                // ==================================================
+                // SECTION 3: APP SETTINGS
+                // ==================================================
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            alpha = animProgress.value
+                            translationY = (1f - animProgress.value) * 15f
+                        }
+                ) {
+                    SectionHeader(title = "APP SETTINGS", icon = Icons.Default.Settings, iconTint = ElectricPurple)
 
-                SoftGlassDivider()
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                PremiumPressableRow(
-                    title = "Founder & Creator",
-                    subtitle = "Built with ❤️ by Asit Yadav",
-                    icon = Icons.Default.Code,
-                    iconTint = ElectricPurple,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showFounderDialog = true
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF131824),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Dark Mode Selector
+                            Text(text = "Theme Mode", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextGray)
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf("System", "Dark", "Light").forEach { mode ->
+                                    val isSelected = selectedThemeMode == mode
+                                    Surface(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                selectedThemeMode = mode
+                                                CreatorAcademyPrefs.setAppThemeMode(context, mode)
+                                                Toast.makeText(context, "Theme set to $mode Mode", Toast.LENGTH_SHORT).show()
+                                            },
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = if (isSelected) ElectricPurple.copy(alpha = 0.25f) else Color(0xFF0C101A),
+                                        border = BorderStroke(1.dp, if (isSelected) ElectricPurple else Color.White.copy(alpha = 0.1f))
+                                    ) {
+                                        Text(
+                                            text = mode,
+                                            fontSize = 12.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) ElectricPurple else TextWhite,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Language Selector
+                            Text(text = "App Language", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextGray)
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf("English", "Hindi", "Hinglish").forEach { lang ->
+                                    val isSelected = selectedLanguage == lang
+                                    Surface(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                selectedLanguage = lang
+                                                CreatorAcademyPrefs.setAppLanguage(context, lang)
+                                                Toast.makeText(context, "Language set to $lang", Toast.LENGTH_SHORT).show()
+                                            },
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = if (isSelected) EmeraldGlow.copy(alpha = 0.25f) else Color(0xFF0C101A),
+                                        border = BorderStroke(1.dp, if (isSelected) EmeraldGlow else Color.White.copy(alpha = 0.1f))
+                                    ) {
+                                        Text(
+                                            text = lang,
+                                            fontSize = 12.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) EmeraldGlow else TextWhite,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Notifications Row
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Notifications",
+                                            fontSize = 13.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextWhite
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = GoldPrimary.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "Future Ready",
+                                                fontSize = 9.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = GoldPrimary,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = "Receive daily creator tips, task reminders & contest updates.",
+                                        fontSize = 11.sp,
+                                        color = TextGray
+                                    )
+                                }
+
+                                Switch(
+                                    checked = notificationsEnabled,
+                                    onCheckedChange = { checked ->
+                                        notificationsEnabled = checked
+                                        CreatorAcademyPrefs.setNotificationsEnabled(context, checked)
+                                        Toast.makeText(
+                                            context,
+                                            if (checked) "Notifications enabled" else "Notifications muted",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = Color.Black,
+                                        checkedTrackColor = EmeraldGlow
+                                    )
+                                )
+                            }
+                        }
                     }
-                )
-            }
+                }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            // ================= FOOTER =================
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = "Made with ❤️ by Asit Yadav",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite.copy(alpha = 0.85f)
-                )
+                // ==================================================
+                // SECTION 4: SUPPORT & LEGAL
+                // ==================================================
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "SUPPORT & LEGAL", icon = Icons.Default.HelpOutline, iconTint = EmeraldGlow)
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
-                    text = "ViralToolAI v1.0.0 • Nothing OS Glass Edition",
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextWhite.copy(alpha = 0.40f),
-                    letterSpacing = 0.6.sp,
-                    textAlign = TextAlign.Center
-                )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF131824),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                    ) {
+                        Column {
+                            SettingsRowItem(
+                                title = "Privacy Policy",
+                                subtitle = "Play Store compliant zero data selling policy",
+                                icon = Icons.Default.Security,
+                                iconTint = EmeraldGlow,
+                                onClick = { activeLegalSheet = "privacy" }
+                            )
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+
+                            SettingsRowItem(
+                                title = "Terms & Conditions",
+                                subtitle = "App usage rules & AI guidelines",
+                                icon = Icons.Default.Gavel,
+                                iconTint = GoldPrimary,
+                                onClick = { activeLegalSheet = "terms" }
+                            )
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+
+                            SettingsRowItem(
+                                title = "About ViralToolAi",
+                                subtitle = "AI creator platform mission & roadmap",
+                                icon = Icons.Default.Info,
+                                iconTint = ElectricPurple,
+                                onClick = { showFounderDialog = true }
+                            )
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+
+                            SettingsRowItem(
+                                title = "Frequently Asked Questions (FAQ)",
+                                subtitle = "Answers to common creator queries",
+                                icon = Icons.Default.QuestionAnswer,
+                                iconTint = Color(0xFF3B82F6),
+                                onClick = { showFaqDialog = true }
+                            )
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.06f))
+
+                            SettingsRowItem(
+                                title = "Contact Support",
+                                subtitle = supportEmail,
+                                icon = Icons.Default.SupportAgent,
+                                iconTint = EmeraldGlow,
+                                onClick = { openMailClient("ViralToolAi Support Request", "Hello Team,\n\n") }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ==================================================
+                // SECTION 5: ABOUT VIRALTOOLAI (APP DETAILS)
+                // ==================================================
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "ABOUT APP", icon = Icons.Default.AutoAwesome, iconTint = GoldPrimary)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF131824),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(text = "ViralToolAi", fontSize = 16.sp, fontWeight = FontWeight.Black, color = TextWhite)
+                                    Text(text = "AI Creator Platform • 2026 Edition", fontSize = 11.5.sp, color = TextGray)
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = EmeraldGlow.copy(alpha = 0.2f),
+                                    border = BorderStroke(1.dp, EmeraldGlow)
+                                ) {
+                                    Text(
+                                        text = "v1.0.0 (2026.07)",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = EmeraldGlow,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { showWhatsNewDialog = true },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = BorderStroke(1.dp, GoldPrimary)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.NewReleases, contentDescription = null, tint = GoldPrimary, modifier = Modifier.size(15.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("What's New", fontSize = 12.sp, color = GoldPrimary)
+                                    }
+                                }
+
+                                OutlinedButton(
+                                    onClick = { showFounderDialog = true },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = BorderStroke(1.dp, ElectricPurple)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = ElectricPurple, modifier = Modifier.size(15.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Credits", fontSize = 12.sp, color = ElectricPurple)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ==================================================
+                // SECTION 6: PERFORMANCE & STORAGE
+                // ==================================================
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "PERFORMANCE & STORAGE", icon = Icons.Default.Speed, iconTint = EmeraldGlow)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF131824),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(text = "App Storage Used", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(text = "UI Assets, Local Prefs & Cached Media", fontSize = 11.sp, color = TextGray)
+                                }
+                                Text(
+                                    text = formatBytes(cacheSizeBytes + 14500000L),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(text = "Offline UI Cache", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(text = formatBytes(cacheSizeBytes), fontSize = 11.sp, color = TextGray)
+                                }
+
+                                Button(
+                                    onClick = {
+                                        if (!isClearingCache) {
+                                            isClearingCache = true
+                                            scope.launch {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                delay(400)
+                                                clearAppCache(context)
+                                                cacheSizeBytes = calculateCacheSize(context)
+                                                isClearingCache = false
+                                                Toast.makeText(context, "✅ Offline cache cleared successfully", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = CrimsonLight),
+                                    shape = RoundedCornerShape(10.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (isClearingCache) {
+                                            CircularProgressIndicator(modifier = Modifier.size(12.dp), color = Color.White, strokeWidth = 1.5.dp)
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                        } else {
+                                            Icon(imageVector = Icons.Default.CleaningServices, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+                                        Text("Clear Cache", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color(0xFF0C101A)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(EmeraldGlow)
+                                    )
+                                    Text(
+                                        text = "App Performance Status: Optimal • 60 FPS • Low Battery Usage",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = EmeraldGlow
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ==================================================
+                // SECTION 7: DEVELOPER (BUILT IN INDIA & FOUNDER)
+                // ==================================================
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "DEVELOPER", icon = Icons.Default.Code, iconTint = ElectricPurple)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(8.dp, RoundedCornerShape(22.dp)),
+                        shape = RoundedCornerShape(22.dp),
+                        color = Color(0xFF141824),
+                        border = BorderStroke(
+                            1.2.dp,
+                            Brush.linearGradient(listOf(EmeraldGlow, ElectricPurple, GoldPrimary))
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(18.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(text = "🇮🇳", fontSize = 22.sp)
+                                    Column {
+                                        Text(text = "Proudly Built in India", fontSize = 15.sp, fontWeight = FontWeight.Black, color = TextWhite)
+                                        Text(text = "Founder: Asit Yadav", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = EmeraldGlow)
+                                    }
+                                }
+
+                                IconButton(onClick = { showFounderDialog = true }) {
+                                    Icon(imageVector = Icons.Default.Info, contentDescription = "Founder Info", tint = GoldPrimary)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Instagram External Buttons
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { openUrl(founderInstagramUrl) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE1306C)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Founder IG", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { openUrl(officialInstagramUrl) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = ElectricPurple),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.Campaign, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Official IG", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ==================================================
+                // SECTION 8: FEEDBACK
+                // ==================================================
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "FEEDBACK", icon = Icons.Default.RateReview, iconTint = GoldPrimary)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { showBugReportDialog = true },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, CrimsonLight)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(imageVector = Icons.Default.ReportProblem, contentDescription = null, tint = CrimsonLight, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Report Issue", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = CrimsonLight)
+                            }
+                        }
+
+                        Button(
+                            onClick = { showFeatureRequestDialog = true },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(imageVector = Icons.Default.AddComment, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Suggest Feature", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Footer
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Made with ❤️ by Asit Yadav",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite.copy(alpha = 0.8f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "ViralToolAi v1.0.0 • Flagship Glass Edition",
+                        fontSize = 10.5.sp,
+                        color = TextGray
+                    )
+                }
             }
         }
 
-        // ================= DIALOGS & SHEETS =================
+        // ==================================================
+        // DIALOGS & MODALS
+        // ==================================================
 
-        // About Founder Dialog
+        // 1. Edit Profile Modal
+        if (showEditProfileDialog) {
+            EditProfileDialog(
+                currentName = userDisplayName,
+                currentNiche = setupData.niche,
+                onDismiss = { showEditProfileDialog = false },
+                onSave = { newName, newNiche ->
+                    userDisplayName = newName
+                    CreatorAcademyPrefs.saveUserDisplayName(context, newName)
+                    CreatorAcademyPrefs.saveSetupData(
+                        context,
+                        setupData.copy(niche = newNiche)
+                    )
+                    showEditProfileDialog = false
+                    Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+
+        // 2. Report Bug Dialog
+        if (showBugReportDialog) {
+            ReportBugDialog(
+                onDismiss = { showBugReportDialog = false },
+                onSend = { title, desc ->
+                    openMailClient("ViralToolAi Bug Report: $title", "Bug Description:\n$desc\n\nDevice: Android")
+                    showBugReportDialog = false
+                }
+            )
+        }
+
+        // 3. Feature Request Dialog
+        if (showFeatureRequestDialog) {
+            SuggestFeatureDialog(
+                onDismiss = { showFeatureRequestDialog = false },
+                onSend = { title, desc ->
+                    openMailClient("ViralToolAi Feature Request: $title", "Feature Suggestion:\n$desc")
+                    showFeatureRequestDialog = false
+                }
+            )
+        }
+
+        // 4. FAQ Accordion Dialog
+        if (showFaqDialog) {
+            FaqDialog(onDismiss = { showFaqDialog = false })
+        }
+
+        // 5. About Founder Dialog
         if (showFounderDialog) {
             AboutFounderDialog(
                 onDismiss = { showFounderDialog = false },
@@ -520,17 +1070,12 @@ fun ProfileScreen(
             )
         }
 
-        // Bug Report Dialog
-        if (showBugReportDialog) {
-            ReportBugDialog(
-                onDismiss = { showBugReportDialog = false },
-                onSend = { title, desc ->
-                    openMailClient("ViralToolAI Bug Report: $title\n\n$desc")
-                }
-            )
+        // 6. What's New Dialog
+        if (showWhatsNewDialog) {
+            WhatsNewDialog(onDismiss = { showWhatsNewDialog = false })
         }
 
-        // Legal Sheet Dialog
+        // 7. Legal Dialog Sheet
         activeLegalSheet?.let { sheetType ->
             LegalDialogSheet(
                 type = sheetType,
@@ -541,316 +1086,515 @@ fun ProfileScreen(
     }
 }
 
-// ================= HERO HEADER COMPONENT =================
-
+/**
+ * Top Header Profile Card Component
+ */
 @Composable
-private fun PremiumHeroHeader(
-    alpha: Float,
-    offsetY: Dp
+private fun TopHeaderProfileCard(
+    displayName: String,
+    skillLevel: String,
+    niche: String,
+    onEditProfile: () -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "heroAnims")
-
-    // Aurora Rotation Angle
-    val auroraRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "auroraRotation"
-    )
-
-    // Floating animation
-    val floatingY by infiniteTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "floatingY"
-    )
-
-    // Shine sweep offset
-    val sweepOffset by infiniteTransition.animateFloat(
-        initialValue = -200f,
-        targetValue = 800f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "sweepOffset"
-    )
-
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                this.alpha = alpha
-                translationY = offsetY.toPx()
-            },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Section Title
-        Text(
-            text = "ABOUT VIRALTOOLAI",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Black,
-            color = EmeraldGlow,
-            letterSpacing = 2.sp,
-            modifier = Modifier.padding(bottom = 12.dp)
+            .shadow(12.dp, RoundedCornerShape(26.dp), spotColor = EmeraldGlow),
+        shape = RoundedCornerShape(26.dp),
+        color = Color(0xFF131826),
+        border = BorderStroke(
+            1.5.dp,
+            Brush.linearGradient(listOf(EmeraldGlow, ElectricPurple, GoldPrimary))
         )
-
-        // Glass Membership Card
-        Box(
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer {
-                    translationY = floatingY
-                }
-                .clip(RoundedCornerShape(28.dp))
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0x2E1B2B21),
-                            Color(0x18101A14),
-                            Color(0x2A152219)
-                        )
-                    )
-                )
-                .border(
-                    BorderStroke(
-                        1.8.dp,
-                        Brush.sweepGradient(
-                            colors = listOf(
-                                EmeraldGlow,
-                                ElectricPurple,
-                                Color(0xFF2ECC71),
-                                EmeraldPrimary,
-                                EmeraldGlow
-                            )
-                        )
-                    ),
-                    RoundedCornerShape(28.dp)
-                )
-                .padding(22.dp)
+                .padding(20.dp)
         ) {
-            // Glass Light Shine Effect
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.12f),
-                            Color.Transparent
-                        ),
-                        start = Offset(sweepOffset, 0f),
-                        end = Offset(sweepOffset + 120f, size.height)
-                    )
-                )
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Top Badge Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color(0xFFFFD700),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = "✨ Premium Membership",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = TextWhite,
-                            letterSpacing = 0.5.sp
-                        )
-                    }
-
-                    // Badge: Selected User
+                    // Avatar Box
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(62.dp)
+                            .clip(CircleShape)
                             .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFF10B981), Color(0xFF059669))
+                                Brush.linearGradient(
+                                    listOf(EmeraldGlow, ElectricPurple, GoldPrimary)
                                 )
                             )
-                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .border(2.dp, Color.Black, CircleShape)
+                            .clickable { onEditProfile() },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = TextWhite,
-                                modifier = Modifier.size(12.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Avatar",
+                            tint = Color.Black,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Selected User",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                color = TextWhite,
-                                letterSpacing = 0.4.sp
+                                text = "Welcome back,",
+                                fontSize = 12.sp,
+                                color = TextGray
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = EmeraldGlow.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "CREATOR PRO ⚡",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = EmeraldGlow,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
                         }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
+                            text = displayName,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TextWhite,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = "$niche • $skillLevel Creator",
+                            fontSize = 11.5.sp,
+                            color = TextGray
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Headline
-                Text(
-                    text = "FREE ACCESS GRANTED",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Black,
-                    color = EmeraldGlow,
-                    letterSpacing = 1.2.sp
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Body text
-                Text(
-                    text = "You are one of the selected users enjoying complete Premium access at no cost. Enjoy every AI feature without restrictions.",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextWhite.copy(alpha = 0.85f),
-                    lineHeight = 18.sp
-                )
+                // Edit Button
+                IconButton(
+                    onClick = onEditProfile,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Profile",
+                        tint = TextWhite,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
 }
 
-// ================= FOLLOW INSTAGRAM ROW =================
+/**
+ * Section Header
+ */
+@Composable
+private fun SectionHeader(title: String, icon: ImageVector, iconTint: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
+        Text(
+            text = title,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+            color = iconTint,
+            letterSpacing = 1.2.sp
+        )
+    }
+}
+
+/**
+ * Quick Action Data & Card
+ */
+private data class QuickActionItem(
+    val title: String,
+    val subtitle: String,
+    val icon: ImageVector,
+    val color: Color,
+    val onClick: () -> Unit
+)
 
 @Composable
-private fun FollowInstagramCardRow(
-    handleName: String,
-    subtitle: String,
-    onClick: () -> Unit
+private fun QuickActionCard(
+    modifier: Modifier = Modifier,
+    item: QuickActionItem
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val animatedScale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1.0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-        label = "igRowScale"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = animatedScale
-                scaleY = animatedScale
-            }
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (isPressed) Color(0x22FFFFFF) else Color(0x0AFFFFFF))
-            .border(
-                BorderStroke(
-                    0.8.dp,
-                    Brush.linearGradient(
-                        listOf(
-                            Color(0xFFE1306C).copy(alpha = 0.4f),
-                            Color(0xFFF77737).copy(alpha = 0.3f)
-                        )
-                    )
-                ),
-                RoundedCornerShape(18.dp)
-            )
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { item.onClick() },
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0xFF131824),
+        border = BorderStroke(1.dp, item.color.copy(alpha = 0.3f))
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier.weight(1f)
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            // Instagram Icon Badge
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                Color(0xFF833AB4),
-                                Color(0xFFFD1D1D),
-                                Color(0xFFFCB045)
-                            )
-                        )
-                    ),
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(item.color.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = handleName,
-                    tint = TextWhite,
-                    modifier = Modifier.size(22.dp)
+                    imageVector = item.icon,
+                    contentDescription = item.title,
+                    tint = item.color,
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            Column {
-                Text(
-                    text = handleName,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = TextWhite,
-                    letterSpacing = 0.2.sp
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = TextWhite.copy(alpha = 0.65f)
-                )
-            }
-        }
+            Spacer(modifier = Modifier.height(10.dp))
 
-        // Follow Pill Button
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            Color(0xFF833AB4),
-                            Color(0xFFE1306C)
-                        )
-                    )
-                )
-                .border(BorderStroke(0.8.dp, Color.White.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
             Text(
-                text = "Follow",
-                fontSize = 11.5.sp,
+                text = item.title,
+                fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextWhite
+                color = TextWhite,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                text = item.subtitle,
+                fontSize = 10.sp,
+                color = TextGray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
-// ================= ABOUT FOUNDER DIALOG =================
+/**
+ * Settings Row Item
+ */
+@Composable
+private fun SettingsRowItem(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    iconTint: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(iconTint.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = title, tint = iconTint, modifier = Modifier.size(20.dp))
+            }
+
+            Column {
+                Text(text = title, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = subtitle, fontSize = 11.sp, color = TextGray)
+            }
+        }
+
+        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = TextGray, modifier = Modifier.size(20.dp))
+    }
+}
+
+// ================= DIALOG IMPLEMENTATIONS =================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditProfileDialog(
+    currentName: String,
+    currentNiche: String,
+    onDismiss: () -> Unit,
+    onSave: (newName: String, newNiche: String) -> Unit
+) {
+    var name by remember { mutableStateOf(currentName) }
+    var niche by remember { mutableStateOf(currentNiche) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.5.dp, EmeraldGlow.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(text = "Edit Profile", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Display Name") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = EmeraldGlow, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = niche,
+                    onValueChange = { niche = it },
+                    label = { Text("Creator Niche (e.g., Tech, Fashion)") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = EmeraldGlow, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextGray) }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onSave(name.trim(), niche.trim()) },
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldGlow)
+                    ) {
+                        Text("Save Changes", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReportBugDialog(
+    onDismiss: () -> Unit,
+    onSend: (title: String, desc: String) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var desc by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.5.dp, CrimsonLight.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "Report a Bug 🐞", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = { Text("Bug Title (e.g. Screen frozen)") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CrimsonLight, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = desc,
+                    onValueChange = { desc = it },
+                    placeholder = { Text("Detailed description of what happened...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CrimsonLight, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite)
+                )
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextGray) }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onSend(title, desc) },
+                        colors = ButtonDefaults.buttonColors(containerColor = CrimsonLight),
+                        enabled = title.isNotEmpty() && desc.isNotEmpty()
+                    ) {
+                        Text("Send Bug Report", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SuggestFeatureDialog(
+    onDismiss: () -> Unit,
+    onSend: (title: String, desc: String) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var desc by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.5.dp, GoldPrimary.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "Suggest a Feature 💡", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = { Text("Feature Title") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = GoldPrimary, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = desc,
+                    onValueChange = { desc = it },
+                    placeholder = { Text("How would this feature help you as a creator?") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = GoldPrimary, focusedTextColor = TextWhite, unfocusedTextColor = TextWhite)
+                )
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextGray) }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onSend(title, desc) },
+                        colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
+                        enabled = title.isNotEmpty() && desc.isNotEmpty()
+                    ) {
+                        Text("Submit Idea", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FaqDialog(onDismiss: () -> Unit) {
+    val faqs = listOf(
+        "Is ViralToolAi completely free?" to "Yes! All creator education, AI script engines, and contest reward campaigns are free for selected creators.",
+        "How do Refer & Rewards contest payments work?" to "Submit your video or post link under Refer & Earn. Once manually verified, rewards up to ₹1000 are processed directly.",
+        "Will my data or Instagram login be requested?" to "No! ViralToolAi never asks for your Instagram password or private login. Everything runs securely on your device.",
+        "How can I contact the founder?" to "You can directly connect with Asit Yadav via Instagram (@asittttttttttttttttt) or email support."
+    )
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(text = "Frequently Asked Questions", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                faqs.forEach { (q, a) ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF0C101A))
+                            .padding(12.dp)
+                    ) {
+                        Text(text = "Q: $q", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = EmeraldGlow)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = a, fontSize = 11.5.sp, color = TextGray, lineHeight = 16.sp)
+                    }
+                }
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Close FAQ", color = TextGray)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WhatsNewDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.dp, GoldPrimary),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "✨ What's New in Phase 5", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                val updates = listOf(
+                    "🔥 Redesigned Profile & Settings Hub: Glassmorphic UI with full app control.",
+                    "🏆 Creator Rewards Campaign: Submit Reels & win up to ₹1000 with manual verification.",
+                    "⚡ Multi-Language Support: English, Hindi, and Hinglish for all creator modules.",
+                    "🛠 Offline UI Caching & Speed Optimizations for seamless performance."
+                )
+
+                updates.forEach { item ->
+                    Text(text = item, fontSize = 12.sp, color = TextWhite, lineHeight = 17.sp)
+                }
+
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+                    Text("Got it!", color = GoldPrimary, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun AboutFounderDialog(
@@ -876,7 +1620,7 @@ fun AboutFounderDialog(
                             listOf(
                                 EmeraldGlow,
                                 ElectricPurple,
-                                Color(0xFF2ECC71)
+                                GoldPrimary
                             )
                         )
                     ),
@@ -890,7 +1634,6 @@ fun AboutFounderDialog(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                // Header Title
                 Text(
                     text = "MEET THE FOUNDER",
                     fontSize = 12.sp,
@@ -901,7 +1644,6 @@ fun AboutFounderDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Avatar Icon Box
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -915,10 +1657,7 @@ fun AboutFounderDialog(
                                 )
                             )
                         )
-                        .border(
-                            BorderStroke(2.dp, EmeraldGlow),
-                            CircleShape
-                        ),
+                        .border(BorderStroke(2.dp, EmeraldGlow), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -931,7 +1670,6 @@ fun AboutFounderDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Name & Role
                 Text(
                     text = "Asit Yadav",
                     fontSize = 22.sp,
@@ -941,72 +1679,49 @@ fun AboutFounderDialog(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0x1A10B981))
-                        .border(BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0x1A10B981),
+                    border = BorderStroke(0.8.dp, EmeraldPrimary.copy(alpha = 0.4f))
                 ) {
                     Text(
                         text = "Founder • AI Creator • Influencer",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = EmeraldGlow
+                        color = EmeraldGlow,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Description Box
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0x14FFFFFF))
-                        .border(BorderStroke(0.8.dp, Color(0x22FFFFFF)), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0x14FFFFFF),
+                    border = BorderStroke(0.8.dp, Color(0x22FFFFFF))
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text(
-                            text = "With over 10 years of experience in content creation, AI tools, creator education, brand collaborations and social media growth, Asit built ViralToolAI to help beginners become professional creators through one simple app.",
+                            text = "With over 10 years of experience in content creation, AI tools, creator education, brand collaborations and social media growth, Asit built ViralToolAi to help creators learn, create and earn using AI.",
                             fontSize = 12.sp,
                             color = TextWhite.copy(alpha = 0.90f),
                             lineHeight = 17.sp
                         )
 
                         Text(
-                            text = "Worked with multiple brands and creator campaigns.",
+                            text = "Mission: Empower Indian & global creators with cutting-edge AI tools and verified monetization opportunities.",
                             fontSize = 11.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextWhite.copy(alpha = 0.75f)
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldGlow
                         )
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = EmeraldGlow,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "Mission: Help creators learn, create and earn using AI.",
-                                fontSize = 11.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldGlow
-                            )
-                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Instagram Button
                 Button(
                     onClick = {
                         onFollowInstagram()
@@ -1016,41 +1731,24 @@ fun AboutFounderDialog(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    contentPadding = PaddingValues(0.dp)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE1306C))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color(0xFF833AB4),
-                                        Color(0xFFE1306C),
-                                        Color(0xFFFD1D1D)
-                                    )
-                                )
-                            )
-                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)), RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CameraAlt,
-                                contentDescription = null,
-                                tint = TextWhite,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = "Follow Asit Yadav on Instagram",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            tint = TextWhite,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "Follow Asit Yadav on Instagram",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
+                        )
                     }
                 }
 
@@ -1064,379 +1762,8 @@ fun AboutFounderDialog(
     }
 }
 
-// ================= REUSABLE GLASS CARD & ROW COMPONENTS =================
-
 @Composable
-fun PremiumGlassSectionCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    subtitle: String? = null,
-    headerIcon: ImageVector,
-    headerIconTint: Color = EmeraldPrimary,
-    alpha: Float = 1f,
-    offsetY: Dp = 0.dp,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Box(
-        modifier = modifier
-            .graphicsLayer {
-                this.alpha = alpha
-                translationY = offsetY.toPx()
-            }
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0x241A2820),
-                        Color(0x14101813),
-                        Color(0x1F1A241C)
-                    )
-                )
-            )
-            .border(
-                BorderStroke(
-                    1.dp,
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0x35FFFFFF),
-                            Color(0x10FFFFFF),
-                            headerIconTint.copy(alpha = 0.25f),
-                            Color(0x20FFFFFF)
-                        )
-                    )
-                ),
-                RoundedCornerShape(28.dp)
-            )
-            .padding(18.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Section Header
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.padding(bottom = 12.dp, start = 4.dp, end = 4.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(headerIconTint.copy(alpha = 0.15f))
-                        .border(
-                            BorderStroke(0.8.dp, headerIconTint.copy(alpha = 0.35f)),
-                            RoundedCornerShape(10.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = headerIcon,
-                        contentDescription = title,
-                        tint = headerIconTint,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                Column {
-                    Text(
-                        text = title.uppercase(),
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = TextWhite,
-                        letterSpacing = 1.2.sp
-                    )
-                    if (!subtitle.isNullOrBlank()) {
-                        Text(
-                            text = subtitle,
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextWhite.copy(alpha = 0.5f),
-                            letterSpacing = 0.3.sp
-                        )
-                    }
-                }
-            }
-
-            // Divider Line
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color.Transparent,
-                                Color(0x1AFFFFFF),
-                                headerIconTint.copy(alpha = 0.2f),
-                                Color(0x1AFFFFFF),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            content()
-        }
-    }
-}
-
-@Composable
-fun PremiumPressableRow(
-    title: String,
-    subtitle: String? = null,
-    icon: ImageVector,
-    iconTint: Color = EmeraldPrimary,
-    trailingContent: (@Composable () -> Unit)? = null,
-    onClick: (() -> Unit)? = null
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val animatedScale by animateFloatAsState(
-        targetValue = if (isPressed && onClick != null) 0.97f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "rowScale"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 52.dp)
-            .graphicsLayer {
-                scaleX = animatedScale
-                scaleY = animatedScale
-            }
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isPressed && onClick != null) Color(0x1AFFFFFF) else Color.Transparent)
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = onClick
-                    )
-                } else Modifier
-            )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            // Glass Icon Badge
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                iconTint.copy(alpha = 0.18f),
-                                Color(0x1AFFFFFF)
-                            )
-                        )
-                    )
-                    .border(
-                        BorderStroke(
-                            0.8.dp,
-                            Brush.linearGradient(
-                                listOf(
-                                    iconTint.copy(alpha = 0.4f),
-                                    Color(0x22FFFFFF)
-                                )
-                            )
-                        ),
-                        RoundedCornerShape(12.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = iconTint,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = title,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite,
-                    letterSpacing = 0.2.sp
-                )
-                if (!subtitle.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = subtitle,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = TextWhite.copy(alpha = 0.55f),
-                        letterSpacing = 0.1.sp
-                    )
-                }
-            }
-        }
-
-        if (trailingContent != null) {
-            trailingContent()
-        } else if (onClick != null) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = TextWhite.copy(alpha = 0.35f),
-                modifier = Modifier.size(18.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun SoftGlassDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .height(1.dp)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        Color.Transparent,
-                        Color(0x0EFFFFFF),
-                        Color(0x18FFFFFF),
-                        Color(0x0EFFFFFF),
-                        Color.Transparent
-                    )
-                )
-            )
-    )
-}
-
-@Composable
-private fun BackgroundFloatingParticles() {
-    val infiniteTransition = rememberInfiniteTransition(label = "bgParticles")
-    val pulse by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 6.28f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "pulse"
-    )
-
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val numParticles = 18
-        for (i in 0 until numParticles) {
-            val cx = (sin((i * 1.8f + pulse * 1.2f).toDouble()) * 0.48f + 0.5f) * size.width
-            val cy = (cos((i * 2.1f + pulse * 1.1f).toDouble()) * 0.48f + 0.5f) * size.height
-            val radius = (1.8f + (i % 4) * 1.2f).dp.toPx()
-            val particleColor = if (i % 2 == 0) EmeraldGlow else ElectricPurple
-            drawCircle(
-                color = particleColor.copy(
-                    alpha = (0.10f + 0.12f * sin((i + pulse).toDouble())).toFloat().coerceIn(0.02f, 0.25f)
-                ),
-                radius = radius,
-                center = Offset(cx.toFloat(), cy.toFloat())
-            )
-        }
-    }
-}
-
-// ================= BUG REPORT DIALOG =================
-
-@Composable
-fun ReportBugDialog(
-    onDismiss: () -> Unit,
-    onSend: (title: String, description: String) -> Unit
-) {
-    var titleText by remember { mutableStateOf("") }
-    var descText by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
-        modifier = Modifier.imePadding().navigationBarsPadding(),
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (titleText.isNotBlank() && descText.isNotBlank()) {
-                        onSend(titleText.trim(), descText.trim())
-                        onDismiss()
-                    }
-                },
-                enabled = titleText.isNotBlank() && descText.isNotBlank()
-            ) {
-                Text(
-                    "Send Email",
-                    color = if (titleText.isNotBlank() && descText.isNotBlank()) EmeraldPrimary else TextGray,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = TextGray)
-            }
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.BugReport, contentDescription = null, tint = EmeraldPrimary, modifier = Modifier.size(22.dp))
-                Text("Report a Bug", fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Describe the bug or issue encountered. This will send an email directly to developer support.", fontSize = 12.sp, color = TextGray)
-
-                OutlinedTextField(
-                    value = titleText,
-                    onValueChange = { titleText = it },
-                    label = { Text("Bug Summary", fontSize = 12.sp, color = TextGray) },
-                    placeholder = { Text("e.g. Issue during video export", fontSize = 12.sp, color = TextGray.copy(alpha = 0.5f)) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = EmeraldPrimary,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = descText,
-                    onValueChange = { descText = it },
-                    label = { Text("Steps / Details", fontSize = 12.sp, color = TextGray) },
-                    placeholder = { Text("Describe what happened...", fontSize = 12.sp, color = TextGray.copy(alpha = 0.5f)) },
-                    minLines = 3,
-                    maxLines = 5,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = EmeraldPrimary,
-                        unfocusedBorderColor = Color(0x33FFFFFF),
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        containerColor = Color(0xFF121A15),
-        shape = RoundedCornerShape(28.dp)
-    )
-}
-
-// ================= LEGAL DIALOG SHEET =================
-
-@Composable
-fun LegalDialogSheet(
+private fun LegalDialogSheet(
     type: String,
     supportEmail: String,
     onDismiss: () -> Unit
@@ -1444,102 +1771,102 @@ fun LegalDialogSheet(
     val title = when (type) {
         "privacy" -> "Privacy Policy"
         "terms" -> "Terms of Service"
-        "licenses" -> "Licenses & Open Source"
+        "licenses" -> "Open Source Licenses"
         else -> "Disclaimer"
     }
 
-    val bodyContent = when (type) {
+    val contentText = when (type) {
         "privacy" -> """
-            ViralToolAI Privacy Policy
-            
-            1. Zero Data Selling
-            ViralToolAI does not sell, rent, or commercialize your personal data to any third party.
-            
-            2. Local Processing & Storage
-            All your creator settings, session data, and preferences are stored locally on your device.
-            
-            3. AI & Camera Permissions
-            Camera and storage permissions are requested strictly for analyzing product images or video editing when initiated by you.
-            
-            4. Support Queries
-            Support inquiries sent to $supportEmail are used strictly to resolve technical issues and improve app experience.
+            ViralToolAi respects your privacy:
+            • Zero Data Selling: We never sell, rent, or trade your personal information.
+            • Local Preference Storage: Your app settings and preferences are stored securely on your local device.
+            • Play Store Compliance: We do not request unnecessary system permissions.
+            • Contact: For privacy inquiries, email us at $supportEmail.
         """.trimIndent()
-
         "terms" -> """
-            ViralToolAI Terms of Service
-            
-            1. Acceptance of Terms
-            By downloading or using ViralToolAI, you agree to comply with these terms.
-            
-            2. Creator & Educational Purpose
-            ViralToolAI provides AI-assisted creator analysis, video editing guidance, and shopping price analytics for informational & creative purposes.
-            
-            3. User Responsibility
-            Users remain responsible for content generated, posted, or published to social media platforms.
-            
-            4. Community Standards
-            Inappropriate, illegal, or abusive usage of AI models is strictly prohibited.
+            ViralToolAi Terms of Usage:
+            • Fair Use: All AI script generation, brand deal templates, and educational lessons are provided for personal creator development.
+            • Automated Verification: Contest submissions under Refer & Earn undergo manual review prior to reward distribution.
+            • Content Ownership: Creators retain full ownership of videos and scripts generated using ViralToolAi.
         """.trimIndent()
-
         "licenses" -> """
-            ViralToolAI Open Source Licenses
-            
-            This application uses open source libraries and components:
-            
-            • Jetpack Compose (Apache 2.0)
-            • AndroidX Libraries (Apache 2.0)
+            Open Source Software Licenses:
+            • Jetpack Compose & AndroidX Libraries (Apache 2.0)
             • Kotlin Coroutines & Serialization (Apache 2.0)
-            • Material Design 3 Components (Apache 2.0)
-            • Coil Image Loading (Apache 2.0)
-            
-            Full license texts available upon request.
+            • Material Components for Android (Apache 2.0)
         """.trimIndent()
-
         else -> """
-            ViralToolAI Disclaimer & Notice
-            
-            1. AI Content Generation
-            AI recommendations, creator score estimates, and hook suggestions are generated via machine learning algorithms and should be used as guidance.
-            
-            2. Shopping & Price Intelligence
-            Prices, discounts, and cashback values are aggregated estimates subject to seller availability and real-time merchant changes.
-            
-            3. Social Media Affiliation
-            ViralToolAI is an independent creation tool and is not officially affiliated with Instagram, Meta, YouTube, or TikTok.
+            Disclaimer & AI Usage:
+            • AI Output: Generated content and scripts should be reviewed for accuracy before publishing.
+            • Platform Independence: ViralToolAi is an independent creator platform and is not affiliated directly with Instagram, YouTube, Meesho, or Wishlink.
         """.trimIndent()
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
-        modifier = Modifier.imePadding().navigationBarsPadding(),
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Got It", color = EmeraldPrimary, fontWeight = FontWeight.Bold)
-            }
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.Gavel, contentDescription = null, tint = EmeraldPrimary, modifier = Modifier.size(20.dp))
-                Text(title, fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
-            }
-        },
-        text = {
-            Box(
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF121622),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 320.dp)
-                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text(
-                    text = bodyContent,
-                    fontSize = 12.5.sp,
-                    color = TextWhite.copy(alpha = 0.85f),
-                    lineHeight = 18.sp
-                )
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Black, color = TextWhite)
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF0C101A),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = contentText,
+                        fontSize = 12.sp,
+                        color = TextWhite,
+                        lineHeight = 18.sp,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Close", color = TextGray)
+                }
             }
-        },
-        containerColor = Color(0xFF121A15),
-        shape = RoundedCornerShape(28.dp)
-    )
+        }
+    }
+}
+
+// Helpers
+private fun calculateCacheSize(context: Context): Long {
+    return try {
+        val dir = context.cacheDir
+        dir?.walkTopDown()?.map { it.length() }?.sum() ?: 0L
+    } catch (e: Exception) {
+        0L
+    }
+}
+
+private fun clearAppCache(context: Context) {
+    try {
+        context.cacheDir?.deleteRecursively()
+    } catch (e: Exception) {
+        // Ignore
+    }
+}
+
+private fun formatBytes(bytes: Long): String {
+    return when {
+        bytes >= 1024 * 1024 -> String.format("%.1f MB", bytes.toFloat() / (1024 * 1024))
+        bytes >= 1024 -> String.format("%.1f KB", bytes.toFloat() / 1024)
+        else -> "$bytes Bytes"
+    }
 }

@@ -193,7 +193,7 @@ object LiveCloudManager {
                 val json = JSONObject(baJson)
                 val savedImg = json.optString("image", "")
                 val finalImg = if (savedImg.isBlank() || savedImg.contains("Picsart") || savedImg.contains("a7996a261d91d703ea1e41a90cba30233d85b80a") || savedImg.contains("unsplash")) {
-                    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png"
+                    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png"
                 } else {
                     savedImg
                 }
@@ -329,7 +329,7 @@ object LiveCloudManager {
 
             val rcBaImg = rc.getString("brand_ambassador_image").ifBlank { _brandAmbassadorConfig.value.image }
             val finalBaImg = if (rcBaImg.contains("Picsart") || rcBaImg.contains("a7996a261d91d703ea1e41a90cba30233d85b80a") || rcBaImg.contains("unsplash")) {
-                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png"
+                "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png"
             } else {
                 rcBaImg
             }
@@ -653,4 +653,21 @@ object LiveCloudManager {
             is Int -> prefs.edit().putInt(key, value).apply()
         }
     }
+
+    /**
+     * Retrieves live promoter leaderboard items when backend Firestore/RemoteConfig is connected.
+     * Returns empty list if no verified backend data is available.
+     */
+    fun getLiveLeaderboard(): List<LiveLeaderboardItem> {
+        // Return empty list if no verified live data is available in cloud
+        return emptyList()
+    }
 }
+
+data class LiveLeaderboardItem(
+    val rank: Int,
+    val name: String,
+    val points: String,
+    val badge: String,
+    val imageUrl: String
+)

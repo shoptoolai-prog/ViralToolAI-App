@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "ViralToolAI"
+rootProject.name = "ViralToolAi"
 
 include(":app")

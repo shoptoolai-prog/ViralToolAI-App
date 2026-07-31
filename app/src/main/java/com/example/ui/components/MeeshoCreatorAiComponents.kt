@@ -606,7 +606,7 @@ fun MeeshoCreatorAiCard(
 
                     Column {
                         Text(
-                            text = "Meesho Creator AI",
+                            text = "Meesho Creator Guide",
                             fontSize = 17.5.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
@@ -968,7 +968,7 @@ fun MeeshoCreatorAiDialog(
                                 Column {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = "Meesho Creator AI",
+                                            text = "Meesho Creator Guide",
                                             fontSize = 15.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = TextWhite

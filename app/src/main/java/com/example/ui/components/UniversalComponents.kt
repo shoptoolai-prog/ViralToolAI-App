@@ -914,7 +914,7 @@ fun CommonToolIntroCard(
 
 /**
  * COMMON TOOL INTRO CONTAINER
- * Complete swipeable intro experience for any ViralToolAI tool.
+ * Complete swipeable intro experience for any ViralToolAi tool.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

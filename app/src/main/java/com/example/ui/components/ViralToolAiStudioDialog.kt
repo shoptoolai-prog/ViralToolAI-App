@@ -922,7 +922,7 @@ fun ViralToolAiStudioDialog(
                                                             action = Intent.ACTION_SEND
                                                             putExtra(
                                                                 Intent.EXTRA_TEXT,
-                                                                "🔥 Extracted AI Recreation Prompt via ViralToolAI:\n\n${result.recreationPrompt}\n\nNegative Prompt:\n${result.negativePrompt}"
+                                                                "🔥 Extracted AI Recreation Prompt via ViralToolAi:\n\n${result.recreationPrompt}\n\nNegative Prompt:\n${result.negativePrompt}"
                                                             )
                                                             type = "text/plain"
                                                         }

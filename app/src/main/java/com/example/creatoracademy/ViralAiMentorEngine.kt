@@ -11,7 +11,7 @@ import java.net.URL
 import kotlin.random.Random
 
 /**
- * ViralToolAI — Master Unified AI Mentor Engine
+ * ViralToolAi — Master Unified AI Mentor Engine
  * Integrates Google Search Data (Real-time social media trends, viral content formats, hashtags,
  * brand updates, creator trends, editing trends, market insights) together with Gemini Intelligence
  * (Creative intelligence layer for personalized answers, scripts, strategies, prompts, and recommendations).
@@ -70,8 +70,8 @@ object ViralAiMentorEngine {
         if (apiKey.isNotBlank() && apiKey != "BUILDCONFIG_MISSING" && apiKey != "null" && apiKey != "MY_GEMINI_API_KEY") {
             try {
                 val promptText = """
-                    [SYSTEM: ViralToolAI Dual Intelligence Engine]
-                    You are ViralToolAI Senior AI Mentor powering ${domain.title}.
+                    [SYSTEM: ViralToolAi Dual Intelligence Engine]
+                    You are ViralToolAi Senior AI Mentor powering ${domain.title}.
                     Language Directive: $langInstruction
                     
                     Your Architecture:
@@ -214,7 +214,7 @@ Target Topic: $cleanQuery
             MentorToolDomain.MEESHO_CREATOR_AI -> if (isHindi) """
 🌐 1. गूगल सर्च डेटा इनसाइट्स (मीशो ट्रेंड्स व हैशटैग्स):
 • हॉट कैटेगरीज़: एथनिक कुर्तीयों के सेट्स, वर्कवेयर कॉम्बो, और टेक एक्सेसरीज।
-• वायरल हैशटैग्स: #MeeshoHaul #MeeshoFinds #BudgetFashion #MeeshoKurti #ViralToolAI
+• वायरल हैशटैग्स: #MeeshoHaul #MeeshoFinds #BudgetFashion #MeeshoKurti #ViralToolAi
 • बेस्ट शेयरिंग चैनल: वॉट्सएप कैटलॉग ग्रुप्स व इंस्टाग्राम बायो लिंक ट्री।
 
 🧠 2. जेमिनी क्रिएटिव स्क्रिप्ट व कैप्शन:
@@ -229,7 +229,7 @@ Target Topic: $cleanQuery
             """.trimIndent() else """
 🌐 1. GOOGLE SEARCH REAL-TIME INSIGHTS:
 • Trending Categories: Ethnic Kurti Sets, Workwear combos, Aesthetic desk items, and Smart accessories.
-• Viral Hashtags: #MeeshoHaul #MeeshoFinds #BudgetFashion #MeeshoOutfit #ViralToolAI
+• Viral Hashtags: #MeeshoHaul #MeeshoFinds #BudgetFashion #MeeshoOutfit #ViralToolAi
 • Top Channel: WhatsApp Broadcast Lists + Instagram Bio LinkTree.
 
 🧠 2. GEMINI CREATIVE SCRIPT & CAPTION:
@@ -247,7 +247,7 @@ Target Topic: $cleanQuery
 🌐 1. गूगल सर्च डेटा इनसाइट्स (इंस्टाग्राम रील्स ट्रेंड्स):
 • एल्गोरिदम अपडेट: 3-सेकंड वॉच टाइम रिटेंशन और शेयर/सेव मीट्रिक को सबसे ज्यादा रीच मिल रही है।
 • ट्रेंडिंग ऑडियो: ↗️ डायगोनल एरो वाले <10k रील्स वाले ओरिजिनल ऑडियो चुनें।
-• 3-टायर हैशटैग्स: #ReelsGrowth #ContentStrategy #${cleanQuery.replace(" ", "")} #ViralToolAI
+• 3-टायर हैशटैग्स: #ReelsGrowth #ContentStrategy #${cleanQuery.replace(" ", "")} #ViralToolAi
 
 🧠 2. जेमिनी क्रिएटिव हुक व स्ट्रैटेजी:
 हुक: "2026 में यह $cleanQuery गलती आपकी रील्स रीच किल कर रही है!"
@@ -261,7 +261,7 @@ Target Topic: $cleanQuery
 🌐 1. GOOGLE SEARCH REAL-TIME INSIGHTS:
 • Reel Algorithm Signal: 3-second retention and saves/shares drive 80%+ of Explore page pushes.
 • Trending Audio Formula: Pick audio tracks with the diagonal ↗️ arrow and <10k uses.
-• 3-Tier Hashtag Stack: #ReelsGrowth #ContentStrategy #${cleanQuery.replace(" ", "")} #ViralToolAI
+• 3-Tier Hashtag Stack: #ReelsGrowth #ContentStrategy #${cleanQuery.replace(" ", "")} #ViralToolAi
 
 🧠 2. GEMINI CREATIVE SCRIPT & HOOK:
 Hook: "Stop making this $1,000 $cleanQuery mistake in 2026!"
@@ -291,7 +291,7 @@ CTA: "Save this Reel for later & comment 'STRATEGY' for the full breakdown!"
 🌐 1. GOOGLE SEARCH REAL-TIME INSIGHTS:
 • Shorts Algorithm Metric: Maintain 'Viewed vs Swiped' above 75%. First 2 seconds dictate reach.
 • High CTR Combo: Emotional face expression thumbnail + curious title.
-• Search Tags: #Shorts #YouTubeGrowth #${cleanQuery.replace(" ", "")} #ViralToolAI
+• Search Tags: #Shorts #YouTubeGrowth #${cleanQuery.replace(" ", "")} #ViralToolAi
 
 🧠 2. GEMINI CREATIVE SHORTS SCRIPT:
 0-3s: "Do NOT attempt $cleanQuery until you know this secret!"

@@ -1,13 +1,13 @@
 package com.example.ui.screens
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,10 +16,11 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,14 +47,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.TextWhite
+import com.example.ui.theme.VioletGlow
+import com.example.ui.theme.VioletLight
+import com.example.ui.theme.VioletPrimary
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.cos
@@ -94,58 +100,83 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
     val scope = rememberCoroutineScope()
     val isPreviewMode = LocalInspectionMode.current
 
-    // 3 Fresh Onboarding Cards
+    // 4 Flagship Onboarding Cards
     val cards = remember {
         listOf(
             OnboardingCardData(
                 pageIndex = 0,
-                title = "What You Can Create",
-                subtitle = "Viral Reels, Shorts, Posts, Captions & Prompts",
+                title = "AI Script & Reel Suite",
+                subtitle = "Generate viral scripts, hooks & captions in seconds",
                 highlights = listOf(
                     "Viral Reels & Shorts Scripts",
                     "AI Prompt Extractor",
-                    "Image & Video Analysis",
-                    "High-Converting Posts"
+                    "Trending Hook Generator",
+                    "High-Converting Captions"
                 ),
                 icon = Icons.Default.Movie,
-                badge = "CREATOR SUITE",
-                primaryColor = EmeraldPrimary,
-                secondaryColor = Color(0xFF00E5FF)
+                badge = "CREATOR AI",
+                primaryColor = VioletPrimary,
+                secondaryColor = ElectricPurple
             ),
             OnboardingCardData(
                 pageIndex = 1,
-                title = "Creator AI Tools",
-                subtitle = "Everything a creator needs to speed up workflow",
+                title = "Shopping Intelligence",
+                subtitle = "Discover top converting deals & affiliate products",
                 highlights = listOf(
-                    "Smart AI Generator",
-                    "Shopping Intelligence",
-                    "Creator Academy Guides",
-                    "Daily Creator Support"
+                    "Meesho & Wishlink Radar",
+                    "Price Drop Tracker",
+                    "High Commission Items",
+                    "Instant Deal Link Finder"
                 ),
-                icon = Icons.Default.AutoAwesome,
-                badge = "AI TOOLKIT",
-                primaryColor = Color(0xFF8B5CF6),
-                secondaryColor = Color(0xFFEC4899)
+                icon = Icons.Default.ShoppingBag,
+                badge = "DEAL RADAR",
+                primaryColor = VioletGlow,
+                secondaryColor = EmeraldGlow
             ),
             OnboardingCardData(
                 pageIndex = 2,
-                title = "How ViralToolAI Helps You Grow",
-                subtitle = "Scale reach & monetize across platforms",
+                title = "Scale Reach & Monetize",
+                subtitle = "Creator academy blueprints & brand deal guides",
                 highlights = listOf(
+                    "10x Social Growth Blueprint",
                     "Brand Collaboration AI",
-                    "Instagram Creator AI",
-                    "YouTube Creator AI",
-                    "Meesho Creator AI"
+                    "Creator Academy Guides",
+                    "Verified Reward Contests"
                 ),
                 icon = Icons.Default.RocketLaunch,
                 badge = "VIRAL GROWTH",
-                primaryColor = Color(0xFFA3E635),
-                secondaryColor = EmeraldGlow
+                primaryColor = Color(0xFFC084FC),
+                secondaryColor = Color(0xFF38BDF8)
+            ),
+            OnboardingCardData(
+                pageIndex = 3,
+                title = "Welcome to ViralToolAi",
+                subtitle = "Your ultimate AI companion for creator success",
+                highlights = listOf(
+                    "100% Free Creator Tools",
+                    "100% Private & Secure",
+                    "Instant AI Generation",
+                    "Built For Creators"
+                ),
+                icon = Icons.Default.AutoAwesome,
+                badge = "ALL SET!",
+                primaryColor = VioletPrimary,
+                secondaryColor = VioletGlow
             )
         )
     }
 
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { cards.size })
+
+    // CRITICAL REQUIREMENT: Back gesture navigation handling
+    BackHandler(enabled = true) {
+        if (pagerState.currentPage > 0) {
+            scope.launch {
+                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+            }
+        }
+        // If on page 0, back gesture is suppressed to prevent accidental exit
+    }
 
     val finishOnboarding = {
         OnboardingPrefs.setOnboardingCompleted(context, true)
@@ -201,18 +232,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF030706),
-                        Color(0xFF08120E),
-                        Color(0xFF0A1017),
-                        Color(0xFF020507)
-                    ),
-                    start = Offset(auroraOffset % 800f, 0f),
-                    end = Offset((auroraOffset % 800f) + 600f, 1200f)
-                )
-            )
+            .background(AmoledBlack)
             .statusBarsPadding()
             .navigationBarsPadding()
             .graphicsLayer {
@@ -221,30 +241,30 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                 alpha = startupAlpha
             }
     ) {
-        // Soft Ambient Floating Radial Orbs
+        // Soft Ambient Floating Radial Orbs in Background
         if (!isPreviewMode) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            currentCard.primaryColor.copy(alpha = 0.22f * pulseGlow),
-                            currentCard.secondaryColor.copy(alpha = 0.08f),
+                            currentCard.primaryColor.copy(alpha = 0.28f * pulseGlow),
+                            currentCard.secondaryColor.copy(alpha = 0.12f),
                             Color.Transparent
                         )
                     ),
-                    radius = size.width * 0.72f,
+                    radius = size.width * 0.85f,
                     center = Offset(size.width * 0.5f, size.height * 0.35f)
                 )
 
                 // Twinkling background particles
-                val numParticles = 14
+                val numParticles = 18
                 for (i in 0 until numParticles) {
                     val px = (sin((i * 1.5f + auroraOffset * 0.005f)) * 0.45f + 0.5f) * size.width
                     val py = (cos((i * 2.1f + auroraOffset * 0.004f)) * 0.45f + 0.5f) * size.height
                     val radius = (1.5f + (i % 3) * 1.2f).dp.toPx()
                     drawCircle(
                         color = currentCard.primaryColor.copy(
-                            alpha = (0.15f + 0.25f * sin(i + pulseGlow))
+                            alpha = (0.20f + 0.30f * sin(i + pulseGlow))
                         ),
                         radius = radius,
                         center = Offset(px, py)
@@ -262,41 +282,30 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Glass App Title Badge
+                // Glass App Title Badge with Standalone Logo Icon
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xBB0A1812))
+                        .background(Color(0x30130926))
                         .border(
-                            BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.5f)),
+                            BorderStroke(1.dp, VioletGlow.copy(alpha = 0.5f)),
                             RoundedCornerShape(20.dp)
                         )
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_viraltool_icon),
+                            contentDescription = "ViralToolAi Logo",
                             modifier = Modifier
                                 .size(22.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(EmeraldPrimary, EmeraldGlow)
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = AmoledBlack,
-                                modifier = Modifier.size(13.dp)
-                            )
-                        }
+                                .shadow(6.dp, CircleShape, spotColor = VioletPrimary)
+                        )
                         Text(
-                            text = "ViralToolAI",
+                            text = "ViralToolAi",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
@@ -305,7 +314,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     }
                 }
 
-                // Skip Button
+                // Skip Button (Glass Pill)
                 val skipInteraction = remember { MutableInteractionSource() }
                 val isSkipPressed by skipInteraction.collectIsPressedAsState()
                 val skipScale by animateFloatAsState(
@@ -337,7 +346,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                         text = "Skip",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextWhite.copy(alpha = 0.85f),
+                        color = TextWhite.copy(alpha = 0.90f),
                         letterSpacing = 0.3.sp
                     )
                 }
@@ -398,7 +407,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     // Left Chevron Arrow Indicator (Previous Card)
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .background(if (pagerState.currentPage > 0) Color(0x28FFFFFF) else Color.Transparent)
                             .border(
@@ -422,7 +431,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                         }
                     }
 
-                    // Animated Page Dots Indicator
+                    // Animated Page Dots Indicator (Current: Large Pill + Glow, Other: Small Dot)
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
@@ -430,12 +439,12 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                         repeat(cards.size) { index ->
                             val isSelected = pagerState.currentPage == index
                             val dotWidth by animateDpAsState(
-                                targetValue = if (isSelected) 28.dp else 8.dp,
+                                targetValue = if (isSelected) 30.dp else 8.dp,
                                 animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                                 label = "dotWidth"
                             )
                             val dotColor by animateColorAsState(
-                                targetValue = if (isSelected) currentCard.primaryColor else Color(0x33FFFFFF),
+                                targetValue = if (isSelected) currentCard.primaryColor else Color(0x40FFFFFF),
                                 animationSpec = tween(300),
                                 label = "dotColor"
                             )
@@ -446,7 +455,7 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                     .height(8.dp)
                                     .width(dotWidth)
                                     .shadow(
-                                        elevation = if (isSelected) 8.dp else 0.dp,
+                                        elevation = if (isSelected) 10.dp else 0.dp,
                                         shape = CircleShape,
                                         spotColor = currentCard.primaryColor
                                     )
@@ -464,9 +473,9 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     // Right Chevron Arrow Indicator (Next Card)
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .background(if (!isLastPage) currentCard.primaryColor.copy(alpha = 0.25f) else Color.Transparent)
+                            .background(if (!isLastPage) currentCard.primaryColor.copy(alpha = 0.30f) else Color.Transparent)
                             .border(
                                 BorderStroke(1.dp, if (!isLastPage) currentCard.primaryColor else Color.Transparent),
                                 CircleShape
@@ -489,9 +498,9 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                     }
                 }
 
-                // If Last Page: Prominent Single-Line Compact CTA Button
+                // Prominent Single-Line Compact CTA Button for Last Page
                 if (isLastPage) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     val btnInteraction = remember { MutableInteractionSource() }
                     val isBtnPressed by btnInteraction.collectIsPressedAsState()
@@ -508,15 +517,15 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 scaleX = btnScale
                                 scaleY = btnScale
                             }
-                            .shadow(16.dp, RoundedCornerShape(24.dp), spotColor = EmeraldGlow)
+                            .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = VioletPrimary)
                             .clip(RoundedCornerShape(24.dp))
                             .background(
                                 Brush.horizontalGradient(
-                                    listOf(EmeraldPrimary, EmeraldGlow)
+                                    listOf(VioletPrimary, ElectricPurple, VioletGlow)
                                 )
                             )
                             .border(
-                                BorderStroke(1.2.dp, Color.White.copy(alpha = 0.85f)),
+                                BorderStroke(1.2.dp, Color.White.copy(alpha = 0.90f)),
                                 RoundedCornerShape(24.dp)
                             )
                             .clickable(
@@ -526,7 +535,8 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 finishOnboarding()
                             }
-                            .padding(vertical = 13.dp),
+                            .padding(vertical = 14.dp)
+                            .testTag("get_started_onboarding_button"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
@@ -534,19 +544,19 @@ fun OnboardingScreen(onOnboardingFinished: () -> Unit) {
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "Start Creating with ViralToolAI",
-                                fontSize = 14.5.sp,
+                                text = "Get Started with ViralToolAi",
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Black,
-                                color = AmoledBlack,
+                                color = TextWhite,
                                 maxLines = 1,
-                                letterSpacing = 0.2.sp
+                                letterSpacing = 0.3.sp
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
-                                tint = AmoledBlack,
-                                modifier = Modifier.size(16.dp)
+                                tint = TextWhite,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -566,9 +576,7 @@ private fun OnboardingCardItem(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        val maxHeight = maxHeight
-
-        // iPhone Glassmorphic Main Card
+        // Glassmorphic Main Card Container (NO accidental dismissal on click)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -581,9 +589,9 @@ private fun OnboardingCardItem(
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            Color(0xF00D1812),
-                            Color(0xF808110D),
-                            Color(0xFF040A07)
+                            Color(0xF0120926),
+                            Color(0xF80A041A),
+                            Color(0xFF04020A)
                         )
                     )
                 )
@@ -616,12 +624,12 @@ private fun OnboardingCardItem(
                             translationX = pageOffset * -40f
                         }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(cardData.primaryColor.copy(alpha = 0.16f))
+                        .background(cardData.primaryColor.copy(alpha = 0.18f))
                         .border(
-                            BorderStroke(1.dp, cardData.primaryColor.copy(alpha = 0.6f)),
+                            BorderStroke(1.dp, cardData.primaryColor.copy(alpha = 0.65f)),
                             RoundedCornerShape(16.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -631,11 +639,11 @@ private fun OnboardingCardItem(
                             imageVector = cardData.icon,
                             contentDescription = null,
                             tint = cardData.primaryColor,
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(13.dp)
                         )
                         Text(
                             text = cardData.badge,
-                            fontSize = 10.sp,
+                            fontSize = 10.5.sp,
                             fontWeight = FontWeight.Black,
                             color = cardData.primaryColor,
                             letterSpacing = 1.2.sp
@@ -680,12 +688,12 @@ private fun OnboardingCardItem(
                         text = cardData.subtitle,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal,
-                        color = TextWhite.copy(alpha = 0.72f),
+                        color = TextWhite.copy(alpha = 0.78f),
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )
 
-                    // Highlights List (Cards 2, 3, 4)
+                    // Highlights List Grid (2x2)
                     if (cardData.highlights.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(14.dp))
 
@@ -703,9 +711,9 @@ private fun OnboardingCardItem(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .clip(RoundedCornerShape(14.dp))
-                                                .background(Color(0x33000000))
+                                                .background(Color(0x35000000))
                                                 .border(
-                                                    BorderStroke(1.dp, cardData.primaryColor.copy(alpha = 0.4f)),
+                                                    BorderStroke(1.dp, cardData.primaryColor.copy(alpha = 0.45f)),
                                                     RoundedCornerShape(14.dp)
                                                 )
                                                 .padding(horizontal = 10.dp, vertical = 7.dp)
@@ -771,14 +779,14 @@ private fun OnboardingFloatingIllustration(
         // Glowing Background Orb
         Box(
             modifier = Modifier
-                .size(160.dp)
+                .size(170.dp)
                 .graphicsLayer {
                     translationX = pageOffset * 50f
                 }
                 .background(
                     Brush.radialGradient(
                         listOf(
-                            cardData.primaryColor.copy(alpha = 0.35f),
+                            cardData.primaryColor.copy(alpha = 0.40f),
                             Color.Transparent
                         )
                     ),
@@ -786,38 +794,78 @@ private fun OnboardingFloatingIllustration(
                 )
         )
 
-        // Center Hero Graphic Circle
-        Box(
-            modifier = Modifier
-                .graphicsLayer {
-                    translationX = pageOffset * -80f
-                    rotationZ = pageOffset * 8f
-                }
-                .size(90.dp)
-                .shadow(20.dp, CircleShape, spotColor = cardData.primaryColor)
-                .clip(CircleShape)
-                .background(
-                    Brush.linearGradient(
-                        listOf(cardData.primaryColor, cardData.secondaryColor)
-                    )
+        // Center Hero Graphic
+        if (cardData.pageIndex == 3) {
+            // Final Screen: Standalone Logo with glowing success halo
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        translationX = pageOffset * -80f
+                    }
+                    .size(105.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_viraltool_icon),
+                    contentDescription = "ViralToolAi Final Logo",
+                    modifier = Modifier
+                        .size(85.dp)
+                        .shadow(20.dp, CircleShape, spotColor = VioletPrimary)
                 )
-                .border(BorderStroke(2.dp, Color.White.copy(alpha = 0.85f)), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = cardData.icon,
-                contentDescription = cardData.title,
-                tint = AmoledBlack,
-                modifier = Modifier.size(44.dp)
-            )
+
+                // Animated Success Checkmark Badge
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 4.dp, y = 4.dp)
+                        .size(32.dp)
+                        .shadow(8.dp, CircleShape, spotColor = VioletGlow)
+                        .clip(CircleShape)
+                        .background(VioletPrimary)
+                        .border(BorderStroke(2.dp, Color.White), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Success",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        } else {
+            // Standard Cards 0, 1, 2 Hero Circle
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        translationX = pageOffset * -80f
+                        rotationZ = pageOffset * 8f
+                    }
+                    .size(92.dp)
+                    .shadow(20.dp, CircleShape, spotColor = cardData.primaryColor)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(cardData.primaryColor, cardData.secondaryColor)
+                        )
+                    )
+                    .border(BorderStroke(2.dp, Color.White.copy(alpha = 0.85f)), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = cardData.icon,
+                    contentDescription = cardData.title,
+                    tint = AmoledBlack,
+                    modifier = Modifier.size(44.dp)
+                )
+            }
         }
 
         // Floating Glass Accent Badges according to card index
         when (cardData.pageIndex) {
             0 -> {
-                // Workspace Accents
                 FloatingGlassChip(
-                    text = "AI Workspace",
+                    text = "AI Script Engine",
                     icon = Icons.Default.AutoAwesome,
                     color = cardData.primaryColor,
                     modifier = Modifier
@@ -825,8 +873,8 @@ private fun OnboardingFloatingIllustration(
                         .graphicsLayer { translationX = pageOffset * -60f - 10f; translationY = -10f }
                 )
                 FloatingGlassChip(
-                    text = "Deal Radar",
-                    icon = Icons.Default.ShoppingBag,
+                    text = "Prompt Extractor",
+                    icon = Icons.Default.Movie,
                     color = cardData.secondaryColor,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -834,18 +882,17 @@ private fun OnboardingFloatingIllustration(
                 )
             }
             1 -> {
-                // Content Creation Accents
                 FloatingGlassChip(
-                    text = "Prompt Extractor",
-                    icon = Icons.Default.AutoAwesome,
+                    text = "Deal Radar",
+                    icon = Icons.Default.ShoppingBag,
                     color = cardData.primaryColor,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .graphicsLayer { translationX = pageOffset * 50f; translationY = -12f }
                 )
                 FloatingGlassChip(
-                    text = "4K Video AI",
-                    icon = Icons.Default.Movie,
+                    text = "Price Drops",
+                    icon = Icons.Default.TrendingUp,
                     color = cardData.secondaryColor,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -853,9 +900,8 @@ private fun OnboardingFloatingIllustration(
                 )
             }
             2 -> {
-                // Platform Growth Accents
                 FloatingGlassChip(
-                    text = "10x Reach",
+                    text = "10x Social Reach",
                     icon = Icons.Default.TrendingUp,
                     color = cardData.primaryColor,
                     modifier = Modifier
@@ -864,8 +910,26 @@ private fun OnboardingFloatingIllustration(
                 )
                 FloatingGlassChip(
                     text = "Brand Deals AI",
-                    icon = Icons.Default.AutoAwesome,
+                    icon = Icons.Default.RocketLaunch,
                     color = cardData.secondaryColor,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .graphicsLayer { translationX = pageOffset * 50f; translationY = 10f }
+                )
+            }
+            3 -> {
+                FloatingGlassChip(
+                    text = "100% Free",
+                    icon = Icons.Default.CheckCircle,
+                    color = VioletGlow,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .graphicsLayer { translationX = pageOffset * -50f; translationY = -10f }
+                )
+                FloatingGlassChip(
+                    text = "Instant Setup",
+                    icon = Icons.Default.AutoAwesome,
+                    color = VioletPrimary,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .graphicsLayer { translationX = pageOffset * 50f; translationY = 10f }

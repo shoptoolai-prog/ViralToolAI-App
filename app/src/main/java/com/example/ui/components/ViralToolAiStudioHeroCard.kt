@@ -190,13 +190,13 @@ fun ViralToolAiStudioHeroCard(
 
                     Column {
                         Text(
-                            text = "AI Prompt Extractor",
+                            text = "AI Prompt Studio",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite
                         )
                         Text(
-                            text = "Recreate AI Prompts from any Image or Screenshot",
+                            text = "Analyze AI images to generate recreation prompts, style descriptions & guidance",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextWhite.copy(alpha = 0.75f)
@@ -254,7 +254,7 @@ fun ViralToolAiStudioHeroCard(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Open AI Prompt Extractor",
+                            text = "Open AI Prompt Studio",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

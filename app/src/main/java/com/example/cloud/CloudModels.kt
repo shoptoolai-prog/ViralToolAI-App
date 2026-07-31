@@ -29,7 +29,7 @@ data class AnnouncementConfig(
 
 data class BrandAmbassadorConfig(
     val enabled: Boolean = true,
-    val image: String = "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png",
+    val image: String = "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png",
     val durationMs: Long = 5000L
 )
 

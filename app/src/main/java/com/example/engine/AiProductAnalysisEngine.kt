@@ -23,7 +23,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /**
- * ViralToolAI Shopping Intelligence Engine — Internal AI Analysis Layer
+ * ViralToolAi Shopping Intelligence Engine — Internal AI Analysis Layer
  * Combines live metadata extraction, Gemini AI cloud REST analysis,
  * and intelligent local AI url parsing for multi-platform e-commerce links.
  */
@@ -133,7 +133,7 @@ object AiProductAnalysisEngine {
     ): ShoppingResult? {
 
         val prompt = """
-            You are the ViralToolAI Gemini Smart Product Reasoning Engine.
+            You are the ViralToolAi Gemini Smart Product Reasoning Engine.
             Analyze and verify the extracted e-commerce product data for this URL.
 
             Product Link: $url
@@ -276,7 +276,7 @@ object AiProductAnalysisEngine {
                 val imageUrl = if (json.isNull("image_url")) raw.imageUrl else json.optString("image_url").ifBlank { raw.imageUrl }
 
                 val shoppingSummary = if (json.isNull("shopping_summary")) "Verified $productName from $merchantName." else json.optString("shopping_summary")
-                val buyingAdvice = if (json.isNull("buying_advice")) "ViralToolAI Verdict: Product details verified directly from $merchantName catalog." else json.optString("buying_advice")
+                val buyingAdvice = if (json.isNull("buying_advice")) "ViralToolAi Verdict: Product details verified directly from $merchantName catalog." else json.optString("buying_advice")
 
                 val prosList = mutableListOf<String>()
                 val prosArray = json.optJSONArray("pros")
@@ -425,7 +425,7 @@ object AiProductAnalysisEngine {
                 priceTrend = emptyList(),
                 similarProducts = emptyList(),
                 priceComparison = emptyList(),
-                aiRecommendation = "ViralToolAI Verdict: Product details verified directly from $merchantName store catalog.",
+                aiRecommendation = "ViralToolAi Verdict: Product details verified directly from $merchantName store catalog.",
                 detectionConfidence = 95,
                 isCloudVerificationRequired = false,
                 isReliable = true,
@@ -606,7 +606,7 @@ object AiProductAnalysisEngine {
             isPreviewResult = false,
             category = category,
             estimatedMatch = if (confidenceScore.equals("High", ignoreCase = true)) "Exact Product Match" else "Verified Product",
-            status = "ViralToolAI Verified",
+            status = "ViralToolAi Verified",
             variant = variant,
             originalPrice = origPriceVal,
             discountPercent = discountPercent,

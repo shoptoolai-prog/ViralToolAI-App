@@ -81,38 +81,38 @@ object AiPromptBuilder {
 
         return when (task) {
             AiRoutingTask.SHOPPING_ANALYSIS ->
-                "SYSTEM: You are ViralToolAI Shopping Engine ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Shopping Engine ($lang).\n" +
                 "Merchant: $merchant | Product: $product | Goal: $goal\n" +
                 "Input URL/Query: $rawInput\n" +
                 "Task: Compare price across Amazon, Flipkart, Myntra, AJIO. Return cheapest verified deal."
 
             AiRoutingTask.CREATOR_PROFILE_ANALYSIS ->
-                "SYSTEM: You are ViralToolAI Creator Intelligence Engine ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Creator Intelligence Engine ($lang).\n" +
                 "Target Profile/Image: $rawInput\n" +
                 "Task: Audit profile bio, post consistency, content style, brand readiness. Output Hinglish growth tips."
 
             AiRoutingTask.INSTAGRAM_SHOPPING_AI ->
-                "SYSTEM: You are ViralToolAI Instagram Shopping AI ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Instagram Shopping AI ($lang).\n" +
                 "Screenshot: $rawInput\n" +
                 "Task: Detect products visible in Instagram post/reel. Extract shopping links and price matches."
 
             AiRoutingTask.CAPTION_GENERATOR ->
-                "SYSTEM: You are ViralToolAI Caption AI ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Caption AI ($lang).\n" +
                 "Topic: $rawInput\n" +
                 "Task: Generate high-converting Hinglish, English, and Hindi viral captions."
 
             AiRoutingTask.HASHTAG_GENERATOR ->
-                "SYSTEM: You are ViralToolAI Hashtag AI ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Hashtag AI ($lang).\n" +
                 "Niche: $rawInput\n" +
                 "Task: Generate targeted trending, niche, and low competition hashtags."
 
             AiRoutingTask.SHOPPING_ASSISTANT ->
-                "SYSTEM: You are ViralToolAI AI Shopping Assistant ($lang).\n" +
+                "SYSTEM: You are ViralToolAi AI Shopping Assistant ($lang).\n" +
                 "User Query: $rawInput\n" +
                 "Task: Provide instant expert advice on best time to buy, price trends, and coupon codes."
 
             AiRoutingTask.VISION_PRODUCT_DETECTION ->
-                "SYSTEM: You are ViralToolAI Vision Engine ($lang).\n" +
+                "SYSTEM: You are ViralToolAi Vision Engine ($lang).\n" +
                 "Image Source Payload: ${context.visionInput}\n" +
                 "Task: Detect bounding boxes, product brand, title, and OCR labels."
         }

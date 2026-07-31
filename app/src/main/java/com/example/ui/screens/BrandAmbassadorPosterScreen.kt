@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import android.content.Context
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -42,7 +44,7 @@ import kotlin.math.sin
 
 private const val TAG = "BrandAmbassadorPoster"
 private const val POSTER_IMAGE_URL =
-    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png"
+    "https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png"
 
 object BrandAmbassadorPrefs {
     private const val PREF_NAME = "viraltoolai_launch_prefs"
@@ -169,6 +171,11 @@ fun BrandAmbassadorPosterScreen(
         label = "exitScale"
     )
 
+    // Suppress back button gesture during launch screen
+    BackHandler(enabled = true) {
+        // Disabled back gesture during launch screen sequence
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -180,11 +187,14 @@ fun BrandAmbassadorPosterScreen(
             .background(Color.Black)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                handleExit()
+            // CRITICAL REQUIREMENT: Intercept & consume all touch events during startup
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        event.changes.forEach { it.consume() }
+                    }
+                }
             }
     ) {
         if (isFirstTime) {
@@ -250,7 +260,7 @@ private fun PosterHeroImage(
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .crossfade(true)
                 .build(),
-            contentDescription = "ViralToolAI Welcome Banner",
+            contentDescription = "ViralToolAi Welcome Banner",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
@@ -464,7 +474,7 @@ private fun FirstTimeWelcomeView(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Thanks For Downloading ViralToolAI App",
+                    text = "Thanks For Downloading ViralToolAi App",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = TextWhite,
@@ -478,7 +488,7 @@ private fun FirstTimeWelcomeView(
 
             // Subtitle / Additional Message with separate delay reveal
             Text(
-                text = "Support us and follow ViralToolAI on Instagram",
+                text = "Support us and follow ViralToolAi on Instagram",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextWhite.copy(alpha = 0.90f),

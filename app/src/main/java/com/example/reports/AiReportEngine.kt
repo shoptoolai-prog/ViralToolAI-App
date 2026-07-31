@@ -141,7 +141,7 @@ object ReportStorageManager {
             Summary: ${report.summaryBlock}
             Overall Score: ${report.scoreSet.aiConfidence?.scoreValue ?: 95}%
             ---
-            Generated via ViralToolAI — From Products to Popularity
+            Generated via ViralToolAi — From Products to Popularity
         """.trimIndent()
     }
 

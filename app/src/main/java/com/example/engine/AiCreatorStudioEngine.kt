@@ -148,14 +148,14 @@ object AiCreatorStudioEngine {
         // CTAs
         val ctas = listOf(
             CtaOption("Save", "Save this reel so you don't lose the deal price!", "Boosts Bookmark Metric"),
-            CtaOption("Follow", "Follow @ViralToolAI for daily verified price alerts!", "Audience Growth"),
+            CtaOption("Follow", "Follow @ViralToolAi for daily verified price alerts!", "Audience Growth"),
             CtaOption("Comment", "Comment 'LINK' and I'll DM you the active coupon code!", "High Engagement"),
             CtaOption("Share", "Share this with a friend who needs new $category!", "Viral Spread")
         )
 
         // Captions (5 platforms)
         val captions = mapOf(
-            "Instagram" to "Honest review of $name! 🚀 Verified price at $priceStr on $store. Check out full pros, cons, and active discount link in bio! 👇 #$category #ViralToolAI #ProductReview",
+            "Instagram" to "Honest review of $name! 🚀 Verified price at $priceStr on $store. Check out full pros, cons, and active discount link in bio! 👇 #$category #ViralToolAi #ProductReview",
             "Facebook" to "Looking for an update on $category? Here is my breakdown of $name available on $store for $priceStr. Let me know your thoughts in the comments!",
             "Threads" to "Tested $name ($priceStr on $store). Solid overall score. Worth buying or pass? 💬",
             "YouTube" to "$name Unboxing & Review! Best price deal on $store ($priceStr). Link and coupon codes in description below. Subscribe for more smart shopping tips!",
@@ -164,7 +164,7 @@ object AiCreatorStudioEngine {
 
         // Hashtags (6 categories)
         val hashtags = mapOf(
-            "Trending" to listOf("#ViralReels", "#TrendingNow", "#ViralToolAI", "#SmartShopping", "#UnboxingTime"),
+            "Trending" to listOf("#ViralReels", "#TrendingNow", "#ViralToolAi", "#SmartShopping", "#UnboxingTime"),
             "Niche" to listOf("#${category.replace(" ", "")}", "#ProductReview", "#ShoppingGuide", "#ValueForMoney"),
             "Brand" to listOf("#${store.replace(" ", "")}", "#VerifiedStore", "#OfficialSeller"),
             "Shopping" to listOf("#OnlineDeals", "#DiscountAlert", "#BestPrice", "#ShoppingInspiration"),

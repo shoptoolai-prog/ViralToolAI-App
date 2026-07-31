@@ -165,7 +165,7 @@ object HashtagEngineModule {
             trendingHashtags = listOf("#ViralReels", "#InstagramGrowth", "#TrendingAudio"),
             nicheHashtags = listOf("#${category.replace(" ", "")}Tips", "#CreatorEconomy"),
             mediumCompetition = listOf("#ContentCreatorLife", "#DailyReels"),
-            lowCompetition = listOf("#HinglishCreator", "#ViralToolAI"),
+            lowCompetition = listOf("#HinglishCreator", "#ViralToolAi"),
             regionalHashtags = listOf("#CreatorIndia", "#ReelsIndia")
         )
     }

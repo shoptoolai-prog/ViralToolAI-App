@@ -17,7 +17,7 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 
 /**
- * Native AI Studio Integration Engine for ViralToolAI
+ * Native AI Studio Integration Engine for ViralToolAi
  * Implements:
  * 1. High Thinking Mode (gemini-3.1-pro-preview with ThinkingLevel.HIGH)
  * 2. Search Grounding (gemini-3.5-flash with googleSearch tool)

@@ -38,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -175,28 +176,17 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ==================================================
-            // FLAGSHIP HERO BANNER (APP HEADER PREMIUM REDESIGN V1)
+            // FLAGSHIP HERO HEADER (VIRALTOOLAI BLACK & VIOLET)
             // ==================================================
-            // One-time entrance animation sequence (Logo scale -> pulse -> title fade -> tagline fade)
-            val headerAnimProgress = remember { Animatable(0f) }
-            LaunchedEffect(Unit) {
-                headerAnimProgress.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
-                )
-            }
+            val scrollValue = scrollState.value
+            val scrollFraction = (scrollValue / 280f).coerceIn(0f, 1f)
+            val headerVerticalPadding = (14.dp * (1f - scrollFraction * 0.35f)).coerceAtLeast(8.dp)
+            val logoScrollScale = 1f - (scrollFraction * 0.15f)
 
-            val animVal = headerAnimProgress.value
-            val logoScale = 0.75f + (0.25f * (animVal / 0.4f).coerceIn(0f, 1f))
-            val logoPulseGlow = if (animVal in 0.3f..0.7f) ((1f - Math.abs(animVal - 0.5f) / 0.2f) * 0.5f) else 0f
-            val titleAlpha = ((animVal - 0.2f) / 0.4f).coerceIn(0f, 1f)
-            val taglineAlpha = ((animVal - 0.4f) / 0.4f).coerceIn(0f, 1f)
-
-            // Continuous subtle micro-animations for 60 FPS polish
-            val headerInfiniteTransition = rememberInfiniteTransition(label = "headerMicroAnims")
+            val headerInfiniteTransition = rememberInfiniteTransition(label = "flagshipHeaderAnims")
             val logoBreathingAlpha by headerInfiniteTransition.animateFloat(
-                initialValue = 0.35f,
-                targetValue = 0.85f,
+                initialValue = 0.45f,
+                targetValue = 0.90f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(2200, easing = LinearEasing),
                     repeatMode = RepeatMode.Reverse
@@ -212,30 +202,25 @@ fun HomeScreen(
                 ),
                 label = "headerShimmerOffset"
             )
-            val logoFloatY by headerInfiniteTransition.animateFloat(
-                initialValue = -1.5f,
-                targetValue = 1.5f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2600, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "logoFloatY"
-            )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 12.dp)
+                    .padding(top = 4.dp, bottom = 12.dp)
                     .shadow(
-                        elevation = 14.dp,
+                        elevation = (16.dp.value * (1f - scrollFraction * 0.3f)).dp,
                         shape = RoundedCornerShape(24.dp),
-                        spotColor = EmeraldPrimary.copy(alpha = 0.3f),
+                        spotColor = VioletPrimary.copy(alpha = 0.5f),
                         ambientColor = Color.Black
                     )
                     .clip(RoundedCornerShape(24.dp))
                     .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFF131A16), Color(0xFF0A0F0D))
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF1E0E3E),
+                                Color(0xFF120828),
+                                Color(0xFF0A0518)
+                            )
                         )
                     )
                     .border(
@@ -243,9 +228,9 @@ fun HomeScreen(
                             1.2.dp,
                             Brush.linearGradient(
                                 colors = listOf(
-                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                    ElectricPurple.copy(alpha = 0.45f),
-                                    EmeraldGlow.copy(alpha = logoBreathingAlpha)
+                                    VioletPrimary.copy(alpha = logoBreathingAlpha),
+                                    VioletGlow.copy(alpha = 0.65f),
+                                    ElectricPurple.copy(alpha = 0.35f)
                                 ),
                                 start = Offset(headerShimmerOffset, 0f),
                                 end = Offset(headerShimmerOffset + 400f, 250f)
@@ -253,9 +238,9 @@ fun HomeScreen(
                         ),
                         RoundedCornerShape(24.dp)
                     )
-                    .padding(horizontal = 18.dp, vertical = 14.dp)
+                    .padding(horizontal = 16.dp, vertical = headerVerticalPadding)
             ) {
-                // Glass shimmer sweep line across container
+                // Glass shimmer sweep line
                 Canvas(
                     modifier = Modifier
                         .matchParentSize()
@@ -267,7 +252,7 @@ fun HomeScreen(
                             colors = listOf(
                                 Color.Transparent,
                                 Color.White.copy(alpha = 0.03f),
-                                Color.White.copy(alpha = 0.12f),
+                                Color.White.copy(alpha = 0.15f),
                                 Color.White.copy(alpha = 0.03f),
                                 Color.Transparent
                             )
@@ -283,152 +268,196 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // APP LOGO (EXACT OFFICIAL LAUNCHER ICON LOGO)
+                    // LEFT: Logo & Aura + Center Typography
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // LEFT: Latest ViralToolAi Logo + Soft Violet Aura Glow
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.graphicsLayer {
-                                translationY = logoFloatY.dp.toPx()
-                            }
+                            modifier = Modifier.scale(logoScrollScale)
                         ) {
-                            // Soft Outer Glow Ring
+                            // Soft Outer Violet Glow Ring
                             Box(
                                 modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .size(46.dp)
+                                    .clip(CircleShape)
                                     .background(
                                         Brush.radialGradient(
                                             listOf(
-                                                EmeraldPrimary.copy(alpha = (logoBreathingAlpha * 0.4f) + logoPulseGlow),
+                                                VioletPrimary.copy(alpha = logoBreathingAlpha * 0.65f),
+                                                ElectricPurple.copy(alpha = 0.25f),
                                                 Color.Transparent
                                             )
                                         )
                                     )
                             )
 
-                            // Official Icon Container Box
-                            Box(
+                            // Official Logo (Clean Standalone)
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(id = com.example.R.drawable.ic_viraltool_icon),
+                                contentDescription = "ViralToolAi Logo",
                                 modifier = Modifier
-                                    .size(42.dp)
-                                    .graphicsLayer {
-                                        scaleX = logoScale
-                                        scaleY = logoScale
-                                    }
-                                    .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = EmeraldPrimary)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(Color(0xFF1B2820), Color(0xFF0D1610))
-                                        )
-                                    )
-                                    .border(
-                                        BorderStroke(
-                                            1.2.dp,
-                                            Brush.linearGradient(
-                                                listOf(
-                                                    EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                                    EmeraldGlow
-                                                )
-                                            )
-                                        ),
-                                        RoundedCornerShape(14.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                androidx.compose.foundation.Image(
-                                    painter = painterResource(id = com.example.R.drawable.ic_viraltool_icon),
-                                    contentDescription = "ViralToolAI Logo",
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                        .padding(2.dp)
-                                )
-                            }
+                                    .size(38.dp)
+                                    .shadow(8.dp, CircleShape, spotColor = VioletPrimary)
+                            )
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        // APP TITLE & TAGLINE
-                        Column {
+                        // CENTER: Premium Typography with White Text & Soft Violet Glow
+                        Column(verticalArrangement = Arrangement.Center) {
                             Text(
-                                text = "ViralToolAI",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Black,
-                                style = androidx.compose.ui.text.TextStyle(
-                                    brush = Brush.horizontalGradient(
-                                        listOf(
-                                            TextWhite,
-                                            Color(0xFFE2F3EB),
-                                            EmeraldGlow
+                                text = androidx.compose.ui.text.buildAnnotatedString {
+                                    append("ViralTool")
+                                    withStyle(
+                                        style = androidx.compose.ui.text.SpanStyle(
+                                            color = VioletGlow,
+                                            shadow = androidx.compose.ui.graphics.Shadow(
+                                                color = VioletPrimary,
+                                                blurRadius = 12f
+                                            )
                                         )
-                                    )
-                                ),
-                                letterSpacing = (-0.3).sp,
-                                modifier = Modifier.graphicsLayer {
-                                    alpha = titleAlpha
-                                }
+                                    ) {
+                                        append("Ai")
+                                    }
+                                },
+                                fontSize = (20 * (1f - scrollFraction * 0.1f)).sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                letterSpacing = (-0.3).sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = com.example.core.TaglineEngine.getTagline(com.example.core.AppModule.SHOPPING),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = EmeraldPrimary,
-                                letterSpacing = 1.6.sp,
-                                modifier = Modifier.graphicsLayer {
-                                    alpha = taglineAlpha
-                                }
+                                text = "Powering Creators. Amplifying Growth.",
+                                fontSize = 8.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VioletGlow,
+                                letterSpacing = 0.8.sp
                             )
                         }
                     }
 
-                    // CREATED BY ASIT BADGE (POLISHED GLASS PILL)
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        EmeraldPrimary.copy(alpha = 0.18f),
-                                        Color(0x1AFFFFFF)
-                                    )
-                                )
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    Brush.horizontalGradient(
-                                        listOf(
-                                            EmeraldPrimary.copy(alpha = logoBreathingAlpha),
-                                            EmeraldGlow.copy(alpha = 0.6f),
-                                            Color.White.copy(alpha = 0.2f)
-                                        )
-                                    )
-                                ),
-                                RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 11.dp, vertical = 6.dp)
+                    // RIGHT: Material Icons with Premium Circular Glass Background
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Created by Asit",
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite.copy(alpha = 0.95f),
-                            letterSpacing = 0.6.sp
-                        )
+                        // 1. Search Icon Glass Button
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .shadow(6.dp, CircleShape, spotColor = VioletPrimary)
+                                .clip(CircleShape)
+                                .background(Color(0x28FFFFFF))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        Brush.linearGradient(
+                                            listOf(
+                                                VioletGlow.copy(alpha = 0.6f),
+                                                Color.White.copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    ),
+                                    CircleShape
+                                )
+                                .clickable {
+                                    onNavigateToHistory()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        // 2. Notifications Icon Glass Button
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .shadow(6.dp, CircleShape, spotColor = VioletPrimary)
+                                .clip(CircleShape)
+                                .background(Color(0x28FFFFFF))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        Brush.linearGradient(
+                                            listOf(
+                                                VioletGlow.copy(alpha = 0.6f),
+                                                Color.White.copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    ),
+                                    CircleShape
+                                )
+                                .clickable {
+                                    toastMessage = "🔔 Notifications: All AI systems operational"
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notifications",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        // 3. Settings / Profile Icon Glass Button
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .shadow(6.dp, CircleShape, spotColor = VioletPrimary)
+                                .clip(CircleShape)
+                                .background(Color(0x28FFFFFF))
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        Brush.linearGradient(
+                                            listOf(
+                                                VioletGlow.copy(alpha = 0.6f),
+                                                Color.White.copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    ),
+                                    CircleShape
+                                )
+                                .clickable {
+                                    showCreatorProfileScreen = true
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
 
             // ==================================================
-            // PREMIUM FEATURED BANNER CAROUSEL
+            // 1. PREMIUM FEATURED BANNER CAROUSEL
             // ==================================================
             HomeBannerCarousel(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             // ==================================================
-            // FLAGSHIP TOOL #1: VIRALTOOLAI STUDIO
+            // 2. QUICK ACCESS TOOLS
+            // ==================================================
+            com.example.ui.components.CreatorQuickToolsSection()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==================================================
+            // 3. AI PROMPT STUDIO
             // ==================================================
             ViralToolAiStudioHeroCard(
                 onClick = {
@@ -439,7 +468,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ==================================================
-            // FLIPKART SHOPPING ANALYZER (HERO GLASS CARD)
+            // 4. SMART SHOPPING GUIDE (HERO GLASS CARD)
             // ==================================================
             val flipkartShineTransition = rememberInfiniteTransition(label = "flipkartShine")
             val flipkartShineOffset by flipkartShineTransition.animateFloat(
@@ -528,15 +557,15 @@ fun HomeScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = "AI Shopping Intelligence",
+                                        imageVector = Icons.Default.ShoppingBag,
+                                        contentDescription = "Shopping Insights",
                                         tint = Color.White,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
                                 Column {
                                     Text(
-                                        text = "AI Shopping Intelligence",
+                                        text = "Shopping Insights",
                                         fontSize = 17.5.sp,
                                         fontWeight = FontWeight.Black,
                                         color = Color.White,
@@ -544,7 +573,7 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "Paste any shopping link for AI-powered analysis.",
+                                        text = "Product comparisons, review breakdown & buying tips",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = Color(0xFFB8D3F8),
@@ -886,56 +915,50 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // 2. ⭐ PREMIUM CREATOR & AFFILIATE TOOLS MARKETPLACE
+            // SECTION 4: CREATOR SPOTLIGHT
             // ==================================================
-            com.example.ui.components.PremiumCreatorToolsSection(
-                onToolSelected = { tool ->
-                    if (tool.id == "brand_collab_ai") {
-                        checkAndLaunchTool("tool_brand_collaboration", "Brand Collaboration AI") {
-                            showBrandCollabDialog = true
-                        }
-                    } else {
-                        checkAndLaunchTool(tool.id, tool.title) {
-                            selectedPremiumTool = tool
-                        }
-                    }
+            com.example.ui.components.CreatorSpotlightSection(
+                onExploreClick = {
+                    onNavigateToCreatorAcademy?.invoke()
                 }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // 3. MEESHO CREATOR AI CARD
+            // SECTION 5: TODAY'S CREATOR TIPS
             // ==================================================
-            com.example.ui.components.MeeshoCreatorAiCard(
-                onComingSoonClick = {
-                    checkAndLaunchTool("tool_shopping_ai", "Meesho Creator AI") {
-                        showMeeshoCreatorDialog = true
-                    }
-                }
-            )
+            com.example.ui.components.TodaysCreatorTipsSection()
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==================================================
-            // 3B. WISHLINK CREATOR ACADEMY
+            // SECTION 6: CONTENT INSPIRATION
             // ==================================================
-            com.example.ui.components.WishlinkCreatorAiCard(
-                onCardClick = {
-                    checkAndLaunchTool("tool_wishlink_academy", "Wishlink Creator Academy") {
-                        showWishlinkCreatorDialog = true
-                    }
-                }
-            )
+            com.example.ui.components.ContentInspirationSection()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ==================================================
+            // SECTION 7: WEEKLY GROWTH CHALLENGE
+            // ==================================================
+            com.example.ui.components.WeeklyGrowthChallengeSection()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ==================================================
+            // SECTION 8: TOP PROMOTERS (LEADERBOARD)
+            // ==================================================
+            com.example.ui.components.TopPromotersSection()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ==================================================
+            // SECTION 9: WHAT'S NEW
+            // ==================================================
+            com.example.ui.components.WhatsNewSection()
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // ==================================================
-            // CREATOR QUICK TOOLS SECTION
-            // ==================================================
-            com.example.ui.components.CreatorQuickToolsSection()
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // 5. Creator Profile AI Flagship LIVE Overlay Screen (Phase 6D)
@@ -1136,7 +1159,7 @@ fun HomeScreen(
         }
     }
 
-    // Flagship ViralToolAI Studio Dialog
+    // Flagship ViralToolAi Studio Dialog
     if (showViralToolAiStudioDialog) {
         ViralToolAiStudioDialog(
             onDismiss = { showViralToolAiStudioDialog = false }

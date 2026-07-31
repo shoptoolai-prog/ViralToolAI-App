@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * MASTER PHASE 13A — Real Data Integration Layer
- * Single central integration point for ALL shopping product queries in ViralToolAI.
+ * Single central integration point for ALL shopping product queries in ViralToolAi.
  * Sources: HTML Metadata, JSON-LD, Open Graph, Merchant Metadata, Future APIs.
  *
  * Guarantees:
@@ -50,7 +50,7 @@ object RealDataIntegrationLayer {
             // 3. Extract Metadata from Live Sources (HTML, JSON-LD, OpenGraph, Meta Tags)
             val rawExtracted = ShoppingMetadataExtractor.fetchAndExtractMetadata(resolvedCleanUrl)
 
-            // 4. Process via ViralToolAI Shopping Intelligence Engine (Gemini AI REST + Local Fallback)
+            // 4. Process via ViralToolAi Shopping Intelligence Engine (Gemini AI REST + Local Fallback)
             val shoppingResult = com.example.engine.AiProductAnalysisEngine.analyzeProduct(resolvedCleanUrl, rawExtracted)
 
             // 5. Cache Verified Results

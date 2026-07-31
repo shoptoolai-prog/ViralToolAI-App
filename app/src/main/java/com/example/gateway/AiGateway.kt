@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * PHASE 12D — Central AI Gateway
- * The single, unified entry point for all AI operations in ViralToolAI.
+ * The single, unified entry point for all AI operations in ViralToolAi.
  *
  * Rules:
  * 1. UI components NEVER directly call an AI provider.

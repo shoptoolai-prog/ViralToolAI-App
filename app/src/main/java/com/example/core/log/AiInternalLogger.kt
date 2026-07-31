@@ -36,7 +36,7 @@ object AiInternalLogger {
         if (logs.size > MAX_LOGS) {
             logs.poll()
         }
-        Log.d("ViralToolAI_InternalLog", "[$category] $message ${details?.let { "($it)" } ?: ""} ${confidence?.let { "(conf: $it)" } ?: ""}")
+        Log.d("ViralToolAi_InternalLog", "[$category] $message ${details?.let { "($it)" } ?: ""} ${confidence?.let { "(conf: $it)" } ?: ""}")
     }
 
     fun getLogs(): List<AiLogEvent> = logs.toList()

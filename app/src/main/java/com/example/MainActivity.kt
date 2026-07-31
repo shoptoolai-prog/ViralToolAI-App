@@ -47,6 +47,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
@@ -77,6 +79,7 @@ import com.example.data.ShoppingItem
 import com.example.ui.screens.HistoryScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ProfileScreen
+import com.example.ui.screens.ReferAndEarnScreen
 import com.example.ui.screens.SplashScreen
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.CrimsonRed
@@ -148,6 +151,7 @@ enum class Screen {
     CreatorAcademySetup,
     CreatorAcademy,
     VideoEditing,
+    ReferAndEarn,
     History,
     Profile,
     Analysis,
@@ -164,7 +168,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
         try {
             val imageLoader = context.imageLoader
             val request = ImageRequest.Builder(context)
-                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAI-App/main/assets/brand-ambassadors/1785321241752.png")
+                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png")
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
@@ -352,6 +356,9 @@ fun MainAppLayout(sharedUrl: String? = null) {
                             onNavigateToHome = { currentScreen = Screen.Home }
                         )
                     }
+                    Screen.ReferAndEarn -> {
+                        ReferAndEarnScreen()
+                    }
                     Screen.Home -> {
                         HomeScreen(
                             historyList = historyList,
@@ -445,12 +452,23 @@ fun BottomNavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(Color(0xFF0B0B12))
+                    .background(Color(0xFF0A0516))
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            Brush.verticalGradient(
+                                listOf(
+                                    VioletPrimary.copy(alpha = 0.25f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                    )
                     .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Home tab
+                // 1. Home tab
                 NavigationTabItem(
                     screen = Screen.Home,
                     icon = Icons.Default.Home,
@@ -460,27 +478,37 @@ fun BottomNavigationBar(
                     testTag = "tab_home"
                 )
 
-                // Creator Academy tab
+                // 2. Learn tab
                 NavigationTabItem(
                     screen = Screen.CreatorAcademy,
                     icon = Icons.Default.School,
-                    label = com.example.core.LanguageEngine.get("tab_academy"),
+                    label = "Learn",
                     isSelected = currentScreen == Screen.CreatorAcademy,
                     onClick = { onScreenSelected(Screen.CreatorAcademy) },
-                    testTag = "tab_academy"
+                    testTag = "tab_learn"
                 )
                 
-                // Video Editing tab
+                // 3. Tools tab
                 NavigationTabItem(
                     screen = Screen.VideoEditing,
-                    icon = Icons.Default.Videocam,
-                    label = "Video Editing",
+                    icon = Icons.Default.Build,
+                    label = "Tools",
                     isSelected = currentScreen == Screen.VideoEditing,
                     onClick = { onScreenSelected(Screen.VideoEditing) },
-                    testTag = "tab_video_editing"
+                    testTag = "tab_tools"
+                )
+
+                // 4. Refer & Earn tab
+                NavigationTabItem(
+                    screen = Screen.ReferAndEarn,
+                    icon = Icons.Default.CardGiftcard,
+                    label = "Refer & Earn",
+                    isSelected = currentScreen == Screen.ReferAndEarn,
+                    onClick = { onScreenSelected(Screen.ReferAndEarn) },
+                    testTag = "tab_refer_earn"
                 )
                 
-                // Profile tab
+                // 5. Profile tab
                 NavigationTabItem(
                     screen = Screen.Profile,
                     icon = Icons.Default.Person,

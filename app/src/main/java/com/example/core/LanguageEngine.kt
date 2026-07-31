@@ -154,8 +154,8 @@ object LanguageEngine {
 
         // Home Screen
         "home_title" to mapOf(
-            ReportLanguage.ENGLISH to "ViralToolAI",
-            ReportLanguage.HINGLISH to "ViralToolAI",
+            ReportLanguage.ENGLISH to "ViralToolAi",
+            ReportLanguage.HINGLISH to "ViralToolAi",
             ReportLanguage.HINDI to "वायरलटूल AI"
         ),
         "home_subtitle" to mapOf(
