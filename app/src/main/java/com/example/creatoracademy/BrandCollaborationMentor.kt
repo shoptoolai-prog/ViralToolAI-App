@@ -4,6 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.sin
 import com.example.ui.components.SmartWelcomeBackDialog
 import com.example.ui.components.RestartCourseConfirmDialog
 import com.example.ui.components.LearningProgressIndicatorCard
@@ -13,6 +21,8 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -51,6 +61,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -480,6 +491,744 @@ object BrandCollabStaticData {
 }
 
 /**
+ * MASTER PHASE 1 — BRAND COLLABORATION HUB
+ * Complete Redesign with Premium Grey & Gold Theme, Animated Background Loop,
+ * Onboarding Flow, Swipe Cards, AI Mentor Avatar, Language & Creator Type Selection,
+ * Preview Roadmap, Feature Showcase, and Lifetime Coach Dashboard.
+ */
+
+val MASTER_PHASE1_WELCOME_STYLES = listOf(
+    "🔥 Welcome aboard! Ready to land your first ₹50,000 paid brand deal?",
+    "👋 Hey champ! I'm your Brand Collab Mentor. Let's convert your views into sponsorships!",
+    "🚀 High energy today! Welcome to the Brand Collaboration Hub — let's build your media kit!",
+    "💎 Welcome! Today is the day we elevate your profile to catch top brand managers' eyes.",
+    "🎯 Greetings Creator! Brands are spending millions on influencers. Let's claim your share!",
+    "✨ Welcome back! Ready to pitch your dream brands like Boat, Myntra, and Amazon?",
+    "🌟 Namaste! Main hoon tumhara AI Brand Collab Coach. Sahi pitch likhna seekhein?",
+    "💥 Welcome! Let me help transform your follower count into recurring monthly brand retainers.",
+    "🏆 Hello superstar! Today we optimize your Bio & DM strategy for maximum replies.",
+    "⚡ Welcome! Zero to sponsored creator roadmap starts right here. Let me guide you!",
+    "👑 Hey creator boss! Let's craft a killer pitch deck that brands cannot refuse.",
+    "🎁 Welcome! Turn gifted PR packages into high-paying commercial contracts today.",
+    "💡 Hello! Did you know 90% of creators pitch wrong? Let's fix your pitch template now!",
+    "💼 Welcome! Time to calculate your exact Reel & Story rate card based on real engagement.",
+    "📈 Welcome aboard! Let me audit your Brand Ready Score and fix every bottleneck.",
+    "🛡️ Welcome! Protect yourself from scam deal emails while landing legit ₹20k brand deals.",
+    "🔮 Hey there! Your next brand deal is just one perfect pitch away. Ready to draft it?",
+    "🤝 Welcome! Brands are searching for niche creators right now. Let's get you noticed!",
+    "🎬 Welcome! From 1,000 views to paid sponsorships — let's unlock your earning potential.",
+    "🛍️ Hello! Ready to collaborate with fashion, tech, and lifestyle brands like a pro?",
+    "📊 Welcome! Let's build a data-driven Media Kit that impresses brand campaign managers.",
+    "🚀 Welcome future top creator! Let's turn your passion into a profitable business.",
+    "💯 Hey! No more guessing rates. Let's negotiate like a seasoned influencer manager.",
+    "⭐ Welcome! Let's craft customized DMs for Instagram, YouTube, and Email outreach.",
+    "🌟 Welcome! Learn how to close long-term monthly brand deals instead of one-time posts.",
+    "📦 Welcome! Want to get free products AND get paid commercial fees? Let's begin!",
+    "🎨 Welcome creator! Your unique style deserves top-tier brand partnerships.",
+    "💬 Namaste! Aaj hum seekhenge brands ko DM karke instant response kaise paayein.",
+    "🚀 Welcome! Let me personally guide your brand collab strategy step by step.",
+    "🔥 Ready to level up? Let's make brands come directly to your DMs!",
+    "💎 Welcome! Your brand deal journey begins with a solid profile foundation. Let's build!",
+    "✨ Hello! Let's analyze your niche and target the highest-paying brand categories.",
+    "👑 Welcome creator! Master the art of brand negotiation and contract protection.",
+    "🎯 Welcome! Let's create an invoice and rate card that command respect and top pay.",
+    "💼 Greetings! Ready to turn your content creation into a full-time brand business?",
+    "📈 Welcome! High engagement + Smart outreach = Unlimited paid sponsorships!",
+    "🌟 Hello! Let me help turn your social media into a brand attraction magnet.",
+    "🛡️ Welcome! Learn the exact red flags to avoid fake brand sponsorship scams.",
+    "🏆 Welcome superstar! Let's elevate your brand collaboration game to the top 1%!",
+    "⚡ Welcome! Let me write a DM pitch that gets read and replied to within 24 hours!",
+    "🎉 Welcome! Your personal AI Brand Mentor is active and ready. What shall we tackle first?"
+)
+
+@Composable
+fun BrandCollabAnimatedBackgroundLoop() {
+    val infiniteTransition = rememberInfiniteTransition(label = "bgLoop")
+    val animProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "loopProgress"
+    )
+
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF121216),
+                        Color(0xFF1B1B22),
+                        Color(0xFF121216)
+                    )
+                )
+            )
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+
+            // 1. Draw glowing wave analytics graph line
+            val graphPath = Path().apply {
+                moveTo(0f, h * 0.72f)
+                val curveHeight = h * 0.04f
+                val offset = animProgress * 2 * Math.PI.toFloat()
+                for (x in 0..w.toInt() step 15) {
+                    val y = h * 0.72f + sin(x * 0.012f + offset) * curveHeight
+                    lineTo(x.toFloat(), y)
+                }
+            }
+            drawPath(
+                path = graphPath,
+                color = Color(0xFFFFD700).copy(alpha = 0.35f),
+                style = Stroke(width = 3.5f)
+            )
+
+            // 2. Draw golden particles rising slowly
+            val particleCount = 20
+            for (i in 0 until particleCount) {
+                val pX = (w * (i.toFloat() / particleCount) + (animProgress * 120f)) % w
+                val pY = (h - ((animProgress * h + i * 45f) % h))
+                val alpha = ((1f - (pY / h)) * 0.5f).coerceIn(0f, 0.75f)
+                drawCircle(
+                    color = Color(0xFFFFD700).copy(alpha = alpha),
+                    radius = 2.5f + (i % 3),
+                    center = Offset(pX, pY)
+                )
+            }
+        }
+
+        // 3. Floating Brand Logos & Floating Badges Overlays
+        val floatingLogos = listOf(
+            "📸" to Offset(0.10f, 0.12f),
+            "▶️" to Offset(0.85f, 0.18f),
+            "📦" to Offset(0.06f, 0.48f),
+            "🛍️" to Offset(0.90f, 0.52f),
+            "👗" to Offset(0.18f, 0.78f),
+            "🎨" to Offset(0.82f, 0.82f),
+            "🖌️" to Offset(0.48f, 0.06f)
+        )
+
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val maxWidthPx = maxWidth.value
+            val maxHeightPx = maxHeight.value
+
+            floatingLogos.forEachIndexed { idx, (emoji, relPos) ->
+                val floatOffsetY = (sin(animProgress * 2 * Math.PI.toFloat() + idx) * 10f)
+                Box(
+                    modifier = Modifier
+                        .offset(
+                            x = (maxWidthPx * relPos.x).dp,
+                            y = (maxHeightPx * relPos.y + floatOffsetY).dp
+                        )
+                        .clip(CircleShape)
+                        .background(Color(0x221E1E28))
+                        .border(1.dp, Color(0xFFFFD700).copy(alpha = 0.3f), CircleShape)
+                        .padding(5.dp)
+                ) {
+                    Text(text = emoji, fontSize = 13.sp)
+                }
+            }
+
+            // Floating Verified Badge & Handshake
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = (maxWidthPx * 0.45f).dp,
+                        y = (maxHeightPx * 0.30f + sin(animProgress * 2 * Math.PI.toFloat()) * 12f).dp
+                    )
+                    .scale(pulseScale)
+                    .clip(CircleShape)
+                    .background(Color(0x331E1E28))
+                    .border(1.dp, Color(0xFFFFD700).copy(alpha = 0.5f), CircleShape)
+                    .padding(7.dp)
+            ) {
+                Text(text = "🤝", fontSize = 16.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun BrandCollabGlassHeader(
+    onClose: () -> Unit,
+    onReset: (() -> Unit)? = null
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "goldGlow")
+    val lineAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "lineGlow"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(12.dp, shape = RoundedCornerShape(22.dp), spotColor = Color(0xFFFFD700)),
+        shape = RoundedCornerShape(22.dp),
+        color = Color(0x331E1E28),
+        border = BorderStroke(
+            1.5.dp,
+            Brush.horizontalGradient(
+                listOf(
+                    Color(0xFFFFD700).copy(alpha = lineAlpha),
+                    Color(0xFFFF8C00).copy(alpha = 0.6f),
+                    Color(0xFFFFD700).copy(alpha = lineAlpha)
+                )
+            )
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFFFF8C00))))
+                            .shadow(8.dp, CircleShape, spotColor = Color(0xFFFFD700)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🤝", fontSize = 20.sp)
+                    }
+
+                    Column {
+                        Text(
+                            text = "Brand Collaboration Hub",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Build • Connect • Earn",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFD700)
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (onReset != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x22FFFFFF))
+                                .clickable { onReset() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Reset",
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x22FFFFFF))
+                            .clickable { onClose() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Animated Gold Line
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.5.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color(0xFFFFD700).copy(alpha = lineAlpha),
+                                Color(0xFFFF8C00),
+                                Color(0xFFFFD700).copy(alpha = lineAlpha),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+fun BrandCollabAiMentorAvatarCard(
+    welcomeText: String
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "avatarBreathing")
+    val breathScale by infiniteTransition.animateFloat(
+        initialValue = 0.98f,
+        targetValue = 1.03f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "breath"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(breathScale)
+            .shadow(12.dp, shape = RoundedCornerShape(20.dp), spotColor = Color(0xFFFFD700)),
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFF1E1E26),
+        border = BorderStroke(1.dp, Color(0xFFFFD700).copy(alpha = 0.6f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(Brush.radialGradient(listOf(Color(0xFFFFD700), Color(0xFF282834))))
+                    .border(2.dp, Color(0xFFFFD700), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "🤖", fontSize = 28.sp)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "AI Brand Collab Mentor",
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD700)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "✔️", fontSize = 11.sp)
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = welcomeText,
+                    fontSize = 12.sp,
+                    color = Color.White.copy(alpha = 0.95f),
+                    lineHeight = 16.sp
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun BrandCollabSwipeCardsSection() {
+    val cards = listOf(
+        SwipeCardData(
+            emoji = "🤝",
+            title = "What Is Brand Collaboration?",
+            desc = "Professional brands creators ke saath products aur services promote karne ke liye collaborate karti hain.",
+            badge = "CONCEPT"
+        ),
+        SwipeCardData(
+            emoji = "💰",
+            title = "How Creators Earn",
+            desc = "Story Promotion, Reels, Posts, YouTube Videos, Affiliate, & Long-Term Deals.",
+            badge = "MONETIZATION"
+        ),
+        SwipeCardData(
+            emoji = "🚀",
+            title = "Meet Your AI Mentor",
+            desc = "Main sirf information nahi dunga. Main personally guide karunga step-by-step.",
+            badge = "PERSONAL COACH"
+        ),
+        SwipeCardData(
+            emoji = "🏆",
+            title = "Everything You'll Learn",
+            desc = "Profile Optimization, Brand Ready Score, Media Kit, Finding Brands, DMs, Negotiation, Contracts & Payments.",
+            badge = "FULL ROADMAP"
+        )
+    )
+
+    val pagerState = rememberPagerState(pageCount = { cards.size })
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(170.dp)
+        ) { page ->
+            val item = cards[page]
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 4.dp)
+                    .shadow(10.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFFFD700)),
+                shape = RoundedCornerShape(20.dp),
+                color = Color(0xFF242430),
+                border = BorderStroke(1.dp, Color(0xFFFFD700).copy(alpha = 0.4f))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = item.emoji, fontSize = 30.sp)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFFFD700).copy(alpha = 0.15f))
+                                .border(0.8.dp, Color(0xFFFFD700).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = item.badge,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFFD700)
+                            )
+                        }
+                    }
+
+                    Column {
+                        Text(
+                            text = item.title,
+                            fontSize = 15.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = item.desc,
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.85f),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Pager Indicator Dots
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(cards.size) { index ->
+                val isSelected = pagerState.currentPage == index
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 3.dp)
+                        .size(if (isSelected) 20.dp else 7.dp, 7.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) Color(0xFFFFD700) else Color.White.copy(alpha = 0.3f))
+                )
+            }
+        }
+    }
+}
+
+data class SwipeCardData(
+    val emoji: String,
+    val title: String,
+    val desc: String,
+    val badge: String
+)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BrandCollabLanguagePickerSection(
+    selectedLanguage: String,
+    onSelectLanguage: (String) -> Unit
+) {
+    val languages = listOf("Hinglish", "Hindi", "English")
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Select Language / भाषा चुनें",
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFD700)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            languages.forEach { lang ->
+                val isSelected = selectedLanguage == lang
+                val flag = when (lang) {
+                    "Hindi" -> "🇮🇳 Hindi"
+                    "English" -> "🇺🇸 English"
+                    else -> "🌐 Hinglish"
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onSelectLanguage(lang) },
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isSelected) Color(0xFFFFD700).copy(alpha = 0.2f) else Color(0x22FFFFFF),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSelected) Color(0xFFFFD700) else Color.White.copy(alpha = 0.15f)
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = flag,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                            color = if (isSelected) Color(0xFFFFD700) else Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BrandCollabPersonalizationPickerSection(
+    selectedCreatorType: String,
+    onSelectCreatorType: (String) -> Unit
+) {
+    val types = listOf(
+        "Student" to "🎓",
+        "Content Creator" to "🎬",
+        "Influencer" to "🌟",
+        "YouTuber" to "📹",
+        "Business Owner" to "💼",
+        "Freelancer" to "💻",
+        "Beginner" to "🚀",
+        "Other" to "⭐"
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "What best describes you?",
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFD700)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            types.forEach { (label, emoji) ->
+                val isSelected = selectedCreatorType == label
+                Surface(
+                    modifier = Modifier.clickable { onSelectCreatorType(label) },
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isSelected) Color(0xFFFFD700).copy(alpha = 0.22f) else Color(0x1AFFFFFF),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSelected) Color(0xFFFFD700) else Color.White.copy(alpha = 0.15f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(text = emoji, fontSize = 14.sp)
+                        Text(
+                            text = label,
+                            fontSize = 11.5.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) Color(0xFFFFD700) else Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BrandCollabPreviewRoadmapSection() {
+    val timelineSteps = listOf(
+        "Create Profile",
+        "Become Brand Ready",
+        "Get First Reply",
+        "Close First Deal",
+        "Become Pro Creator"
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Preview Roadmap",
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFD700)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            timelineSteps.forEachIndexed { idx, stepName ->
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF242430),
+                    border = BorderStroke(1.dp, Color(0xFFFFD700).copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFFFD700)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${idx + 1}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.Black
+                            )
+                        }
+                        Text(
+                            text = stepName,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                if (idx < timelineSteps.size - 1) {
+                    Text(text = "➔", fontSize = 12.sp, color = Color(0xFFFFD700))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BrandCollabFeatureShowcaseGrid() {
+    val features = listOf(
+        "AI Mentor" to "🤖",
+        "AI Brand Score" to "🎯",
+        "AI Media Kit" to "📄",
+        "AI DM Generator" to "✉️",
+        "AI Negotiation" to "🤝",
+        "AI Contract Guide" to "📝",
+        "AI Scam Detector" to "🛡️",
+        "AI Payment Guide" to "💳"
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Feature Showcase",
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFD700)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            features.forEach { (title, emoji) ->
+                Surface(
+                    modifier = Modifier.width(110.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color(0x331E1E28),
+                    border = BorderStroke(1.dp, Color(0xFFFFD700).copy(alpha = 0.35f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = emoji, fontSize = 22.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = title,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * Main Dialog Entry Point
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -491,14 +1240,17 @@ fun BrandCollaborationAiDialog(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    // Animation & View States
     var isEntranceVisible by remember { mutableStateOf(false) }
-    var currentIntroCardIndex by remember { mutableIntStateOf(0) }
     var isIntroCompleted by remember { mutableStateOf(false) }
 
-    // Language Selection State
+    var isOnboardingDone by remember {
+        mutableStateOf(CreatorAcademyPrefs.isBrandCollabOnboardingDone(context))
+    }
     var selectedLanguage by remember {
-        mutableStateOf(CreatorAcademyPrefs.getBrandCollabLanguage(context).ifBlank { "HinEnglish" })
+        mutableStateOf(CreatorAcademyPrefs.getBrandCollabLanguage(context).ifBlank { "Hinglish" })
+    }
+    var selectedCreatorType by remember {
+        mutableStateOf(CreatorAcademyPrefs.getBrandCollabCreatorType(context).ifBlank { "Content Creator" })
     }
     var isLanguageSelected by remember {
         mutableStateOf(CreatorAcademyPrefs.getBrandCollabLanguage(context).isNotBlank())
@@ -521,8 +1273,16 @@ fun BrandCollaborationAiDialog(
     var thinkingMessage by remember { mutableStateOf("") }
     var customUserInput by remember { mutableStateOf("") }
 
-    // Pitch Generator Mode Drawer
-    var activeTab by remember { mutableStateOf("MENTOR_CHAT") } // MENTOR_CHAT, APPS_MARKET, PITCH_BUILDER, LANG_SETTINGS
+    // Pitch Generator & Profile Analysis Mode Drawer
+    val isProfileCompleted = remember { CreatorAcademyPrefs.isBrandCollabProfileCompleted(context) }
+    val isLevel2Completed = remember { CreatorAcademyPrefs.isBrandCollabLevel2Completed(context) }
+    var activeTab by remember {
+        mutableStateOf(
+            if (!isProfileCompleted) "LEVEL1_PROFILE"
+            else if (!isLevel2Completed) "LEVEL2_PROFILE"
+            else "MENTOR_CHAT"
+        )
+    } // LEVEL1_PROFILE, LEVEL2_PROFILE, MENTOR_CHAT, APPS_MARKET, PITCH_BUILDER, LANG_SETTINGS
     var pitchChannel by remember { mutableStateOf("INSTAGRAM_DM") }
     var targetBrandName by remember { mutableStateOf("Boat Audio") }
 
@@ -681,105 +1441,155 @@ fun BrandCollaborationAiDialog(
                     color = Color(0xFF0F1118),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
+                    Box(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        // ==================================================
-                        // DYNAMIC ISLAND HEADER WITH PROGRESS & LANG SELECTOR
-                        // ==================================================
-                        DynamicIslandHeader(
-                            stepNumber = currentStepIndex + 1,
-                            totalSteps = BrandCollabStaticData.guidedLessonsV2.size,
-                            currentLanguage = selectedLanguage,
-                            onOpenLanguageSelector = {
-                                showLanguageSwitcherModal = true
-                            },
-                            onCloseClick = onDismiss
-                        )
+                        // Background Loop
+                        BrandCollabAnimatedBackgroundLoop()
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        com.example.ui.components.ToolHeroBanner(
-                            toolType = com.example.ui.components.ToolHeroType.BRAND_COLLAB,
-                            height = 110.dp,
-                            badgeText = null,
-                            subtitleText = null
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        if (!isLanguageSelected) {
+                        if (!isOnboardingDone) {
                             // ==================================================
-                            // 1. MANDATORY LANGUAGE SELECTION SCREEN
+                            // MASTER PHASE 1 — NEW ONBOARDING FLOW
                             // ==================================================
-                            LanguageSelectionScreen(
-                                currentLanguage = selectedLanguage,
-                                onLanguageSelected = { lang ->
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    selectedLanguage = lang
-                                    isLanguageSelected = true
-                                    CreatorAcademyPrefs.setBrandCollabLanguage(context, lang)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                BrandCollabGlassHeader(
+                                    onClose = onDismiss
+                                )
+
+                                val welcomeGreeting = remember {
+                                    MASTER_PHASE1_WELCOME_STYLES.random()
                                 }
-                            )
-                        } else if (!isIntroCompleted) {
-                            // ==================================================
-                            // 2. INTRODUCTION & SWIPEABLE ROADMAP CARDS
-                            // ==================================================
-                            IntroCardsView(
-                                onStartMentorship = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isIntroCompleted = true
-                                },
-                                onSkipIntro = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isIntroCompleted = true
-                                }
-                            )
-                        } else if (!isProfileSet) {
-                            // ==================================================
-                            // 3. ZERO KNOWLEDGE PROFILE SETUP (TAILORS MENTOR)
-                            // ==================================================
-                            ZeroKnowledgeProfileSetup(
-                                profile = userProfile,
-                                onProfileChanged = { userProfile = it },
-                                onStartMentorship = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isProfileSet = true
-                                    if (!showWelcomeBackDialog) {
-                                        loadStepLesson(0)
+
+                                BrandCollabAiMentorAvatarCard(welcomeText = welcomeGreeting)
+
+                                BrandCollabSwipeCardsSection()
+
+                                BrandCollabLanguagePickerSection(
+                                    selectedLanguage = selectedLanguage,
+                                    onSelectLanguage = { lang ->
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        selectedLanguage = lang
+                                    }
+                                )
+
+                                BrandCollabPersonalizationPickerSection(
+                                    selectedCreatorType = selectedCreatorType,
+                                    onSelectCreatorType = { type ->
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        selectedCreatorType = type
+                                    }
+                                )
+
+                                BrandCollabPreviewRoadmapSection()
+
+                                BrandCollabFeatureShowcaseGrid()
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                // Single Premium Glass Gold Button
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .shadow(12.dp, shape = RoundedCornerShape(18.dp), spotColor = Color(0xFFFFD700))
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            CreatorAcademyPrefs.setBrandCollabLanguage(context, selectedLanguage)
+                                            CreatorAcademyPrefs.setBrandCollabCreatorType(context, selectedCreatorType)
+                                            CreatorAcademyPrefs.setBrandCollabOnboardingDone(context, true)
+                                            isOnboardingDone = true
+                                            if (chatMessages.isEmpty()) {
+                                                loadStepLesson(0)
+                                            }
+                                        },
+                                    shape = RoundedCornerShape(18.dp),
+                                    color = Color(0xFFFFD700),
+                                    border = BorderStroke(1.5.dp, Color(0xFFFFF099))
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 15.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Text(
+                                                text = "Start Your Journey",
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color.Black
+                                            )
+                                            Text(text = "🚀", fontSize = 18.sp)
+                                        }
                                     }
                                 }
-                            )
+
+                                Spacer(modifier = Modifier.height(20.dp))
+                            }
                         } else {
                             // ==================================================
-                            // 4. MAIN MENTOR DASHBOARD & CHAT INTERFACE
+                            // MASTER PHASE 1 — MAIN WORKSPACE
                             // ==================================================
-                            // Tab Selector
-                            Row(
+                            Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(Color(0x15FFFFFF))
-                                    .padding(4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .fillMaxSize()
+                                    .padding(16.dp)
                             ) {
-                                TabPill("AI Mentor 💬", activeTab == "MENTOR_CHAT") {
-                                    activeTab = "MENTOR_CHAT"
-                                }
-                                TabPill("Real Apps 📱", activeTab == "APPS_MARKET") {
-                                    activeTab = "APPS_MARKET"
-                                }
-                                TabPill("Pitch Coach ✉️", activeTab == "PITCH_BUILDER") {
-                                    activeTab = "PITCH_BUILDER"
-                                }
-                                TabPill("Lang 🌐", activeTab == "LANG_SETTINGS") {
-                                    activeTab = "LANG_SETTINGS"
-                                }
-                            }
+                                BrandCollabGlassHeader(
+                                    onClose = onDismiss,
+                                    onReset = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        CreatorAcademyPrefs.setBrandCollabOnboardingDone(context, false)
+                                        isOnboardingDone = false
+                                    }
+                                )
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                // Tab Selector
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    TabPill("Level 1 📊", activeTab == "LEVEL1_PROFILE") {
+                                        activeTab = "LEVEL1_PROFILE"
+                                    }
+                                    TabPill("Level 2 🎯", activeTab == "LEVEL2_PROFILE") {
+                                        activeTab = "LEVEL2_PROFILE"
+                                    }
+                                    TabPill("AI Mentor 💬", activeTab == "MENTOR_CHAT") {
+                                        activeTab = "MENTOR_CHAT"
+                                    }
+                                    TabPill("Real Apps 📱", activeTab == "APPS_MARKET") {
+                                        activeTab = "APPS_MARKET"
+                                    }
+                                    TabPill("Pitch Coach ✉️", activeTab == "PITCH_BUILDER") {
+                                        activeTab = "PITCH_BUILDER"
+                                    }
+                                    TabPill("Lang 🌐", activeTab == "LANG_SETTINGS") {
+                                        activeTab = "LANG_SETTINGS"
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                if (chatMessages.isEmpty() && !showWelcomeBackDialog) {
+                                    LaunchedEffect(Unit) {
+                                        loadStepLesson(savedStepIndex.coerceAtLeast(0))
+                                    }
+                                }
 
                             if (showWelcomeBackDialog) {
                                 SmartWelcomeBackDialog(
@@ -796,6 +1606,50 @@ fun BrandCollaborationAiDialog(
                                 )
                             } else {
                                 when (activeTab) {
+                                    "LEVEL1_PROFILE" -> {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxWidth()
+                                        ) {
+                                            BrandCollabLevel1ProfileAnalysisView(
+                                                onProfileAnalysisCompleted = { updatedData ->
+                                                    userProfile = userProfile.copy(
+                                                        platform = updatedData["platform"] ?: "Instagram",
+                                                        followers = updatedData["followers"] ?: "2K–10K",
+                                                        niche = updatedData["niche"] ?: "Fashion",
+                                                        experience = updatedData["level"] ?: "Beginner"
+                                                    )
+                                                    activeTab = "LEVEL2_PROFILE"
+                                                    Toast.makeText(context, "Level 1 Completed! Moving to Level 2 🚀", Toast.LENGTH_SHORT).show()
+                                                },
+                                                onBack = {
+                                                    activeTab = "MENTOR_CHAT"
+                                                }
+                                            )
+                                        }
+                                    }
+
+                                    "LEVEL2_PROFILE" -> {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxWidth()
+                                        ) {
+                                            BrandCollabLevel2BecomeBrandReadyView(
+                                                userNiche = userProfile.niche,
+                                                userPlatform = userProfile.platform,
+                                                onLevel2Completed = {
+                                                    activeTab = "MENTOR_CHAT"
+                                                    Toast.makeText(context, "Level 2 Completed! Your Profile is Brand Ready 🎉", Toast.LENGTH_SHORT).show()
+                                                },
+                                                onBack = {
+                                                    activeTab = "LEVEL1_PROFILE"
+                                                }
+                                            )
+                                        }
+                                    }
+
                                     "MENTOR_CHAT" -> {
                                         LaunchedEffect(chatMessages.size, isThinking) {
                                             if (chatMessages.isNotEmpty()) {
@@ -1217,6 +2071,1172 @@ fun BrandCollaborationAiDialog(
             },
             onDismiss = { showRestartConfirmDialog = false }
         )
+    }
+}
+}
+
+
+val MASTER_PHASE2_MENTOR_REPLIES = listOf(
+    "Awesome! Ab main tumhare creator profile ko analyse karunga. Uske baad tumhare liye ek personalized Brand Collaboration Roadmap banaunga.",
+    "Super excited! Let's analyze your creator stats now. Next, I'll generate a custom ₹50k brand deal roadmap for you!",
+    "Great work! Ab tumhari profile reach aur niche audit karte hain. Iske baad aagaya tumhara step-by-step pitch plan!",
+    "Fantastic! Pehle main tumhare followers aur engagement rate ko evaluate karunga, fir personalized brand list prepare hogi.",
+    "Let's go! Ab tumhare creator level ka complete AI analysis hoga. Taiyar ho apne pehle paid brand campaign ke liye?",
+    "Brilliant choice! Main tumhare main platform aur niche ka deep breakdown karke, tumhara Brand Readiness Index calculate karunga.",
+    "Awesome progress! Profile analysis complete hote hi tumhein milaga tumhara Daily Mission + Customized Collab Roadmap.",
+    "Perfect! Ab hum tumhare exact growth bottlenecks target karenge taaki top brand managers direct DM mein reply karein.",
+    "Welcoming your creator entry! Let's inspect your current stage and unlock your first +100 XP Brand Badge!",
+    "Top class! Ab main analyse karunga ki tumhara content kitna brand-friendly hai aur kitni pricing quote karni chahiye.",
+    "Namaste Creator! Let's scan your Instagram & YouTube potential to land sponsorships from brands like Boat & Nykaa.",
+    "Woohoo! Step 1 profile analysis starts now. Answer 6 quick questions to receive your tailored brand pitch roadmap.",
+    "Shabash! Pehle tumhare channel/page ka readiness level calculate karte hain. Tabhi toh ₹20k-₹50k rates demand karoge!",
+    "Ready to level up? Let's check your platform focus and follower tier to optimize your media kit pitch strategy.",
+    "Welcome to Level 1! Main tumhare niche potential, audience trust aur pricing power ko scientifically measure karunga.",
+    "Awesome energy! Zero knowledge se brand pro banne ka raasta profile audit se shuru hota hai. Chaliye shuru karein!",
+    "Hey Rockstar! Give me 60 seconds to analyze your profile metrics, and I'll map out your exact brand deal steps.",
+    "Outstanding! Profile analysis done hone ke baad tumhein Creator Readiness Score (0-100) aur Daily Mission milega.",
+    "Let's turn those views into monthly brand retainers! Let's analyze your platform, niche, and main challenges now.",
+    "Aapka personal AI Brand Mentor ready hai! Chaliye 6 steps me aapke creator profile ki puri SWOT analysis karte hain.",
+    "Big moves ahead! I'm going to scan your creator niche and generate an 8-stage personalized brand execution plan.",
+    "Ready for sponsorship success? Let's analyze where you stand today so we can target high-budget brand deals.",
+    "Ekdam sahi direction! Profile analyze karne se pata chalega ki aapko pehle Bio fix karna hai ya Direct Outreach.",
+    "Brilliant! Let's evaluate your primary platform, goal, and biggest obstacle to build a bulletproof pitch deck.",
+    "Zero to Sponsored Creator journey! First, let's establish your Creator Profile Baseline with this 6-step AI audit.",
+    "Hello Champ! Aaj hum tumhara Trust Score, Brand Potential aur Negotiation Tier calculate karne wale hain.",
+    "Full power! 6 simple questions, and boom — your customized Brand Collaboration Roadmap will be ready!",
+    "Zabardast! Ab tumhare account ki brand valuation aur pricing strategy prepare hogi. Let me analyze your inputs.",
+    "Pro level thinking! Analyzing your main platform and follower count now to match you with top verified marketplaces.",
+    "Awesome creator mindset! Let's execute this Level 1 profile scan to unlock your Creator Analysis Completed Badge!",
+    "Hello Superstar! Profile audit shuru karte hain taaki aapko pata chale ki Boat, Mamaearth aur Snitch se deals kaise lein.",
+    "Great determination! Answering these 6 questions unlocks your 8-stage step-by-step brand collaboration roadmap.",
+    "AI Mentor active! Let's audit your niche marketability, estimated deal pricing, and audience engagement strength.",
+    "Welcome to Phase 2 Level 1! Let's build your verified creator profile so brand campaign managers take you seriously.",
+    "Target unlocked! 6 steps in, and I'll reveal your Creator Readiness Score with glowing personalized analytics.",
+    "Kamaal ka decision! Let me evaluate your primary platform and biggest problem to craft tailored DM scripts.",
+    "Ready to pitch like a pro? Let me first map your current follower count and creator level into an actionable plan.",
+    "High value creator incoming! Let me analyze your niche and goals to give you today's +100 XP Daily Mission.",
+    "Welcome! Pehle profile analyze karenge, fir personalized media kit templates aur brand application links denge.",
+    "Game-changer moment! Let's run a instant AI scan on your main channel type and target brand deal milestones.",
+    "Sahi pakde hain! Profile analysis gives us the exact baseline needed to negotiate ₹10,000+ per Instagram Reel.",
+    "Greetings! Let's kick off your creator profiling to diagnose why brands haven't replied to your previous pitches.",
+    "Let's fix every bottleneck! 6 quick steps to identify your growth potential, trust score, and negotiation strategy.",
+    "Powerful start! Your inputs will train my AI model to suggest exact email pitch subject lines for your niche.",
+    "Phenomenal! Let me inspect your main platform and follower tier so we can calculate your customized Rate Card.",
+    "Welcome Creator! Profile analysis is 5% of your total course, but it sets up 100% of your sponsorship success.",
+    "Exciting times! Let's build your creator profile card and unlock your personalized 8-step roadmap timeline.",
+    "Ek number choice! 6 steps complete karo, aur dekho tumhara AI Readiness Score 0 se 100 tak kaise jump karta hai.",
+    "Master Creator Mode ON! Analyzing your channel niche and level to assign your very first 8-minute Daily Mission.",
+    "Aagaye aap! Chaliye aapke creator account ko brand-ready banane ki pehli seedi profile analysis se shuru karte hain.",
+    "High performance AI loading! Answering these 6 choices helps me customize your entire Brand Collaboration Hub.",
+    "Let's get those paid deals! First, let me scan your platform preference and primary goal in this quick AI questionnaire.",
+    "Awesome! Profile audit se pata chalega ki aap Fashion, Tech ya Lifestyle me kis brand manager ko pitch kar sakte hain.",
+    "Super clean execution! Let's analyze your follower tier and biggest problem to give you direct solutions.",
+    "Welcome onboard! I'm ready to evaluate your creator metrics and craft your step-by-step outreach blueprint.",
+    "Bada socho! Profile analysis is your first official milestone in landing commercial brand sponsorship contracts.",
+    "Solid start! Let's analyze your primary platform, follower base, and main goals to unlock your +100 XP Reward.",
+    "Ready to claim your spot in the creator economy? Let me analyze your creator profile and build your roadmap now!",
+    "Ultimate Creator Blueprint! 6 simple clicks to analyze your readiness and generate your personalized timeline.",
+    "Chaliye shuru karte hain! Profile analysis completed hote hi tumhara personal Brand Collaboration Hub active ho jayega."
+)
+
+/**
+ * Premium 5% Animated Progress Ring Component
+ */
+@Composable
+fun BrandCollabProgressRing(
+    progressPercent: Float = 0.05f,
+    displayText: String = "5%",
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "ring_glow")
+    val rotationAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing), RepeatMode.Restart),
+        label = "rotation"
+    )
+
+    val pulseAnim by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing), RepeatMode.Reverse),
+        label = "pulse"
+    )
+
+    Box(
+        modifier = modifier.size(68.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokeWidth = 5.dp.toPx()
+            val radius = (size.minDimension - strokeWidth) / 2
+            val center = Offset(size.width / 2, size.height / 2)
+
+            drawCircle(
+                color = Color(0x33FFD700),
+                radius = radius,
+                center = center,
+                style = Stroke(width = strokeWidth)
+            )
+
+            drawArc(
+                brush = Brush.sweepGradient(
+                    colors = listOf(
+                        Color(0xFFFFD700),
+                        Color(0xFFFFF099),
+                        Color(0xFFE2E8F0),
+                        Color(0xFFFFD700)
+                    )
+                ),
+                startAngle = -90f + rotationAnim,
+                sweepAngle = 360f * progressPercent,
+                useCenter = false,
+                style = Stroke(width = strokeWidth + 1.dp.toPx())
+            )
+        }
+
+        Surface(
+            shape = CircleShape,
+            color = Color(0xFF0D131A),
+            border = BorderStroke(1.dp, Color(0x66FFD700)),
+            modifier = Modifier
+                .size(52.dp)
+                .scale(pulseAnim)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = displayText,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD700)
+                    )
+                    Text(
+                        text = "LEVEL 1",
+                        fontSize = 7.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * MASTER PHASE 2 — LEVEL 1 CREATOR PROFILE ANALYSIS VIEW
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BrandCollabLevel1ProfileAnalysisView(
+    onProfileAnalysisCompleted: (Map<String, String>) -> Unit,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+
+    val savedProfileData = remember { CreatorAcademyPrefs.getBrandCollabProfileData(context) }
+    var isAlreadyCompleted by remember { mutableStateOf(savedProfileData["completed"] as? Boolean ?: false) }
+
+    var currentStep by remember { mutableIntStateOf(1) }
+    var selectedPlatform by remember { mutableStateOf(savedProfileData["platform"] as? String ?: "Instagram") }
+    var selectedFollowers by remember { mutableStateOf(savedProfileData["followers"] as? String ?: "2K–10K") }
+    var customFollowersText by remember { mutableStateOf("") }
+    var selectedNiche by remember { mutableStateOf(savedProfileData["niche"] as? String ?: "Fashion") }
+    var selectedLevel by remember { mutableStateOf(savedProfileData["level"] as? String ?: "Beginner") }
+    var selectedGoal by remember { mutableStateOf(savedProfileData["goal"] as? String ?: "Get My First Brand Deal") }
+    var selectedProblem by remember { mutableStateOf(savedProfileData["problem"] as? String ?: "No Brand Replies") }
+
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var scanMessageIndex by remember { mutableIntStateOf(0) }
+    var calculatedScore by remember { mutableIntStateOf(78) }
+
+    val mentorMessage = remember { MASTER_PHASE2_MENTOR_REPLIES.random() }
+
+    val scanMessages = listOf(
+        "⚡ Scanning profile parameters across platforms...",
+        "📊 Calculating audience engagement potential...",
+        "💡 Matching brand categories for ${selectedNiche}...",
+        "🏆 Evaluating Creator Readiness Index (0–100)...",
+        "🎯 Generating personalized 8-step Brand Collab Roadmap..."
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 520.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0x22121824),
+                border = BorderStroke(
+                    1.5.dp,
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFFFD700).copy(alpha = 0.6f), Color(0x33FFFFFF), Color(0xFFFFD700).copy(alpha = 0.4f))
+                    )
+                ),
+                shadowElevation = 10.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Brand Collaboration Hub",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "👑", fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Let's Build Your Creator Profile",
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFFFD700)
+                            )
+                        }
+
+                        BrandCollabProgressRing(
+                            progressPercent = if (isAlreadyCompleted) 1.0f else (currentStep.toFloat() / 6f) * 0.05f + 0.05f,
+                            displayText = if (isAlreadyCompleted) "100%" else "5%"
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color.Transparent, Color(0xFFFFD700), Color.Transparent)
+                                )
+                            )
+                    )
+                }
+            }
+
+            val infiniteTransition = rememberInfiniteTransition(label = "avatar_breath")
+            val breathScale by infiniteTransition.animateFloat(
+                initialValue = 0.97f,
+                targetValue = 1.03f,
+                animationSpec = infiniteRepeatable(tween(1600, easing = LinearEasing), RepeatMode.Reverse),
+                label = "breath"
+            )
+
+            Surface(
+                shape = RoundedCornerShape(22.dp),
+                color = Color(0x1A1E2638),
+                border = BorderStroke(1.dp, Color(0x33FFD700)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .scale(breathScale)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFFFFD700).copy(alpha = 0.35f), Color.Transparent)
+                                )
+                            )
+                            .border(BorderStroke(1.5.dp, Color(0xFFFFD700)), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🤖", fontSize = 28.sp)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "AI Mentor Says",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFD700)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "✨", fontSize = 11.sp)
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = if (isAlreadyCompleted)
+                                "Awesome! Tumhara Creator Profile complete ho gaya hai. Yahan tumhari detailed readiness analytics aur personalized roadmap hai."
+                            else
+                                mentorMessage,
+                            fontSize = 12.5.sp,
+                            color = TextWhite,
+                            lineHeight = 17.sp
+                        )
+                    }
+                }
+            }
+
+            if (isAnalyzing) {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF101726),
+                    border = BorderStroke(1.5.dp, Color(0xFFFFD700)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(90.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x22FFD700))
+                                .border(BorderStroke(2.dp, Color(0xFFFFD700)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🔍", fontSize = 42.sp)
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Analyzing Creator Profile...",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextWhite
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = scanMessages.getOrElse(scanMessageIndex) { scanMessages.first() },
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFFFD700),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else if (isAlreadyCompleted) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color(0x22182234),
+                        border = BorderStroke(1.5.dp, Color(0xFFFFD700)),
+                        shadowElevation = 8.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "CREATOR READINESS SCORE",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFFD700),
+                                letterSpacing = 1.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Box(
+                                modifier = Modifier.size(120.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    val strokeWidth = 10.dp.toPx()
+                                    val radius = (size.minDimension - strokeWidth) / 2
+                                    val center = Offset(size.width / 2, size.height / 2)
+
+                                    drawCircle(
+                                        color = Color(0x33FFFFFF),
+                                        radius = radius,
+                                        center = center,
+                                        style = Stroke(width = strokeWidth)
+                                    )
+
+                                    drawArc(
+                                        brush = Brush.sweepGradient(
+                                            colors = listOf(Color(0xFFFFD700), Color(0xFFFFF099), Color(0xFFFFD700))
+                                        ),
+                                        startAngle = -90f,
+                                        sweepAngle = 360f * (calculatedScore / 100f),
+                                        useCenter = false,
+                                        style = Stroke(width = strokeWidth + 1.dp.toPx())
+                                    )
+                                }
+
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "$calculatedScore",
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextWhite
+                                    )
+                                    Text(
+                                        text = "/ 100",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFFD700)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0x33FFD700),
+                                border = BorderStroke(1.dp, Color(0xFFFFD700))
+                            ) {
+                                Text(
+                                    text = "🔥 Brand Ready Tier",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFFD700),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        MetricGlassCard(
+                            title = "Brand Potential",
+                            value = "85% 🔥",
+                            subtitle = "High Demand",
+                            modifier = Modifier.weight(1f)
+                        )
+                        MetricGlassCard(
+                            title = "Growth Potential",
+                            value = "92% 🚀",
+                            subtitle = "Viral Reach",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        MetricGlassCard(
+                            title = "Negotiation Level",
+                            value = selectedLevel,
+                            subtitle = "Rate Power",
+                            modifier = Modifier.weight(1f)
+                        )
+                        MetricGlassCard(
+                            title = "Trust Score",
+                            value = "88% 🛡️",
+                            subtitle = "Verified",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color(0x1A141A29),
+                        border = BorderStroke(1.dp, Color(0x33FFFFFF)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(18.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "🗺️ Your Personalized Roadmap",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                                Text(
+                                    text = "8 Steps",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFFD700)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            val roadmapMilestones = listOf(
+                                Pair("Optimize Profile", "⚙️ Fix Bio, Links & Highlights"),
+                                Pair("Become Brand Ready", "🚀 Create High-Quality Content"),
+                                Pair("Create Media Kit", "📄 Professional Rate Card & Stats"),
+                                Pair("Find Brands", "🔎 Direct Marketplaces & Agencies"),
+                                Pair("Professional Outreach", "✉️ DM & Email Pitch Scripts"),
+                                Pair("Negotiate", "🤝 50% Advance & Usage Rights"),
+                                Pair("Close First Deal", "💰 Finalize Contract & Post Reel"),
+                                Pair("Become Premium Creator", "👑 Monthly Paid Retainers")
+                            )
+
+                            roadmapMilestones.forEachIndexed { index, (title, sub) ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                                .background(if (index == 0) Color(0xFFFFD700) else Color(0x33FFFFFF))
+                                                .border(
+                                                    BorderStroke(1.5.dp, if (index == 0) Color.White else Color(0x44FFFFFF)),
+                                                    CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (index == 0) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = "Active",
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(12.dp)
+                                                )
+                                            } else {
+                                                Text(text = "${index + 1}", fontSize = 10.sp, color = TextWhite)
+                                            }
+                                        }
+
+                                        if (index < roadmapMilestones.size - 1) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(2.dp)
+                                                    .height(26.dp)
+                                                    .background(if (index == 0) Color(0xFFFFD700) else Color(0x22FFFFFF))
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column {
+                                        Text(
+                                            text = title,
+                                            fontSize = 13.sp,
+                                            fontWeight = if (index == 0) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                            color = if (index == 0) Color(0xFFFFD700) else TextWhite
+                                        )
+                                        Text(
+                                            text = sub,
+                                            fontSize = 10.5.sp,
+                                            color = TextWhite.copy(alpha = 0.65f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0x22FFD700),
+                        border = BorderStroke(1.2.dp, Color(0xFFFFD700)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "🎯 TODAY'S MISSION",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFFFFD700)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Complete Creator Analysis",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                                Text(
+                                    text = "Estimated Time: 8 Minutes",
+                                    fontSize = 11.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFFFFD700)
+                            ) {
+                                Text(
+                                    text = "+100 XP ✓",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0x1A10281A),
+                        border = BorderStroke(1.5.dp, Color(0xFF4ADE80)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "🏆", fontSize = 32.sp)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Creator Analysis Completed",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF4ADE80)
+                                )
+                                Text(
+                                    text = "Badge unlocked & saved to profile memory!",
+                                    fontSize = 11.5.sp,
+                                    color = TextWhite.copy(alpha = 0.75f)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Color(0x22FFFFFF))
+                                .border(BorderStroke(1.dp, Color(0x44FFFFFF)), RoundedCornerShape(24.dp))
+                                .clickable {
+                                    isAlreadyCompleted = false
+                                    currentStep = 1
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Restart Audit 🔄",
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1.3f)
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Color(0xFFFFD700))
+                                .clickable {
+                                    onProfileAnalysisCompleted(
+                                        mapOf(
+                                            "platform" to selectedPlatform,
+                                            "followers" to if (selectedFollowers == "Custom") customFollowersText.ifBlank { "Custom" } else selectedFollowers,
+                                            "niche" to selectedNiche,
+                                            "level" to selectedLevel,
+                                            "goal" to selectedGoal,
+                                            "problem" to selectedProblem
+                                        )
+                                    )
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Continue Learning ➔",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            } else {
+                Surface(
+                    shape = RoundedCornerShape(26.dp),
+                    color = Color(0x1E121824),
+                    border = BorderStroke(1.5.dp, Color(0x33FFD700)),
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "STEP $currentStep OF 6",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFFD700),
+                                letterSpacing = 1.sp
+                            )
+
+                            Text(
+                                text = "${((currentStep / 6f) * 100).toInt()}% Done",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite.copy(alpha = 0.6f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        when (currentStep) {
+                            1 -> {
+                                Text(
+                                    text = "Choose Your Main Platform",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val platforms = listOf(
+                                    Triple("Instagram", "Instagram", "📸"),
+                                    Triple("YouTube", "YouTube", "🎬"),
+                                    Triple("Facebook", "Facebook", "📘"),
+                                    Triple("LinkedIn", "LinkedIn", "💼"),
+                                    Triple("Multiple Platforms", "Multiple Platforms", "🌐")
+                                )
+
+                                platforms.forEach { (code, name, icon) ->
+                                    SelectableGlassCard(
+                                        title = name,
+                                        icon = icon,
+                                        isSelected = selectedPlatform == code,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedPlatform = code
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+
+                            2 -> {
+                                Text(
+                                    text = "Select Your Follower Count",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val followerRanges = listOf("0–500", "500–2K", "2K–10K", "10K–50K", "50K+", "Custom")
+
+                                followerRanges.forEach { range ->
+                                    SelectableGlassCard(
+                                        title = range,
+                                        icon = "👥",
+                                        isSelected = selectedFollowers == range,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedFollowers = range
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+
+                                if (selectedFollowers == "Custom") {
+                                    OutlinedTextField(
+                                        value = customFollowersText,
+                                        onValueChange = { customFollowersText = it },
+                                        placeholder = { Text("Enter exact follower count (e.g., 7.5K)", color = TextWhite.copy(alpha = 0.4f), fontSize = 12.sp) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = Color(0xFFFFD700),
+                                            unfocusedBorderColor = Color(0x33FFFFFF),
+                                            focusedTextColor = TextWhite,
+                                            unfocusedTextColor = TextWhite
+                                        ),
+                                        shape = RoundedCornerShape(14.dp),
+                                        singleLine = true
+                                    )
+                                }
+                            }
+
+                            3 -> {
+                                Text(
+                                    text = "Select Your Content Niche",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val niches = listOf(
+                                    "Fashion", "Beauty", "Gaming", "Technology", "Education",
+                                    "Finance", "Fitness", "Food", "Travel", "Lifestyle",
+                                    "Comedy", "Business", "Photography", "Other"
+                                )
+
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    niches.forEach { niche ->
+                                        val isSel = selectedNiche == niche
+                                        Surface(
+                                            modifier = Modifier.clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                selectedNiche = niche
+                                            },
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = if (isSel) Color(0x33FFD700) else Color(0x18FFFFFF),
+                                            border = BorderStroke(
+                                                if (isSel) 1.5.dp else 1.dp,
+                                                if (isSel) Color(0xFFFFD700) else Color(0x22FFFFFF)
+                                            )
+                                        ) {
+                                            Text(
+                                                text = niche,
+                                                fontSize = 12.5.sp,
+                                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isSel) Color(0xFFFFD700) else TextWhite,
+                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            4 -> {
+                                Text(
+                                    text = "Select Your Creator Level",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val levels = listOf(
+                                    Pair("Beginner", "Zero brand experience, just starting out"),
+                                    Pair("Intermediate", "Done 1-3 gifted collabs or small deals"),
+                                    Pair("Advanced", "Regularly posting sponsored content"),
+                                    Pair("Professional", "Full-time creator with rate cards")
+                                )
+
+                                levels.forEach { (lvl, desc) ->
+                                    SelectableGlassCard(
+                                        title = lvl,
+                                        subtitle = desc,
+                                        icon = "🌟",
+                                        isSelected = selectedLevel == lvl,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedLevel = lvl
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+
+                            5 -> {
+                                Text(
+                                    text = "What Is Your Primary Goal?",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val goals = listOf(
+                                    "Get My First Brand Deal",
+                                    "Earn Monthly Income",
+                                    "Become Full-Time Creator",
+                                    "Premium Brand Collaborations",
+                                    "Grow Personal Brand"
+                                )
+
+                                goals.forEach { goal ->
+                                    SelectableGlassCard(
+                                        title = goal,
+                                        icon = "🎯",
+                                        isSelected = selectedGoal == goal,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedGoal = goal
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+
+                            6 -> {
+                                Text(
+                                    text = "What Is Your Biggest Problem?",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val problems = listOf(
+                                    "No Brand Replies",
+                                    "Low Followers",
+                                    "Low Engagement",
+                                    "No Media Kit",
+                                    "Don't Know Pricing",
+                                    "Negotiation Fear",
+                                    "Don't Know Where To Find Brands",
+                                    "Other"
+                                )
+
+                                problems.forEach { prob ->
+                                    SelectableGlassCard(
+                                        title = prob,
+                                        icon = "⚠️",
+                                        isSelected = selectedProblem == prob,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedProblem = prob
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            if (currentStep > 1) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .border(BorderStroke(1.dp, Color(0x33FFFFFF)), RoundedCornerShape(24.dp))
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            currentStep -= 1
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "← Back",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite
+                                    )
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1.5f)
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(Color(0xFFFFD700))
+                                    .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFFFFD700))
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (currentStep < 6) {
+                                            currentStep += 1
+                                        } else {
+                                            scope.launch {
+                                                isAnalyzing = true
+                                                for (i in 0 until scanMessages.size) {
+                                                    scanMessageIndex = i
+                                                    delay(600)
+                                                }
+                                                CreatorAcademyPrefs.saveBrandCollabProfile(
+                                                    context = context,
+                                                    platform = selectedPlatform,
+                                                    followers = if (selectedFollowers == "Custom") customFollowersText.ifBlank { "Custom" } else selectedFollowers,
+                                                    niche = selectedNiche,
+                                                    level = selectedLevel,
+                                                    goal = selectedGoal,
+                                                    problem = selectedProblem
+                                                )
+                                                isAnalyzing = false
+                                                isAlreadyCompleted = true
+                                            }
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (currentStep == 6) "Analyze Profile 🚀" else "Continue ➔",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+/**
+ * Helper Selectable Glass Card Component
+ */
+@Composable
+private fun SelectableGlassCard(
+    title: String,
+    subtitle: String? = null,
+    icon: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        color = if (isSelected) Color(0x33FFD700) else Color(0x18FFFFFF),
+        border = BorderStroke(
+            if (isSelected) 1.5.dp else 1.dp,
+            if (isSelected) Color(0xFFFFD700) else Color(0x22FFFFFF)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = icon, fontSize = 20.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = title,
+                        fontSize = 13.5.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) Color(0xFFFFD700) else TextWhite
+                    )
+                    if (!subtitle.isNullOrBlank()) {
+                        Text(
+                            text = subtitle,
+                            fontSize = 10.5.sp,
+                            color = TextWhite.copy(alpha = 0.65f)
+                        )
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) Color(0xFFFFD700) else Color.Transparent)
+                    .border(
+                        BorderStroke(1.5.dp, if (isSelected) Color(0xFFFFD700) else Color(0x44FFFFFF)),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        tint = Color.Black,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Helper Metric Glass Card Component
+ */
+@Composable
+private fun MetricGlassCard(
+    title: String,
+    value: String,
+    subtitle: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0x1AFFFFFF),
+        border = BorderStroke(1.dp, Color(0x22FFFFFF)),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = title,
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextWhite.copy(alpha = 0.65f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = value,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFFFFD700)
+            )
+            Text(
+                text = subtitle,
+                fontSize = 9.5.sp,
+                color = TextWhite.copy(alpha = 0.5f)
+            )
+        }
     }
 }
 
@@ -2798,3 +4818,1279 @@ private suspend fun generateGeminiMentorResponse(
         language = selectedLanguage
     )
 }
+
+val MASTER_PHASE3_LEVEL2_MENTOR_REPLIES = listOf(
+    "Brands sirf followers nahi dekhte. Woh pehle tumhara profile dekhte hain. Aaj hum tumhari profile ko Brand Ready banayenge.",
+    "Welcome to Level 2! High-paying brands deal dene se pehle tumhara DP, Bio aur Grid check karte hain. Let's optimize everything today!",
+    "Followers reach laate hain, par Brand Ready Profile deals convert karta hai! Ready to transform your creator identity?",
+    "Awesome momentum! Aaj hum tumhare account ko ek professional brand magnet mein transform karenge.",
+    "Brand managers get 100+ DMs daily. Stand out karne ke liye aapki profile authority crystal clear honi chahiye!",
+    "Level 2 unlocked! Profile optimization is the secret weapon of micro-creators landing ₹50,000+ brand retainers.",
+    "Let's fix every profile flaw! Zero to sponsored creator journey ka sabse critical stage hai profile authority.",
+    "High-converting Bio + Professional DP = 80% higher brand response rate! Let's build yours step by step.",
+    "Brands want creators who look reliable & aesthetic. Aaj tumhare username se lekar highlights tak sab polish karenge.",
+    "Super excited! Step 1 to 10 execute karke tumhara Creator Trust Score 90%+ target karenge.",
+    "Namaste Creator! Clean bio and structured highlights make brands feel safe investing ₹20k-₹100k in your reels.",
+    "Ready for Level 2? Answer 10 quick profile optimization steps to claim your Brand Ready Profile Badge (+200 XP)!",
+    "Profile audit complete karne wale creators ko brand managers direct DM mein barter & paid campaigns offer karte hain.",
+    "Shabash! Apne niche ki top 1% profile aesthetic create karne ke liye hum Step 1 Profile Review se shuru karte hain.",
+    "Zero confusion, 100% action! AI-powered username ideas and 10 premium bios are waiting for you in Level 2.",
+    "Let's elevate your social media presence! Premium brands like Nykaa & Boat look for visual symmetry and contact clarity.",
+    "Awesome determination! In 15 minutes, your profile will look like an agency-signed creator page.",
+    "Great moves! DP position, bio hooks, and highlights strategy will make brand PR managers say YES instantly.",
+    "Welcome Rockstar! A brand-ready profile converts cold pitches into warm sponsorship contracts.",
+    "Let's optimize! Aaj tumhare account ki visual quality, consistency, and trust factors ko score karenge.",
+    "Sahi raste par ho! Level 2 complete hote hi tumhare pass 10 high-authority bio options air 5 custom usernames honge.",
+    "Brand Collaboration Masterclass! Let me scan your profile link or screenshot to calculate your Brand Trust Index.",
+    "Phenomenal energy! Let's polish your username, DP, and story highlights for maximum sponsorship attraction.",
+    "Top class execution ahead! Follow these 10 steps to unlock your Level 2 Brand Ready Badge and 200 XP!",
+    "Brands love organized creators! Let me generate your personalized 10 Premium Bios tailored to your niche.",
+    "Profile optimization is like your digital store front. Let's make it look like a 5-star brand showroom!",
+    "Let's convert those views into cash flow! A clear business bio & structured highlights double your sponsorship replies.",
+    "Professionalism matters! Today we optimize your DP lighting, face position, and call-to-action link.",
+    "High value creator mindset! Answering Level 2 steps will generate your exact Brand Attraction Score.",
+    "Awesome! Let's review your main profile link or screenshot and craft an irresistible creator identity.",
+    "AI Brand Mentor active! Analyzing your feed symmetry, username simplicity, and contact setup.",
+    "Ek number choice! Level 2 is designed to give you 5x faster brand approvals from verified marketing agencies.",
+    "Let's turn your social page into a monetization engine! STEP 1 Profile Review starts right now.",
+    "Zabardast! 10 steps complete karte hi tumhara account official brand pitch ready ho jayega.",
+    "Welcome Superstar! Let's eliminate all amateur mistakes from your bio, grid, and highlight covers.",
+    "Pro level creator strategy! Highlighting past reviews and portfolio builds instant trust with marketing leads.",
+    "Target unlocked! Complete Level 2 today to claim your +200 XP Reward and Brand Ready Profile Badge.",
+    "Solid start! Your niche-tailored bios and custom username suggestions will give you an unfair advantage.",
+    "Hello Champ! Let's audit your lighting, DP background, and content consistency in 10 fast steps.",
+    "Game-changer moment! Micro-influencers with optimized bios get 3x more paid deals than accounts with 50k passive followers.",
+    "Let's optimize your brand appeal! Clean highlights like 'About Me' and 'Collabs' show brands you mean business.",
+    "Aagaye Level 2 mein! Chaliye aapke creator profile ki A to Z branding complete karte hain.",
+    "Ready to command ₹10,000+ per reel? A brand-ready profile gives you the confidence to demand high rate cards.",
+    "High authority AI loading! Follow these 10 actionable steps to refine your creator brand image.",
+    "Bada socho! Your creator profile is your live resume. Let's make it look world-class today.",
+    "Welcome! Let me give you 10 copy-paste premium bios tailored strictly to your creator niche.",
+    "Super clean execution! We will optimize DP, Bio, Username, Highlights, and Feed Aesthetics in one flow.",
+    "Master Creator Mode ACTIVE! Let's run Step 1 Profile Review and elevate your social credibility.",
+    "Shandar! Profile optimization complete hote hi aap pitch decks confidently marketing agencies ko bhej sakte ho.",
+    "Let's win those brand sponsorships! 10 quick steps to turn your profile into a magnet for PR packages.",
+    "Hello Rockstar! A great bio tells brands WHO you are, WHAT you create, and HOW to contact you in 3 seconds.",
+    "Welcome to Level 2! Let me generate your custom 5 username suggestions and 10 high-converting bios.",
+    "Ultimate Creator Blueprint! 15 minutes of profile tuning = 10x higher response rate from brand managers.",
+    "Exciting times! Level 2 gives you the exact blueprint to transform your account into a verified brand partner.",
+    "Let's level up! Your Brand Trust Score, Professional Score, and Visual Score will be generated in Step 8.",
+    "Banish amateur profiles forever! Follow this 10-step guided optimization to look like a full-time pro.",
+    "Awesome choice! Let me analyze your feed style, consistency, and color theme harmony today.",
+    "Ready to collect brand deals? Let's fix your call-to-action links and business email placement.",
+    "Welcome Champ! Level 2 is your ticket to getting featured in top brand marketing campaign lists.",
+    "Full power! Step 1 to Step 10 guide you with visual DP rules, bio hooks, and story highlight strategy.",
+    "Zabardast progress! Complete all 6 checklist items in Step 9 to earn your +200 XP Achievement Badge.",
+    "Hello Creator! Clean profile aesthetics build immediate authority when brand managers view your page.",
+    "Great determination! Let's optimize your username simplicity and profile picture framing now.",
+    "Let's build a brand-ready powerhouse! 10 steps to unlock your official Level 2 Completion Badge.",
+    "Pura Josh! Profile optimization is 15% of your total course, but it decides whether brands say YES or ignore.",
+    "Let me guide you through DP lighting, background contrast, and expression rules for maximum impact.",
+    "Phenomenal! Let's generate 10 premium bios according to your niche so you can copy-paste in 1 second.",
+    "Welcome Creator! Time to level up from amateur poster to brand-ready commercial creator.",
+    "Action time! Let me scan your profile details and give you instant rating scores in 10 smooth steps.",
+    "Awesome energy! Let me show you how to structure 'About Me', 'Work', 'Results', and 'Brands' highlights.",
+    "Let's execute! Your Brand Ready Profile badge (+200 XP) is waiting for you at Step 10."
+)
+
+/**
+ * MASTER PHASE 3 — LEVEL 2 BECOME BRAND READY VIEW
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BrandCollabLevel2BecomeBrandReadyView(
+    userNiche: String = "Fashion",
+    userPlatform: String = "Instagram",
+    onLevel2Completed: () -> Unit,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+
+    val savedLevel2Data = remember { CreatorAcademyPrefs.getBrandCollabLevel2Data(context) }
+    var isAlreadyCompleted by remember { mutableStateOf(savedLevel2Data["completed"] as? Boolean ?: false) }
+
+    var currentStep by remember { mutableIntStateOf((savedLevel2Data["step"] as? Int ?: 1).coerceIn(1, 10)) }
+    var profileLinkInput by remember { mutableStateOf(savedLevel2Data["profile_link"] as? String ?: "") }
+    var selectedPlatform by remember { mutableStateOf(userPlatform.ifBlank { "Instagram" }) }
+    var isScreenshotUploaded by remember { mutableStateOf(false) }
+
+    var selectedUsername by remember { mutableStateOf(savedLevel2Data["username"] as? String ?: "") }
+    var selectedBio by remember { mutableStateOf(savedLevel2Data["bio"] as? String ?: "") }
+
+    val savedChecklistCsv = (savedLevel2Data["checklist"] as? String ?: "")
+    val checklistSet = remember {
+        mutableStateListOf<String>().apply {
+            if (savedChecklistCsv.isNotBlank()) {
+                addAll(savedChecklistCsv.split(","))
+            }
+        }
+    }
+
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var scanMessageIndex by remember { mutableIntStateOf(0) }
+
+    val mentorMessage = remember { MASTER_PHASE3_LEVEL2_MENTOR_REPLIES.random() }
+
+    val defaultNicheBios = remember(userNiche) {
+        listOf(
+            "✨ $userNiche Creator & Trendsetter\n📍 India | 📩 Collabs: dm/email\n👇 Best reels & outfits below",
+            "🚀 Helping you upgrade your $userNiche game\n💼 Brand Deals & UGC Content\n📧 Contact: business@creator.com",
+            "🌟 Daily $userNiche Inspo & Tips\n🎥 100K+ Reach | Commercial Partner\n🔗 Tap link for rate card",
+            "🔥 Top $userNiche Picks & Reviews\n🤝 Open for Barter & Paid Campaigns\n👇 Watch my latest haul",
+            "💡 Modern $userNiche Insights & Style\n🏆 Trusted by 20+ Premium Brands\n📩 Inquiries in Bio link",
+            "🎯 Authentic $userNiche Storytelling\n✨ Quality over quantity\n📩 Collabs: DM for Rate Card",
+            "👑 Premium $userNiche Content Creator\n🌍 Mumbai / Delhi\n👇 Tap below for my media kit",
+            "⚡ $userNiche | Lifestyle | Aesthetics\n📸 Creating high-converting UGC\n📩 Direct Message for PR",
+            "🌿 Sustainable & Modern $userNiche\n💬 DMs open for brand managers\n🔗 Portfolio link below",
+            "⭐ $userNiche Expert & Product Reviewer\n🚀 5M+ Impressions\n📧 Email for paid integrations"
+        )
+    }
+
+    val defaultNicheUsernames = remember(userNiche) {
+        val cleanNiche = userNiche.lowercase().replace(" ", "")
+        listOf(
+            "@stylewith_${cleanNiche}",
+            "@official_${cleanNiche}_hub",
+            "@${cleanNiche}.creates",
+            "@glam_${cleanNiche}_pro",
+            "@the_${cleanNiche}_creator"
+        )
+    }
+
+    val allChecklistItems = listOf(
+        "Better Bio Applied",
+        "Better DP Uploaded",
+        "Better Username Chosen",
+        "Better Feed Aesthetic Set",
+        "Better Story Highlights Structured",
+        "Better Contact Details Added"
+    )
+
+    fun persistState(newStep: Int = currentStep, completed: Boolean = isAlreadyCompleted) {
+        CreatorAcademyPrefs.saveBrandCollabLevel2State(
+            context = context,
+            step = newStep,
+            profileLink = profileLinkInput,
+            selectedUsername = selectedUsername,
+            selectedBio = selectedBio,
+            checklistCsv = checklistSet.joinToString(","),
+            isCompleted = completed
+        )
+    }
+
+    val scanMessages = listOf(
+        "⚡ Scanning profile structure & aesthetics...",
+        "🖼️ Evaluating DP resolution & face position...",
+        "📝 Auditing bio hook & contact clarity...",
+        "⭕ Checking story highlights setup for $selectedPlatform...",
+        "📊 Calculating Brand Trust Score (0–100)..."
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 520.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Header Card - Level 2 15% Progress Ring
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0x22121824),
+                border = BorderStroke(
+                    1.5.dp,
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFFFD700).copy(alpha = 0.6f), Color(0x33FFFFFF), Color(0xFFFFD700).copy(alpha = 0.4f))
+                    )
+                ),
+                shadowElevation = 10.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Brand Collaboration Hub",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "👑", fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Optimize Your Creator Profile (Level 2)",
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFFFD700)
+                            )
+                        }
+
+                        BrandCollabProgressRing(
+                            progressPercent = if (isAlreadyCompleted) 1.0f else 0.15f,
+                            displayText = if (isAlreadyCompleted) "100%" else "15%"
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color.Transparent, Color(0xFFFFD700), Color.Transparent)
+                                )
+                            )
+                    )
+                }
+            }
+
+            // AI Mentor Card
+            val infiniteTransition = rememberInfiniteTransition(label = "avatar_breath_l2")
+            val breathScale by infiniteTransition.animateFloat(
+                initialValue = 0.97f,
+                targetValue = 1.03f,
+                animationSpec = infiniteRepeatable(tween(1600, easing = LinearEasing), RepeatMode.Reverse),
+                label = "breath_l2"
+            )
+
+            Surface(
+                shape = RoundedCornerShape(22.dp),
+                color = Color(0x1A1E2638),
+                border = BorderStroke(1.dp, Color(0x33FFD700)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .scale(breathScale)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFFFFD700).copy(alpha = 0.35f), Color.Transparent)
+                                )
+                            )
+                            .border(BorderStroke(1.5.dp, Color(0xFFFFD700)), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🤖", fontSize = 28.sp)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "AI Mentor Says",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFD700)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "✨", fontSize = 11.sp)
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = if (isAlreadyCompleted)
+                                "Brands sirf followers nahi dekhte. Woh pehle tumhara profile dekhte hain. Aapki profile ab 100% Brand Ready hai!"
+                            else
+                                mentorMessage,
+                            fontSize = 12.5.sp,
+                            color = TextWhite,
+                            lineHeight = 17.sp
+                        )
+                    }
+                }
+            }
+
+            if (isAnalyzing) {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF101726),
+                    border = BorderStroke(1.5.dp, Color(0xFFFFD700)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(90.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x22FFD700))
+                                .border(BorderStroke(2.dp, Color(0xFFFFD700)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "⚡", fontSize = 42.sp)
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "AI Profile Analysis in Progress...",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextWhite
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = scanMessages.getOrElse(scanMessageIndex) { scanMessages.first() },
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFFFD700),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                // Steps Container Card
+                Surface(
+                    shape = RoundedCornerShape(26.dp),
+                    color = Color(0x1E121824),
+                    border = BorderStroke(1.5.dp, Color(0x33FFD700)),
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "STEP $currentStep OF 10",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFFD700),
+                                letterSpacing = 1.sp
+                            )
+
+                            Text(
+                                text = "${currentStep * 10}% Complete",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite.copy(alpha = 0.6f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        when (currentStep) {
+                            // STEP 1: Profile Review
+                            1 -> {
+                                Text(
+                                    text = "STEP 1: Profile Review",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Select your primary platform & paste your profile link or upload a screenshot to start AI analysis.",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val platformList = listOf(
+                                    Pair("Instagram", "📸"),
+                                    Pair("YouTube", "🎬"),
+                                    Pair("Facebook", "📘"),
+                                    Pair("LinkedIn", "💼")
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    platformList.forEach { (plat, icon) ->
+                                        val isSel = selectedPlatform == plat
+                                        Surface(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clickable {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    selectedPlatform = plat
+                                                },
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = if (isSel) Color(0x33FFD700) else Color(0x18FFFFFF),
+                                            border = BorderStroke(
+                                                if (isSel) 1.5.dp else 1.dp,
+                                                if (isSel) Color(0xFFFFD700) else Color(0x22FFFFFF)
+                                            )
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.padding(vertical = 8.dp)
+                                            ) {
+                                                Text(text = icon, fontSize = 16.sp)
+                                                Text(
+                                                    text = plat,
+                                                    fontSize = 10.sp,
+                                                    fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isSel) Color(0xFFFFD700) else TextWhite
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                OutlinedTextField(
+                                    value = profileLinkInput,
+                                    onValueChange = {
+                                        profileLinkInput = it
+                                        persistState()
+                                    },
+                                    label = { Text("Paste Your $selectedPlatform Profile Link", color = Color(0xFFFFD700)) },
+                                    placeholder = { Text("e.g., https://instagram.com/your_handle", color = TextWhite.copy(alpha = 0.35f), fontSize = 12.sp) },
+                                    leadingIcon = { Icon(Icons.Default.OpenInNew, contentDescription = "Link", tint = Color(0xFFFFD700)) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Color(0xFFFFD700),
+                                        unfocusedBorderColor = Color(0x33FFFFFF),
+                                        focusedTextColor = TextWhite,
+                                        unfocusedTextColor = TextWhite
+                                    ),
+                                    shape = RoundedCornerShape(14.dp),
+                                    singleLine = true
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "OR UPLOAD PROFILE SCREENSHOT",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite.copy(alpha = 0.6f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            isScreenshotUploaded = true
+                                            Toast
+                                                .makeText(context, "Screenshot Uploaded & Verified ✓", Toast.LENGTH_SHORT)
+                                                .show()
+                                        },
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = if (isScreenshotUploaded) Color(0x224ADE80) else Color(0x18FFFFFF),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        if (isScreenshotUploaded) Color(0xFF4ADE80) else Color(0x33FFFFFF)
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(14.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isScreenshotUploaded) Icons.Default.Check else Icons.Default.OpenInNew,
+                                            contentDescription = "Upload",
+                                            tint = if (isScreenshotUploaded) Color(0xFF4ADE80) else Color(0xFFFFD700)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (isScreenshotUploaded) "📸 Screenshot Uploaded: profile_preview.png ✓" else "📸 Tap to Upload Profile Screenshot",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isScreenshotUploaded) Color(0xFF4ADE80) else TextWhite
+                                        )
+                                    }
+                                }
+                            }
+
+                            // STEP 2: AI Profile Analysis
+                            2 -> {
+                                Text(
+                                    text = "STEP 2: AI Profile Analysis",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "AI evaluation of your Display Picture, Username, Bio, Highlights, and Content Quality.",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Score Circle
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier.size(110.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Canvas(modifier = Modifier.fillMaxSize()) {
+                                            val strokeWidth = 9.dp.toPx()
+                                            val radius = (size.minDimension - strokeWidth) / 2
+                                            val center = Offset(size.width / 2, size.height / 2)
+
+                                            drawCircle(
+                                                color = Color(0x33FFFFFF),
+                                                radius = radius,
+                                                center = center,
+                                                style = Stroke(width = strokeWidth)
+                                            )
+
+                                            drawArc(
+                                                brush = Brush.sweepGradient(
+                                                    colors = listOf(Color(0xFFFFD700), Color(0xFFFFF099), Color(0xFFFFD700))
+                                                ),
+                                                startAngle = -90f,
+                                                sweepAngle = 360f * 0.88f,
+                                                useCenter = false,
+                                                style = Stroke(width = strokeWidth)
+                                            )
+                                        }
+
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(text = "88", fontSize = 30.sp, fontWeight = FontWeight.Black, color = TextWhite)
+                                            Text(text = "/ 100", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFD700))
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                val scanParams = listOf(
+                                    Triple("🖼️ Display Picture Quality", "90%", Color(0xFF4ADE80)),
+                                    Triple("🆔 Username Professionalism", "85%", Color(0xFFFFD700)),
+                                    Triple("📝 Bio Hook & Contact Clarity", "82%", Color(0xFFFFD700)),
+                                    Triple("⭕ Highlights Strategy", "88%", Color(0xFF4ADE80)),
+                                    Triple("🎥 Content Visuals & Feed Symmetry", "92%", Color(0xFF4ADE80)),
+                                    Triple("💼 Professionalism Index", "86%", Color(0xFFFFD700)),
+                                    Triple("🛡️ Trust Factor Score", "89%", Color(0xFF4ADE80))
+                                )
+
+                                scanParams.forEach { (label, valStr, color) ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = label, fontSize = 12.sp, color = TextWhite)
+                                        Text(text = valStr, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color)
+                                    }
+                                }
+                            }
+
+                            // STEP 3: Username Review
+                            3 -> {
+                                Text(
+                                    text = "STEP 3: Username Review",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "AI Checks: Easy to remember, Professional, and Brand Friendly. Select or copy a suggestion:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = Color(0x22FFD700),
+                                    border = BorderStroke(1.dp, Color(0xFFFFD700)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = "✅ AI Rules for Brand-Friendly Handles:",
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFFFD700)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "• Avoid excessive underscores (e.g., _x_creator_99_)\n• Keep length under 15 characters\n• Include your niche or 'official/creates' keyword",
+                                            fontSize = 11.sp,
+                                            color = TextWhite.copy(alpha = 0.8f)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                Text(
+                                    text = "SUGGESTED USERNAMES FOR $userNiche:",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFFFFD700)
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                defaultNicheUsernames.forEach { usernameIdea ->
+                                    val isSel = selectedUsername == usernameIdea
+                                    SelectableGlassCard(
+                                        title = usernameIdea,
+                                        subtitle = if (isSel) "Selected as your target handle ✓" else "Tap to choose handle",
+                                        icon = "🆔",
+                                        isSelected = isSel,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedUsername = usernameIdea
+                                            persistState()
+                                            Toast.makeText(context, "Selected: $usernameIdea", Toast.LENGTH_SHORT).show()
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+
+                            // STEP 4: Bio Optimizer
+                            4 -> {
+                                Text(
+                                    text = "STEP 4: Bio Optimizer",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "10 Premium Bios generated for $userNiche. Tap any bio to select & save to your profile:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                defaultNicheBios.forEachIndexed { idx, bioText ->
+                                    val isSel = selectedBio == bioText
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = if (isSel) Color(0x33FFD700) else Color(0x18FFFFFF),
+                                        border = BorderStroke(
+                                            if (isSel) 1.5.dp else 1.dp,
+                                            if (isSel) Color(0xFFFFD700) else Color(0x22FFFFFF)
+                                        ),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                selectedBio = bioText
+                                                persistState()
+                                                Toast
+                                                    .makeText(context, "Saved Bio #${idx + 1} ✓", Toast.LENGTH_SHORT)
+                                                    .show()
+                                            }
+                                    ) {
+                                        Column(modifier = Modifier.padding(14.dp)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "OPTION #${idx + 1}",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFFFFD700)
+                                                )
+                                                Text(
+                                                    text = if (isSel) "SELECTED ✓" else "Tap to Select",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (isSel) Color(0xFF4ADE80) else TextWhite.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = bioText,
+                                                fontSize = 12.sp,
+                                                color = TextWhite,
+                                                lineHeight = 16.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // STEP 5: Profile Picture Guide
+                            5 -> {
+                                Text(
+                                    text = "STEP 5: Profile Picture Guide",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Master the 6 Golden Rules of a high-converting Brand Friendly DP:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val dpRules = listOf(
+                                    Triple("🎯 Face Position", "Eye-level framing taking ~60% of avatar circle area.", "01"),
+                                    Triple("💡 Lighting", "Bright, soft natural light or ring light. Avoid dark shadows.", "02"),
+                                    Triple("🎨 Background", "Clean solid backdrop or aesthetic blurred high-contrast color.", "03"),
+                                    Triple("😊 Expression", "Warm, confident, approachable smile that invites trust.", "04"),
+                                    Triple("👔 Dress Code", "Neat, niche-appropriate attire reflecting your content style.", "05"),
+                                    Triple("✨ Brand Ring", "Subtle ring or high-contrast border for high visibility in DMs.", "06")
+                                )
+
+                                dpRules.forEach { (title, desc, num) ->
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color(0x18FFFFFF),
+                                        border = BorderStroke(1.dp, Color(0x22FFFFFF)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0x33FFD700)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = num,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFFFFD700)
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(12.dp))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = title,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = TextWhite
+                                                )
+                                                Text(
+                                                    text = desc,
+                                                    fontSize = 11.sp,
+                                                    color = TextWhite.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // STEP 6: Highlight Strategy
+                            6 -> {
+                                Text(
+                                    text = "STEP 6: Highlight Strategy",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Custom Story Highlight structure tailored to $userNiche to prove credibility instantly:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val highlightList = listOf(
+                                    Pair("👤 About Me", "Your creator journey, niche focus & brand mission"),
+                                    Pair("💼 Work / Portfolio", "Best reels, UGC samples & top performing posts"),
+                                    Pair("📈 Results", "Impressions proof, reach metrics & audience demographics"),
+                                    Pair("⭐ Reviews", "Brand feedback, client messages & subscriber love"),
+                                    Pair("🤝 Brands", "Tagged brand collaborations & PR packages unboxing"),
+                                    Pair("📩 Contact", "Business email, WhatsApp link & direct rate card")
+                                )
+
+                                highlightList.forEach { (name, desc) ->
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color(0x18FFFFFF),
+                                        border = BorderStroke(1.dp, Color(0x22FFFFFF)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Surface(
+                                                shape = CircleShape,
+                                                color = Color(0x33FFD700),
+                                                border = BorderStroke(1.dp, Color(0xFFFFD700))
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.size(38.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(text = "⭕", fontSize = 18.sp)
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.width(12.dp))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = name,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFFFFD700)
+                                                )
+                                                Text(
+                                                    text = desc,
+                                                    fontSize = 11.sp,
+                                                    color = TextWhite.copy(alpha = 0.75f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // STEP 7: Content Quality Review
+                            7 -> {
+                                Text(
+                                    text = "STEP 7: Content Quality Review",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "AI Content & Feed Quality Audit parameters for $selectedPlatform:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                val qualityFactors = listOf(
+                                    Triple("🎞️ Feed Aesthetics & Grid Symmetry", "Strong Cover Cards", Color(0xFF4ADE80)),
+                                    Triple("📅 Posting Consistency Rate", "3-5 Posts / Week", Color(0xFFFFD700)),
+                                    Triple("🎨 Color Theme Harmony", "Unified 2-Color Palette", Color(0xFF4ADE80)),
+                                    Triple("📹 Content Format & Style", "High-Hook Reels & Carousels", Color(0xFF4ADE80)),
+                                    Triple("💡 Visual Quality & Audio Clarity", "1080p Resolution", Color(0xFF4ADE80))
+                                )
+
+                                qualityFactors.forEach { (factor, detail, color) ->
+                                    MetricGlassCard(
+                                        title = factor,
+                                        value = detail,
+                                        subtitle = "AI Grade: Excellent",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = Color(0x22FFD700),
+                                    border = BorderStroke(1.dp, Color(0xFFFFD700)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = "💡 Actionable Suggestion:",
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFFFD700)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "Use consistent cover fonts and 3-second visual hooks. Brands evaluate the first 3 posts on your profile before reading pitch emails!",
+                                            fontSize = 11.sp,
+                                            color = TextWhite.copy(alpha = 0.85f)
+                                        )
+                                    }
+                                }
+                            }
+
+                            // STEP 8: Brand Trust Score
+                            8 -> {
+                                Text(
+                                    text = "STEP 8: Brand Trust Score",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Your profile authority breakdown generated across 4 essential brand dimensions:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    MetricGlassCard(
+                                        title = "Trust Score",
+                                        value = "92% 🛡️",
+                                        subtitle = "High Credibility",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    MetricGlassCard(
+                                        title = "Professional Score",
+                                        value = "88% 💼",
+                                        subtitle = "Agency Ready",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    MetricGlassCard(
+                                        title = "Visual Score",
+                                        value = "94% 🎨",
+                                        subtitle = "Aesthetic Grid",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    MetricGlassCard(
+                                        title = "Brand Attraction",
+                                        value = "90% 🧲",
+                                        subtitle = "Inbound Magnet",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+
+                            // STEP 9: Quick Improvements
+                            9 -> {
+                                Text(
+                                    text = "STEP 9: Quick Improvements",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Tap each item as you apply it to your profile:",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                allChecklistItems.forEach { item ->
+                                    val isChecked = checklistSet.contains(item)
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                if (isChecked) {
+                                                    checklistSet.remove(item)
+                                                } else {
+                                                    checklistSet.add(item)
+                                                }
+                                                persistState()
+                                            },
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = if (isChecked) Color(0x224ADE80) else Color(0x18FFFFFF),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (isChecked) Color(0xFF4ADE80) else Color(0x22FFFFFF)
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(14.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(24.dp)
+                                                    .clip(CircleShape)
+                                                    .background(if (isChecked) Color(0xFF4ADE80) else Color(0x22FFFFFF)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                if (isChecked) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Done",
+                                                        tint = Color.Black,
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.width(12.dp))
+
+                                            Text(
+                                                text = item,
+                                                fontSize = 13.sp,
+                                                fontWeight = if (isChecked) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isChecked) Color(0xFF4ADE80) else TextWhite
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // STEP 10: Today's Mission & ACHIEVEMENT
+                            10 -> {
+                                Text(
+                                    text = "STEP 10: Today's Mission",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextWhite
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Complete Profile Optimization & claim your official Level 2 Achievement Badge!",
+                                    fontSize = 12.sp,
+                                    color = TextWhite.copy(alpha = 0.7f)
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                // Mission Card
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = Color(0x22FFD700),
+                                    border = BorderStroke(1.2.dp, Color(0xFFFFD700)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "🎯 TODAY'S MISSION",
+                                                fontSize = 10.5.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color(0xFFFFD700)
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = "Complete Profile Optimization",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextWhite
+                                            )
+                                            Text(
+                                                text = "Estimated Time: 15 Minutes",
+                                                fontSize = 11.sp,
+                                                color = TextWhite.copy(alpha = 0.7f)
+                                            )
+                                        }
+
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFFFFD700)
+                                        ) {
+                                            Text(
+                                                text = "+200 XP ✓",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color.Black,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                // Achievement Badge
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = Color(0x1A10281A),
+                                    border = BorderStroke(1.5.dp, Color(0xFF4ADE80)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = "🏆", fontSize = 36.sp)
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                text = "Brand Ready Profile",
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color(0xFF4ADE80)
+                                            )
+                                            Text(
+                                                text = "Level 2 Achievement Unlocked & Saved (+200 XP)",
+                                                fontSize = 11.5.sp,
+                                                color = TextWhite.copy(alpha = 0.8f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Glass Action Buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            if (currentStep > 1) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .border(BorderStroke(1.dp, Color(0x44FFFFFF)), RoundedCornerShape(24.dp))
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            currentStep--
+                                            persistState()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Back",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite
+                                    )
+                                }
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(Color(0x22FFFFFF))
+                                        .border(BorderStroke(1.dp, Color(0x44FFFFFF)), RoundedCornerShape(24.dp))
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onBack()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Back",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextWhite
+                                    )
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1.3f)
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(Color(0xFFFFD700))
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (currentStep < 10) {
+                                            if (currentStep == 1) {
+                                                // Trigger scanning simulation
+                                                scope.launch {
+                                                    isAnalyzing = true
+                                                    for (i in 0..4) {
+                                                        scanMessageIndex = i
+                                                        delay(350)
+                                                    }
+                                                    isAnalyzing = false
+                                                    currentStep = 2
+                                                    persistState()
+                                                }
+                                            } else {
+                                                currentStep++
+                                                persistState()
+                                            }
+                                        } else {
+                                            isAlreadyCompleted = true
+                                            persistState(completed = true)
+                                            onLevel2Completed()
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (currentStep == 10) "Finish Level 2 ➔" else "Continue ➔",
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

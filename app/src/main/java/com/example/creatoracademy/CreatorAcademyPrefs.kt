@@ -38,6 +38,27 @@ object CreatorAcademyPrefs {
     private const val KEY_LANG_SELECTED = "academy_lang_selected"
     private const val KEY_BRAND_COLLAB_LANG = "brand_collab_language"
     private const val KEY_BRAND_COLLAB_STEP_INDEX = "brand_collab_step_index"
+    private const val KEY_BRAND_COLLAB_CREATOR_TYPE = "brand_collab_creator_type"
+    private const val KEY_BRAND_COLLAB_ONBOARDING_DONE = "brand_collab_onboarding_done"
+    
+    // Brand Collab Phase 2 Profile Analysis Preferences
+    private const val KEY_BRAND_COLLAB_PROFILE_COMPLETED = "brand_collab_profile_completed"
+    private const val KEY_BRAND_COLLAB_PROFILE_PLATFORM = "brand_collab_profile_platform"
+    private const val KEY_BRAND_COLLAB_PROFILE_FOLLOWERS = "brand_collab_profile_followers"
+    private const val KEY_BRAND_COLLAB_PROFILE_NICHE = "brand_collab_profile_niche"
+    private const val KEY_BRAND_COLLAB_PROFILE_LEVEL = "brand_collab_profile_level"
+    private const val KEY_BRAND_COLLAB_PROFILE_GOAL = "brand_collab_profile_goal"
+    private const val KEY_BRAND_COLLAB_PROFILE_PROBLEM = "brand_collab_profile_problem"
+    private const val KEY_BRAND_COLLAB_PROFILE_LESSON = "brand_collab_profile_lesson"
+    private const val KEY_BRAND_COLLAB_PROFILE_PROGRESS = "brand_collab_profile_progress"
+
+    // Brand Collab Phase 3 Level 2 Become Brand Ready Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL2_COMPLETED = "brand_collab_level2_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL2_STEP = "brand_collab_level2_step"
+    private const val KEY_BRAND_COLLAB_LEVEL2_PROFILE_LINK = "brand_collab_level2_profile_link"
+    private const val KEY_BRAND_COLLAB_LEVEL2_SELECTED_USERNAME = "brand_collab_level2_selected_username"
+    private const val KEY_BRAND_COLLAB_LEVEL2_SELECTED_BIO = "brand_collab_level2_selected_bio"
+    private const val KEY_BRAND_COLLAB_LEVEL2_CHECKLIST = "brand_collab_level2_checklist"
     private const val KEY_MEESHO_CREATOR_LANG = "meesho_creator_language"
     private const val KEY_MEESHO_CREATOR_STEP_INDEX = "meesho_creator_step_index"
 
@@ -593,6 +614,110 @@ object CreatorAcademyPrefs {
         prefs.edit().putInt(KEY_BRAND_COLLAB_STEP_INDEX, stepIndex).apply()
     }
 
+    fun getBrandCollabCreatorType(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_BRAND_COLLAB_CREATOR_TYPE, "Content Creator") ?: "Content Creator"
+    }
+
+    fun setBrandCollabCreatorType(context: Context, type: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_BRAND_COLLAB_CREATOR_TYPE, type).apply()
+    }
+
+    fun isBrandCollabOnboardingDone(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_ONBOARDING_DONE, false)
+    }
+
+    fun setBrandCollabOnboardingDone(context: Context, done: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_BRAND_COLLAB_ONBOARDING_DONE, done).apply()
+    }
+
+    // Phase 2 Profile Data
+    fun isBrandCollabProfileCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_PROFILE_COMPLETED, false)
+    }
+
+    fun saveBrandCollabProfile(
+        context: Context,
+        platform: String,
+        followers: String,
+        niche: String,
+        level: String,
+        goal: String,
+        problem: String,
+        lesson: String = "Creator Profile Analysis",
+        progress: Int = 5
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_BRAND_COLLAB_PROFILE_COMPLETED, true)
+            .putString(KEY_BRAND_COLLAB_PROFILE_PLATFORM, platform)
+            .putString(KEY_BRAND_COLLAB_PROFILE_FOLLOWERS, followers)
+            .putString(KEY_BRAND_COLLAB_PROFILE_NICHE, niche)
+            .putString(KEY_BRAND_COLLAB_PROFILE_LEVEL, level)
+            .putString(KEY_BRAND_COLLAB_PROFILE_GOAL, goal)
+            .putString(KEY_BRAND_COLLAB_PROFILE_PROBLEM, problem)
+            .putString(KEY_BRAND_COLLAB_PROFILE_LESSON, lesson)
+            .putInt(KEY_BRAND_COLLAB_PROFILE_PROGRESS, progress)
+            .apply()
+    }
+
+    fun getBrandCollabProfileData(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_PROFILE_COMPLETED, false),
+            "platform" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_PLATFORM, "Instagram") ?: "Instagram"),
+            "followers" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_FOLLOWERS, "2K–10K") ?: "2K–10K"),
+            "niche" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_NICHE, "Fashion") ?: "Fashion"),
+            "level" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_LEVEL, "Beginner") ?: "Beginner"),
+            "goal" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_GOAL, "Get My First Brand Deal") ?: "Get My First Brand Deal"),
+            "problem" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_PROBLEM, "No Brand Replies") ?: "No Brand Replies"),
+            "lesson" to (prefs.getString(KEY_BRAND_COLLAB_PROFILE_LESSON, "Creator Profile Analysis") ?: "Creator Profile Analysis"),
+            "progress" to prefs.getInt(KEY_BRAND_COLLAB_PROFILE_PROGRESS, 5)
+        )
+    }
+
+    // Phase 3 Level 2 Preference Helpers
+    fun isBrandCollabLevel2Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL2_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel2State(
+        context: Context,
+        step: Int,
+        profileLink: String,
+        selectedUsername: String,
+        selectedBio: String,
+        checklistCsv: String,
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL2_STEP, step)
+            .putString(KEY_BRAND_COLLAB_LEVEL2_PROFILE_LINK, profileLink)
+            .putString(KEY_BRAND_COLLAB_LEVEL2_SELECTED_USERNAME, selectedUsername)
+            .putString(KEY_BRAND_COLLAB_LEVEL2_SELECTED_BIO, selectedBio)
+            .putString(KEY_BRAND_COLLAB_LEVEL2_CHECKLIST, checklistCsv)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL2_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel2Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL2_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL2_STEP, 1),
+            "profile_link" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL2_PROFILE_LINK, "") ?: ""),
+            "username" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL2_SELECTED_USERNAME, "") ?: ""),
+            "bio" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL2_SELECTED_BIO, "") ?: ""),
+            "checklist" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL2_CHECKLIST, "") ?: "")
+        )
+    }
+
     fun getMeeshoLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_MEESHO_CREATOR_LANG, "") ?: ""
@@ -843,6 +968,23 @@ object CreatorAcademyPrefs {
             "brand_collab" -> {
                 editor.remove(KEY_BRAND_COLLAB_LANG)
                 editor.remove(KEY_BRAND_COLLAB_STEP_INDEX)
+                editor.remove(KEY_BRAND_COLLAB_CREATOR_TYPE)
+                editor.remove(KEY_BRAND_COLLAB_ONBOARDING_DONE)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_COMPLETED)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_PLATFORM)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_FOLLOWERS)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_NICHE)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_LEVEL)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_GOAL)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_PROBLEM)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_LESSON)
+                editor.remove(KEY_BRAND_COLLAB_PROFILE_PROGRESS)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_COMPLETED)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_STEP)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_PROFILE_LINK)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_SELECTED_USERNAME)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_SELECTED_BIO)
+                editor.remove(KEY_BRAND_COLLAB_LEVEL2_CHECKLIST)
             }
             "meesho" -> {
                 editor.remove(KEY_MEESHO_CREATOR_LANG)
