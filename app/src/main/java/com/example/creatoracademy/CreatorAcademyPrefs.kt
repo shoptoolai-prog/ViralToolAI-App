@@ -47,13 +47,49 @@ object CreatorAcademyPrefs {
 
     private const val KEY_INSTAGRAM_INTRO_COMPLETED = "instagram_creator_intro_completed"
     private const val KEY_INSTAGRAM_LANG = "instagram_creator_language"
+    private const val KEY_INSTAGRAM_CATEGORY = "instagram_creator_category"
+    private const val KEY_INSTAGRAM_EXP = "instagram_creator_exp"
+    private const val KEY_INSTAGRAM_FOLLOWERS = "instagram_creator_followers"
+    private const val KEY_INSTAGRAM_GOAL = "instagram_creator_goal"
+    private const val KEY_INSTAGRAM_DAILY_TIME = "instagram_creator_daily_time"
+    private const val KEY_INSTAGRAM_ROADMAP_JSON = "instagram_creator_roadmap_json"
     private const val KEY_INSTAGRAM_CURRENT_STEP = "instagram_creator_current_step"
     private const val KEY_INSTAGRAM_COMPLETED_STEPS = "instagram_creator_completed_steps"
 
+    private const val KEY_YOUTUBE_INTRO_COMPLETED = "youtube_creator_v2_intro_completed"
+    private const val KEY_YOUTUBE_LEVEL0_COMPLETED = "youtube_creator_v2_level0_completed"
+    private const val KEY_YOUTUBE_LEVEL1_COMPLETED = "youtube_creator_v2_level1_completed"
+    private const val KEY_YOUTUBE_LEVEL2_COMPLETED = "youtube_creator_v2_level2_completed"
+    private const val KEY_YOUTUBE_LEVEL3_COMPLETED = "youtube_creator_v2_level3_completed"
+    private const val KEY_YOUTUBE_LEVEL4_COMPLETED = "youtube_creator_v2_level4_completed"
+    private const val KEY_YOUTUBE_LEVEL5_COMPLETED = "youtube_creator_v2_level5_completed"
+    private const val KEY_YOUTUBE_LEVEL6_COMPLETED = "youtube_creator_v2_level6_completed"
+    private const val KEY_YOUTUBE_FINAL_COMPLETED = "youtube_creator_v2_final_completed"
+    private const val KEY_YOUTUBE_GROWTH_GOAL = "youtube_creator_v2_growth_goal"
+    private const val KEY_YOUTUBE_SUBS_RANGE = "youtube_creator_v2_subs_range"
+    private const val KEY_YOUTUBE_WATCH_HOURS_RANGE = "youtube_creator_v2_watch_hours_range"
+    private const val KEY_YOUTUBE_SHORTS_VIEWS_RANGE = "youtube_creator_v2_shorts_views_range"
+    private const val KEY_YOUTUBE_NICHE = "youtube_creator_v2_niche"
+    private const val KEY_YOUTUBE_NICHE_EXP = "youtube_creator_v2_niche_exp"
+    private const val KEY_YOUTUBE_CONTENT_STYLE = "youtube_creator_v2_content_style"
+    private const val KEY_YOUTUBE_CONTENT_PILLARS = "youtube_creator_v2_content_pillars"
+    private const val KEY_YOUTUBE_HAS_CHANNEL = "youtube_creator_v2_has_channel"
+    private const val KEY_YOUTUBE_CHANNEL_NAME = "youtube_creator_v2_channel_name"
+    private const val KEY_YOUTUBE_CURRENT_LEVEL = "youtube_creator_v2_current_level"
+    private const val KEY_YOUTUBE_MAIN_GOAL = "youtube_creator_v2_main_goal"
+    private const val KEY_YOUTUBE_VIDEO_TYPE = "youtube_creator_v2_video_type"
+    private const val KEY_YOUTUBE_WEEKLY_TIME = "youtube_creator_v2_weekly_time"
+    private const val KEY_YOUTUBE_EDITING_EXP = "youtube_creator_v2_editing_exp"
+    private const val KEY_YOUTUBE_RECORDING_SETUP = "youtube_creator_v2_recording_setup"
+    private const val KEY_YOUTUBE_VIDEO_LANG = "youtube_creator_v2_video_lang"
+    private const val KEY_YOUTUBE_BIGGEST_PROBLEM = "youtube_creator_v2_biggest_problem"
     private const val KEY_YOUTUBE_LANG = "youtube_creator_v2_language"
     private const val KEY_YOUTUBE_CREATOR_TYPE = "youtube_creator_v2_type"
     private const val KEY_YOUTUBE_CURRENT_STEP = "youtube_creator_v2_current_step"
     private const val KEY_YOUTUBE_COMPLETED_STEPS = "youtube_creator_v2_completed_steps"
+    private const val KEY_YOUTUBE_CURRENT_LESSON = "youtube_creator_v2_current_lesson"
+    private const val KEY_YOUTUBE_CURRENT_MISSION = "youtube_creator_v2_current_mission"
+    private const val KEY_YOUTUBE_LAST_CONVERSATION = "youtube_creator_v2_last_conversation"
 
     // Video Editing Mentor Tools (CapCut, VN, Instagram Edits) Data Isolation
     fun getEditingToolLanguage(context: Context, toolKey: String): String? {
@@ -140,6 +176,300 @@ object CreatorAcademyPrefs {
         prefs.edit().putStringSet(KEY_YOUTUBE_COMPLETED_STEPS, strSet).apply()
     }
 
+    fun isYouTubeIntroCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_INTRO_COMPLETED, false)
+    }
+
+    fun setYouTubeIntroCompleted(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_INTRO_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel0Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL0_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel0Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL0_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel1Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL1_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel1Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL1_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel2Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL2_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel2Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL2_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel3Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL3_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel3Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL3_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel4Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL4_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel4Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL4_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel5Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL5_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel5Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL5_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeLevel6Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_LEVEL6_COMPLETED, false)
+    }
+
+    fun setYouTubeLevel6Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_LEVEL6_COMPLETED, completed).apply()
+    }
+
+    fun isYouTubeFinalCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_YOUTUBE_FINAL_COMPLETED, false)
+    }
+
+    fun setYouTubeFinalCompleted(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_YOUTUBE_FINAL_COMPLETED, completed).apply()
+    }
+
+    fun resetAllYouTubeData(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_YOUTUBE_LEVEL0_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL1_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL2_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL3_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL4_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL5_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_LEVEL6_COMPLETED, false)
+            .putBoolean(KEY_YOUTUBE_FINAL_COMPLETED, false)
+            .apply()
+    }
+
+    fun getYouTubeGrowthGoal(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_GROWTH_GOAL, "1000 Subscribers") ?: "1000 Subscribers"
+    }
+
+    fun saveYouTubeGrowthGoal(context: Context, goal: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_GROWTH_GOAL, goal).apply()
+    }
+
+    fun getYouTubeSubsRange(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_SUBS_RANGE, "0–100") ?: "0–100"
+    }
+
+    fun saveYouTubeSubsRange(context: Context, range: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_SUBS_RANGE, range).apply()
+    }
+
+    fun getYouTubeWatchHoursRange(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_WATCH_HOURS_RANGE, "0–500") ?: "0–500"
+    }
+
+    fun saveYouTubeWatchHoursRange(context: Context, range: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_WATCH_HOURS_RANGE, range).apply()
+    }
+
+    fun getYouTubeNiche(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_NICHE, null)
+    }
+
+    fun saveYouTubeNiche(context: Context, niche: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_NICHE, niche).apply()
+    }
+
+    fun getYouTubeNicheExp(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_NICHE_EXP, null)
+    }
+
+    fun saveYouTubeNicheExp(context: Context, exp: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_NICHE_EXP, exp).apply()
+    }
+
+    fun getYouTubeContentStyle(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_CONTENT_STYLE, null)
+    }
+
+    fun saveYouTubeContentStyle(context: Context, style: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_CONTENT_STYLE, style).apply()
+    }
+
+    fun getYouTubeHasChannel(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_HAS_CHANNEL, null)
+    }
+
+    fun saveYouTubeHasChannel(context: Context, hasChannel: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_HAS_CHANNEL, hasChannel).apply()
+    }
+
+    fun getYouTubeChannelName(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_CHANNEL_NAME, null)
+    }
+
+    fun saveYouTubeChannelName(context: Context, name: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_CHANNEL_NAME, name).apply()
+    }
+
+    fun getYouTubeCurrentLevel(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_CURRENT_LEVEL, null)
+    }
+
+    fun saveYouTubeCurrentLevel(context: Context, level: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_CURRENT_LEVEL, level).apply()
+    }
+
+    fun getYouTubeMainGoal(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_MAIN_GOAL, null)
+    }
+
+    fun saveYouTubeMainGoal(context: Context, goal: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_MAIN_GOAL, goal).apply()
+    }
+
+    fun getYouTubeVideoType(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_VIDEO_TYPE, null)
+    }
+
+    fun saveYouTubeVideoType(context: Context, type: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_VIDEO_TYPE, type).apply()
+    }
+
+    fun getYouTubeWeeklyTime(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_WEEKLY_TIME, null)
+    }
+
+    fun saveYouTubeWeeklyTime(context: Context, time: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_WEEKLY_TIME, time).apply()
+    }
+
+    fun getYouTubeEditingExp(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_EDITING_EXP, null)
+    }
+
+    fun saveYouTubeEditingExp(context: Context, exp: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_EDITING_EXP, exp).apply()
+    }
+
+    fun getYouTubeRecordingSetup(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_RECORDING_SETUP, null)
+    }
+
+    fun saveYouTubeRecordingSetup(context: Context, setup: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_RECORDING_SETUP, setup).apply()
+    }
+
+    fun getYouTubeVideoLanguage(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_VIDEO_LANG, null)
+    }
+
+    fun saveYouTubeVideoLanguage(context: Context, lang: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_VIDEO_LANG, lang).apply()
+    }
+
+    fun getYouTubeBiggestProblem(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_BIGGEST_PROBLEM, null)
+    }
+
+    fun saveYouTubeBiggestProblem(context: Context, problem: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_BIGGEST_PROBLEM, problem).apply()
+    }
+
+    fun getYouTubeCurrentLesson(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_YOUTUBE_CURRENT_LESSON, 1)
+    }
+
+    fun saveYouTubeCurrentLesson(context: Context, lesson: Int) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_YOUTUBE_CURRENT_LESSON, lesson).apply()
+    }
+
+    fun getYouTubeCurrentMission(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_CURRENT_MISSION, "Set up your Channel") ?: "Set up your Channel"
+    }
+
+    fun saveYouTubeCurrentMission(context: Context, mission: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_CURRENT_MISSION, mission).apply()
+    }
+
+    fun getYouTubeLastConversation(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_YOUTUBE_LAST_CONVERSATION, "") ?: ""
+    }
+
+    fun saveYouTubeLastConversation(context: Context, chatJson: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_YOUTUBE_LAST_CONVERSATION, chatJson).apply()
+    }
+
     // Instagram Creator Guide Preferences
     fun isInstagramIntroCompleted(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -153,12 +483,22 @@ object CreatorAcademyPrefs {
 
     fun getInstagramLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_INSTAGRAM_LANG, "EN") ?: "EN"
+        return prefs.getString(KEY_INSTAGRAM_LANG, "") ?: ""
     }
 
     fun saveInstagramLanguage(context: Context, lang: String) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_INSTAGRAM_LANG, lang).apply()
+    }
+
+    fun getInstagramCategory(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_CATEGORY, "") ?: ""
+    }
+
+    fun saveInstagramCategory(context: Context, category: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_CATEGORY, category).apply()
     }
 
     fun getInstagramCurrentStep(context: Context): Int {
@@ -181,6 +521,56 @@ object CreatorAcademyPrefs {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val strSet = steps.map { it.toString() }.toSet()
         prefs.edit().putStringSet(KEY_INSTAGRAM_COMPLETED_STEPS, strSet).apply()
+    }
+
+    fun getInstagramExperience(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_EXP, "") ?: ""
+    }
+
+    fun saveInstagramExperience(context: Context, exp: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_EXP, exp).apply()
+    }
+
+    fun getInstagramFollowers(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_FOLLOWERS, "") ?: ""
+    }
+
+    fun saveInstagramFollowers(context: Context, followers: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_FOLLOWERS, followers).apply()
+    }
+
+    fun getInstagramGoal(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_GOAL, "") ?: ""
+    }
+
+    fun saveInstagramGoal(context: Context, goal: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_GOAL, goal).apply()
+    }
+
+    fun getInstagramDailyTime(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_DAILY_TIME, "") ?: ""
+    }
+
+    fun saveInstagramDailyTime(context: Context, time: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_DAILY_TIME, time).apply()
+    }
+
+    fun getInstagramRoadmapJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_INSTAGRAM_ROADMAP_JSON, "") ?: ""
+    }
+
+    fun saveInstagramRoadmapJson(context: Context, json: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_INSTAGRAM_ROADMAP_JSON, json).apply()
     }
 
     fun getBrandCollabLanguage(context: Context): String {
@@ -413,14 +803,35 @@ object CreatorAcademyPrefs {
         val editor = prefs.edit()
         when (courseKey.lowercase()) {
             "youtube" -> {
+                editor.remove(KEY_YOUTUBE_INTRO_COMPLETED)
+                editor.remove(KEY_YOUTUBE_LEVEL0_COMPLETED)
+                editor.remove(KEY_YOUTUBE_HAS_CHANNEL)
+                editor.remove(KEY_YOUTUBE_CHANNEL_NAME)
+                editor.remove(KEY_YOUTUBE_CURRENT_LEVEL)
+                editor.remove(KEY_YOUTUBE_MAIN_GOAL)
+                editor.remove(KEY_YOUTUBE_VIDEO_TYPE)
+                editor.remove(KEY_YOUTUBE_WEEKLY_TIME)
+                editor.remove(KEY_YOUTUBE_EDITING_EXP)
+                editor.remove(KEY_YOUTUBE_RECORDING_SETUP)
+                editor.remove(KEY_YOUTUBE_VIDEO_LANG)
+                editor.remove(KEY_YOUTUBE_BIGGEST_PROBLEM)
                 editor.remove(KEY_YOUTUBE_LANG)
                 editor.remove(KEY_YOUTUBE_CREATOR_TYPE)
                 editor.remove(KEY_YOUTUBE_CURRENT_STEP)
                 editor.remove(KEY_YOUTUBE_COMPLETED_STEPS)
+                editor.remove(KEY_YOUTUBE_CURRENT_LESSON)
+                editor.remove(KEY_YOUTUBE_CURRENT_MISSION)
+                editor.remove(KEY_YOUTUBE_LAST_CONVERSATION)
             }
             "instagram" -> {
                 editor.remove(KEY_INSTAGRAM_INTRO_COMPLETED)
                 editor.remove(KEY_INSTAGRAM_LANG)
+                editor.remove(KEY_INSTAGRAM_CATEGORY)
+                editor.remove(KEY_INSTAGRAM_EXP)
+                editor.remove(KEY_INSTAGRAM_FOLLOWERS)
+                editor.remove(KEY_INSTAGRAM_GOAL)
+                editor.remove(KEY_INSTAGRAM_DAILY_TIME)
+                editor.remove(KEY_INSTAGRAM_ROADMAP_JSON)
                 editor.remove("instagram_creator_language")
                 editor.remove("instagram_creator_type")
                 editor.remove(KEY_INSTAGRAM_CURRENT_STEP)

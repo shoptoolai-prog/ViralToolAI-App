@@ -450,14 +450,24 @@ fun HomeScreen(
             )
 
             // ==================================================
-            // 2. QUICK ACCESS TOOLS
+            // 2. CREATOR OS DASHBOARD (NEW CORE FEATURE)
             // ==================================================
-            com.example.ui.components.CreatorQuickToolsSection()
-
-            Spacer(modifier = Modifier.height(16.dp))
+            com.example.ui.components.CreatorOsDashboard(
+                modifier = Modifier.padding(bottom = 16.dp),
+                onNavigateToAcademy = {
+                    onNavigateToCreatorAcademy?.invoke()
+                }
+            )
 
             // ==================================================
-            // 3. AI PROMPT STUDIO
+            // 3. AI REEL ANALYZER (NEW FLAGSHIP HERO FEATURE)
+            // ==================================================
+            com.example.ui.components.AiReelAnalyzerCard(
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // ==================================================
+            // 4. AI PROMPT STUDIO
             // ==================================================
             ViralToolAiStudioHeroCard(
                 onClick = {
