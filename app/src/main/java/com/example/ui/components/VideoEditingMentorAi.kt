@@ -1202,14 +1202,6 @@ private fun EditingMentorChatScreen(
             else -> "Keyframe & Velocity Accelerator"
         }
 
-        ToolHeroBanner(
-            toolType = heroType,
-            height = 110.dp,
-            badgeText = heroBadge,
-            subtitleText = heroSub,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-        )
-
         // STEP PROGRESS BAR
         Box(
             modifier = Modifier

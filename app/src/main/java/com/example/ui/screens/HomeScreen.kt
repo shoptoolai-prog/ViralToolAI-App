@@ -5188,14 +5188,6 @@ fun BrandCollaborationAiCard(
                     )
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Animated Luxury Hero Banner at Top of Card
-                    com.example.ui.components.ToolHeroBanner(
-                        toolType = com.example.ui.components.ToolHeroType.BRAND_COLLAB,
-                        height = 110.dp,
-                        badgeText = null,
-                        subtitleText = null
-                    )
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

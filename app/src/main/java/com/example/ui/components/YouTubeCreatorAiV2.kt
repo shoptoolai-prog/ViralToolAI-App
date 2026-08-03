@@ -12734,14 +12734,6 @@ private fun YouTubeMentorChatScreen(
             onClose = onClose
         )
 
-        com.example.ui.components.ToolHeroBanner(
-            toolType = com.example.ui.components.ToolHeroType.YOUTUBE_CREATOR,
-            height = 110.dp,
-            badgeText = "▶️ YOUTUBE CREATOR AI",
-            subtitleText = "Shorts & SEO Growth Accelerator",
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-        )
-
         // STEP PROGRESS INDICATOR STRIP
         YouTubeStepProgressStrip(
             steps = YOUTUBE_ROADMAP_STEPS,

@@ -2,6 +2,21 @@ package com.example.ui.components
 
 import com.example.creatoracademy.ViralAiMentorEngine
 import com.example.creatoracademy.MentorToolDomain
+import com.example.creatoracademy.MeeshoCreatorLevel1WelcomeView
+import com.example.creatoracademy.MeeshoCreatorLevel2AccountSetupView
+import com.example.creatoracademy.MeeshoCreatorLevel3DashboardMasterView
+import com.example.creatoracademy.MeeshoCreatorLevel4ProductResearchMasterView
+import com.example.creatoracademy.MeeshoCreatorLevel5ViralProductHunterView
+import com.example.creatoracademy.MeeshoCreatorLevel6ReelCreatorStudioView
+import com.example.creatoracademy.MeeshoCreatorLevel7CaptionSeoMasterView
+import com.example.creatoracademy.MeeshoCreatorLevel8SalesPsychologyMasterView
+import com.example.creatoracademy.MeeshoCreatorLevel9IncomeScalingView
+import com.example.creatoracademy.MeeshoCreatorLevel10ContentGrowthSystemView
+import com.example.creatoracademy.MeeshoCreatorLevel11AnalyticsMasterView
+import com.example.creatoracademy.MeeshoCreatorLevel12CreatorBusinessSystemView
+import com.example.creatoracademy.MeeshoCreatorLevel13PortfolioBuilderView
+import com.example.creatoracademy.MeeshoCreatorLevel14SuccessDashboardView
+import com.example.creatoracademy.MeeshoCreatorLevel15SuccessHubView
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -570,15 +585,6 @@ fun MeeshoCreatorAiCard(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            ToolHeroBanner(
-                toolType = ToolHeroType.MEESHO_CREATOR,
-                height = 100.dp,
-                badgeText = null,
-                subtitleText = null
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Top Row Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -730,14 +736,59 @@ fun MeeshoCreatorAiDialog(
     val clipboardManager = LocalClipboardManager.current
 
     // Preferences & Saved State
+    var isLevel1Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoOnboardingCompleted(context))
+    }
+    var isLevel2Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel2Completed(context))
+    }
+    var isLevel3Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel3Completed(context))
+    }
+    var isLevel4Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel4Completed(context))
+    }
+    var isLevel5Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel5Completed(context))
+    }
+    var isLevel6Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel6Completed(context))
+    }
+    var isLevel7Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel7Completed(context))
+    }
+    var isLevel8Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel8Completed(context))
+    }
+    var isLevel9Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel9Completed(context))
+    }
+    var isLevel10Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel10Completed(context))
+    }
+    var isLevel11Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel11Completed(context))
+    }
+    var isLevel12Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel12Completed(context))
+    }
+    var isLevel13Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel13Completed(context))
+    }
+    var isLevel14Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel14Completed(context))
+    }
+    var isLevel15Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isMeeshoLevel15Completed(context))
+    }
     var selectedLanguage by remember {
-        mutableStateOf(CreatorAcademyPrefs.getMeeshoLanguage(context).ifBlank { "HinEnglish" })
+        mutableStateOf(CreatorAcademyPrefs.getMeeshoLanguage(context).ifBlank { "Hinglish" })
     }
     var isLanguageSelected by remember {
         mutableStateOf(CreatorAcademyPrefs.getMeeshoLanguage(context).isNotBlank())
     }
-    var isWelcomeCompleted by remember { mutableStateOf(false) }
-    var isRoadmapCompleted by remember { mutableStateOf(false) }
+    var isWelcomeCompleted by remember { mutableStateOf(isLevel1Completed) }
+    var isRoadmapCompleted by remember { mutableStateOf(isLevel1Completed) }
 
     val savedStepIndex = remember { CreatorAcademyPrefs.getMeeshoStepIndex(context) }
     var currentStepIndex by remember { mutableIntStateOf(if (savedStepIndex in 0..7) savedStepIndex else 0) }
@@ -1039,66 +1090,160 @@ fun MeeshoCreatorAiDialog(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        ToolHeroBanner(
-                            toolType = ToolHeroType.MEESHO_CREATOR,
-                            height = 110.dp,
-                            badgeText = null,
-                            subtitleText = null
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        if (!isWelcomeCompleted) {
-                            // ==================================================
-                            // 1. WELCOME SCREEN CARD
-                            // ==================================================
-                            MeeshoWelcomeScreenView(
-                                onStartClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (!isLevel1Completed) {
+                            // MASTER PHASE 1: Complete Level 1 Meesho Creator Welcome & Personalization
+                            MeeshoCreatorLevel1WelcomeView(
+                                onCompleteLevel1 = { profile ->
+                                    isLevel1Completed = true
                                     isWelcomeCompleted = true
-                                }
-                            )
-                        } else if (!isLanguageSelected) {
-                            // ==================================================
-                            // 2. MANDATORY LANGUAGE SELECTION SCREEN
-                            // ==================================================
-                            MeeshoLanguageSelectionView(
-                                currentLanguage = selectedLanguage,
-                                onSelectLanguage = { lang ->
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    selectedLanguage = lang
                                     isLanguageSelected = true
-                                    CreatorAcademyPrefs.setMeeshoLanguage(context, lang)
-                                }
-                            )
-                        } else if (!isRoadmapCompleted) {
-                            // ==================================================
-                            // 3. ROADMAP SWIPE CARDS VIEW (8 CARDS)
-                            // ==================================================
-                            MeeshoRoadmapSwipeView(
-                                currentCardIndex = currentRoadmapIndex,
-                                selectedLanguage = selectedLanguage,
-                                onNextCard = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (currentRoadmapIndex < MeeshoCreatorStaticData.roadmapCards.size - 1) {
-                                        currentRoadmapIndex++
-                                    } else {
-                                        isRoadmapCompleted = true
-                                        if (chatMessages.isEmpty()) {
-                                            loadGuidedStep(currentStepIndex)
-                                        }
-                                    }
-                                },
-                                onPrevCard = {
-                                    if (currentRoadmapIndex > 0) currentRoadmapIndex--
-                                },
-                                onSkipRoadmap = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isRoadmapCompleted = true
+                                    selectedLanguage = profile["language"] ?: "Hinglish"
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel2Completed) {
+                            // MASTER PHASE 2: Complete Level 2 Meesho Creator Account Setup Master
+                            MeeshoCreatorLevel2AccountSetupView(
+                                onCompleteLevel2 = {
+                                    isLevel2Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel3Completed) {
+                            // MASTER PHASE 3: Complete Level 3 Meesho Creator Dashboard Master
+                            MeeshoCreatorLevel3DashboardMasterView(
+                                onCompleteLevel3 = {
+                                    isLevel3Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel4Completed) {
+                            // MASTER PHASE 4: Complete Level 4 AI Product Research Master
+                            MeeshoCreatorLevel4ProductResearchMasterView(
+                                onCompleteLevel4 = {
+                                    isLevel4Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel5Completed) {
+                            // MASTER PHASE 5: Complete Level 5 AI Viral Product Hunter
+                            MeeshoCreatorLevel5ViralProductHunterView(
+                                onCompleteLevel5 = {
+                                    isLevel5Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel6Completed) {
+                            // MASTER PHASE 6: Complete Level 6 AI Reel Creator Studio
+                            MeeshoCreatorLevel6ReelCreatorStudioView(
+                                onCompleteLevel6 = {
+                                    isLevel6Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel7Completed) {
+                            // MASTER PHASE 7: Complete Level 7 AI Caption, SEO & UI Polish
+                            MeeshoCreatorLevel7CaptionSeoMasterView(
+                                onCompleteLevel7 = {
+                                    isLevel7Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel8Completed) {
+                            // MASTER PHASE 8: Complete Level 8 AI Sales Psychology & Buyer Conversion Master
+                            MeeshoCreatorLevel8SalesPsychologyMasterView(
+                                onCompleteLevel8 = {
+                                    isLevel8Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel9Completed) {
+                            // MASTER PHASE 9: Complete Level 9 AI Income Scaling Blueprint
+                            MeeshoCreatorLevel9IncomeScalingView(
+                                onCompleteLevel9 = {
+                                    isLevel9Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel10Completed) {
+                            // MASTER PHASE 10: Complete Level 10 AI Content Growth System
+                            MeeshoCreatorLevel10ContentGrowthSystemView(
+                                onCompleteLevel10 = {
+                                    isLevel10Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel11Completed) {
+                            // MASTER PHASE 11: Complete Level 11 AI Analytics & Performance Master
+                            MeeshoCreatorLevel11AnalyticsMasterView(
+                                onCompleteLevel11 = {
+                                    isLevel11Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel12Completed) {
+                            // MASTER PHASE 12: Complete Level 12 Creator Business System
+                            MeeshoCreatorLevel12CreatorBusinessSystemView(
+                                onCompleteLevel12 = {
+                                    isLevel12Completed = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel13Completed) {
+                            // MASTER PHASE 13: Complete Level 13 AI Portfolio & Creator Profile Builder
+                            MeeshoCreatorLevel13PortfolioBuilderView(
+                                onCompleteLevel13 = {
+                                    isLevel13Completed = true
                                     if (chatMessages.isEmpty()) {
                                         loadGuidedStep(currentStepIndex)
                                     }
-                                }
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel14Completed) {
+                            // MASTER PHASE 14: Complete Level 14 Creator Success Dashboard
+                            MeeshoCreatorLevel14SuccessDashboardView(
+                                onCompleteLevel14 = {
+                                    isLevel14Completed = true
+                                    if (chatMessages.isEmpty()) {
+                                        loadGuidedStep(currentStepIndex)
+                                    }
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel15Completed) {
+                            // MASTER PHASE 15: Complete Level 15 Creator Success Hub (FINAL LEVEL)
+                            MeeshoCreatorLevel15SuccessHubView(
+                                onCompleteLevel15 = {
+                                    isLevel15Completed = true
+                                    isSessionCompleted = true
+                                },
+                                onRestartCourse = {
+                                    isSessionCompleted = false
+                                    isLevel1Completed = false
+                                    isLevel2Completed = false
+                                    isLevel3Completed = false
+                                    isLevel4Completed = false
+                                    isLevel5Completed = false
+                                    isLevel6Completed = false
+                                    isLevel7Completed = false
+                                    isLevel8Completed = false
+                                    isLevel9Completed = false
+                                    isLevel10Completed = false
+                                    isLevel11Completed = false
+                                    isLevel12Completed = false
+                                    isLevel13Completed = false
+                                    isLevel14Completed = false
+                                    isLevel15Completed = false
+                                    isWelcomeCompleted = false
+                                    isRoadmapCompleted = false
+                                    isLanguageSelected = false
+                                    currentStepIndex = 0
+                                    CreatorAcademyPrefs.resetMeeshoCourse(context)
+                                    chatMessages.clear()
+                                },
+                                onBack = onDismiss
                             )
                         } else if (isSessionCompleted) {
                             // ==================================================
@@ -1112,10 +1257,27 @@ fun MeeshoCreatorAiDialog(
                                 },
                                 onRestart = {
                                     isSessionCompleted = false
+                                    isLevel1Completed = false
+                                    isLevel2Completed = false
+                                    isLevel3Completed = false
+                                    isLevel4Completed = false
+                                    isLevel5Completed = false
+                                    isLevel6Completed = false
+                                    isLevel7Completed = false
+                                    isLevel8Completed = false
+                                    isLevel9Completed = false
+                                    isLevel10Completed = false
+                                    isLevel11Completed = false
+                                    isLevel12Completed = false
+                                    isLevel13Completed = false
+                                    isLevel14Completed = false
+                                    isLevel15Completed = false
+                                    isWelcomeCompleted = false
+                                    isRoadmapCompleted = false
+                                    isLanguageSelected = false
                                     currentStepIndex = 0
-                                    CreatorAcademyPrefs.setMeeshoStepIndex(context, 0)
+                                    CreatorAcademyPrefs.resetMeeshoCreatorCourse(context)
                                     chatMessages.clear()
-                                    loadGuidedStep(0)
                                 },
                                 onClose = onDismiss
                             )

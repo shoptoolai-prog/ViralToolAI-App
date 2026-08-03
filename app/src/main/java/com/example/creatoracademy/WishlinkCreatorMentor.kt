@@ -551,9 +551,47 @@ fun WishlinkCreatorAiDialog(
 
     var isEntranceVisible by remember { mutableStateOf(false) }
 
+    // Level 1, Level 2, Level 3, Level 4, Level 5 & Level 6 Completed States
+    var isLevel1Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel1Completed(context))
+    }
+    var isLevel2Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel2Completed(context))
+    }
+    var isLevel3Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel3Completed(context))
+    }
+    var isLevel4Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel4Completed(context))
+    }
+    var isLevel5Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel5Completed(context))
+    }
+    var isLevel6Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel6Completed(context))
+    }
+    var isLevel7Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel7Completed(context))
+    }
+    var isLevel8Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel8Completed(context))
+    }
+    var isLevel9Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel9Completed(context))
+    }
+    var isLevel10Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel10Completed(context))
+    }
+    var isLevel11Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel11Completed(context))
+    }
+    var userProfileState by remember {
+        mutableStateOf(CreatorAcademyPrefs.getWishlinkLevel1Profile(context))
+    }
+
     // Language Selection State
     var selectedLanguage by remember {
-        mutableStateOf(CreatorAcademyPrefs.getWishlinkLanguage(context).ifBlank { "" })
+        mutableStateOf(CreatorAcademyPrefs.getWishlinkLanguage(context).ifBlank { "English" })
     }
     var isLanguageSelected by remember {
         mutableStateOf(CreatorAcademyPrefs.getWishlinkLanguage(context).isNotBlank())
@@ -614,10 +652,10 @@ fun WishlinkCreatorAiDialog(
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
                         .clip(RoundedCornerShape(28.dp))
                         .border(
-                            BorderStroke(1.5.dp, WishlinkOrangeGlow),
+                            BorderStroke(1.5.dp, Color(0x33B388FF)),
                             RoundedCornerShape(28.dp)
                         ),
                     color = Color(0xFF100C0A)
@@ -625,23 +663,136 @@ fun WishlinkCreatorAiDialog(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        // Header Bar
-                        WishlinkDialogHeader(
-                            selectedLanguage = selectedLanguage,
-                            isLanguageSelected = isLanguageSelected,
-                            onLanguageClick = { showLanguagePickerModal = true },
-                            onCloseClick = onDismiss
-                        )
-
-                        if (!isLanguageSelected) {
-                            // FIRST SCREEN: Language Selection
-                            WishlinkLanguageSelectionView(
-                                onSelectLanguage = { lang ->
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    saveLanguage(lang)
+                        if (!isLevel1Completed) {
+                            // MASTER PHASE 1 - Wishlink Creator Guide Level 1 View
+                            WishlinkCreatorLevel1WelcomeView(
+                                onCompleteLevel1 = { profile ->
+                                    isLevel1Completed = true
+                                    userProfileState = profile
+                                    selectedLanguage = profile["language"] ?: "English"
+                                    isLanguageSelected = true
+                                },
+                                onBack = onDismiss
+                            )
+                        } else if (!isLevel2Completed) {
+                            // MASTER PHASE 2 - Wishlink Creator Guide Level 2 Account Setup View
+                            WishlinkCreatorLevel2AccountSetupView(
+                                userProfile = userProfileState,
+                                onCompleteLevel2 = {
+                                    isLevel2Completed = true
+                                },
+                                onBack = {
+                                    isLevel1Completed = false
+                                }
+                            )
+                        } else if (!isLevel3Completed) {
+                            // MASTER PHASE 3 - Wishlink Creator Guide Level 3 Dashboard View
+                            WishlinkCreatorLevel3DashboardView(
+                                userProfile = userProfileState,
+                                onCompleteLevel3 = {
+                                    isLevel3Completed = true
+                                },
+                                onBack = {
+                                    isLevel2Completed = false
+                                }
+                            )
+                        } else if (!isLevel4Completed) {
+                            // MASTER PHASE 4 - Wishlink Creator Guide Level 4 Link Generator Master View
+                            WishlinkCreatorLevel4LinkMasterView(
+                                userProfile = userProfileState,
+                                onCompleteLevel4 = {
+                                    isLevel4Completed = true
+                                },
+                                onBack = {
+                                    isLevel3Completed = false
+                                }
+                            )
+                        } else if (!isLevel5Completed) {
+                            // MASTER PHASE 5 - Wishlink Creator Guide Level 5 AI Store Builder View
+                            WishlinkCreatorLevel5StoreBuilderView(
+                                userProfile = userProfileState,
+                                onCompleteLevel5 = {
+                                    isLevel5Completed = true
+                                },
+                                onBack = {
+                                    isLevel4Completed = false
+                                }
+                            )
+                        } else if (!isLevel6Completed) {
+                            // MASTER PHASE 6 - Wishlink Creator Guide Level 6 AI Product Research View
+                            WishlinkCreatorLevel6ProductResearchView(
+                                userProfile = userProfileState,
+                                onCompleteLevel6 = {
+                                    isLevel6Completed = true
+                                },
+                                onBack = {
+                                    isLevel5Completed = false
+                                }
+                            )
+                        } else if (!isLevel7Completed) {
+                            // MASTER PHASE 7 - Wishlink Creator Guide Level 7 AI Reel → Wishlink Conversion View
+                            WishlinkCreatorLevel7ReelConversionView(
+                                userProfile = userProfileState,
+                                onCompleteLevel7 = {
+                                    isLevel7Completed = true
+                                },
+                                onBack = {
+                                    isLevel6Completed = false
+                                }
+                            )
+                        } else if (!isLevel8Completed) {
+                            // MASTER PHASE 8 - Wishlink Creator Guide Level 8 AI Store Optimization Master View
+                            WishlinkCreatorLevel8StoreOptimizationView(
+                                userProfile = userProfileState,
+                                onCompleteLevel8 = {
+                                    isLevel8Completed = true
+                                },
+                                onBack = {
+                                    isLevel7Completed = false
+                                }
+                            )
+                        } else if (!isLevel9Completed) {
+                            // MASTER PHASE 9 - Wishlink Creator Guide Level 9 AI Analytics & Income Scaling View
+                            WishlinkCreatorLevel9AnalyticsScalingView(
+                                userProfile = userProfileState,
+                                onCompleteLevel9 = {
+                                    isLevel9Completed = true
+                                },
+                                onBack = {
+                                    isLevel8Completed = false
+                                }
+                            )
+                        } else if (!isLevel10Completed) {
+                            // MASTER PHASE 10 - Wishlink Creator Guide Level 10 AI Content Growth System View
+                            WishlinkCreatorLevel10ContentGrowthView(
+                                userProfile = userProfileState,
+                                onCompleteLevel10 = {
+                                    isLevel10Completed = true
+                                },
+                                onBack = {
+                                    isLevel9Completed = false
+                                }
+                            )
+                        } else if (!isLevel11Completed) {
+                            // MASTER PHASE 11 - Wishlink Creator Guide Level 11 AI Content Factory View
+                            WishlinkCreatorLevel11AiContentFactoryView(
+                                userProfile = userProfileState,
+                                onCompleteLevel11 = {
+                                    isLevel11Completed = true
+                                },
+                                onBack = {
+                                    isLevel10Completed = false
                                 }
                             )
                         } else {
+                            // Header Bar
+                            WishlinkDialogHeader(
+                                selectedLanguage = selectedLanguage,
+                                isLanguageSelected = isLanguageSelected,
+                                onLanguageClick = { showLanguagePickerModal = true },
+                                onCloseClick = onDismiss
+                            )
+
                             // MAIN LEARNING VIEW
                             WishlinkMainLearningView(
                                 currentStepIndex = currentStepIndex,
@@ -651,9 +802,22 @@ fun WishlinkCreatorAiDialog(
                                 onPrevStep = { setStep(currentStepIndex - 1) },
                                 onStepClick = { idx -> setStep(idx) },
                                 onRestartCourse = {
+                                    CreatorAcademyPrefs.resetWishlinkLevel1Data(context)
                                     setStep(0)
-                                    CreatorAcademyPrefs.saveWishlinkCompletedSteps(context, emptySet())
                                     completedSteps = emptySet()
+                                    isLevel1Completed = false
+                                    isLevel2Completed = false
+                                    isLevel3Completed = false
+                                    isLevel4Completed = false
+                                    isLevel5Completed = false
+                                    isLevel6Completed = false
+                                    isLevel7Completed = false
+                                    isLevel8Completed = false
+                                    isLevel9Completed = false
+                                    isLevel10Completed = false
+                                    isLevel11Completed = false
+                                    isLanguageSelected = false
+                                    selectedLanguage = ""
                                 }
                             )
                         }

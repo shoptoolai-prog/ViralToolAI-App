@@ -475,16 +475,6 @@ fun AiVideoImageGeneratorDialog(
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Animated Violet Hero Banner (No text inside)
-                            ToolHeroBanner(
-                                toolType = ToolHeroType.AI_VIDEO_IMAGE,
-                                height = 130.dp,
-                                badgeText = null,
-                                subtitleText = null
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
                             // Tag Badge
                             Box(
                                 modifier = Modifier

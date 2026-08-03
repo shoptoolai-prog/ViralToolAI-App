@@ -59,12 +59,182 @@ object CreatorAcademyPrefs {
     private const val KEY_BRAND_COLLAB_LEVEL2_SELECTED_USERNAME = "brand_collab_level2_selected_username"
     private const val KEY_BRAND_COLLAB_LEVEL2_SELECTED_BIO = "brand_collab_level2_selected_bio"
     private const val KEY_BRAND_COLLAB_LEVEL2_CHECKLIST = "brand_collab_level2_checklist"
+
+    // Brand Collab Phase 4 Level 3 AI Media Kit Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL3_COMPLETED = "brand_collab_level3_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL3_STEP = "brand_collab_level3_step"
+    private const val KEY_BRAND_COLLAB_LEVEL3_FULL_NAME = "brand_collab_level3_full_name"
+    private const val KEY_BRAND_COLLAB_LEVEL3_CREATOR_NAME = "brand_collab_level3_creator_name"
+    private const val KEY_BRAND_COLLAB_LEVEL3_EMAIL = "brand_collab_level3_email"
+    private const val KEY_BRAND_COLLAB_LEVEL3_CITY = "brand_collab_level3_city"
+    private const val KEY_BRAND_COLLAB_LEVEL3_COUNTRY = "brand_collab_level3_country"
+    private const val KEY_BRAND_COLLAB_LEVEL3_SOCIAL_LINKS = "brand_collab_level3_social_links"
+    private const val KEY_BRAND_COLLAB_LEVEL3_BIO = "brand_collab_level3_bio"
+    private const val KEY_BRAND_COLLAB_LEVEL3_AUDIENCE = "brand_collab_level3_audience"
+    private const val KEY_BRAND_COLLAB_LEVEL3_DEMO_COUNTRY = "brand_collab_level3_demo_country"
+    private const val KEY_BRAND_COLLAB_LEVEL3_DEMO_LANG = "brand_collab_level3_demo_lang"
+    private const val KEY_BRAND_COLLAB_LEVEL3_DEMO_AGE = "brand_collab_level3_demo_age"
+    private const val KEY_BRAND_COLLAB_LEVEL3_CATEGORIES = "brand_collab_level3_categories"
+    private const val KEY_BRAND_COLLAB_LEVEL3_ACHIEVEMENTS = "brand_collab_level3_achievements"
+    private const val KEY_BRAND_COLLAB_LEVEL3_FOLLOWERS = "brand_collab_level3_followers"
+    private const val KEY_BRAND_COLLAB_LEVEL3_REACH = "brand_collab_level3_reach"
+    private const val KEY_BRAND_COLLAB_LEVEL3_VIEWS = "brand_collab_level3_views"
+    private const val KEY_BRAND_COLLAB_LEVEL3_ENGAGEMENT = "brand_collab_level3_engagement"
+    private const val KEY_BRAND_COLLAB_LEVEL3_MONTHLY_VIEWS = "brand_collab_level3_monthly_views"
+    private const val KEY_BRAND_COLLAB_LEVEL3_CHECKLIST = "brand_collab_level3_checklist"
+
+    // Brand Collab Phase 5 Level 4 AI Rate Card Builder Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL4_COMPLETED = "brand_collab_level4_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL4_STEP = "brand_collab_level4_step"
+    private const val KEY_BRAND_COLLAB_LEVEL4_FOLLOWERS = "brand_collab_level4_followers"
+    private const val KEY_BRAND_COLLAB_LEVEL4_REACH = "brand_collab_level4_reach"
+    private const val KEY_BRAND_COLLAB_LEVEL4_REEL_VIEWS = "brand_collab_level4_reel_views"
+    private const val KEY_BRAND_COLLAB_LEVEL4_STORY_VIEWS = "brand_collab_level4_story_views"
+    private const val KEY_BRAND_COLLAB_LEVEL4_LIKES = "brand_collab_level4_likes"
+    private const val KEY_BRAND_COLLAB_LEVEL4_ENGAGEMENT = "brand_collab_level4_engagement"
+    private const val KEY_BRAND_COLLAB_LEVEL4_CONTENT_TYPES = "brand_collab_level4_content_types"
+    private const val KEY_BRAND_COLLAB_LEVEL4_COLLAB_TYPES = "brand_collab_level4_collab_types"
+    private const val KEY_BRAND_COLLAB_LEVEL4_BRAND_TYPES = "brand_collab_level4_brand_types"
+    private const val KEY_BRAND_COLLAB_LEVEL4_COUNTRY = "brand_collab_level4_country"
+    private const val KEY_BRAND_COLLAB_LEVEL4_STORY_PRICE = "brand_collab_level4_story_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_REEL_PRICE = "brand_collab_level4_reel_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_FEED_PRICE = "brand_collab_level4_feed_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_YOUTUBE_PRICE = "brand_collab_level4_youtube_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_UGC_PRICE = "brand_collab_level4_ugc_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_MONTHLY_PACKAGE_PRICE = "brand_collab_level4_monthly_package_price"
+    private const val KEY_BRAND_COLLAB_LEVEL4_NEGOTIATION_CONFIDENCE = "brand_collab_level4_negotiation_confidence"
+    private const val KEY_BRAND_COLLAB_LEVEL4_CHECKLIST = "brand_collab_level4_checklist"
+
+    // Brand Collab Phase 6 Level 5 AI Brand Finder Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL5_COMPLETED = "brand_collab_level5_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL5_STEP = "brand_collab_level5_step"
+    private const val KEY_BRAND_COLLAB_LEVEL5_PLATFORM = "brand_collab_level5_platform"
+    private const val KEY_BRAND_COLLAB_LEVEL5_NICHE = "brand_collab_level5_niche"
+    private const val KEY_BRAND_COLLAB_LEVEL5_BRAND_SIZE = "brand_collab_level5_brand_size"
+    private const val KEY_BRAND_COLLAB_LEVEL5_COLLAB_TYPE = "brand_collab_level5_collab_type"
+    private const val KEY_BRAND_COLLAB_LEVEL5_SAVED_BRANDS = "brand_collab_level5_saved_brands"
+    private const val KEY_BRAND_COLLAB_LEVEL5_CHECKLIST = "brand_collab_level5_checklist"
+
+    // Brand Collab Phase 7 Level 6 AI Outreach Master Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL6_COMPLETED = "brand_collab_level6_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL6_STEP = "brand_collab_level6_step"
+    private const val KEY_BRAND_COLLAB_LEVEL6_METHOD = "brand_collab_level6_method"
+    private const val KEY_BRAND_COLLAB_LEVEL6_BRAND_TYPE = "brand_collab_level6_brand_type"
+    private const val KEY_BRAND_COLLAB_LEVEL6_BRAND_NAME = "brand_collab_level6_brand_name"
+    private const val KEY_BRAND_COLLAB_LEVEL6_WEBSITE = "brand_collab_level6_website"
+    private const val KEY_BRAND_COLLAB_LEVEL6_IG_HANDLE = "brand_collab_level6_ig_handle"
+    private const val KEY_BRAND_COLLAB_LEVEL6_PURPOSE = "brand_collab_level6_purpose"
+    private const val KEY_BRAND_COLLAB_LEVEL6_EMAIL_TEXT = "brand_collab_level6_email_text"
+    private const val KEY_BRAND_COLLAB_LEVEL6_DM_TEXT = "brand_collab_level6_dm_text"
+    private const val KEY_BRAND_COLLAB_LEVEL6_FOLLOWUP_TEXT = "brand_collab_level6_followup_text"
+    private const val KEY_BRAND_COLLAB_LEVEL6_CONFIDENCE = "brand_collab_level6_confidence"
+
+    // Brand Collab Phase 8 Level 7 AI Negotiation Master Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL7_COMPLETED = "brand_collab_level7_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL7_STEP = "brand_collab_level7_step"
+    private const val KEY_BRAND_COLLAB_LEVEL7_MODULE = "brand_collab_level7_module"
+    private const val KEY_BRAND_COLLAB_LEVEL7_SCORE_CONFIDENCE = "brand_collab_level7_score_confidence"
+    private const val KEY_BRAND_COLLAB_LEVEL7_SCORE_COMMUNICATION = "brand_collab_level7_score_comm"
+    private const val KEY_BRAND_COLLAB_LEVEL7_SCORE_CLOSING = "brand_collab_level7_score_closing"
+    private const val KEY_BRAND_COLLAB_LEVEL7_SCORE_PRO = "brand_collab_level7_score_pro"
+
+    // Brand Collab Phase 9 Level 8 AI Contract & Legal Guide Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL8_COMPLETED = "brand_collab_level8_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL8_STEP = "brand_collab_level8_step"
+    private const val KEY_BRAND_COLLAB_LEVEL8_MODULE = "brand_collab_level8_module"
+    private const val KEY_BRAND_COLLAB_LEVEL8_EXPLAIN_LANG = "brand_collab_level8_explain_lang"
+
+    // Brand Collab Phase 10 Level 9 AI Payment & Finance Hub Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL9_COMPLETED = "brand_collab_level9_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL9_STEP = "brand_collab_level9_step"
+    private const val KEY_BRAND_COLLAB_LEVEL9_MODULE = "brand_collab_level9_module"
+    private const val KEY_BRAND_COLLAB_LEVEL9_INVOICE_NUM = "brand_collab_level9_inv_num"
+    private const val KEY_BRAND_COLLAB_LEVEL9_BRAND_NAME = "brand_collab_level9_brand_name"
+    private const val KEY_BRAND_COLLAB_LEVEL9_AMOUNT = "brand_collab_level9_amount"
+
+    // Brand Collab Phase 11 Level 10 Creator CRM Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL10_COMPLETED = "brand_collab_level10_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL10_STEP = "brand_collab_level10_step"
+    private const val KEY_BRAND_COLLAB_LEVEL10_MODULE = "brand_collab_level10_module"
+    private const val KEY_BRAND_COLLAB_LEVEL10_BRANDS_DATA = "brand_collab_level10_brands_data"
+    private const val KEY_BRAND_COLLAB_LEVEL10_SELECTED_BRAND = "brand_collab_level10_selected_brand"
+
+    // Brand Collab Phase 12 Level 11 AI Campaign Planner Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL11_COMPLETED = "brand_collab_level11_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL11_STEP = "brand_collab_level11_step"
+    private const val KEY_BRAND_COLLAB_LEVEL11_MODULE = "brand_collab_level11_module"
+    private const val KEY_BRAND_COLLAB_LEVEL11_CAMPAIGN_NAME = "brand_collab_level11_campaign_name"
+    private const val KEY_BRAND_COLLAB_LEVEL11_BRAND_NAME = "brand_collab_level11_brand_name"
+
+    // Brand Collab Phase 13 Level 12 AI Portfolio Builder Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL12_COMPLETED = "brand_collab_level12_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL12_STEP = "brand_collab_level12_step"
+    private const val KEY_BRAND_COLLAB_LEVEL12_MODULE = "brand_collab_level12_module"
+    private const val KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_NAME = "brand_collab_level12_portfolio_name"
+    private const val KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_BIO = "brand_collab_level12_portfolio_bio"
+
+    // Brand Collab Phase 14 Level 13 Creator Business Dashboard Preferences
+    private const val KEY_BRAND_COLLAB_LEVEL13_COMPLETED = "brand_collab_level13_completed"
+    private const val KEY_BRAND_COLLAB_LEVEL13_STEP = "brand_collab_level13_step"
+    private const val KEY_BRAND_COLLAB_LEVEL13_MODULE = "brand_collab_level13_module"
+    private const val KEY_BRAND_COLLAB_LEVEL13_MONTHLY_GOAL = "brand_collab_level13_monthly_goal"
+    private const val KEY_BRAND_COLLAB_LEVEL13_CURRENT_XP = "brand_collab_level13_current_xp"
+
+    // Brand Collab Phase 15 Final Level Creator Success Hub Preferences
+    private const val KEY_BRAND_COLLAB_PHASE15_COMPLETED = "brand_collab_phase15_completed"
+    private const val KEY_BRAND_COLLAB_CERTIFICATE_DATE = "brand_collab_certificate_date"
+    private const val KEY_BRAND_COLLAB_CERTIFICATE_ID = "brand_collab_certificate_id"
+    private const val KEY_BRAND_COLLAB_SUCCESS_GOAL = "brand_collab_success_goal"
+    private const val KEY_BRAND_COLLAB_SUCCESS_XP = "brand_collab_success_xp"
     private const val KEY_MEESHO_CREATOR_LANG = "meesho_creator_language"
     private const val KEY_MEESHO_CREATOR_STEP_INDEX = "meesho_creator_step_index"
 
     private const val KEY_WISHLINK_LANG = "wishlink_creator_language"
     private const val KEY_WISHLINK_STEP_INDEX = "wishlink_creator_step_index"
     private const val KEY_WISHLINK_COMPLETED_STEPS = "wishlink_creator_completed_steps"
+    private const val KEY_WISHLINK_ONBOARDING_DONE = "wishlink_creator_onboarding_done"
+    private const val KEY_WISHLINK_LEVEL1_COMPLETED = "wishlink_creator_level1_completed"
+    private const val KEY_WISHLINK_HEARD_BEFORE = "wishlink_creator_heard_before"
+    private const val KEY_WISHLINK_HAS_ACCOUNT = "wishlink_creator_has_account"
+    private const val KEY_WISHLINK_PLATFORMS = "wishlink_creator_platforms"
+    private const val KEY_WISHLINK_NICHE = "wishlink_creator_niche"
+    private const val KEY_WISHLINK_GOAL = "wishlink_creator_goal"
+    private const val KEY_WISHLINK_LEARNING_LEVEL = "wishlink_creator_learning_level"
+    private const val KEY_WISHLINK_LEVEL2_COMPLETED = "wishlink_creator_level2_completed"
+    private const val KEY_WISHLINK_LEVEL3_COMPLETED = "wishlink_creator_level3_completed"
+    private const val KEY_WISHLINK_LEVEL3_SCORE = "wishlink_creator_level3_score"
+    private const val KEY_WISHLINK_LEVEL4_COMPLETED = "wishlink_creator_level4_completed"
+    private const val KEY_WISHLINK_LEVEL4_SCORE = "wishlink_creator_level4_score"
+    private const val KEY_WISHLINK_LEVEL4_GENERATED_LINKS = "wishlink_creator_level4_generated_links"
+    private const val KEY_WISHLINK_LEVEL5_COMPLETED = "wishlink_creator_level5_completed"
+    private const val KEY_WISHLINK_LEVEL5_SCORE = "wishlink_creator_level5_score"
+    private const val KEY_WISHLINK_LEVEL5_STORE_STYLE = "wishlink_creator_level5_store_style"
+    private const val KEY_WISHLINK_LEVEL5_AUDIT_SCORE = "wishlink_creator_level5_audit_score"
+    private const val KEY_WISHLINK_LEVEL6_COMPLETED = "wishlink_creator_level6_completed"
+    private const val KEY_WISHLINK_LEVEL6_SCORE = "wishlink_creator_level6_score"
+    private const val KEY_WISHLINK_LEVEL6_RESEARCH_COUNT = "wishlink_creator_level6_research_count"
+    private const val KEY_WISHLINK_LEVEL7_COMPLETED = "wishlink_creator_level7_completed"
+    private const val KEY_WISHLINK_LEVEL7_SCORE = "wishlink_creator_level7_score"
+    private const val KEY_WISHLINK_LEVEL7_FUNNEL_COUNT = "wishlink_creator_level7_funnel_count"
+    private const val KEY_WISHLINK_LEVEL8_COMPLETED = "wishlink_creator_level8_completed"
+    private const val KEY_WISHLINK_LEVEL8_SCORE = "wishlink_creator_level8_score"
+    private const val KEY_WISHLINK_LEVEL8_HEALTH_SCORE = "wishlink_creator_level8_health_score"
+    private const val KEY_WISHLINK_LEVEL9_COMPLETED = "wishlink_creator_level9_completed"
+    private const val KEY_WISHLINK_LEVEL9_SCORE = "wishlink_creator_level9_score"
+    private const val KEY_WISHLINK_LEVEL9_PLAN_SCORE = "wishlink_creator_level9_plan_score"
+    private const val KEY_WISHLINK_LEVEL10_COMPLETED = "wishlink_creator_level10_completed"
+    private const val KEY_WISHLINK_LEVEL10_SCORE = "wishlink_creator_level10_score"
+    private const val KEY_WISHLINK_LEVEL10_STREAK = "wishlink_creator_level10_streak"
+    private const val KEY_WISHLINK_LEVEL10_CALENDAR_JSON = "wishlink_creator_level10_calendar_json"
+    private const val KEY_WISHLINK_LEVEL10_WEEKLY_PLAN_JSON = "wishlink_creator_level10_weekly_plan_json"
+    private const val KEY_WISHLINK_LEVEL11_COMPLETED = "wishlink_creator_level11_completed"
+    private const val KEY_WISHLINK_LEVEL11_SCORE = "wishlink_creator_level11_score"
+    private const val KEY_WISHLINK_LEVEL11_PACKAGE_JSON = "wishlink_creator_level11_package_json"
+    private const val KEY_WISHLINK_INSTALLED = "wishlink_creator_installed"
+    private const val KEY_WISHLINK_ACCOUNT_STATUS = "wishlink_creator_account_status"
+    private const val KEY_WISHLINK_PLATFORM_CONNECTED = "wishlink_creator_platform_connected"
+    private const val KEY_WISHLINK_STORE_STATUS = "wishlink_creator_store_status"
+    private const val KEY_WISHLINK_PROGRESS = "wishlink_creator_progress"
 
     private const val KEY_INSTAGRAM_INTRO_COMPLETED = "instagram_creator_intro_completed"
     private const val KEY_INSTAGRAM_LANG = "instagram_creator_language"
@@ -718,6 +888,565 @@ object CreatorAcademyPrefs {
         )
     }
 
+    // Phase 4 Level 3 Preference Helpers
+    fun isBrandCollabLevel3Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL3_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel3State(
+        context: Context,
+        step: Int,
+        fullName: String = "",
+        creatorName: String = "",
+        email: String = "",
+        city: String = "",
+        country: String = "",
+        socialLinks: String = "",
+        bio: String = "",
+        audience: String = "",
+        demoCountry: String = "",
+        demoLang: String = "",
+        demoAge: String = "",
+        categories: String = "",
+        achievements: String = "",
+        followers: String = "",
+        reach: String = "",
+        views: String = "",
+        engagement: String = "",
+        monthlyViews: String = "",
+        checklistCsv: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL3_STEP, step)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_FULL_NAME, fullName)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_CREATOR_NAME, creatorName)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_EMAIL, email)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_CITY, city)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_COUNTRY, country)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_SOCIAL_LINKS, socialLinks)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_BIO, bio)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_AUDIENCE, audience)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_DEMO_COUNTRY, demoCountry)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_DEMO_LANG, demoLang)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_DEMO_AGE, demoAge)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_CATEGORIES, categories)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_ACHIEVEMENTS, achievements)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_FOLLOWERS, followers)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_REACH, reach)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_VIEWS, views)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_ENGAGEMENT, engagement)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_MONTHLY_VIEWS, monthlyViews)
+            .putString(KEY_BRAND_COLLAB_LEVEL3_CHECKLIST, checklistCsv)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL3_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel3Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL3_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL3_STEP, 1),
+            "fullName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_FULL_NAME, "") ?: ""),
+            "creatorName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_CREATOR_NAME, "") ?: ""),
+            "email" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_EMAIL, "") ?: ""),
+            "city" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_CITY, "") ?: ""),
+            "country" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_COUNTRY, "") ?: ""),
+            "socialLinks" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_SOCIAL_LINKS, "") ?: ""),
+            "bio" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_BIO, "") ?: ""),
+            "audience" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_AUDIENCE, "") ?: ""),
+            "demoCountry" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_DEMO_COUNTRY, "India") ?: "India"),
+            "demoLang" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_DEMO_LANG, "Hindi / English") ?: "Hindi / English"),
+            "demoAge" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_DEMO_AGE, "18–24 years") ?: "18–24 years"),
+            "categories" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_CATEGORIES, "") ?: ""),
+            "achievements" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_ACHIEVEMENTS, "") ?: ""),
+            "followers" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_FOLLOWERS, "10,500") ?: "10,500"),
+            "reach" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_REACH, "45,000 / month") ?: "45,000 / month"),
+            "views" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_VIEWS, "25,000 / reel") ?: "25,000 / reel"),
+            "engagement" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_ENGAGEMENT, "6.8%") ?: "6.8%"),
+            "monthlyViews" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_MONTHLY_VIEWS, "180,000") ?: "180,000"),
+            "checklist" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL3_CHECKLIST, "") ?: "")
+        )
+    }
+
+    // Phase 5 Level 4 Preference Helpers
+    fun isBrandCollabLevel4Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL4_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel4State(
+        context: Context,
+        step: Int,
+        followers: String = "",
+        reach: String = "",
+        reelViews: String = "",
+        storyViews: String = "",
+        likes: String = "",
+        engagement: String = "",
+        contentTypes: String = "",
+        collabTypes: String = "",
+        brandTypes: String = "",
+        country: String = "",
+        storyPrice: String = "",
+        reelPrice: String = "",
+        feedPrice: String = "",
+        youtubePrice: String = "",
+        ugcPrice: String = "",
+        monthlyPackagePrice: String = "",
+        negotiationConfidence: String = "",
+        checklistCsv: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL4_STEP, step)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_FOLLOWERS, followers)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_REACH, reach)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_REEL_VIEWS, reelViews)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_STORY_VIEWS, storyViews)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_LIKES, likes)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_ENGAGEMENT, engagement)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_CONTENT_TYPES, contentTypes)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_COLLAB_TYPES, collabTypes)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_BRAND_TYPES, brandTypes)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_COUNTRY, country)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_STORY_PRICE, storyPrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_REEL_PRICE, reelPrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_FEED_PRICE, feedPrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_YOUTUBE_PRICE, youtubePrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_UGC_PRICE, ugcPrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_MONTHLY_PACKAGE_PRICE, monthlyPackagePrice)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_NEGOTIATION_CONFIDENCE, negotiationConfidence)
+            .putString(KEY_BRAND_COLLAB_LEVEL4_CHECKLIST, checklistCsv)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL4_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel4Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL4_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL4_STEP, 1),
+            "followers" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_FOLLOWERS, "") ?: ""),
+            "reach" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_REACH, "") ?: ""),
+            "reelViews" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_REEL_VIEWS, "") ?: ""),
+            "storyViews" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_STORY_VIEWS, "") ?: ""),
+            "likes" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_LIKES, "") ?: ""),
+            "engagement" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_ENGAGEMENT, "") ?: ""),
+            "contentTypes" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_CONTENT_TYPES, "") ?: ""),
+            "collabTypes" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_COLLAB_TYPES, "") ?: ""),
+            "brandTypes" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_BRAND_TYPES, "") ?: ""),
+            "country" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_COUNTRY, "India") ?: "India"),
+            "storyPrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_STORY_PRICE, "₹1,500 – ₹3,500") ?: "₹1,500 – ₹3,500"),
+            "reelPrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_REEL_PRICE, "₹5,000 – ₹12,000") ?: "₹5,000 – ₹12,000"),
+            "feedPrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_FEED_PRICE, "₹3,000 – ₹7,000") ?: "₹3,000 – ₹7,000"),
+            "youtubePrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_YOUTUBE_PRICE, "₹10,000 – ₹25,000") ?: "₹10,000 – ₹25,000"),
+            "ugcPrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_UGC_PRICE, "₹4,000 – ₹9,000") ?: "₹4,000 – ₹9,000"),
+            "monthlyPackagePrice" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_MONTHLY_PACKAGE_PRICE, "₹25,000 – ₹60,000") ?: "₹25,000 – ₹60,000"),
+            "negotiationConfidence" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_NEGOTIATION_CONFIDENCE, "High") ?: "High"),
+            "checklist" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL4_CHECKLIST, "") ?: "")
+        )
+    }
+
+    // Phase 6 Level 5 Preference Helpers
+    fun isBrandCollabLevel5Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL5_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel5State(
+        context: Context,
+        step: Int,
+        platform: String = "",
+        niche: String = "",
+        brandSize: String = "",
+        collabType: String = "",
+        savedBrandsJson: String = "",
+        checklistCsv: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL5_STEP, step)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_PLATFORM, platform)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_NICHE, niche)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_BRAND_SIZE, brandSize)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_COLLAB_TYPE, collabType)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_SAVED_BRANDS, savedBrandsJson)
+            .putString(KEY_BRAND_COLLAB_LEVEL5_CHECKLIST, checklistCsv)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL5_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel5Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL5_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL5_STEP, 1),
+            "platform" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_PLATFORM, "Instagram") ?: "Instagram"),
+            "niche" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_NICHE, "Tech") ?: "Tech"),
+            "brandSize" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_BRAND_SIZE, "Growing Brands") ?: "Growing Brands"),
+            "collabType" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_COLLAB_TYPE, "Paid") ?: "Paid"),
+            "savedBrands" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_SAVED_BRANDS, "") ?: ""),
+            "checklist" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL5_CHECKLIST, "") ?: "")
+        )
+    }
+
+    // Phase 7 Level 6 Preference Helpers
+    fun isBrandCollabLevel6Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL6_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel6State(
+        context: Context,
+        step: Int,
+        method: String = "",
+        brandType: String = "",
+        brandName: String = "",
+        website: String = "",
+        igHandle: String = "",
+        purpose: String = "",
+        emailText: String = "",
+        dmText: String = "",
+        followupText: String = "",
+        confidenceScore: Int = 88,
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL6_STEP, step)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_METHOD, method)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_BRAND_TYPE, brandType)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_BRAND_NAME, brandName)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_WEBSITE, website)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_IG_HANDLE, igHandle)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_PURPOSE, purpose)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_EMAIL_TEXT, emailText)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_DM_TEXT, dmText)
+            .putString(KEY_BRAND_COLLAB_LEVEL6_FOLLOWUP_TEXT, followupText)
+            .putInt(KEY_BRAND_COLLAB_LEVEL6_CONFIDENCE, confidenceScore)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL6_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel6Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL6_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL6_STEP, 1),
+            "method" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_METHOD, "Instagram DM") ?: "Instagram DM"),
+            "brandType" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_BRAND_TYPE, "Growing Brand") ?: "Growing Brand"),
+            "brandName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_BRAND_NAME, "") ?: ""),
+            "website" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_WEBSITE, "") ?: ""),
+            "igHandle" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_IG_HANDLE, "") ?: ""),
+            "purpose" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_PURPOSE, "Paid Collaboration") ?: "Paid Collaboration"),
+            "emailText" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_EMAIL_TEXT, "") ?: ""),
+            "dmText" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_DM_TEXT, "") ?: ""),
+            "followupText" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL6_FOLLOWUP_TEXT, "") ?: ""),
+            "confidence" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL6_CONFIDENCE, 88)
+        )
+    }
+
+    // Phase 8 Level 7 Preference Helpers
+    fun isBrandCollabLevel7Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL7_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel7State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        scoreConfidence: Int = 90,
+        scoreComm: Int = 92,
+        scoreClosing: Int = 88,
+        scorePro: Int = 95,
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_MODULE, module)
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_CONFIDENCE, scoreConfidence)
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_COMMUNICATION, scoreComm)
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_CLOSING, scoreClosing)
+            .putInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_PRO, scorePro)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL7_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel7Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL7_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_MODULE, 1),
+            "scoreConfidence" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_CONFIDENCE, 90),
+            "scoreComm" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_COMMUNICATION, 92),
+            "scoreClosing" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_CLOSING, 88),
+            "scorePro" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL7_SCORE_PRO, 95)
+        )
+    }
+
+    // Phase 9 Level 8 Preference Helpers
+    fun isBrandCollabLevel8Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL8_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel8State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        explainLang: String = "Hinglish",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL8_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL8_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL8_EXPLAIN_LANG, explainLang)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL8_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel8Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL8_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL8_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL8_MODULE, 1),
+            "explainLang" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL8_EXPLAIN_LANG, "Hinglish") ?: "Hinglish")
+        )
+    }
+
+    // Phase 10 Level 9 Preference Helpers
+    fun isBrandCollabLevel9Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL9_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel9State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        invNum: String = "INV-2026-001",
+        brandName: String = "Boat Audio",
+        amount: String = "₹15,000",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL9_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL9_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL9_INVOICE_NUM, invNum)
+            .putString(KEY_BRAND_COLLAB_LEVEL9_BRAND_NAME, brandName)
+            .putString(KEY_BRAND_COLLAB_LEVEL9_AMOUNT, amount)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL9_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel9Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL9_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL9_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL9_MODULE, 1),
+            "invNum" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL9_INVOICE_NUM, "INV-2026-001") ?: "INV-2026-001"),
+            "brandName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL9_BRAND_NAME, "Boat Audio") ?: "Boat Audio"),
+            "amount" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL9_AMOUNT, "₹15,000") ?: "₹15,000")
+        )
+    }
+
+    // Phase 11 Level 10 Preference Helpers
+    fun isBrandCollabLevel10Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL10_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel10State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        brandsData: String = "",
+        selectedBrand: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL10_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL10_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL10_BRANDS_DATA, brandsData)
+            .putString(KEY_BRAND_COLLAB_LEVEL10_SELECTED_BRAND, selectedBrand)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL10_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel10Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL10_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL10_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL10_MODULE, 1),
+            "brandsData" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL10_BRANDS_DATA, "") ?: ""),
+            "selectedBrand" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL10_SELECTED_BRAND, "") ?: "")
+        )
+    }
+
+    // Phase 12 Level 11 Preference Helpers
+    fun isBrandCollabLevel11Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL11_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel11State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        campaignName: String = "",
+        brandName: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL11_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL11_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL11_CAMPAIGN_NAME, campaignName)
+            .putString(KEY_BRAND_COLLAB_LEVEL11_BRAND_NAME, brandName)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL11_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel11Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL11_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL11_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL11_MODULE, 1),
+            "campaignName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL11_CAMPAIGN_NAME, "Nirvana Ion Launch") ?: "Nirvana Ion Launch"),
+            "brandName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL11_BRAND_NAME, "Boat Audio") ?: "Boat Audio")
+        )
+    }
+
+    // Phase 13 Level 12 Preference Helpers
+    fun isBrandCollabLevel12Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL12_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel12State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        portfolioName: String = "",
+        portfolioBio: String = "",
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL12_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL12_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_NAME, portfolioName)
+            .putString(KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_BIO, portfolioBio)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL12_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel12Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL12_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL12_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL12_MODULE, 1),
+            "portfolioName" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_NAME, "Creator") ?: "Creator"),
+            "portfolioBio" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL12_PORTFOLIO_BIO, "Tech & Lifestyle Creator building high impact brand content.") ?: "Tech & Lifestyle Creator building high impact brand content.")
+        )
+    }
+
+    // Phase 14 Level 13 Preference Helpers
+    fun isBrandCollabLevel13Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL13_COMPLETED, false)
+    }
+
+    fun saveBrandCollabLevel13State(
+        context: Context,
+        step: Int,
+        module: Int = 1,
+        monthlyGoal: String = "₹50,000 Goal",
+        currentXp: Int = 1000,
+        isCompleted: Boolean = false
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_BRAND_COLLAB_LEVEL13_STEP, step)
+            .putInt(KEY_BRAND_COLLAB_LEVEL13_MODULE, module)
+            .putString(KEY_BRAND_COLLAB_LEVEL13_MONTHLY_GOAL, monthlyGoal)
+            .putInt(KEY_BRAND_COLLAB_LEVEL13_CURRENT_XP, currentXp)
+            .putBoolean(KEY_BRAND_COLLAB_LEVEL13_COMPLETED, isCompleted)
+            .apply()
+    }
+
+    fun getBrandCollabLevel13Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_LEVEL13_COMPLETED, false),
+            "step" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL13_STEP, 1),
+            "module" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL13_MODULE, 1),
+            "monthlyGoal" to (prefs.getString(KEY_BRAND_COLLAB_LEVEL13_MONTHLY_GOAL, "₹50,000 Goal") ?: "₹50,000 Goal"),
+            "currentXp" to prefs.getInt(KEY_BRAND_COLLAB_LEVEL13_CURRENT_XP, 1000)
+        )
+    }
+
+    // Phase 15 Final Level Creator Success Hub Preference Helpers
+    fun isBrandCollabPhase15Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_BRAND_COLLAB_PHASE15_COMPLETED, false)
+    }
+
+    fun saveBrandCollabPhase15State(
+        context: Context,
+        isCompleted: Boolean = true,
+        goal: String = "₹1,00,000 Goal",
+        xp: Int = 5000,
+        certDate: String = "August 1, 2026",
+        certId: String = "BCH-2026-LEGEND-8892"
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_BRAND_COLLAB_PHASE15_COMPLETED, isCompleted)
+            .putString(KEY_BRAND_COLLAB_SUCCESS_GOAL, goal)
+            .putInt(KEY_BRAND_COLLAB_SUCCESS_XP, xp)
+            .putString(KEY_BRAND_COLLAB_CERTIFICATE_DATE, certDate)
+            .putString(KEY_BRAND_COLLAB_CERTIFICATE_ID, certId)
+            .apply()
+    }
+
+    fun getBrandCollabPhase15Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completed" to prefs.getBoolean(KEY_BRAND_COLLAB_PHASE15_COMPLETED, false),
+            "goal" to (prefs.getString(KEY_BRAND_COLLAB_SUCCESS_GOAL, "₹1,00,000 Goal") ?: "₹1,00,000 Goal"),
+            "xp" to prefs.getInt(KEY_BRAND_COLLAB_SUCCESS_XP, 5000),
+            "certDate" to (prefs.getString(KEY_BRAND_COLLAB_CERTIFICATE_DATE, "August 1, 2026") ?: "August 1, 2026"),
+            "certId" to (prefs.getString(KEY_BRAND_COLLAB_CERTIFICATE_ID, "BCH-2026-LEGEND-8892") ?: "BCH-2026-LEGEND-8892")
+        )
+    }
+
+    fun resetBrandCollabFullCourse(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val keysToRemove = prefs.all.keys.filter { it.startsWith("brand_collab_") }
+        for (k in keysToRemove) {
+            editor.remove(k)
+        }
+        editor.apply()
+    }
+
     fun getMeeshoLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_MEESHO_CREATOR_LANG, "") ?: ""
@@ -726,6 +1455,567 @@ object CreatorAcademyPrefs {
     fun setMeeshoLanguage(context: Context, lang: String) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_MEESHO_CREATOR_LANG, lang).apply()
+    }
+
+    fun isMeeshoOnboardingCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_onboarding_done", false)
+    }
+
+    fun isMeeshoLevel2Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level2_completed", false)
+    }
+
+    fun setMeeshoLevel2Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level2_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel3Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level3_completed", false)
+    }
+
+    fun setMeeshoLevel3Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level3_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel4Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level4_completed", false)
+    }
+
+    fun setMeeshoLevel4Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level4_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel5Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level5_completed", false)
+    }
+
+    fun setMeeshoLevel5Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level5_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel6Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level6_completed", false)
+    }
+
+    fun setMeeshoLevel6Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level6_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel7Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level7_completed", false)
+    }
+
+    fun setMeeshoLevel7Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level7_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel8Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level8_completed", false)
+    }
+
+    fun setMeeshoLevel8Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level8_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel9Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level9_completed", false)
+    }
+
+    fun setMeeshoLevel9Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level9_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel10Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level10_completed", false)
+    }
+
+    fun setMeeshoLevel10Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level10_completed", completed).apply()
+    }
+
+    fun isMeeshoLevel11Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level11_completed", false)
+    }
+
+    fun setMeeshoLevel11Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level11_completed", completed).apply()
+    }
+
+    fun saveMeeshoLevel11Data(
+        context: Context,
+        analyticsReportData: String,
+        quizScore: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level11_report", analyticsReportData)
+            .putInt("meesho_level11_quiz_score", quizScore)
+            .putInt("meesho_level11_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel11Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "analyticsReportData" to (prefs.getString("meesho_level11_report", "") ?: ""),
+            "quizScore" to prefs.getInt("meesho_level11_quiz_score", 0),
+            "currentStep" to prefs.getInt("meesho_level11_step", 1)
+        )
+    }
+
+    fun isMeeshoLevel13Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level13_completed", false)
+    }
+
+    fun setMeeshoLevel13Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level13_completed", completed).apply()
+    }
+
+    fun saveMeeshoLevel13Data(
+        context: Context,
+        creatorName: String,
+        username: String,
+        niche: String,
+        bio: String,
+        aboutMe: String,
+        skillsMask: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level13_name", creatorName)
+            .putString("meesho_level13_username", username)
+            .putString("meesho_level13_niche", niche)
+            .putString("meesho_level13_bio", bio)
+            .putString("meesho_level13_aboutme", aboutMe)
+            .putInt("meesho_level13_skills", skillsMask)
+            .putInt("meesho_level13_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel13Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "creatorName" to (prefs.getString("meesho_level13_name", "") ?: ""),
+            "username" to (prefs.getString("meesho_level13_username", "") ?: ""),
+            "niche" to (prefs.getString("meesho_level13_niche", "Fashion & Lifestyle") ?: "Fashion & Lifestyle"),
+            "bio" to (prefs.getString("meesho_level13_bio", "") ?: ""),
+            "aboutMe" to (prefs.getString("meesho_level13_aboutme", "") ?: ""),
+            "skillsMask" to prefs.getInt("meesho_level13_skills", 0),
+            "currentStep" to prefs.getInt("meesho_level13_step", 1)
+        )
+    }
+
+    fun isMeeshoLevel14Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level14_completed", false)
+    }
+
+    fun setMeeshoLevel14Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level14_completed", completed).apply()
+    }
+
+    fun saveMeeshoLevel14Data(
+        context: Context,
+        weeklyGoal: String,
+        monthlyGoal: String,
+        customGoal: String,
+        customGoalProgress: Int,
+        vaultNotes: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level14_weekly_goal", weeklyGoal)
+            .putString("meesho_level14_monthly_goal", monthlyGoal)
+            .putString("meesho_level14_custom_goal", customGoal)
+            .putInt("meesho_level14_custom_progress", customGoalProgress)
+            .putString("meesho_level14_vault_notes", vaultNotes)
+            .putInt("meesho_level14_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel14Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "weeklyGoal" to (prefs.getString("meesho_level14_weekly_goal", "Post 3 Reels & 2 Shorts") ?: "Post 3 Reels & 2 Shorts"),
+            "monthlyGoal" to (prefs.getString("meesho_level14_monthly_goal", "Reach 5,000 Total Video Views") ?: "Reach 5,000 Total Video Views"),
+            "customGoal" to (prefs.getString("meesho_level14_custom_goal", "Earn First ₹1,000 Affiliate Commission") ?: "Earn First ₹1,000 Affiliate Commission"),
+            "customProgress" to prefs.getInt("meesho_level14_custom_progress", 60),
+            "vaultNotes" to (prefs.getString("meesho_level14_vault_notes", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level14_step", 1)
+        )
+    }
+
+    fun isMeeshoLevel15Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level15_completed", false)
+    }
+
+    fun setMeeshoLevel15Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level15_completed", completed).apply()
+    }
+
+    fun saveMeeshoLevel15Data(
+        context: Context,
+        customGoal: String,
+        customGoalProgress: Int,
+        vaultNotes: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level15_custom_goal", customGoal)
+            .putInt("meesho_level15_custom_progress", customGoalProgress)
+            .putString("meesho_level15_vault_notes", vaultNotes)
+            .putInt("meesho_level15_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel15Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "customGoal" to (prefs.getString("meesho_level15_custom_goal", "Reach ₹10,000 Creator Earnings") ?: "Reach ₹10,000 Creator Earnings"),
+            "customProgress" to prefs.getInt("meesho_level15_custom_progress", 75),
+            "vaultNotes" to (prefs.getString("meesho_level15_vault_notes", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level15_step", 1)
+        )
+    }
+
+    fun resetMeeshoCourse(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        for (i in 1..15) {
+            editor.remove("meesho_level${i}_completed")
+            editor.remove("meesho_level${i}_step")
+        }
+        editor.apply()
+    }
+
+    fun isMeeshoLevel12Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean("meesho_level12_completed", false)
+    }
+
+    fun setMeeshoLevel12Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_level12_completed", completed).apply()
+    }
+
+    fun saveMeeshoLevel12Data(
+        context: Context,
+        creatorIdentity: String,
+        weeklyBusinessPlan: String,
+        businessGoals: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level12_identity", creatorIdentity)
+            .putString("meesho_level12_plan", weeklyBusinessPlan)
+            .putString("meesho_level12_goals", businessGoals)
+            .putInt("meesho_level12_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel12Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "creatorIdentity" to (prefs.getString("meesho_level12_identity", "Fashion") ?: "Fashion"),
+            "weeklyBusinessPlan" to (prefs.getString("meesho_level12_plan", "") ?: ""),
+            "businessGoals" to (prefs.getString("meesho_level12_goals", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level12_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel10Data(
+        context: Context,
+        calendarData: String,
+        weeklyPlanData: String,
+        currentStreak: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level10_calendar", calendarData)
+            .putString("meesho_level10_weekly", weeklyPlanData)
+            .putInt("meesho_level10_streak", currentStreak)
+            .putInt("meesho_level10_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel10Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "calendarData" to (prefs.getString("meesho_level10_calendar", "") ?: ""),
+            "weeklyPlanData" to (prefs.getString("meesho_level10_weekly", "") ?: ""),
+            "currentStreak" to prefs.getInt("meesho_level10_streak", 5),
+            "currentStep" to prefs.getInt("meesho_level10_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel9Data(
+        context: Context,
+        plannerData: String,
+        goalsData: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level9_planner", plannerData)
+            .putString("meesho_level9_goals", goalsData)
+            .putInt("meesho_level9_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel9Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "plannerData" to (prefs.getString("meesho_level9_planner", "") ?: ""),
+            "goalsData" to (prefs.getString("meesho_level9_goals", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level9_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel8Data(
+        context: Context,
+        savedStories: String,
+        conversationHistory: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level8_stories", savedStories)
+            .putString("meesho_level8_chat", conversationHistory)
+            .putInt("meesho_level8_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel8Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "savedStories" to (prefs.getString("meesho_level8_stories", "") ?: ""),
+            "conversationHistory" to (prefs.getString("meesho_level8_chat", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level8_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel7Data(
+        context: Context,
+        savedCaptions: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level7_captions", savedCaptions)
+            .putInt("meesho_level7_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel7Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "savedCaptions" to (prefs.getString("meesho_level7_captions", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level7_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel6Data(
+        context: Context,
+        savedScripts: String,
+        savedHooks: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level6_scripts", savedScripts)
+            .putString("meesho_level6_hooks", savedHooks)
+            .putInt("meesho_level6_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel6Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "savedScripts" to (prefs.getString("meesho_level6_scripts", "") ?: ""),
+            "savedHooks" to (prefs.getString("meesho_level6_hooks", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level6_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel5Data(
+        context: Context,
+        productHistory: String,
+        practiceScore: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level5_history", productHistory)
+            .putInt("meesho_level5_score", practiceScore)
+            .putInt("meesho_level5_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel5Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "productHistory" to (prefs.getString("meesho_level5_history", "") ?: ""),
+            "practiceScore" to prefs.getInt("meesho_level5_score", 0),
+            "currentStep" to prefs.getInt("meesho_level5_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel4Data(
+        context: Context,
+        researchHistory: String,
+        practiceScore: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level4_history", researchHistory)
+            .putInt("meesho_level4_score", practiceScore)
+            .putInt("meesho_level4_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel4Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "researchHistory" to (prefs.getString("meesho_level4_history", "") ?: ""),
+            "practiceScore" to prefs.getInt("meesho_level4_score", 0),
+            "currentStep" to prefs.getInt("meesho_level4_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel3Data(
+        context: Context,
+        completedLessons: String,
+        practiceScore: Int,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level3_lessons", completedLessons)
+            .putInt("meesho_level3_score", practiceScore)
+            .putInt("meesho_level3_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel3Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "completedLessons" to (prefs.getString("meesho_level3_lessons", "") ?: ""),
+            "practiceScore" to prefs.getInt("meesho_level3_score", 0),
+            "currentStep" to prefs.getInt("meesho_level3_step", 1)
+        )
+    }
+
+    fun saveMeeshoLevel2Data(
+        context: Context,
+        installationStatus: String,
+        loginStatus: String,
+        creatorStatus: String,
+        profileStatus: String,
+        currentStepIndex: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("meesho_level2_install", installationStatus)
+            .putString("meesho_level2_login", loginStatus)
+            .putString("meesho_level2_creator", creatorStatus)
+            .putString("meesho_level2_profile", profileStatus)
+            .putInt("meesho_level2_step", currentStepIndex)
+            .apply()
+    }
+
+    fun getMeeshoLevel2Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "installationStatus" to (prefs.getString("meesho_level2_install", "") ?: ""),
+            "loginStatus" to (prefs.getString("meesho_level2_login", "") ?: ""),
+            "creatorStatus" to (prefs.getString("meesho_level2_creator", "") ?: ""),
+            "profileStatus" to (prefs.getString("meesho_level2_profile", "") ?: ""),
+            "currentStep" to prefs.getInt("meesho_level2_step", 1)
+        )
+    }
+
+    fun setMeeshoOnboardingCompleted(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("meesho_onboarding_done", completed).apply()
+    }
+
+    fun saveMeeshoLevel1Profile(
+        context: Context,
+        language: String,
+        usedBefore: String,
+        accountStatus: String,
+        creatorStatus: String,
+        platform: String,
+        goal: String,
+        learningLevel: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean("meesho_onboarding_done", true)
+            .putString(KEY_MEESHO_CREATOR_LANG, language)
+            .putString("meesho_used_before", usedBefore)
+            .putString("meesho_account_status", accountStatus)
+            .putString("meesho_creator_status", creatorStatus)
+            .putString("meesho_platform", platform)
+            .putString("meesho_goal", goal)
+            .putString("meesho_learning_level", learningLevel)
+            .apply()
+    }
+
+    fun getMeeshoLevel1Profile(context: Context): Map<String, String> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "language" to (prefs.getString(KEY_MEESHO_CREATOR_LANG, "Hinglish") ?: "Hinglish"),
+            "usedBefore" to (prefs.getString("meesho_used_before", "Yes") ?: "Yes"),
+            "accountStatus" to (prefs.getString("meesho_account_status", "Yes") ?: "Yes"),
+            "creatorStatus" to (prefs.getString("meesho_creator_status", "No") ?: "No"),
+            "platform" to (prefs.getString("meesho_platform", "Instagram") ?: "Instagram"),
+            "goal" to (prefs.getString("meesho_goal", "Earn ₹10,000") ?: "Earn ₹10,000"),
+            "learningLevel" to (prefs.getString("meesho_learning_level", "Beginner") ?: "Beginner")
+        )
+    }
+
+    fun resetMeeshoCreatorCourse(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val keysToRemove = prefs.all.keys.filter { it.startsWith("meesho_") }
+        for (k in keysToRemove) {
+            editor.remove(k)
+        }
+        editor.apply()
     }
 
     fun getMeeshoStepIndex(context: Context): Int {
@@ -768,6 +2058,414 @@ object CreatorAcademyPrefs {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val strSet = steps.map { it.toString() }.toSet()
         prefs.edit().putStringSet(KEY_WISHLINK_COMPLETED_STEPS, strSet).apply()
+    }
+
+    fun isWishlinkOnboardingDone(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_ONBOARDING_DONE, false)
+    }
+
+    fun setWishlinkOnboardingDone(context: Context, done: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_ONBOARDING_DONE, done).apply()
+    }
+
+    fun isWishlinkLevel1Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL1_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel1Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL1_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel1Profile(
+        context: Context,
+        heardBefore: String,
+        hasAccount: String,
+        platform: String,
+        niche: String,
+        goal: String,
+        learningLevel: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL1_COMPLETED, true)
+            .putString(KEY_WISHLINK_HEARD_BEFORE, heardBefore)
+            .putString(KEY_WISHLINK_HAS_ACCOUNT, hasAccount)
+            .putString(KEY_WISHLINK_PLATFORMS, platform)
+            .putString(KEY_WISHLINK_NICHE, niche)
+            .putString(KEY_WISHLINK_GOAL, goal)
+            .putString(KEY_WISHLINK_LEARNING_LEVEL, learningLevel)
+            .apply()
+    }
+
+    fun getWishlinkLevel1Profile(context: Context): Map<String, String> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "heardBefore" to (prefs.getString(KEY_WISHLINK_HEARD_BEFORE, "") ?: ""),
+            "hasAccount" to (prefs.getString(KEY_WISHLINK_HAS_ACCOUNT, "") ?: ""),
+            "platform" to (prefs.getString(KEY_WISHLINK_PLATFORMS, "Instagram") ?: "Instagram"),
+            "niche" to (prefs.getString(KEY_WISHLINK_NICHE, "Fashion") ?: "Fashion"),
+            "goal" to (prefs.getString(KEY_WISHLINK_GOAL, "Earn First ₹100") ?: "Earn First ₹100"),
+            "learningLevel" to (prefs.getString(KEY_WISHLINK_LEARNING_LEVEL, "Beginner") ?: "Beginner")
+        )
+    }
+
+    fun isWishlinkLevel2Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL2_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel2Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL2_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel2Data(
+        context: Context,
+        isInstalled: Boolean,
+        accountStatus: String,
+        platformConnected: String,
+        storeStatus: String,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL2_COMPLETED, true)
+            .putBoolean(KEY_WISHLINK_INSTALLED, isInstalled)
+            .putString(KEY_WISHLINK_ACCOUNT_STATUS, accountStatus)
+            .putString(KEY_WISHLINK_PLATFORM_CONNECTED, platformConnected)
+            .putString(KEY_WISHLINK_STORE_STATUS, storeStatus)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun getWishlinkLevel2Data(context: Context): Map<String, Any> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return mapOf(
+            "isInstalled" to prefs.getBoolean(KEY_WISHLINK_INSTALLED, true),
+            "accountStatus" to (prefs.getString(KEY_WISHLINK_ACCOUNT_STATUS, "Created") ?: "Created"),
+            "platformConnected" to (prefs.getString(KEY_WISHLINK_PLATFORM_CONNECTED, "Instagram") ?: "Instagram"),
+            "storeStatus" to (prefs.getString(KEY_WISHLINK_STORE_STATUS, "Configured") ?: "Configured"),
+            "progress" to prefs.getInt(KEY_WISHLINK_PROGRESS, 8)
+        )
+    }
+
+    fun isWishlinkLevel3Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL3_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel3Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL3_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel3Data(
+        context: Context,
+        score: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL3_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL3_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel4Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL4_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel4Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL4_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel4Data(
+        context: Context,
+        score: Int,
+        linksCount: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL4_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL4_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL4_GENERATED_LINKS, linksCount)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel5Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL5_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel5Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL5_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel5Data(
+        context: Context,
+        score: Int,
+        storeStyle: String,
+        auditScore: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL5_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL5_SCORE, score)
+            .putString(KEY_WISHLINK_LEVEL5_STORE_STYLE, storeStyle)
+            .putInt(KEY_WISHLINK_LEVEL5_AUDIT_SCORE, auditScore)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel6Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL6_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel6Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL6_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel6Data(
+        context: Context,
+        score: Int,
+        researchCount: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL6_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL6_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL6_RESEARCH_COUNT, researchCount)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel7Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL7_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel7Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL7_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel7Data(
+        context: Context,
+        score: Int,
+        funnelCount: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL7_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL7_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL7_FUNNEL_COUNT, funnelCount)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel8Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL8_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel8Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL8_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel8Data(
+        context: Context,
+        score: Int,
+        healthScore: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL8_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL8_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL8_HEALTH_SCORE, healthScore)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel9Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL9_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel9Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL9_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel9Data(
+        context: Context,
+        score: Int,
+        planScore: Int,
+        progress: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL9_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL9_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL9_PLAN_SCORE, planScore)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .apply()
+    }
+
+    fun isWishlinkLevel10Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL10_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel10Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL10_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel10Data(
+        context: Context,
+        score: Int,
+        streak: Int,
+        progress: Int,
+        calendarJson: String,
+        weeklyPlanJson: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL10_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL10_SCORE, score)
+            .putInt(KEY_WISHLINK_LEVEL10_STREAK, streak)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .putString(KEY_WISHLINK_LEVEL10_CALENDAR_JSON, calendarJson)
+            .putString(KEY_WISHLINK_LEVEL10_WEEKLY_PLAN_JSON, weeklyPlanJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel10Streak(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_WISHLINK_LEVEL10_STREAK, 7)
+    }
+
+    fun saveWishlinkLevel10State(
+        context: Context,
+        streak: Int,
+        calendarJson: String,
+        weeklyPlanJson: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_WISHLINK_LEVEL10_STREAK, streak)
+            .putString(KEY_WISHLINK_LEVEL10_CALENDAR_JSON, calendarJson)
+            .putString(KEY_WISHLINK_LEVEL10_WEEKLY_PLAN_JSON, weeklyPlanJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel10CalendarJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL10_CALENDAR_JSON, "") ?: ""
+    }
+
+    fun getWishlinkLevel10WeeklyPlanJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL10_WEEKLY_PLAN_JSON, "") ?: ""
+    }
+
+    fun isWishlinkLevel11Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL11_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel11Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL11_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel11Data(
+        context: Context,
+        score: Int,
+        progress: Int,
+        packageJson: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL11_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL11_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .putString(KEY_WISHLINK_LEVEL11_PACKAGE_JSON, packageJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel11PackageJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL11_PACKAGE_JSON, "") ?: ""
+    }
+
+    fun resetWishlinkLevel1Data(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_ONBOARDING_DONE, false)
+            .putBoolean(KEY_WISHLINK_LEVEL1_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL2_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL3_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL4_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL5_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL6_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL7_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL8_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL9_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL10_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL11_COMPLETED, false)
+            .putInt(KEY_WISHLINK_LEVEL3_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL4_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL4_GENERATED_LINKS, 0)
+            .putInt(KEY_WISHLINK_LEVEL5_SCORE, 0)
+            .putString(KEY_WISHLINK_LEVEL5_STORE_STYLE, "")
+            .putInt(KEY_WISHLINK_LEVEL5_AUDIT_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL6_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL6_RESEARCH_COUNT, 0)
+            .putInt(KEY_WISHLINK_LEVEL7_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL7_FUNNEL_COUNT, 0)
+            .putInt(KEY_WISHLINK_LEVEL8_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL8_HEALTH_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL9_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL9_PLAN_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL10_SCORE, 0)
+            .putInt(KEY_WISHLINK_LEVEL10_STREAK, 7)
+            .putString(KEY_WISHLINK_LEVEL10_CALENDAR_JSON, "")
+            .putString(KEY_WISHLINK_LEVEL10_WEEKLY_PLAN_JSON, "")
+            .putInt(KEY_WISHLINK_LEVEL11_SCORE, 0)
+            .putString(KEY_WISHLINK_LEVEL11_PACKAGE_JSON, "")
+            .putString(KEY_WISHLINK_LANG, "")
+            .putString(KEY_WISHLINK_HEARD_BEFORE, "")
+            .putString(KEY_WISHLINK_HAS_ACCOUNT, "")
+            .putString(KEY_WISHLINK_PLATFORMS, "")
+            .putString(KEY_WISHLINK_NICHE, "")
+            .putString(KEY_WISHLINK_GOAL, "")
+            .putString(KEY_WISHLINK_LEARNING_LEVEL, "")
+            .putBoolean(KEY_WISHLINK_INSTALLED, false)
+            .putString(KEY_WISHLINK_ACCOUNT_STATUS, "")
+            .putString(KEY_WISHLINK_PLATFORM_CONNECTED, "")
+            .putString(KEY_WISHLINK_STORE_STATUS, "")
+            .putInt(KEY_WISHLINK_PROGRESS, 0)
+            .putInt(KEY_WISHLINK_STEP_INDEX, 0)
+            .putStringSet(KEY_WISHLINK_COMPLETED_STEPS, emptySet())
+            .apply()
     }
 
     fun isLanguageSelected(context: Context): Boolean {
