@@ -266,6 +266,51 @@ fun UniversalToolPopupDialog(
 }
 
 @Composable
+fun UniversalToolPopup(
+    toolId: String,
+    onDismiss: () -> Unit
+) {
+    val title = when (toolId) {
+        "tool_captions" -> "AI Subtitle & Caption Generator"
+        "tool_remove_bg" -> "AI Video Background Remover"
+        "tool_resize" -> "Auto Smart Re-framer"
+        "tool_thumbnail" -> "AI Viral Thumbnail Designer"
+        else -> "AI Creator Tool"
+    }
+    
+    val subtitle = when (toolId) {
+        "tool_captions" -> "Generate animated captions in 15+ languages"
+        "tool_remove_bg" -> "Remove video background without green screen"
+        "tool_resize" -> "Convert horizontal video to 9:16 vertical Reel"
+        "tool_thumbnail" -> "Create high CTR thumbnails with AI face enhancer"
+        else -> "Smart AI video processing"
+    }
+
+    UniversalToolPopupDialog(
+        onDismiss = onDismiss,
+        title = title,
+        subtitle = subtitle,
+        ctaText = "Process Video ➔",
+        onCtaClick = onDismiss,
+        scrollableContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Select a video or image file to run $title with AI optimization.",
+                    color = com.example.ui.theme.TextWhite,
+                    fontSize = 13.sp
+                )
+            }
+        }
+    )
+}
+
+@Composable
 fun UniversalCtaButton(
     text: String,
     modifier: Modifier = Modifier,

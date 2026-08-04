@@ -47,8 +47,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
@@ -76,9 +78,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.ShoppingItem
+import com.example.ui.screens.AiLabScreen
 import com.example.ui.screens.HistoryScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ProfileScreen
+import com.example.ui.screens.ProjectsScreen
 import com.example.ui.screens.ReferAndEarnScreen
 import com.example.ui.screens.SplashScreen
 import com.example.ui.theme.AmoledBlack
@@ -150,12 +154,16 @@ enum class Screen {
     Home,
     CreatorAcademySetup,
     CreatorAcademy,
+    AiLab,
+    Projects,
     VideoEditing,
     ReferAndEarn,
     History,
     Profile,
     Analysis,
-    Result
+    Result,
+    MediaPicker,
+    ProjectSetup
 }
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalSharedTransitionApi::class)
@@ -180,6 +188,8 @@ fun MainAppLayout(sharedUrl: String? = null) {
 
     var currentScreen by remember { mutableStateOf(if (!sharedUrl.isNullOrBlank()) Screen.Home else Screen.Splash) }
     var analyzedLink by remember { mutableStateOf("") }
+    var selectedMediaForProject by remember { mutableStateOf<List<com.example.ui.screens.MediaPickerItem>>(emptyList()) }
+    var currentProjectConfig by remember { mutableStateOf<com.example.ui.screens.ProjectSetupConfig?>(null) }
 
     // Automatically navigate to Home screen when a link is shared from Android Share sheet
     LaunchedEffect(sharedUrl) {
@@ -237,7 +247,9 @@ fun MainAppLayout(sharedUrl: String? = null) {
             currentScreen != Screen.Onboarding && 
             currentScreen != Screen.CreatorAcademySetup && 
             currentScreen != Screen.Result && 
-            currentScreen != Screen.Analysis
+            currentScreen != Screen.Analysis &&
+            currentScreen != Screen.MediaPicker &&
+            currentScreen != Screen.ProjectSetup
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -353,6 +365,7 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     }
                     Screen.VideoEditing -> {
                         VideoEditingScreen(
+                            projectConfig = currentProjectConfig,
                             onNavigateToHome = { currentScreen = Screen.Home }
                         )
                     }
@@ -361,17 +374,45 @@ fun MainAppLayout(sharedUrl: String? = null) {
                     }
                     Screen.Home -> {
                         HomeScreen(
-                            historyList = historyList,
-                            onAddHistoryItem = onAddHistoryItem,
+                            onNavigateToProjects = { currentScreen = Screen.Projects },
+                            onNavigateToAiLab = { currentScreen = Screen.AiLab },
+                            onNavigateToAcademy = { currentScreen = Screen.CreatorAcademy },
+                            onNavigateToMediaPicker = { currentScreen = Screen.MediaPicker },
+                            initialSharedUrl = sharedUrl
+                        )
+                    }
+                    Screen.MediaPicker -> {
+                        com.example.ui.screens.MediaPickerScreen(
+                            onClose = { currentScreen = Screen.Home },
+                            onNext = { items ->
+                                selectedMediaForProject = items
+                                currentScreen = Screen.ProjectSetup
+                            }
+                        )
+                    }
+                    Screen.ProjectSetup -> {
+                        com.example.ui.screens.ProjectSetupScreen(
+                            initialSelectedMedia = selectedMediaForProject,
+                            onBackToPicker = { currentScreen = Screen.MediaPicker },
+                            onStartEditing = { config ->
+                                currentProjectConfig = config
+                                currentScreen = Screen.VideoEditing
+                            }
+                        )
+                    }
+                    Screen.AiLab -> {
+                        AiLabScreen(
                             onNavigateToHistory = { currentScreen = Screen.History },
                             onNavigateToAnalysis = { link ->
                                 analyzedLink = link
                                 currentScreen = Screen.Analysis
-                            },
-                            onNavigateToCreatorAcademy = {
-                                currentScreen = Screen.CreatorAcademy
-                            },
-                            initialSharedUrl = sharedUrl
+                            }
+                        )
+                    }
+                    Screen.Projects -> {
+                        ProjectsScreen(
+                            onNavigateToHome = { currentScreen = Screen.Home },
+                            onNavigateToAcademy = { currentScreen = Screen.CreatorAcademy }
                         )
                     }
                     Screen.History -> {
@@ -392,11 +433,9 @@ fun MainAppLayout(sharedUrl: String? = null) {
                         )
                     }
                     Screen.Analysis -> {
-                        com.example.ui.screens.AnalysisScreen(
+                        com.example.ui.screens.ResultScreen(
                             analyzedLink = analyzedLink,
-                            onAddHistoryItem = onAddHistoryItem,
-                            onBackClick = { currentScreen = Screen.Home },
-                            onNavigateToResult = { currentScreen = Screen.Result }
+                            onBackClick = { currentScreen = Screen.Home }
                         )
                     }
                     Screen.Result -> {
@@ -472,47 +511,47 @@ fun BottomNavigationBar(
                 NavigationTabItem(
                     screen = Screen.Home,
                     icon = Icons.Default.Home,
-                    label = com.example.core.LanguageEngine.get("tab_home"),
+                    label = "Home",
                     isSelected = currentScreen == Screen.Home,
                     onClick = { onScreenSelected(Screen.Home) },
                     testTag = "tab_home"
                 )
 
-                // 2. Learn tab
+                // 2. Creator Learning Hub tab
                 NavigationTabItem(
                     screen = Screen.CreatorAcademy,
                     icon = Icons.Default.School,
-                    label = "Learn",
+                    label = "Learning Hub",
                     isSelected = currentScreen == Screen.CreatorAcademy,
                     onClick = { onScreenSelected(Screen.CreatorAcademy) },
                     testTag = "tab_learn"
                 )
                 
-                // 3. Tools tab
+                // 3. AI Lab tab
                 NavigationTabItem(
-                    screen = Screen.VideoEditing,
-                    icon = Icons.Default.Build,
-                    label = "Tools",
-                    isSelected = currentScreen == Screen.VideoEditing,
-                    onClick = { onScreenSelected(Screen.VideoEditing) },
-                    testTag = "tab_tools"
+                    screen = Screen.AiLab,
+                    icon = Icons.Default.AutoAwesome,
+                    label = "AI Lab",
+                    isSelected = currentScreen == Screen.AiLab,
+                    onClick = { onScreenSelected(Screen.AiLab) },
+                    testTag = "tab_ai_lab"
                 )
 
-                // 4. Refer & Earn tab
+                // 4. Projects tab
                 NavigationTabItem(
-                    screen = Screen.ReferAndEarn,
-                    icon = Icons.Default.CardGiftcard,
-                    label = "Refer & Earn",
-                    isSelected = currentScreen == Screen.ReferAndEarn,
-                    onClick = { onScreenSelected(Screen.ReferAndEarn) },
-                    testTag = "tab_refer_earn"
+                    screen = Screen.Projects,
+                    icon = Icons.Default.FolderSpecial,
+                    label = "Projects",
+                    isSelected = currentScreen == Screen.Projects,
+                    onClick = { onScreenSelected(Screen.Projects) },
+                    testTag = "tab_projects"
                 )
                 
                 // 5. Profile tab
                 NavigationTabItem(
                     screen = Screen.Profile,
                     icon = Icons.Default.Person,
-                    label = com.example.core.LanguageEngine.get("tab_profile"),
+                    label = "Profile",
                     isSelected = currentScreen == Screen.Profile,
                     onClick = { onScreenSelected(Screen.Profile) },
                     testTag = "tab_profile"

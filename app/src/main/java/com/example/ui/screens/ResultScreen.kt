@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
+import com.example.data.detectMerchant
 import androidx.compose.animation.*
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -47,6 +50,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import coil.compose.SubcomposeAsyncImage
+
+@Composable
+fun OfficialLogo(
+    modifier: Modifier = Modifier,
+    name: String = "ViralToolAi",
+    size: Dp = 32.dp
+) {
+    com.example.ui.components.OfficialLogo(modifier = modifier, name = name, size = size)
+}
 
 // Beautiful custom Shimmer modifier
 fun Modifier.shimmer(): Modifier = composed {
@@ -404,7 +416,7 @@ fun AiProcessingScreen(
     )
 
     val storeName = remember(analyzedLink, detectedStore) {
-        if (detectedStore.isNotBlank() && detectedStore != "Unknown") detectedStore else detectMerchant(analyzedLink).name
+        if (detectedStore.isNotBlank() && detectedStore != "Unknown") detectedStore else detectMerchant(analyzedLink).merchantName
     }
 
     val progressPercent = remember(currentStepIndex, pipelineSteps.size) {

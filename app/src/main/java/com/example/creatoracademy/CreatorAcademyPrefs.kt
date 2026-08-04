@@ -230,6 +230,21 @@ object CreatorAcademyPrefs {
     private const val KEY_WISHLINK_LEVEL11_COMPLETED = "wishlink_creator_level11_completed"
     private const val KEY_WISHLINK_LEVEL11_SCORE = "wishlink_creator_level11_score"
     private const val KEY_WISHLINK_LEVEL11_PACKAGE_JSON = "wishlink_creator_level11_package_json"
+    private const val KEY_WISHLINK_LEVEL12_COMPLETED = "wishlink_creator_level12_completed"
+    private const val KEY_WISHLINK_LEVEL12_SCORE = "wishlink_creator_level12_score"
+    private const val KEY_WISHLINK_LEVEL12_PLAN_JSON = "wishlink_creator_level12_plan_json"
+    private const val KEY_WISHLINK_LEVEL12_HEALTH_SCORE = "wishlink_creator_level12_health_score"
+    private const val KEY_WISHLINK_LEVEL13_COMPLETED = "wishlink_creator_level13_completed"
+    private const val KEY_WISHLINK_LEVEL13_SCORE = "wishlink_creator_level13_score"
+    private const val KEY_WISHLINK_LEVEL13_PORTFOLIO_JSON = "wishlink_creator_level13_portfolio_json"
+    private const val KEY_WISHLINK_LEVEL13_MEDIA_KIT_JSON = "wishlink_creator_level13_media_kit_json"
+    private const val KEY_WISHLINK_LEVEL14_COMPLETED = "wishlink_creator_level14_completed"
+    private const val KEY_WISHLINK_LEVEL14_SCORE = "wishlink_creator_level14_score"
+    private const val KEY_WISHLINK_LEVEL14_GOALS_JSON = "wishlink_creator_level14_goals_json"
+    private const val KEY_WISHLINK_LEVEL14_VAULT_JSON = "wishlink_creator_level14_vault_json"
+    private const val KEY_WISHLINK_LEVEL15_COMPLETED = "wishlink_creator_level15_completed"
+    private const val KEY_WISHLINK_LEVEL15_SCORE = "wishlink_creator_level15_score"
+    private const val KEY_WISHLINK_LEVEL15_CERTIFICATE_JSON = "wishlink_creator_level15_certificate_json"
     private const val KEY_WISHLINK_INSTALLED = "wishlink_creator_installed"
     private const val KEY_WISHLINK_ACCOUNT_STATUS = "wishlink_creator_account_status"
     private const val KEY_WISHLINK_PLATFORM_CONNECTED = "wishlink_creator_platform_connected"
@@ -2416,6 +2431,140 @@ object CreatorAcademyPrefs {
         return prefs.getString(KEY_WISHLINK_LEVEL11_PACKAGE_JSON, "") ?: ""
     }
 
+    fun isWishlinkLevel12Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL12_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel12Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL12_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel12Data(
+        context: Context,
+        score: Int,
+        progress: Int,
+        planJson: String,
+        healthScore: Int
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL12_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL12_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .putString(KEY_WISHLINK_LEVEL12_PLAN_JSON, planJson)
+            .putInt(KEY_WISHLINK_LEVEL12_HEALTH_SCORE, healthScore)
+            .apply()
+    }
+
+    fun getWishlinkLevel12PlanJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL12_PLAN_JSON, "") ?: ""
+    }
+
+    fun isWishlinkLevel13Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL13_COMPLETED, false)
+    }
+
+    fun setWishlinkLevel13Completed(context: Context, completed: Boolean) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_WISHLINK_LEVEL13_COMPLETED, completed).apply()
+    }
+
+    fun saveWishlinkLevel13Data(
+        context: Context,
+        score: Int,
+        progress: Int,
+        portfolioJson: String,
+        mediaKitJson: String
+    ) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL13_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL13_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .putString(KEY_WISHLINK_LEVEL13_PORTFOLIO_JSON, portfolioJson)
+            .putString(KEY_WISHLINK_LEVEL13_MEDIA_KIT_JSON, mediaKitJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel13PortfolioJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL13_PORTFOLIO_JSON, "") ?: ""
+    }
+
+    fun getWishlinkLevel13MediaKitJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL13_MEDIA_KIT_JSON, "") ?: ""
+    }
+
+    fun isWishlinkLevel14Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL14_COMPLETED, false)
+    }
+
+    fun getWishlinkLevel14Score(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_WISHLINK_LEVEL14_SCORE, 0)
+    }
+
+    fun completeWishlinkLevel14(context: Context, score: Int, goalsJson: String, vaultJson: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val progress = Math.max(prefs.getInt(KEY_WISHLINK_PROGRESS, 0), 98)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL14_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL14_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, progress)
+            .putString(KEY_WISHLINK_LEVEL14_GOALS_JSON, goalsJson)
+            .putString(KEY_WISHLINK_LEVEL14_VAULT_JSON, vaultJson)
+            .apply()
+    }
+
+    fun saveWishlinkLevel14Data(context: Context, goalsJson: String, vaultJson: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString(KEY_WISHLINK_LEVEL14_GOALS_JSON, goalsJson)
+            .putString(KEY_WISHLINK_LEVEL14_VAULT_JSON, vaultJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel14GoalsJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL14_GOALS_JSON, "") ?: ""
+    }
+
+    fun getWishlinkLevel14VaultJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL14_VAULT_JSON, "") ?: ""
+    }
+
+    fun isWishlinkLevel15Completed(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_WISHLINK_LEVEL15_COMPLETED, false)
+    }
+
+    fun getWishlinkLevel15Score(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_WISHLINK_LEVEL15_SCORE, 0)
+    }
+
+    fun completeWishlinkLevel15(context: Context, score: Int, certJson: String) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_WISHLINK_LEVEL15_COMPLETED, true)
+            .putInt(KEY_WISHLINK_LEVEL15_SCORE, score)
+            .putInt(KEY_WISHLINK_PROGRESS, 100)
+            .putString(KEY_WISHLINK_LEVEL15_CERTIFICATE_JSON, certJson)
+            .apply()
+    }
+
+    fun getWishlinkLevel15CertificateJson(context: Context): String {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_WISHLINK_LEVEL15_CERTIFICATE_JSON, "") ?: ""
+    }
+
     fun resetWishlinkLevel1Data(context: Context) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit()
@@ -2431,6 +2580,10 @@ object CreatorAcademyPrefs {
             .putBoolean(KEY_WISHLINK_LEVEL9_COMPLETED, false)
             .putBoolean(KEY_WISHLINK_LEVEL10_COMPLETED, false)
             .putBoolean(KEY_WISHLINK_LEVEL11_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL12_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL13_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL14_COMPLETED, false)
+            .putBoolean(KEY_WISHLINK_LEVEL15_COMPLETED, false)
             .putInt(KEY_WISHLINK_LEVEL3_SCORE, 0)
             .putInt(KEY_WISHLINK_LEVEL4_SCORE, 0)
             .putInt(KEY_WISHLINK_LEVEL4_GENERATED_LINKS, 0)

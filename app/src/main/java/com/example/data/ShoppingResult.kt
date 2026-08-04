@@ -1,9 +1,22 @@
 package com.example.data
 
 import androidx.compose.ui.graphics.Color
-import com.example.ui.screens.detectMerchant
 import kotlin.math.absoluteValue
 import java.net.URLDecoder
+
+fun detectMerchant(url: String): MerchantInfo {
+    val cleanUrl = url.lowercase()
+    return when {
+        cleanUrl.contains("amazon") -> MerchantInfo(merchantName = "Amazon", primaryColor = 0xFFFF9900L, secondaryColor = 0xFF000000L, domain = "amazon.in")
+        cleanUrl.contains("flipkart") -> MerchantInfo(merchantName = "Flipkart", primaryColor = 0xFF2874F0L, secondaryColor = 0xFFFFE500L, domain = "flipkart.com")
+        cleanUrl.contains("myntra") -> MerchantInfo(merchantName = "Myntra", primaryColor = 0xFFFC2779L, secondaryColor = 0xFFFF3F6CL, domain = "myntra.com")
+        cleanUrl.contains("ajio") -> MerchantInfo(merchantName = "Ajio", primaryColor = 0xFF2C3E50L, secondaryColor = 0xFF111111L, domain = "ajio.com")
+        cleanUrl.contains("meesho") -> MerchantInfo(merchantName = "Meesho", primaryColor = 0xFF9C27B0L, secondaryColor = 0xFF550055L, domain = "meesho.com")
+        cleanUrl.contains("instagram") -> MerchantInfo(merchantName = "Instagram", primaryColor = 0xFFE1306CL, secondaryColor = 0xFFC13584L, domain = "instagram.com")
+        cleanUrl.contains("youtube") -> MerchantInfo(merchantName = "YouTube", primaryColor = 0xFFFF0000L, secondaryColor = 0xFF282828L, domain = "youtube.com")
+        else -> MerchantInfo(merchantName = "Online Store", primaryColor = 0xFF8B5CF6L, secondaryColor = 0xFF111111L, domain = "store.com")
+    }
+}
 
 data class SimilarProduct(
     val name: String,

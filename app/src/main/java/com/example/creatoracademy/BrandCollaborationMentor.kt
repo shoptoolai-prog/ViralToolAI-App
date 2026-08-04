@@ -15,6 +15,7 @@ import kotlin.math.sin
 import com.example.ui.components.SmartWelcomeBackDialog
 import com.example.ui.components.RestartCourseConfirmDialog
 import com.example.ui.components.LearningProgressIndicatorCard
+import com.example.ui.components.OfficialLogo
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -152,7 +153,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.BuildConfig
-import com.example.ui.screens.OfficialLogo
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.TextWhite
 

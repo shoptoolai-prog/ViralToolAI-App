@@ -1,5 +1,6 @@
 package com.example.creatoracademy
 
+import com.example.ui.components.OfficialLogo
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -106,7 +107,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.config.WishlinkAcademyConfig
 import com.example.ui.components.MentorToolTheme
-import com.example.ui.screens.OfficialLogo
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.TextWhite
 import com.example.ui.theme.responsiveImeAndNavPadding
@@ -585,6 +585,18 @@ fun WishlinkCreatorAiDialog(
     var isLevel11Completed by remember {
         mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel11Completed(context))
     }
+    var isLevel12Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel12Completed(context))
+    }
+    var isLevel13Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel13Completed(context))
+    }
+    var isLevel14Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel14Completed(context))
+    }
+    var isLevel15Completed by remember {
+        mutableStateOf(CreatorAcademyPrefs.isWishlinkLevel15Completed(context))
+    }
     var userProfileState by remember {
         mutableStateOf(CreatorAcademyPrefs.getWishlinkLevel1Profile(context))
     }
@@ -784,6 +796,72 @@ fun WishlinkCreatorAiDialog(
                                     isLevel10Completed = false
                                 }
                             )
+                        } else if (!isLevel12Completed) {
+                            // MASTER PHASE 12 - Wishlink Creator Guide Level 12 AI Creator Business System View
+                            WishlinkCreatorLevel12BusinessSystemView(
+                                userProfile = userProfileState,
+                                onCompleteLevel12 = {
+                                    isLevel12Completed = true
+                                },
+                                onBack = {
+                                    isLevel11Completed = false
+                                }
+                            )
+                        } else if (!isLevel13Completed) {
+                            // MASTER PHASE 13 - Wishlink Creator Guide Level 13 AI Portfolio & Brand Ready Profile Builder View
+                            WishlinkCreatorLevel13PortfolioView(
+                                userProfile = userProfileState,
+                                onCompleteLevel13 = {
+                                    isLevel13Completed = true
+                                },
+                                onBack = {
+                                    isLevel12Completed = false
+                                }
+                            )
+                        } else if (!isLevel14Completed) {
+                            // MASTER PHASE 14 - Wishlink Creator Guide Level 14 Creator Success Dashboard View
+                            WishlinkCreatorLevel14DashboardView(
+                                userProfile = userProfileState,
+                                onCompleteLevel14 = {
+                                    isLevel14Completed = true
+                                },
+                                onBack = {
+                                    isLevel13Completed = false
+                                }
+                            )
+                        } else if (!isLevel15Completed) {
+                            // MASTER PHASE 15 - Wishlink Creator Guide Level 15 Success Hub View (FINAL LEVEL)
+                            WishlinkCreatorLevel15SuccessHubView(
+                                userProfile = userProfileState,
+                                onCompleteLevel15 = {
+                                    isLevel15Completed = true
+                                },
+                                onRestartCourse = {
+                                    CreatorAcademyPrefs.resetWishlinkLevel1Data(context)
+                                    setStep(0)
+                                    completedSteps = emptySet()
+                                    isLevel1Completed = false
+                                    isLevel2Completed = false
+                                    isLevel3Completed = false
+                                    isLevel4Completed = false
+                                    isLevel5Completed = false
+                                    isLevel6Completed = false
+                                    isLevel7Completed = false
+                                    isLevel8Completed = false
+                                    isLevel9Completed = false
+                                    isLevel10Completed = false
+                                    isLevel11Completed = false
+                                    isLevel12Completed = false
+                                    isLevel13Completed = false
+                                    isLevel14Completed = false
+                                    isLevel15Completed = false
+                                    isLanguageSelected = false
+                                    selectedLanguage = ""
+                                },
+                                onBack = {
+                                    isLevel14Completed = false
+                                }
+                            )
                         } else {
                             // Header Bar
                             WishlinkDialogHeader(
@@ -816,6 +894,9 @@ fun WishlinkCreatorAiDialog(
                                     isLevel9Completed = false
                                     isLevel10Completed = false
                                     isLevel11Completed = false
+                                    isLevel12Completed = false
+                                    isLevel13Completed = false
+                                    isLevel14Completed = false
                                     isLanguageSelected = false
                                     selectedLanguage = ""
                                 }

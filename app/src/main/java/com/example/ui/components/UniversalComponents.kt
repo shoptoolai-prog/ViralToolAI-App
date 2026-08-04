@@ -1179,3 +1179,38 @@ fun CommonPopupCard(
     }
 }
 
+/**
+ * Official Brand Logo Composable for ViralToolAi
+ */
+@Composable
+fun OfficialLogo(
+    modifier: Modifier = Modifier,
+    name: String = "ViralToolAi",
+    size: Dp = 32.dp
+) {
+    val iconRes = com.example.R.drawable.ic_viraltool_icon
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    listOf(
+                        com.example.ui.theme.VioletPrimary.copy(alpha = 0.6f),
+                        com.example.ui.theme.ElectricPurple.copy(alpha = 0.2f),
+                        Color.Transparent
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(id = iconRes),
+            contentDescription = "$name Logo",
+            modifier = Modifier.size(size * 0.85f)
+        )
+    }
+}
+
+
