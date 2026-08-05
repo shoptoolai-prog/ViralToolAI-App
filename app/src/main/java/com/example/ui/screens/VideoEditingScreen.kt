@@ -1,3 +1,9 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.media3.common.util.UnstableApi::class
+)
+
 package com.example.ui.screens
 
 import android.content.Context
@@ -47,15 +53,29 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.annotation.OptIn
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.request.videoFrameMicros
+import coil.decode.VideoFrameDecoder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -388,12 +408,31 @@ fun VideoEditingScreen(
     val initialClips = remember(projectConfig) {
         if (projectConfig != null && projectConfig.selectedMedia.isNotEmpty()) {
             projectConfig.selectedMedia.mapIndexed { idx, item ->
+                val itemDur = if (item.durationSeconds > 0) item.durationSeconds.toDouble() else {
+                    try {
+                        val uri = item.uri
+                        if (uri != null && uri != Uri.EMPTY) {
+                            val retriever = android.media.MediaMetadataRetriever()
+                            try {
+                                retriever.setDataSource(context, uri)
+                                val durMs = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toDoubleOrNull() ?: 15000.0
+                                (durMs / 1000.0).coerceAtLeast(1.0)
+                            } finally {
+                                try { retriever.release() } catch (_: Throwable) {}
+                            }
+                        } else {
+                            15.0
+                        }
+                    } catch (e: Throwable) {
+                        15.0
+                    }
+                }
                 TimelineClip(
                     id = "clip_${idx}_${System.currentTimeMillis()}",
                     mediaUri = item.uri,
                     title = item.title,
-                    originalDurationSec = if (item.durationSeconds > 0) item.durationSeconds.toDouble() else 15.0,
-                    endTrimSec = if (item.durationSeconds > 0) item.durationSeconds.toDouble() else 15.0,
+                    originalDurationSec = itemDur,
+                    endTrimSec = itemDur,
                     resolutionLabel = item.resolutionLabel
                 )
             }
@@ -506,15 +545,25 @@ fun VideoEditingScreen(
             pushUndoState()
             val newClips = uris.mapIndexed { idx, uri ->
                 val fileName = uri.lastPathSegment ?: "Imported Clip ${idx + 1}"
+                val durSec = try {
+                    val retriever = android.media.MediaMetadataRetriever()
+                    retriever.setDataSource(context, uri)
+                    val durMs = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toDoubleOrNull() ?: 15000.0
+                    retriever.release()
+                    (durMs / 1000.0).coerceAtLeast(1.0)
+                } catch (e: Exception) {
+                    15.0
+                }
                 TimelineClip(
                     id = "imported_${idx}_${System.currentTimeMillis()}",
                     mediaUri = uri,
                     title = fileName,
-                    originalDurationSec = 15.0,
-                    endTrimSec = 15.0
+                    originalDurationSec = durSec,
+                    endTrimSec = durSec
                 )
             }
-            clips = clips + newClips
+            clips = clips.filterNot { it.mediaUri == null } + newClips
+            selectedClipId = newClips.firstOrNull()?.id
             Toast.makeText(context, "Added ${uris.size} clip(s) to timeline", Toast.LENGTH_SHORT).show()
         }
     }
@@ -549,9 +598,9 @@ fun VideoEditingScreen(
     // Phase 11 Transition Engine State
     var tempPreviewTransitionConfig by remember { mutableStateOf<com.example.ui.components.TransitionConfig?>(null) }
 
-    // Playback Coroutine Loop
-    LaunchedEffect(isPlaying, playbackSpeed, totalDurationSec, isLoopEnabled) {
-        if (isPlaying) {
+    // Playback Coroutine Loop (Fallback for draft canvas without video file)
+    LaunchedEffect(isPlaying, playbackSpeed, totalDurationSec, isLoopEnabled, activeClip?.mediaUri) {
+        if (isPlaying && activeClip?.mediaUri == null) {
             val stepMs = 33L
             val incrementSec = (stepMs / 1000.0) * playbackSpeed
             while (isPlaying) {
@@ -639,6 +688,7 @@ fun VideoEditingScreen(
                             stickerTracks = stickerTracks,
                             drawingTracks = drawingTracks,
                             currentPlayheadSec = currentPlayheadSec,
+                            isPlaying = isPlaying,
                             isSafeAreaEnabled = isSafeAreaEnabled,
                             isGridEnabled = isGridEnabled,
                             isPreviewMuted = isPreviewMuted,
@@ -666,6 +716,15 @@ fun VideoEditingScreen(
                                 activeClip?.let { c ->
                                     val updated = c.copy(isFlippedHorizontal = !c.isFlippedHorizontal)
                                     clips = clips.map { if (it.id == c.id) updated else it }
+                                }
+                            },
+                            playbackSpeed = playbackSpeed,
+                            onPlayheadUpdate = { newTime -> currentPlayheadSec = newTime },
+                            onPlaybackEnded = {
+                                isPlaying = false
+                                if (isLoopEnabled) {
+                                    currentPlayheadSec = 0.0
+                                    isPlaying = true
                                 }
                             }
                         )
@@ -844,6 +903,8 @@ fun VideoEditingScreen(
                         stickerTracks = stickerTracks,
                         drawingTracks = drawingTracks,
                         currentPlayheadSec = currentPlayheadSec,
+                        isPlaying = isPlaying,
+                        playbackSpeed = playbackSpeed,
                         isSafeAreaEnabled = isSafeAreaEnabled,
                         isGridEnabled = isGridEnabled,
                         isPreviewMuted = isPreviewMuted,
@@ -871,6 +932,14 @@ fun VideoEditingScreen(
                             activeClip?.let { c ->
                                 val updated = c.copy(isFlippedHorizontal = !c.isFlippedHorizontal)
                                 clips = clips.map { if (it.id == c.id) updated else it }
+                            }
+                        },
+                        onPlayheadUpdate = { newTime -> currentPlayheadSec = newTime },
+                        onPlaybackEnded = {
+                            isPlaying = false
+                            if (isLoopEnabled) {
+                                currentPlayheadSec = 0.0
+                                isPlaying = true
                             }
                         }
                     )
@@ -2360,6 +2429,7 @@ private fun Phase9CompactTimeline(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val density = LocalDensity.current.density
 
     // Layer Mute / Hide / Lock States
     var isVideoHidden by remember { mutableStateOf(false) }
@@ -2376,7 +2446,30 @@ private fun Phase9CompactTimeline(
     var isFiltersHidden by remember { mutableStateOf(false) }
     var isStickersHidden by remember { mutableStateOf(false) }
 
-    Box(
+    val horizontalScrollState = rememberScrollState()
+    val pxPerSec = timelineZoomPxPerSec * density
+
+    // Synchronize user scrubbing -> onSeek
+    LaunchedEffect(horizontalScrollState.value, horizontalScrollState.isScrollInProgress) {
+        if (horizontalScrollState.isScrollInProgress) {
+            val derivedSec = (horizontalScrollState.value / pxPerSec.toDouble()).coerceIn(0.0, totalDurationSec)
+            if (kotlin.math.abs(derivedSec - currentPlayheadSec) > 0.02) {
+                onSeek(derivedSec)
+            }
+        }
+    }
+
+    // Synchronize playhead position -> horizontal scroll offset
+    LaunchedEffect(currentPlayheadSec, timelineZoomPxPerSec) {
+        if (!horizontalScrollState.isScrollInProgress) {
+            val targetPx = (currentPlayheadSec * pxPerSec).toInt()
+            if (kotlin.math.abs(horizontalScrollState.value - targetPx) > 2) {
+                horizontalScrollState.scrollTo(targetPx)
+            }
+        }
+    }
+
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBg)
@@ -2385,20 +2478,71 @@ private fun Phase9CompactTimeline(
                     onUpdateZoom((timelineZoomPxPerSec * zoom).coerceIn(10f, 120f))
                 }
             }
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                // Tap empty timeline background clears selection
-                onSelectClip("")
-            }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 2.dp)
-        ) {
+        val totalWidthDp = maxWidth
+        val headerWidthDp = 40.dp
+        val trackAreaWidthDp = (totalWidthDp - headerWidthDp).coerceAtLeast(100.dp)
+        val centerPaddingDp = trackAreaWidthDp / 2f
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            // FIXED TRACK HEADERS COLUMN ON LEFT (width 40dp)
+            Column(
+                modifier = Modifier
+                    .width(headerWidthDp)
+                    .fillMaxHeight()
+                    .background(Color(0xFF0F121C))
+                    .padding(top = 26.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                LayerTrackHeader(
+                    icon = Icons.Default.Videocam,
+                    color = Color(0xFF10B981),
+                    heightDp = 56.dp,
+                    isHidden = isVideoHidden,
+                    isLocked = isVideoLocked,
+                    onToggleHide = { isVideoHidden = !isVideoHidden },
+                    onToggleLock = { isVideoLocked = !isVideoLocked }
+                )
+                LayerTrackHeader(
+                    icon = Icons.Default.MusicNote,
+                    color = Color(0xFF3B82F6),
+                    heightDp = 44.dp,
+                    isHidden = isAudioHidden,
+                    isLocked = isAudioLocked,
+                    isMuted = isAudioMuted,
+                    onToggleHide = { isAudioHidden = !isAudioHidden },
+                    onToggleLock = { isAudioLocked = !isAudioLocked },
+                    onToggleMute = { isAudioMuted = !isAudioMuted }
+                )
+                LayerTrackHeader(
+                    icon = Icons.Default.Title,
+                    color = Color(0xFF8B5CF6),
+                    heightDp = 44.dp,
+                    isHidden = isTextHidden,
+                    onToggleHide = { isTextHidden = !isTextHidden }
+                )
+                LayerTrackHeader(
+                    icon = Icons.Default.ClosedCaption,
+                    color = Color(0xFFF97316),
+                    heightDp = 44.dp,
+                    isHidden = isCaptionHidden,
+                    onToggleHide = { isCaptionHidden = !isCaptionHidden }
+                )
+            }
+
+            // HORIZONTALLY SCROLLING TRACK CONTENT AREA
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .horizontalScroll(horizontalScrollState)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(start = centerPaddingDp, end = centerPaddingDp)
+                        .wrapContentWidth()
+                        .fillMaxHeight()
+                ) {
             Spacer(Modifier.height(2.dp))
 
             // PROFESSIONAL TIMELINE RULER (00:00, 00:01, 00:02 with frame marks 5f, 10f, 15f when zoomed)
@@ -2414,11 +2558,11 @@ private fun Phase9CompactTimeline(
                 val tickStepSec = if (isZoomedIn) 1.0 else if (timelineZoomPxPerSec > 18f) 2.0 else 5.0
                 val tickCount = (totalDurationSec / tickStepSec).toInt().coerceIn(4, 120)
 
-                LazyRow(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy((tickStepSec * timelineZoomPxPerSec).dp)
                 ) {
-                    items(tickCount) { tickIdx ->
+                    (0 until tickCount).forEach { tickIdx ->
                         val timeVal = tickIdx * tickStepSec
                         val mins = (timeVal / 60).toInt()
                         val secs = (timeVal % 60).toInt()
@@ -2495,12 +2639,12 @@ private fun Phase9CompactTimeline(
                 Spacer(Modifier.width(4.dp))
 
                 if (!isVideoHidden) {
-                    LazyRow(
+                    Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        itemsIndexed(clips, key = { _, item -> item.id }) { index, clip ->
+                        clips.forEachIndexed { index, clip ->
                             val isSelected = if (isMultiSelectMode) selectedClipIds.contains(clip.id) else clip.id == selectedClipId
                             val hasActiveSelection = selectedClipId != null || selectedClipIds.isNotEmpty()
                             val isDimmed = hasActiveSelection && !isSelected
@@ -2630,18 +2774,16 @@ private fun Phase9CompactTimeline(
                             }
                         }
 
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF1E2030))
-                                    .border(BorderStroke(1.dp, MintPrimary), CircleShape)
-                                    .clickable { onAddMediaBetween() },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "Add Clip", tint = MintPrimary, modifier = Modifier.size(14.dp))
-                            }
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF1E2030))
+                                .border(BorderStroke(1.dp, MintPrimary), CircleShape)
+                                .clickable { onAddMediaBetween() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Clip", tint = MintPrimary, modifier = Modifier.size(14.dp))
                         }
                     }
                 }
@@ -2671,11 +2813,11 @@ private fun Phase9CompactTimeline(
                 Spacer(Modifier.width(4.dp))
 
                 if (!isAudioHidden) {
-                    LazyRow(
+                    Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        itemsIndexed(audioTracks) { _, aud ->
+                        audioTracks.forEachIndexed { _, aud ->
                             val isSel = selectedAudioTrackId == aud.id
                             val trackWidth = (aud.durationSec * timelineZoomPxPerSec).dp.coerceAtLeast(60.dp)
                             Box(
@@ -2747,11 +2889,11 @@ private fun Phase9CompactTimeline(
                 Spacer(Modifier.width(4.dp))
 
                 if (!isTextHidden) {
-                    LazyRow(
+                    Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        itemsIndexed(textTracks) { _, txt ->
+                        textTracks.forEachIndexed { _, txt ->
                             Box(
                                 modifier = Modifier
                                     .width((txt.durationSec * timelineZoomPxPerSec).dp.coerceAtLeast(50.dp))
@@ -2789,11 +2931,11 @@ private fun Phase9CompactTimeline(
                 Spacer(Modifier.width(4.dp))
 
                 if (!isCaptionHidden) {
-                    LazyRow(
+                    Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        items(3) { idx ->
+                        repeat(3) { idx ->
                             Box(
                                 modifier = Modifier
                                     .width((3.0 * timelineZoomPxPerSec).dp.coerceAtLeast(45.dp))
@@ -2831,11 +2973,11 @@ private fun Phase9CompactTimeline(
                 Spacer(Modifier.width(4.dp))
 
                 if (!isEffectsHidden) {
-                    LazyRow(
+                    Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        itemsIndexed(effectTracks) { _, fx ->
+                        effectTracks.forEachIndexed { _, fx ->
                             Box(
                                 modifier = Modifier
                                     .width((fx.durationSec * timelineZoomPxPerSec).dp.coerceAtLeast(48.dp))
@@ -2877,35 +3019,28 @@ private fun Phase9CompactTimeline(
                 }
             }
         }
-
-        // PLAYHEAD CURSOR LINE WITH GLOWING EMERALD HANDLE (POSITIONED ACCORDING TO PLAYHEAD)
-        val cursorOffsetPx = 44.dp + (currentPlayheadSec * timelineZoomPxPerSec).dp
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = cursorOffsetPx)
-                .fillMaxHeight()
-                .width(20.dp),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(2.dp)
-                    .background(Color(0xFF10B981))
-                    .shadow(6.dp, spotColor = Color(0xFF10B981))
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981))
-                    .border(BorderStroke(1.5.dp, TextWhite), CircleShape)
-                    .shadow(8.dp, spotColor = Color(0xFF10B981))
-            )
-        }
     }
+
+    // FIXED PLAYHEAD LINE & HANDLE OVERLAY (#34D399, 2dp line, 10dp circle top handle)
+    val playheadX = headerWidthDp + centerPaddingDp
+    Box(
+        modifier = Modifier
+            .offset(x = playheadX - 1.dp)
+            .fillMaxHeight()
+            .width(2.dp)
+            .background(Color(0xFF34D399))
+    )
+
+    Box(
+        modifier = Modifier
+            .offset(x = playheadX - 5.dp, y = 2.dp)
+            .size(10.dp)
+            .clip(CircleShape)
+            .background(Color(0xFF34D399))
+            .border(BorderStroke(1.5.dp, TextWhite), CircleShape)
+    )
+}
+}
 }
 
 @Composable
@@ -3167,6 +3302,8 @@ private fun PreviewCanvasArea(
     stickerTracks: List<StickerTrackItem> = emptyList(),
     drawingTracks: List<DrawingTrackItem> = emptyList(),
     currentPlayheadSec: Double,
+    isPlaying: Boolean = false,
+    playbackSpeed: Float = 1.0f,
     isSafeAreaEnabled: Boolean,
     isGridEnabled: Boolean,
     isPreviewMuted: Boolean,
@@ -3180,7 +3317,9 @@ private fun PreviewCanvasArea(
     onOpenInspector: () -> Unit = {},
     onUpdateTransform: (Float, Float, Float, Float) -> Unit = { _, _, _, _ -> },
     onRotateClip: () -> Unit = {},
-    onMirrorClip: () -> Unit = {}
+    onMirrorClip: () -> Unit = {},
+    onPlayheadUpdate: (Double) -> Unit = {},
+    onPlaybackEnded: () -> Unit = {}
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var showFloatingControls by remember { mutableStateOf(false) }
@@ -3306,15 +3445,40 @@ private fun PreviewCanvasArea(
             val clipY = activeClip?.offsetY ?: 0f
             val clipAlpha = activeClip?.opacity ?: 1.0f
 
+            val context = LocalContext.current
+            val videoImageLoader = remember(context) {
+                coil.ImageLoader.Builder(context)
+                    .components {
+                        add(VideoFrameDecoder.Factory())
+                    }
+                    .build()
+            }
+
+            val targetFrameMicros = remember(currentPlayheadSec, activeClip) {
+                val sec = (currentPlayheadSec + (activeClip?.startTrimSec ?: 0.0)).coerceAtLeast(0.0)
+                (sec * 1_000_000.0).toLong()
+            }
+
+            val videoImageRequest = remember(activeClip?.mediaUri, targetFrameMicros) {
+                ImageRequest.Builder(context)
+                    .data(activeClip?.mediaUri)
+                    .videoFrameMicros(targetFrameMicros)
+                    .decoderFactory(VideoFrameDecoder.Factory())
+                    .crossfade(false)
+                    .build()
+            }
+
             if (activeClip?.mediaUri != null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(activeClip.mediaUri)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Active Video Preview Frame",
+                ExoPlayerVideoPreview(
+                    mediaUri = activeClip.mediaUri,
+                    currentPlayheadSec = currentPlayheadSec,
+                    startTrimSec = activeClip.startTrimSec,
+                    isPlaying = isPlaying,
+                    playbackSpeed = playbackSpeed,
                     contentScale = if (isPreviewFilled) ContentScale.Crop else ContentScale.Fit,
                     colorFilter = activeColorFilter,
+                    onPlayheadUpdate = onPlayheadUpdate,
+                    onPlaybackEnded = onPlaybackEnded,
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer(
@@ -3695,205 +3859,130 @@ private fun ControlBar(
         modifier = Modifier.fillMaxWidth(),
         color = Color(0xFF050507)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Undo & Redo
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = formatTimecode(currentPlayheadSec),
-                    color = MintPrimary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Slider(
-                    value = currentPlayheadSec.toFloat(),
-                    onValueChange = { onSeek(it.toDouble()) },
-                    valueRange = 0f..totalDurationSec.toFloat(),
-                    colors = SliderDefaults.colors(
-                        thumbColor = MintPrimary,
-                        activeTrackColor = MintPrimary,
-                        inactiveTrackColor = Color(0xFF1F1F2E)
-                    ),
+                IconButton(
+                    onClick = onUndo,
+                    enabled = undoEnabled,
                     modifier = Modifier
-                        .weight(1f)
-                        .height(18.dp)
-                )
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(if (undoEnabled) Color(0xFF1A1A24) else Color(0xFF1A1A24).copy(alpha = 0.4f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Undo,
+                        contentDescription = "Undo",
+                        tint = if (undoEnabled) TextWhite else TextGray.copy(alpha = 0.4f),
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onRedo,
+                    enabled = redoEnabled,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(if (redoEnabled) Color(0xFF1A1A24) else Color(0xFF1A1A24).copy(alpha = 0.4f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Redo,
+                        contentDescription = "Redo",
+                        tint = if (redoEnabled) TextWhite else TextGray.copy(alpha = 0.4f),
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
 
                 Text(
-                    text = formatTimecode(totalDurationSec),
-                    color = TextGray,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
+                    text = "${formatTimecode(currentPlayheadSec)} / ${formatTimecode(totalDurationSec)}",
+                    color = MintPrimary,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
             }
 
+            // Playback Controls (Prev Frame, Play/Pause, Next Frame)
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    IconButton(
-                        onClick = onUndo,
-                        enabled = undoEnabled,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(if (undoEnabled) Color(0xFF1A1A24) else Color(0xFF1A1A24).copy(alpha = 0.4f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Undo,
-                            contentDescription = "Undo",
-                            tint = if (undoEnabled) TextWhite else TextGray.copy(alpha = 0.4f),
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onRedo,
-                        enabled = redoEnabled,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(if (redoEnabled) Color(0xFF1A1A24) else Color(0xFF1A1A24).copy(alpha = 0.4f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Redo,
-                            contentDescription = "Redo",
-                            tint = if (redoEnabled) TextWhite else TextGray.copy(alpha = 0.4f),
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onToggleLoop,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(if (isLoopEnabled) MintPrimary.copy(alpha = 0.2f) else Color(0xFF1A1A24))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Repeat,
-                            contentDescription = "Loop",
-                            tint = if (isLoopEnabled) MintPrimary else TextGray,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = onJumpStart,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1A1A24))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FirstPage,
-                            contentDescription = "Jump Start",
-                            tint = TextWhite,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onPrevFrame,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1A1A24))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SkipPrevious,
-                            contentDescription = "Previous Frame",
-                            tint = TextWhite,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onTogglePlay,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(MintPrimary, Color(0xFF059669))
-                                )
-                            )
-                            .shadow(4.dp, spotColor = MintGlow)
-                    ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            tint = Color.Black,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onNextFrame,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1A1A24))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SkipNext,
-                            contentDescription = "Next Frame",
-                            tint = TextWhite,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onJumpEnd,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1A1A24))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LastPage,
-                            contentDescription = "Jump End",
-                            tint = TextWhite,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-                }
-
-                Box(
+                IconButton(
+                    onClick = onPrevFrame,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(28.dp)
+                        .clip(CircleShape)
                         .background(Color(0xFF1A1A24))
-                        .border(BorderStroke(1.dp, MintPrimary.copy(alpha = 0.5f)), RoundedCornerShape(8.dp))
-                        .clickable { onOpenSpeedSheet() }
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
-                    Text(
-                        text = "${playbackSpeed}x",
-                        color = MintPrimary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                    Icon(
+                        imageVector = Icons.Default.SkipPrevious,
+                        contentDescription = "Previous Frame",
+                        tint = TextWhite,
+                        modifier = Modifier.size(15.dp)
                     )
                 }
+
+                IconButton(
+                    onClick = onTogglePlay,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(MintPrimary, Color(0xFF059669))
+                            )
+                        )
+                        .shadow(4.dp, spotColor = MintGlow)
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = Color.Black,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onNextFrame,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF1A1A24))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SkipNext,
+                        contentDescription = "Next Frame",
+                        tint = TextWhite,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+
+            // Playback Speed Pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF1A1A24))
+                    .border(BorderStroke(1.dp, MintPrimary.copy(alpha = 0.5f)), RoundedCornerShape(8.dp))
+                    .clickable { onOpenSpeedSheet() }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "${playbackSpeed}x",
+                    color = MintPrimary,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -5332,4 +5421,147 @@ private fun formatTimecode(seconds: Double): String {
     val secs = totalSec % 60
     val millis = ((seconds - totalSec) * 100).toInt().coerceIn(0, 99)
     return String.format(Locale.US, "%02d:%02d.%02d", mins, secs, millis)
+}
+
+// ============================================================================
+// MEDIA3 EXOPLAYER VIDEO PREVIEW COMPOSABLE
+// ============================================================================
+@OptIn(UnstableApi::class)
+@Composable
+private fun ExoPlayerVideoPreview(
+    mediaUri: Uri,
+    currentPlayheadSec: Double,
+    startTrimSec: Double,
+    isPlaying: Boolean,
+    playbackSpeed: Float = 1.0f,
+    contentScale: ContentScale,
+    colorFilter: ColorFilter?,
+    onPlayheadUpdate: (Double) -> Unit = {},
+    onPlaybackEnded: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var isExoError by remember { mutableStateOf(false) }
+
+    val exoPlayer = remember(context, mediaUri) {
+        ExoPlayer.Builder(context)
+            .setSeekBackIncrementMs(100)
+            .setSeekForwardIncrementMs(100)
+            .build().apply {
+                repeatMode = Player.REPEAT_MODE_OFF
+            }
+    }
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                isExoError = true
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    onPlaybackEnded()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(mediaUri) {
+        isExoError = false
+        try {
+            val mediaItem = MediaItem.fromUri(mediaUri)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            val initialPosMs = ((currentPlayheadSec + startTrimSec).coerceAtLeast(0.0) * 1000.0).toLong()
+            exoPlayer.seekTo(initialPosMs)
+        } catch (e: Exception) {
+            isExoError = true
+        }
+    }
+
+    LaunchedEffect(playbackSpeed) {
+        try {
+            exoPlayer.setPlaybackSpeed(playbackSpeed)
+        } catch (e: Exception) {
+            // ignore
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            exoPlayer.playWhenReady = true
+            exoPlayer.play()
+        } else {
+            exoPlayer.pause()
+            val targetPosMs = ((currentPlayheadSec + startTrimSec).coerceAtLeast(0.0) * 1000.0).toLong()
+            exoPlayer.seekTo(targetPosMs)
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            while (true) {
+                withFrameNanos {
+                    if (exoPlayer.isPlaying) {
+                        val posSec = (exoPlayer.currentPosition / 1000.0) - startTrimSec
+                        onPlayheadUpdate(posSec.coerceAtLeast(0.0))
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(currentPlayheadSec, startTrimSec) {
+        if (!isPlaying) {
+            val targetPosMs = ((currentPlayheadSec + startTrimSec).coerceAtLeast(0.0) * 1000.0).toLong()
+            if (kotlin.math.abs(exoPlayer.currentPosition - targetPosMs) > 30) {
+                exoPlayer.seekTo(targetPosMs)
+            }
+        }
+    }
+
+    if (!isExoError) {
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    useController = false
+                    player = exoPlayer
+                    resizeMode = if (contentScale == ContentScale.Crop) {
+                        AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    } else {
+                        AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    }
+                    setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
+                }
+            },
+            update = { playerView ->
+                playerView.player = exoPlayer
+                playerView.resizeMode = if (contentScale == ContentScale.Crop) {
+                    AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                } else {
+                    AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            },
+            modifier = modifier
+        )
+    } else {
+        val fallbackImageRequest = remember(mediaUri) {
+            ImageRequest.Builder(context)
+                .data(mediaUri)
+                .crossfade(true)
+                .build()
+        }
+        AsyncImage(
+            model = fallbackImageRequest,
+            contentDescription = "Active Media Preview Frame",
+            contentScale = contentScale,
+            colorFilter = colorFilter,
+            modifier = modifier
+        )
+    }
 }

@@ -55,6 +55,11 @@ android {
   }
   kotlinOptions {
     jvmTarget = "17"
+    freeCompilerArgs += listOf(
+      "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+      "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+      "-opt-in=androidx.media3.common.util.UnstableApi"
+    )
   }
   buildFeatures {
     compose = true
@@ -99,6 +104,9 @@ dependencies {
   implementation(libs.androidx.room.ktx)
   implementation(libs.androidx.room.runtime)
   implementation(libs.coil.compose)
+  implementation("io.coil-kt:coil-video:2.7.0")
+  implementation("androidx.media3:media3-exoplayer:1.5.1")
+  implementation("androidx.media3:media3-ui:1.5.1")
   implementation(libs.converter.moshi)
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.auth)

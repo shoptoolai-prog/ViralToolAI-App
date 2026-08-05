@@ -249,7 +249,8 @@ fun MainAppLayout(sharedUrl: String? = null) {
             currentScreen != Screen.Result && 
             currentScreen != Screen.Analysis &&
             currentScreen != Screen.MediaPicker &&
-            currentScreen != Screen.ProjectSetup
+            currentScreen != Screen.ProjectSetup &&
+            currentScreen != Screen.VideoEditing
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -378,6 +379,10 @@ fun MainAppLayout(sharedUrl: String? = null) {
                             onNavigateToAiLab = { currentScreen = Screen.AiLab },
                             onNavigateToAcademy = { currentScreen = Screen.CreatorAcademy },
                             onNavigateToMediaPicker = { currentScreen = Screen.MediaPicker },
+                            onVideoImportedToEditor = { config ->
+                                currentProjectConfig = config
+                                currentScreen = Screen.VideoEditing
+                            },
                             initialSharedUrl = sharedUrl
                         )
                     }
@@ -527,27 +532,17 @@ fun BottomNavigationBar(
                     testTag = "tab_learn"
                 )
                 
-                // 3. AI Lab tab
+                // 3. AI Labs tab
                 NavigationTabItem(
                     screen = Screen.AiLab,
                     icon = Icons.Default.AutoAwesome,
-                    label = "AI Lab",
+                    label = "AI Labs",
                     isSelected = currentScreen == Screen.AiLab,
                     onClick = { onScreenSelected(Screen.AiLab) },
                     testTag = "tab_ai_lab"
                 )
-
-                // 4. Projects tab
-                NavigationTabItem(
-                    screen = Screen.Projects,
-                    icon = Icons.Default.FolderSpecial,
-                    label = "Projects",
-                    isSelected = currentScreen == Screen.Projects,
-                    onClick = { onScreenSelected(Screen.Projects) },
-                    testTag = "tab_projects"
-                )
                 
-                // 5. Profile tab
+                // 4. Profile tab
                 NavigationTabItem(
                     screen = Screen.Profile,
                     icon = Icons.Default.Person,

@@ -12,7 +12,10 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.core.MediaImportHelper
+import kotlinx.coroutines.launch
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -108,6 +111,7 @@ fun MediaPickerScreen(
     val activity = context as? Activity
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
 
     // Permissions to request depending on Android API level
     val permissionsToRequest = remember {
@@ -121,35 +125,27 @@ fun MediaPickerScreen(
         }
     }
 
-    // Storage Access Framework SAF launcher for browsing system files
+    // Modern Android Photo Picker launcher
     val systemGalleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
+        contract = ActivityResultContracts.PickMultipleVisualMedia()
     ) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
-            val importedItems = uris.mapIndexed { idx, uri ->
-                MediaPickerItem(
-                    id = "sys_${idx}_${System.currentTimeMillis()}",
-                    uri = uri,
-                    title = "Storage Item #${idx + 1}",
-                    durationFormatted = "0:30",
-                    durationSeconds = 30,
-                    isVideo = true,
-                    albumName = "Downloads & Storage",
-                    mimeType = "video/*",
-                    dateAddedSeconds = System.currentTimeMillis() / 1000,
-                    resolutionLabel = "1080p",
-                    width = 1920,
-                    height = 1080,
-                    fileSizeFormatted = "Storage File",
-                    fileSizeBytes = 15000000L,
-                    frameRateLabel = "30 FPS"
-                )
+            scope.launch {
+                try {
+                    val importedItems = MediaImportHelper.importVideoUris(context, uris)
+                    if (importedItems.isNotEmpty()) {
+                        onNext(importedItems)
+                    } else {
+                        Toast.makeText(context, "Unable to import selected media.", Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Throwable) {
+                    Toast.makeText(context, "Unable to import selected media.", Toast.LENGTH_LONG).show()
+                }
             }
-            onNext(importedItems)
         }
     }
 
-    // Permission State
+    // Permission check for optional MediaStore query
     var hasPermission by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -161,39 +157,27 @@ fun MediaPickerScreen(
         )
     }
 
-    var permissionRequestedOnce by remember { mutableStateOf(false) }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        permissionRequestedOnce = true
-        val granted = permissions.values.any { it }
-        hasPermission = granted
-    }
-
-    // FIRST OPEN AUTOMATIC NATIVE PERMISSION TRIGGER
-    LaunchedEffect(Unit) {
-        if (!hasPermission && !permissionRequestedOnce) {
-            permissionRequestedOnce = true
-            permissionLauncher.launch(permissionsToRequest)
-        }
-    }
-
     // Device MediaStore items
     var deviceMediaItems by remember { mutableStateOf<List<MediaPickerItem>>(emptyList()) }
     var isLoadingMediaStore by remember { mutableStateOf(false) }
 
-    // Scan real MediaStore as soon as permission is granted
-    LaunchedEffect(hasPermission) {
+    // Scan real MediaStore silently if permission is already available
+    LaunchedEffect(Unit) {
         if (hasPermission) {
             isLoadingMediaStore = true
             withContext(Dispatchers.IO) {
-                val videos = queryMediaStoreVideos(context)
-                val images = queryMediaStoreImages(context)
-                val combined = (videos + images).sortedByDescending { it.dateAddedSeconds }
-                withContext(Dispatchers.Main) {
-                    deviceMediaItems = combined
-                    isLoadingMediaStore = false
+                try {
+                    val videos = queryMediaStoreVideos(context)
+                    val images = queryMediaStoreImages(context)
+                    val combined = (videos + images).sortedByDescending { it.dateAddedSeconds }
+                    withContext(Dispatchers.Main) {
+                        deviceMediaItems = combined
+                        isLoadingMediaStore = false
+                    }
+                } catch (_: Throwable) {
+                    withContext(Dispatchers.Main) {
+                        isLoadingMediaStore = false
+                    }
                 }
             }
         }
@@ -271,13 +255,6 @@ fun MediaPickerScreen(
         val sizeMb = totalSizeBytes / (1024f * 1024f)
         if (sizeMb > 1024f) String.format(Locale.US, "%.1f GB", sizeMb / 1024f)
         else String.format(Locale.US, "%.1f MB", sizeMb)
-    }
-
-    // Check if permanently denied ("Don't ask again")
-    val isPermanentlyDenied = remember(hasPermission, permissionRequestedOnce) {
-        permissionRequestedOnce && !hasPermission && activity != null && permissionsToRequest.all { perm ->
-            !ActivityCompat.shouldShowRequestPermissionRationale(activity, perm)
-        }
     }
 
     Box(
@@ -433,7 +410,7 @@ fun MediaPickerScreen(
                                     },
                                     onClick = {
                                         showAlbumDropdown = false
-                                        systemGalleryLauncher.launch("video/*")
+                                        systemGalleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
                                     }
                                 )
                             }
@@ -638,123 +615,16 @@ fun MediaPickerScreen(
                     color = MintGlow,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { systemGalleryLauncher.launch("*/*") }
+                    modifier = Modifier.clickable {
+                        systemGalleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+                    }
                 )
             }
 
             // ==================================================
-            // MAIN CONTENT AREA: PERMISSION / LOADING / MEDIA GRID
+            // MAIN CONTENT AREA: LOADING / MEDIA GRID / EMPTY
             // ==================================================
-            if (!hasPermission) {
-                // ELEGANT PERMISSION EXPLANATION CARD
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(20.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0x1AFFFFFF),
-                        border = BorderStroke(1.dp, Color(0x20FFFFFF))
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(14.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(CircleShape)
-                                    .background(MintSurface),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PhotoLibrary,
-                                    contentDescription = null,
-                                    tint = MintGlow,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-
-                            Text(
-                                text = "Media Permission Required",
-                                color = TextWhite,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Text(
-                                text = "Grant access to videos and photos on your device so ViralToolAi can import and process media.",
-                                color = TextGray,
-                                fontSize = 12.sp,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                if (isPermanentlyDenied) {
-                                    Button(
-                                        onClick = {
-                                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                                data = Uri.fromParts("package", context.packageName, null)
-                                            }
-                                            context.startActivity(intent)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MintPrimary),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(15.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Open Settings", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                    }
-                                } else {
-                                    Button(
-                                        onClick = {
-                                            permissionLauncher.launch(permissionsToRequest)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MintPrimary),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(15.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Grant Permission", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                    }
-                                }
-
-                                OutlinedButton(
-                                    onClick = { onClose() },
-                                    border = BorderStroke(1.dp, Color(0xFF282B3E)),
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text("Not Now", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                }
-                            }
-
-                            TextButton(
-                                onClick = { systemGalleryLauncher.launch("*/*") }
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(Icons.Default.FolderOpen, contentDescription = null, tint = MintGlow, modifier = Modifier.size(15.dp))
-                                    Text("Browse Storage Files (SAF)", color = MintGlow, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                    }
-                }
-            } else if (isLoadingMediaStore) {
+            if (isLoadingMediaStore) {
                 // Scanning Progress Indicator
                 Box(
                     modifier = Modifier
@@ -815,7 +685,7 @@ fun MediaPickerScreen(
                         )
 
                         Button(
-                            onClick = { systemGalleryLauncher.launch("*/*") },
+                            onClick = { systemGalleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
                             colors = ButtonDefaults.buttonColors(containerColor = MintPrimary),
                             shape = RoundedCornerShape(12.dp)
                         ) {
