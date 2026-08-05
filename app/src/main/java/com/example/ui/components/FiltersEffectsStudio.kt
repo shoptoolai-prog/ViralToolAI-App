@@ -141,25 +141,38 @@ object EffectRepository {
 object CapCutProAssetMarketplaceRepository {
 
     val CATEGORIES = listOf(
-        "Featured", "Trending", "Cinematic", "Portrait", "Nature", "Travel", "India",
-        "Monsoon", "Mountains", "Forest", "Temple", "City", "Night", "Food", "Wedding",
-        "Festival", "Street", "Vintage", "Film", "Black & White", "HDR", "Neon", "Moody",
-        "Aesthetic", "Luxury", "Gaming", "Anime", "Vlog", "Shorts", "Reels", "YouTube",
-        "Instagram", "AI Generated", "Latest"
+        "Featured", "Trending", "Cinematic", "HDR", "Portrait", "Nature", "Travel", "Food",
+        "Fashion", "Street", "Vlog", "Film", "Vintage", "Black & White", "Dark", "Night",
+        "Neon", "Moody", "Dream", "Summer", "Winter", "Rain", "Snow", "Festival", "India",
+        "Wedding", "Instagram", "YouTube", "Anime", "Gaming", "Luxury", "Luxury Gold",
+        "Luxury Black", "Luxury Green", "Luxury Purple", "Minimal", "AI Recommended", "Favorites", "Recently Used"
     )
 
     private val THUMBNAIL_URLS = listOf(
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80", // Mountains
-        "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=400&q=80", // Taj Mahal
-        "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=400&q=80", // Kerala
-        "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=400&q=80", // Mumbai
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80", // Sunset
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80", // Indian Mountains
+        "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=400&q=80", // Ladakh
+        "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=400&q=80", // Kashmir
+        "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=400&q=80", // Shimla / Manali
+        "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=400&q=80", // Kerala Backwaters
+        "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=400&q=80", // Goa Beach
+        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=400&q=80", // Rajasthan Desert
+        "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400&q=80", // Delhi Night
+        "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=400&q=80", // Mumbai Skyline
+        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=400&q=80", // Forest / Waterfall
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80", // Sunset / Sunrise
+        "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=400&q=80", // Temple / Taj Mahal
+        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=400&q=80", // Flowers
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80", // Portrait
-        "https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=400&q=80", // Film
+        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=400&q=80", // Fashion Model
+        "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=400&q=80", // Cafe
         "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80", // Food
-        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=400&q=80", // Forest
-        "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=400&q=80", // Cyber
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80"  // Beach
+        "https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=400&q=80", // Street Photography
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=400&q=80", // Cars
+        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80", // Nature / Birds
+        "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=400&q=80", // Snow / Winter
+        "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=400&q=80", // Rain / Monsoon
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80", // Travel Beach
+        "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=400&q=80"  // Night City / Cyber
     )
 
     val ALL_MARKET_ASSETS: List<MarketAsset> by lazy {
@@ -355,6 +368,8 @@ fun CapCutProMarketplaceSheet(
     activeEffectId: String? = null,
     activeAnimId: String? = null,
     onSelectAsset: (MarketAsset) -> Unit,
+    onIntensityChange: (Float) -> Unit = {},
+    onComparePressChanged: (Boolean) -> Unit = {},
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -366,25 +381,43 @@ fun CapCutProMarketplaceSheet(
     var selectedType by remember { mutableStateOf(initialTab) }
     var selectedCategory by remember { mutableStateOf("Featured") }
     var selectedSubFilter by remember { mutableStateOf("All") } // All, Favorites, Downloads, AI Recommended, Trending, Free, Premium
+    var currentIntensity by remember { mutableStateOf(1.0f) }
 
     // Local Download & Favorite State tracking
     var downloadedAssetIds by remember { mutableStateOf(setOf<String>()) }
     var downloadingAssetIds by remember { mutableStateOf(mapOf<String, Float>()) } // id -> progress
     var favoriteAssetIds by remember { mutableStateOf(setOf<String>("filter_1", "filter_3", "effect_1", "effect_2", "trans_1")) }
+    var recentAssetIds by remember { mutableStateOf(listOf<String>("filter_1", "filter_2", "filter_4")) }
+
+    var showGPUStudioSheet by remember { mutableStateOf(false) }
+
+    if (showGPUStudioSheet) {
+        GPUFilterStudioSheet(
+            onApplyToTimeline = { _, _ -> showGPUStudioSheet = false },
+            onClose = { showGPUStudioSheet = false }
+        )
+        return
+    }
 
     // Compare mode state
     var isHoldingCompare by remember { mutableStateOf(false) }
     var holdCompareAsset by remember { mutableStateOf<MarketAsset?>(null) }
 
     // Filter Assets dynamically
-    val filteredAssets by remember(searchQuery, selectedType, selectedCategory, selectedSubFilter, downloadedAssetIds, favoriteAssetIds) {
+    val filteredAssets by remember(searchQuery, selectedType, selectedCategory, selectedSubFilter, downloadedAssetIds, favoriteAssetIds, recentAssetIds) {
         derivedStateOf {
             CapCutProAssetMarketplaceRepository.ALL_MARKET_ASSETS.filter { asset ->
                 // Type match
                 val matchType = asset.type == selectedType
 
                 // Category match
-                val matchCat = selectedCategory == "Featured" || selectedCategory == "Trending" || asset.category.equals(selectedCategory, ignoreCase = true)
+                val matchCat = when (selectedCategory) {
+                    "Featured" -> true
+                    "Trending" -> asset.category == "Trending" || asset.rating >= 4.8f
+                    "Favorites" -> favoriteAssetIds.contains(asset.id)
+                    "Recently Used" -> recentAssetIds.contains(asset.id)
+                    else -> asset.category.equals(selectedCategory, ignoreCase = true)
+                }
 
                 // SubFilter match
                 val matchSub = when (selectedSubFilter) {
@@ -461,6 +494,19 @@ fun CapCutProMarketplaceSheet(
 
                 Spacer(Modifier.width(8.dp))
 
+                // Launch Pro GPU Filter Engine
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MintPrimary)
+                        .clickable { showGPUStudioSheet = true }
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                ) {
+                    Text("STUDIO", color = PureBlackBg, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(Modifier.width(6.dp))
+
                 // Compare Status Indicator if holding
                 if (isHoldingCompare) {
                     Box(
@@ -523,9 +569,83 @@ fun CapCutProMarketplaceSheet(
                 }
             }
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // QUICK FILTER CHIPS (Favorites, Downloads, AI Rec, Trending, Premium)
+            // REAL-TIME INTENSITY SLIDER & HOLD TO COMPARE BAR
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(CardSurfaceDark)
+                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Intensity",
+                    color = TextMutedGray,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Slider(
+                    value = currentIntensity,
+                    onValueChange = {
+                        currentIntensity = it
+                        onIntensityChange(it)
+                    },
+                    valueRange = 0f..1f,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MintPrimary,
+                        activeTrackColor = MintPrimary,
+                        inactiveTrackColor = CardSurfaceBorder
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(24.dp)
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(
+                    text = "${(currentIntensity * 100).toInt()}%",
+                    color = MintPrimary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.width(32.dp)
+                )
+
+                Spacer(Modifier.width(6.dp))
+
+                // Hold to compare original button
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isHoldingCompare) Color(0xFFEF4444) else Color(0xFF222536))
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    isHoldingCompare = true
+                                    onComparePressChanged(true)
+                                    tryAwaitRelease()
+                                    isHoldingCompare = false
+                                    onComparePressChanged(false)
+                                }
+                            )
+                        }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = if (isHoldingCompare) "COMPARING" else "Hold Compare",
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -605,9 +725,9 @@ fun CapCutProMarketplaceSheet(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    columns = GridCells.Fixed(4),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.weight(1f)
                 ) {
                     items(filteredAssets, key = { it.id }) { asset ->
@@ -622,16 +742,16 @@ fun CapCutProMarketplaceSheet(
                             else -> false
                         }
 
-                        // CapCut Pro Asset Card (Rounded 18dp)
+                        // CapCut Pro Asset Card (Compact 95dp, 10dp rounded)
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(140.dp)
-                                .clip(RoundedCornerShape(18.dp))
+                                .height(95.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(CardSurfaceDark)
                                 .border(
-                                    border = if (isActive) BorderStroke(2.5.dp, MintPrimary) else BorderStroke(1.dp, CardSurfaceBorder),
-                                    shape = RoundedCornerShape(18.dp)
+                                    border = if (isActive) BorderStroke(2.dp, MintPrimary) else BorderStroke(1.dp, CardSurfaceBorder),
+                                    shape = RoundedCornerShape(10.dp)
                                 )
                                 .pointerInput(Unit) {
                                     detectTapGestures(

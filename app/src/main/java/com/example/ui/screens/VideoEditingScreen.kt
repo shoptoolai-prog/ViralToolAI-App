@@ -2270,21 +2270,29 @@ private fun CapCutMiniIconToolbar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Group: Undo / Redo
+            // Left Group: Snap Magnet, Mute, Select
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onUndo, enabled = undoEnabled, modifier = Modifier.size(24.dp)) {
+                IconButton(onClick = onToggleSnap, modifier = Modifier.size(24.dp)) {
                     Icon(
-                        Icons.Default.Undo,
-                        contentDescription = "Undo",
-                        tint = if (undoEnabled) TextWhite else TextGray.copy(alpha = 0.3f),
+                        Icons.Default.GridOn,
+                        contentDescription = "Magnet Snap",
+                        tint = if (enableSnapToGrid) MintGlow else TextGray,
                         modifier = Modifier.size(14.dp)
                     )
                 }
-                IconButton(onClick = onRedo, enabled = redoEnabled, modifier = Modifier.size(24.dp)) {
+                IconButton(onClick = onToggleMute, modifier = Modifier.size(24.dp)) {
                     Icon(
-                        Icons.Default.Redo,
-                        contentDescription = "Redo",
-                        tint = if (redoEnabled) TextWhite else TextGray.copy(alpha = 0.3f),
+                        if (isPreviewMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                        contentDescription = "Mute",
+                        tint = if (isPreviewMuted) Color(0xFFEF4444) else TextWhite,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+                IconButton(onClick = onToggleMultiSelect, modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        Icons.Default.SelectAll,
+                        contentDescription = "Multi-Select",
+                        tint = if (isMultiSelectMode) MintGlow else TextGray,
                         modifier = Modifier.size(14.dp)
                     )
                 }
@@ -2315,34 +2323,6 @@ private fun CapCutMiniIconToolbar(
 
                 IconButton(onClick = onZoomIn, modifier = Modifier.size(24.dp)) {
                     Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = TextWhite, modifier = Modifier.size(14.dp))
-                }
-            }
-
-            // Right Group: Snap Magnet, Mute, Select
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onToggleSnap, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        Icons.Default.GridOn,
-                        contentDescription = "Magnet Snap",
-                        tint = if (enableSnapToGrid) MintGlow else TextGray,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-                IconButton(onClick = onToggleMute, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        if (isPreviewMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
-                        contentDescription = "Mute",
-                        tint = if (isPreviewMuted) Color(0xFFEF4444) else TextWhite,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-                IconButton(onClick = onToggleMultiSelect, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        Icons.Default.SelectAll,
-                        contentDescription = "Multi-Select",
-                        tint = if (isMultiSelectMode) MintGlow else TextGray,
-                        modifier = Modifier.size(14.dp)
-                    )
                 }
             }
         }
@@ -2419,41 +2399,6 @@ private fun Phase9CompactTimeline(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 2.dp)
         ) {
-            // COMPACT "ADD BAR" (34dp Height, 10dp Rounded)
-            // + Add Audio | + Add Text | + Add Caption | + Add Overlay
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TimelineAddPill(
-                    icon = Icons.Default.MusicNote,
-                    label = "+ Add Audio",
-                    accentColor = Color(0xFF3B82F6),
-                    onClick = { onAddAudioTrack?.invoke() }
-                )
-                TimelineAddPill(
-                    icon = Icons.Default.Title,
-                    label = "+ Add Text",
-                    accentColor = Color(0xFF8B5CF6),
-                    onClick = { Toast.makeText(context, "Add Text", Toast.LENGTH_SHORT).show() }
-                )
-                TimelineAddPill(
-                    icon = Icons.Default.ClosedCaption,
-                    label = "+ Caption",
-                    accentColor = Color(0xFFF97316),
-                    onClick = { Toast.makeText(context, "Generating Auto Captions...", Toast.LENGTH_SHORT).show() }
-                )
-                TimelineAddPill(
-                    icon = Icons.Default.Layers,
-                    label = "+ Overlay",
-                    accentColor = Color(0xFFEC4899),
-                    onClick = { onAddMediaBetween() }
-                )
-            }
-
             Spacer(Modifier.height(2.dp))
 
             // PROFESSIONAL TIMELINE RULER (00:00, 00:01, 00:02 with frame marks 5f, 10f, 15f when zoomed)
@@ -2462,7 +2407,7 @@ private fun Phase9CompactTimeline(
                     .fillMaxWidth()
                     .height(22.dp)
                     .background(Color(0xFF0F121C))
-                    .padding(start = 48.dp),
+                    .padding(start = 44.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val isZoomedIn = timelineZoomPxPerSec > 35f
@@ -2933,10 +2878,12 @@ private fun Phase9CompactTimeline(
             }
         }
 
-        // CENTER FIXED PLAYHEAD LINE WITH GLOWING EMERALD HANDLE
+        // PLAYHEAD CURSOR LINE WITH GLOWING EMERALD HANDLE (POSITIONED ACCORDING TO PLAYHEAD)
+        val cursorOffsetPx = 44.dp + (currentPlayheadSec * timelineZoomPxPerSec).dp
         Box(
             modifier = Modifier
-                .align(Alignment.Center)
+                .align(Alignment.TopStart)
+                .offset(x = cursorOffsetPx)
                 .fillMaxHeight()
                 .width(20.dp),
             contentAlignment = Alignment.TopCenter
@@ -3238,10 +3185,8 @@ private fun PreviewCanvasArea(
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var showFloatingControls by remember { mutableStateOf(false) }
 
-    LaunchedEffect(selectedClipId, showFloatingControls) {
-        if (selectedClipId != null) {
-            showFloatingControls = true
-            delay(2500)
+    LaunchedEffect(selectedClipId) {
+        if (selectedClipId == null) {
             showFloatingControls = false
         }
     }
@@ -4648,6 +4593,7 @@ private fun ClipEditToolbarRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumAdjustSlider(
     value: Float,
@@ -4694,14 +4640,38 @@ private fun PremiumAdjustSlider(
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
-            colors = SliderDefaults.colors(
-                thumbColor = MintPrimary,
-                activeTrackColor = MintPrimary,
-                inactiveTrackColor = Color(0xFF1B1E2B)
-            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(28.dp)
+                .height(20.dp),
+            thumb = {
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .shadow(2.dp, CircleShape)
+                )
+            },
+            track = { sliderState ->
+                val start = sliderState.valueRange.start
+                val end = sliderState.valueRange.endInclusive
+                val rangeLen = (end - start).coerceAtLeast(0.001f)
+                val fraction = ((sliderState.value - start) / rangeLen).coerceIn(0f, 1f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFF222433))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(fraction)
+                            .background(MintPrimary)
+                    )
+                }
+            }
         )
     }
 }
