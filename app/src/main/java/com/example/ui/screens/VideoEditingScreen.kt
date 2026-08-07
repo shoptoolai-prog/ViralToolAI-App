@@ -366,7 +366,8 @@ enum class ActiveBottomSheet {
     ANIMATIONS_KEYFRAMES,
     ADD_MEDIA_PICKER,
     CLIP_ACTION_MENU,
-    EDIT_PANEL
+    EDIT_PANEL,
+    AI_CREATOR_ASSISTANT
 }
 
 // ============================================================================
@@ -459,11 +460,19 @@ fun VideoEditingScreen(
     var isMultiSelectMode by remember { mutableStateOf(false) }
     var selectedClipIds by remember { mutableStateOf<Set<String>>(emptySet()) }
 
-    // Secondary Tracks State (Clean & Empty by default)
-    var audioTracks by remember { mutableStateOf<List<AudioTrackItem>>(emptyList()) }
-    var textTracks by remember { mutableStateOf<List<TextTrackItem>>(emptyList()) }
-    var stickerTracks by remember { mutableStateOf<List<StickerTrackItem>>(emptyList()) }
-    var effectTracks by remember { mutableStateOf<List<EffectTrackItem>>(emptyList()) }
+    // Secondary Tracks State (Loaded from AI Pre-Edit Engine or empty)
+    var audioTracks by remember(projectConfig) {
+        mutableStateOf<List<AudioTrackItem>>(projectConfig?.initialAudioTracks ?: emptyList())
+    }
+    var textTracks by remember(projectConfig) {
+        mutableStateOf<List<TextTrackItem>>(projectConfig?.initialCaptions ?: emptyList())
+    }
+    var stickerTracks by remember(projectConfig) {
+        mutableStateOf<List<StickerTrackItem>>(projectConfig?.initialStickers ?: emptyList())
+    }
+    var effectTracks by remember(projectConfig) {
+        mutableStateOf<List<EffectTrackItem>>(projectConfig?.initialEffectTracks ?: emptyList())
+    }
     var drawingTracks by remember { mutableStateOf<List<DrawingTrackItem>>(emptyList()) }
 
     var selectedTextTrackId by remember { mutableStateOf<String?>(null) }
@@ -667,7 +676,8 @@ fun VideoEditingScreen(
                         onToggleResolutionDropdown = { showResolutionDropdown = it },
                         onSelectResolution = { selectedResolution = it },
                         onBack = onNavigateToHome,
-                        onExport = { activeBottomSheet = ActiveBottomSheet.EXPORT_MODAL }
+                        onExport = { activeBottomSheet = ActiveBottomSheet.EXPORT_MODAL },
+                        onOpenAiCreatorAssistant = { activeBottomSheet = ActiveBottomSheet.AI_CREATOR_ASSISTANT }
                     )
 
                     Box(
@@ -858,7 +868,7 @@ fun VideoEditingScreen(
                                 "Effects" -> activeBottomSheet = ActiveBottomSheet.EFFECTS_CATALOG
                                 "Filters" -> activeBottomSheet = ActiveBottomSheet.FILTERS_CATALOG
                                 "Canvas" -> activeBottomSheet = ActiveBottomSheet.CANVAS_SETTING
-                                "AI" -> Toast.makeText(context, "ViralAI Studio Active", Toast.LENGTH_SHORT).show()
+                                "AI", "AI Creator", "AI Assistant" -> activeBottomSheet = ActiveBottomSheet.AI_CREATOR_ASSISTANT
                                 else -> Toast.makeText(context, "$toolLabel tool opened", Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -880,7 +890,8 @@ fun VideoEditingScreen(
                     onToggleResolutionDropdown = { showResolutionDropdown = it },
                     onSelectResolution = { selectedResolution = it },
                     onBack = onNavigateToHome,
-                    onExport = { activeBottomSheet = ActiveBottomSheet.EXPORT_MODAL }
+                    onExport = { activeBottomSheet = ActiveBottomSheet.EXPORT_MODAL },
+                    onOpenAiCreatorAssistant = { activeBottomSheet = ActiveBottomSheet.AI_CREATOR_ASSISTANT }
                 )
 
                 // PREVIEW CANVAS AREA (Occupies ~48% height)
@@ -1105,6 +1116,7 @@ fun VideoEditingScreen(
                                             "Sticker" -> activeBottomSheet = ActiveBottomSheet.STICKER_PICKER
                                             "Canvas" -> activeBottomSheet = ActiveBottomSheet.CANVAS_SETTING
                                             "Templates" -> activeBottomSheet = ActiveBottomSheet.TEMPLATES_CATALOG
+                                            "AI Creator", "AI Assistant", "AI" -> activeBottomSheet = ActiveBottomSheet.AI_CREATOR_ASSISTANT
                                         }
                                     }
                                 )
@@ -1536,7 +1548,20 @@ fun VideoEditingScreen(
                     },
                 contentAlignment = Alignment.BottomCenter
             ) {
-                if (activeBottomSheet == ActiveBottomSheet.EDIT_PANEL) {
+                if (activeBottomSheet == ActiveBottomSheet.AI_CREATOR_ASSISTANT) {
+                    Box(modifier = Modifier.clickable(enabled = false) {}) {
+                        com.example.ui.components.AiAffiliateCreatorStudioPanel(
+                            videoDurationSec = totalDurationSec,
+                            onDismiss = { activeBottomSheet = ActiveBottomSheet.NONE },
+                            onApplyToTimeline = { newCaptions, newStickers ->
+                                pushUndoState()
+                                textTracks = textTracks + newCaptions
+                                stickerTracks = stickerTracks + newStickers
+                                activeBottomSheet = ActiveBottomSheet.NONE
+                            }
+                        )
+                    }
+                } else if (activeBottomSheet == ActiveBottomSheet.EDIT_PANEL) {
                     Box(modifier = Modifier.clickable(enabled = false) {}) {
                         EditBottomSheetPanel(
                             activeClip = activeClip,
@@ -3144,7 +3169,8 @@ private fun TopBarHeader(
     onToggleResolutionDropdown: (Boolean) -> Unit,
     onSelectResolution: (String) -> Unit,
     onBack: () -> Unit,
-    onExport: () -> Unit
+    onExport: () -> Unit,
+    onOpenAiCreatorAssistant: (() -> Unit)? = null
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -3246,6 +3272,38 @@ private fun TopBarHeader(
                                     onSelectResolution(res)
                                     onToggleResolutionDropdown(false)
                                 }
+                            )
+                        }
+                    }
+                }
+
+                // AI Creator Assistant Trigger Button
+                if (onOpenAiCreatorAssistant != null) {
+                    Box(
+                        modifier = Modifier
+                            .height(30.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF7C3AED).copy(alpha = 0.35f))
+                            .border(BorderStroke(1.dp, Color(0xFFA78BFA)), RoundedCornerShape(14.dp))
+                            .clickable { onOpenAiCreatorAssistant() }
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "AI Creator Assistant",
+                                tint = Color(0xFF34D399),
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Text(
+                                text = "AI Assistant",
+                                color = TextWhite,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.ExtraBold
                             )
                         }
                     }

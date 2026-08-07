@@ -27,9 +27,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.example.ui.theme.AmoledBlack
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +47,8 @@ import com.example.ui.components.InstagramCreatorAiV2Dialog
 import com.example.ui.components.MeeshoCreatorAiDialog
 import com.example.ui.components.VideoEditingMentorAiDialog
 import com.example.ui.components.YouTubeCreatorAiV2Dialog
-import com.example.ui.theme.AmoledBlack
+import com.example.ui.theme.CyanAccent
+import com.example.ui.screens.CreatorGrowthScreen
 import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.EmeraldPrimary
@@ -93,6 +96,7 @@ fun CreatorAcademyScreen(
     val haptic = LocalHapticFeedback.current
 
     // State
+    var activeHubTab by remember { mutableStateOf("GROWTH") } // "GROWTH", "LEARNING"
     var searchQuery by remember { mutableStateOf("") }
     var selectedLanguage by remember {
         mutableStateOf(CreatorAcademyPrefs.getPreferredLanguage(context).ifBlank { "English" })
@@ -308,18 +312,65 @@ fun CreatorAcademyScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AmoledBlack)
-            .statusBarsPadding()
-    ) {
-        Column(
+    var screenHasError by remember { mutableStateOf(false) }
+    var screenErrorMessage by remember { mutableStateOf("") }
+
+    if (screenHasError) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .background(AmoledBlack)
+                .statusBarsPadding()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
         ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(
+                    text = "Something went wrong.",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = if (screenErrorMessage.isNotBlank()) screenErrorMessage else "Creator Hub encountered an unexpected issue.",
+                    color = Color.LightGray,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+                Button(
+                    onClick = {
+                        screenHasError = false
+                        screenErrorMessage = ""
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent)
+                ) {
+                    Text("Retry", color = AmoledBlack, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AmoledBlack)
+                .statusBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(bottom = 90.dp)
+            ) {
             // ==================================================
             // TOP HEADER: Page Title & Language Selector
             // ==================================================
@@ -340,33 +391,33 @@ fun CreatorAcademyScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 Brush.linearGradient(
-                                    listOf(EmeraldPrimary.copy(alpha = 0.3f), EmeraldGlow.copy(alpha = 0.15f))
+                                    listOf(CyanAccent.copy(alpha = 0.3f), EmeraldGlow.copy(alpha = 0.15f))
                                 )
                             )
-                            .border(BorderStroke(1.2.dp, EmeraldGlow.copy(alpha = 0.6f)), RoundedCornerShape(12.dp)),
+                            .border(BorderStroke(1.2.dp, CyanAccent.copy(alpha = 0.6f)), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.School,
-                            contentDescription = "Creator Learning Hub",
-                            tint = EmeraldGlow,
+                            contentDescription = "Creator Hub",
+                            tint = CyanAccent,
                             modifier = Modifier.size(24.dp)
                         )
                     }
 
                     Column {
                         Text(
-                            text = "Creator Learning Hub",
+                            text = "Creator Hub",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = TextWhite,
                             letterSpacing = (-0.3).sp
                         )
                         Text(
-                            text = "Learn. Create. Grow.",
+                            text = "AI Creator Operating System",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = EmeraldGlow,
+                            color = CyanAccent,
                             letterSpacing = 1.2.sp
                         )
                     }
@@ -377,7 +428,7 @@ fun CreatorAcademyScreen(
                     onClick = { showLanguageDialog = true },
                     shape = RoundedCornerShape(20.dp),
                     color = Color(0xFF1A1F2C),
-                    border = BorderStroke(1.dp, EmeraldGlow.copy(alpha = 0.4f))
+                    border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f))
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -387,7 +438,7 @@ fun CreatorAcademyScreen(
                         Icon(
                             imageVector = Icons.Default.Language,
                             contentDescription = "Language",
-                            tint = EmeraldGlow,
+                            tint = CyanAccent,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
@@ -400,8 +451,67 @@ fun CreatorAcademyScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
+            // ==================================================
+            // CREATOR HUB SEGMENTED TAB SELECTOR
+            // ==================================================
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0x1AFFFFFF))
+                    .padding(4.dp)
+            ) {
+                // Tab 1: Creator Growth (DS-26)
+                Box(
+                    modifier = Modifier
+                        .weight(1.1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(if (activeHubTab == "GROWTH") CyanAccent else Color.Transparent)
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            activeHubTab = "GROWTH"
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "📈 Creator Growth",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (activeHubTab == "GROWTH") AmoledBlack else TextWhite
+                    )
+                }
+
+                // Tab 2: Learning Hub
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(if (activeHubTab == "LEARNING") EmeraldPrimary else Color.Transparent)
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            activeHubTab = "LEARNING"
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🎓 Learning Hub",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (activeHubTab == "LEARNING") AmoledBlack else TextWhite
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (activeHubTab == "GROWTH") {
+                CreatorGrowthScreen()
+            } else {
             // ==================================================
             // INSTANT SEARCH BAR
             // ==================================================
@@ -791,6 +901,8 @@ fun CreatorAcademyScreen(
             )
         }
     }
+}
+}
 }
 
 data class CourseProgressInfo(

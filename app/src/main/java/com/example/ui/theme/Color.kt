@@ -2,23 +2,30 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Flagship Deep Black + Premium Violet Palette for Main App Screens
-val AmoledBlack = Color(0xFF07040D) // Global Deep Black
-val DarkGraphite = Color(0xFF0F091A)
-val CardGraphite = Color(0xFF160E26)
+// Flagship Deep Black + Premium Cyan Palette (MASTER DESIGN SYSTEM PHASE DS-1)
+val HomeBg = Color(0xFF0B0B0B)
+val PrimaryCardBg = Color(0xFF141414)
+val SecondaryCardBg = Color(0xFF1B1B1B)
+val CyanAccent = Color(0xFF20D9E8)
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFFB7B7B7)
 
-// Flagship Violet Brand Identity (Used everywhere outside Video Editor)
-val VioletPrimary = Color(0xFF8B5CF6)
-val VioletLight = Color(0xFFA78BFA)
-val VioletGlow = Color(0xFFC084FC)
-val VioletDark = Color(0xFF6D28D9)
-val VioletSurface = Color(0xFF130924)
+val AmoledBlack = Color(0xFF0B0B0B) // Global Deep Black
+val DarkGraphite = Color(0xFF141414)
+val CardGraphite = Color(0xFF1B1B1B)
 
-// Primary Brand Aliases for App Theme (Restored to Violet as requested)
-val EmeraldPrimary = VioletPrimary
-val EmeraldLight = VioletLight
-val EmeraldGlow = VioletGlow
-val EmeraldDark = VioletDark
+// Flagship Cyan Brand Identity
+val VioletPrimary = Color(0xFF20D9E8)
+val VioletLight = Color(0xFF53E2EE)
+val VioletGlow = Color(0xFF20D9E8)
+val VioletDark = Color(0xFF179CA7)
+val VioletSurface = Color(0xFF141414)
+
+// Primary Brand Aliases for App Theme
+val EmeraldPrimary = Color(0xFF20D9E8)
+val EmeraldLight = Color(0xFF53E2EE)
+val EmeraldGlow = Color(0xFF20D9E8)
+val EmeraldDark = Color(0xFF179CA7)
 
 // DEDICATED VIDEO EDITOR THEME (Mint Green + Deep Black)
 val EditorAmoledBlack = Color(0xFF050507) // Deep Black #050507

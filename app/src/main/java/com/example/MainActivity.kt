@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -94,8 +98,6 @@ import com.example.ui.theme.TextWhite
 import com.example.data.ShareIntentHandler
 import android.content.Intent
 import androidx.compose.runtime.LaunchedEffect
-import com.example.ui.screens.BrandAmbassadorPosterScreen
-import com.example.ui.screens.BrandAmbassadorPrefs
 import com.example.ui.screens.OnboardingPrefs
 import com.example.ui.screens.OnboardingScreen
 import androidx.compose.ui.platform.LocalContext
@@ -149,7 +151,6 @@ class MainActivity : ComponentActivity() {
 
 enum class Screen {
     Splash,
-    BrandAmbassadorPoster,
     Onboarding,
     Home,
     CreatorAcademySetup,
@@ -173,17 +174,6 @@ fun MainAppLayout(sharedUrl: String? = null) {
 
     LaunchedEffect(Unit) {
         com.example.core.LanguageEngine.init(context)
-        try {
-            val imageLoader = context.imageLoader
-            val request = ImageRequest.Builder(context)
-                .data("https://raw.githubusercontent.com/shoptoolai-prog/ViralToolAi-App/main/assets/brand-ambassadors/1785321241752.png")
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build()
-            imageLoader.enqueue(request)
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error preloading poster image", e)
-        }
     }
 
     var currentScreen by remember { mutableStateOf(if (!sharedUrl.isNullOrBlank()) Screen.Home else Screen.Splash) }
@@ -243,7 +233,6 @@ fun MainAppLayout(sharedUrl: String? = null) {
     }
 
     val showBottomNav = currentScreen != Screen.Splash && 
-            currentScreen != Screen.BrandAmbassadorPoster && 
             currentScreen != Screen.Onboarding && 
             currentScreen != Screen.CreatorAcademySetup && 
             currentScreen != Screen.Result && 
@@ -313,31 +302,12 @@ fun MainAppLayout(sharedUrl: String? = null) {
                                 if (!OnboardingPrefs.isOnboardingCompleted(context)) {
                                     currentScreen = Screen.Onboarding
                                 } else {
-                                    currentScreen = Screen.BrandAmbassadorPoster
+                                    currentScreen = Screen.Home
                                 }
                             } catch (e: Exception) {
                                 currentScreen = Screen.Home
                             }
                         })
-                    }
-                    Screen.BrandAmbassadorPoster -> {
-                        BrandAmbassadorPosterScreen(
-                            onDismiss = {
-                                try {
-                                    if (CreatorAcademyPrefs.isRememberExperience(context) &&
-                                        CreatorAcademyPrefs.getExperienceChoice(context) == "CREATOR_ACADEMY") {
-                                        currentScreen = Screen.CreatorAcademy
-                                    } else {
-                                        currentScreen = Screen.Home
-                                    }
-                                } catch (e: Exception) {
-                                    currentScreen = Screen.Home
-                                }
-                            },
-                            onExploreClicked = {
-                                currentScreen = Screen.Home
-                            }
-                        )
                     }
                     Screen.Onboarding -> {
                         OnboardingScreen(onOnboardingFinished = {
@@ -462,53 +432,31 @@ fun BottomNavigationBar(
     currentScreen: Screen,
     onScreenSelected: (Screen) -> Unit
 ) {
-    // Pinned Bottom Navigation Bar attached directly to the bottom edge of device
-    Surface(
+    val haptic = LocalHapticFeedback.current
+
+    // Premium Floating Bottom Navigation Bar (Height 72dp, rounded, dark luxury container)
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .zIndex(100f),
-        color = Color(0xFF0B0B12), // Deep dark background
-        shadowElevation = 12.dp
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Column(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF0B0B12))
-                .navigationBarsPadding()
+                .height(72.dp)
+                .clip(RoundedCornerShape(36.dp)),
+            color = Color(0xFF141414),
+            shape = RoundedCornerShape(36.dp),
+            border = BorderStroke(1.dp, Color(0xFF1B1B1B)),
+            tonalElevation = 0.dp
         ) {
-            // Top hairline border with subtle luxury gradient line
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                EmeraldPrimary.copy(alpha = 0.5f),
-                                ElectricPurple.copy(alpha = 0.5f),
-                                EmeraldGlow.copy(alpha = 0.5f)
-                            )
-                        )
-                    )
-            )
-
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(Color(0xFF0A0516))
-                    .border(
-                        BorderStroke(
-                            1.dp,
-                            Brush.verticalGradient(
-                                listOf(
-                                    VioletPrimary.copy(alpha = 0.25f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                    )
-                    .padding(horizontal = 4.dp),
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -522,16 +470,16 @@ fun BottomNavigationBar(
                     testTag = "tab_home"
                 )
 
-                // 2. Creator Learning Hub tab
+                // 2. Creator Hub tab
                 NavigationTabItem(
                     screen = Screen.CreatorAcademy,
                     icon = Icons.Default.School,
-                    label = "Learning Hub",
+                    label = "Creator Hub",
                     isSelected = currentScreen == Screen.CreatorAcademy,
                     onClick = { onScreenSelected(Screen.CreatorAcademy) },
-                    testTag = "tab_learn"
+                    testTag = "tab_creator_hub"
                 )
-                
+
                 // 3. AI Labs tab
                 NavigationTabItem(
                     screen = Screen.AiLab,
@@ -539,17 +487,27 @@ fun BottomNavigationBar(
                     label = "AI Labs",
                     isSelected = currentScreen == Screen.AiLab,
                     onClick = { onScreenSelected(Screen.AiLab) },
-                    testTag = "tab_ai_lab"
+                    testTag = "tab_ai_labs"
                 )
-                
-                // 4. Profile tab
+
+                // 4. Referral tab
+                NavigationTabItem(
+                    screen = Screen.ReferAndEarn,
+                    icon = Icons.Default.CardGiftcard,
+                    label = "Referral",
+                    isSelected = currentScreen == Screen.ReferAndEarn,
+                    onClick = { onScreenSelected(Screen.ReferAndEarn) },
+                    testTag = "tab_referral"
+                )
+
+                // 5. About tab
                 NavigationTabItem(
                     screen = Screen.Profile,
                     icon = Icons.Default.Person,
-                    label = "Profile",
+                    label = "About",
                     isSelected = currentScreen == Screen.Profile,
                     onClick = { onScreenSelected(Screen.Profile) },
-                    testTag = "tab_profile"
+                    testTag = "tab_about"
                 )
             }
         }
@@ -565,75 +523,48 @@ fun NavigationTabItem(
     onClick: () -> Unit,
     testTag: String
 ) {
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val responsiveMetrics = LocalResponsiveMetrics.current
-    val contentColor = if (isSelected) EmeraldGlow else TextWhite.copy(alpha = 0.4f)
-    
-    val backgroundBrush = if (isSelected) {
-        Brush.horizontalGradient(
-            colors = listOf(EmeraldPrimary.copy(alpha = 0.25f), EmeraldGlow.copy(alpha = 0.15f))
-        )
-    } else {
-        null
-    }
-
-    val horizontalPad = if (responsiveMetrics.isSmallPhone) 8.dp else 12.dp
+    val haptic = LocalHapticFeedback.current
 
     Box(
         modifier = Modifier
             .testTag(testTag)
-            .clip(RoundedCornerShape(20.dp))
-            .let {
-                if (backgroundBrush != null) {
-                    it.background(backgroundBrush)
-                } else {
-                    it
-                }
-            }
+            .height(48.dp)
+            .clip(CircleShape)
+            .background(
+                if (isSelected) Color(0xFF1B1B1B) else Color.Transparent
+            )
             .clickable {
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(vertical = 8.dp, horizontal = horizontalPad),
+            .padding(horizontal = if (isSelected) 14.dp else 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .padding(end = 4.dp)
-                        .size(4.dp)
-                        .clip(CircleShape)
-                        .background(EmeraldGlow)
-                        .shadow(4.dp, CircleShape, spotColor = EmeraldGlow)
-                )
-            }
-
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(18.dp)
+                tint = if (isSelected) Color(0xFF20D9E8) else Color(0xFFB7B7B7),
+                modifier = Modifier.size(20.dp)
             )
-            
-            // Animated indicator text expansion
+
+            // Label appears only when selected
             AnimatedVisibility(
                 visible = isSelected,
-                enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-                exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    AutoResizedText(
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
                         text = label,
-                        color = contentColor,
-                        fontSize = if (responsiveMetrics.isSmallPhone) 10.sp else 11.sp,
+                        color = Color(0xFFFFFFFF),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        minFontSize = 8.sp
+                        maxLines = 1
                     )
                 }
             }

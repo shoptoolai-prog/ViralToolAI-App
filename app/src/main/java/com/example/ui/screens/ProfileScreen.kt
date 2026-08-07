@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.creatoracademy.CreatorAcademyPrefs
+import com.example.ui.components.ViralToolAiLogo
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -703,9 +704,15 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
-                                    Text(text = "ViralToolAi", fontSize = 16.sp, fontWeight = FontWeight.Black, color = TextWhite)
-                                    Text(text = "AI Creator Platform • 2026 Edition", fontSize = 11.5.sp, color = TextGray)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    ViralToolAiLogo(size = 32.dp)
+                                    Column {
+                                        Text(text = "ViralToolAI", fontSize = 16.sp, fontWeight = FontWeight.Black, color = TextWhite)
+                                        Text(text = "AI Creator Intelligence • 2026 Edition", fontSize = 11.5.sp, color = TextGray)
+                                    }
                                 }
 
                                 Surface(

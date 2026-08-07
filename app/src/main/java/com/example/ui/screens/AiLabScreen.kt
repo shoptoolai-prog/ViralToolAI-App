@@ -36,13 +36,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val DarkBg = Color(0xFF080808)
-private val PrimaryPurple = Color(0xFF7C3AED)
-private val AccentGreen = Color(0xFF22C55E)
+import com.example.ui.components.ViralToolAiLogo
+
+private val DarkBg = Color(0xFF0B0B0B)
+private val PrimaryPurple = Color(0xFF20D9E8)
+private val AccentGreen = Color(0xFF20D9E8)
 private val CardSurface = Color(0xFF141414)
-private val CardBorder = Color(0xFF242424)
+private val CardBorder = Color(0xFF1B1B1B)
 private val TextWhite = Color(0xFFFFFFFF)
-private val TextSecondary = Color(0xFFB3B3B3)
+private val TextSecondary = Color(0xFFB7B7B7)
 
 data class AiLabProject(
     val id: String,
@@ -177,17 +179,8 @@ fun AiLabScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(PrimaryPurple.copy(alpha = 0.2f))
-                                .border(1.dp, PrimaryPurple.copy(alpha = 0.6f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = "AI Labs", tint = TextWhite, modifier = Modifier.size(16.dp))
-                        }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ViralToolAiLogo(size = 28.dp)
 
                         Text(
                             text = "AI Labs",

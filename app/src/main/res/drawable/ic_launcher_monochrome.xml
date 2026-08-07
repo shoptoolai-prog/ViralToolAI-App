@@ -5,38 +5,32 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Official VT Monogram White Stroke Lines -->
-    <!-- Top T Horizontal Bar -->
     <path
         android:pathData="M 28,32 L 80,32"
         android:strokeWidth="7"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round" />
 
-    <!-- V Left Diagonal -->
     <path
         android:pathData="M 28,32 L 54,78"
         android:strokeWidth="7"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round" />
 
-    <!-- V Right Diagonal -->
     <path
         android:pathData="M 54,78 L 80,32"
         android:strokeWidth="7"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round" />
 
-    <!-- T Vertical Center Stem -->
     <path
         android:pathData="M 54,32 L 54,60"
         android:strokeWidth="7"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round" />
 
-    <!-- Small Cyan Highlight Accent -->
     <path
         android:pathData="M 80,32 m -4,0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0"
-        android:fillColor="#20D9E8" />
+        android:fillColor="#FFFFFF" />
 
 </vector>

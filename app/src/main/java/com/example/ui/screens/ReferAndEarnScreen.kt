@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.creatoracademy.CreatorAcademyPrefs
+import com.example.ui.components.ViralToolAiLogo
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.EmeraldGlow
@@ -137,25 +138,7 @@ fun ReferAndEarnScreen() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(
-                                            Brush.linearGradient(
-                                                listOf(GoldPrimary.copy(alpha = 0.3f), ElectricPurple.copy(alpha = 0.2f))
-                                            )
-                                        )
-                                        .border(BorderStroke(1.2.dp, GoldPrimary.copy(alpha = 0.6f)), RoundedCornerShape(14.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.EmojiEvents,
-                                        contentDescription = "Refer & Rewards",
-                                        tint = GoldPrimary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
+                                ViralToolAiLogo(size = 32.dp)
 
                                 Column {
                                     Text(

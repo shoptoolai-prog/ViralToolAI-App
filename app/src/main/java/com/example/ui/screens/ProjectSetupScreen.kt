@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -47,6 +48,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class AiPreEditSuggestion(
+    val id: String,
+    val title: String,
+    val description: String,
+    val actionLabel: String,
+    val category: String,
+    val isApplied: Boolean = false
+)
+
 data class AspectRatioOption(
     val id: String,
     val ratioLabel: String,
@@ -65,7 +75,20 @@ data class ProjectSetupConfig(
     val autoCaptionsEnabled: Boolean,
     val aiAudioCleanEnabled: Boolean,
     val smartReframerEnabled: Boolean,
-    val autoCutFillersEnabled: Boolean
+    val autoCutFillersEnabled: Boolean,
+    val initialAudioTracks: List<AudioTrackItem> = emptyList(),
+    val initialCaptions: List<TextTrackItem> = emptyList(),
+    val initialStickers: List<StickerTrackItem> = emptyList(),
+    val initialEffectTracks: List<EffectTrackItem> = emptyList(),
+    val aiSuggestions: List<AiPreEditSuggestion> = emptyList(),
+    val brandLogoApplied: Boolean = false,
+    val silenceSections: List<Pair<Double, Double>> = emptyList(),
+    val isShakingDetected: Boolean = false,
+    val lowBrightnessDetected: Boolean = false,
+    val beautyCategoryDetected: Boolean = false,
+    val fashionCategoryDetected: Boolean = false,
+    val thumbnailUri: Uri? = null,
+    val preEditSummaryReady: Boolean = false
 )
 
 private val AspectRatios = listOf(
