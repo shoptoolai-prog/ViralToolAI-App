@@ -856,9 +856,9 @@ private fun Level9Module4TopPerformingProductsView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         val productTypes = listOf(
-            ProductCategory("High CTR Products", "Items with 20%+ click-through rate when featured in Reels.", "Action: Keep as Product #1 in top collection", Icons.Default.Star),
-            ProductCategory("Consistent Performers", "Staples like basic tees, lip tints, or desk mats that sell daily.", "Action: Never remove from permanent store", Icons.Default.TrendingUp),
-            ProductCategory("Seasonal Winners", "Festival sarees, winter jackets, or monsoon footwear.", "Action: Feature heavily during peak month", Icons.Default.Lightbulb)
+            AnalyticsProductCategory("High CTR Products", "Items with 20%+ click-through rate when featured in Reels.", "Action: Keep as Product #1 in top collection", Icons.Default.Star),
+            AnalyticsProductCategory("Consistent Performers", "Staples like basic tees, lip tints, or desk mats that sell daily.", "Action: Never remove from permanent store", Icons.Default.TrendingUp),
+            AnalyticsProductCategory("Seasonal Winners", "Festival sarees, winter jackets, or monsoon footwear.", "Action: Feature heavily during peak month", Icons.Default.Lightbulb)
         )
 
         productTypes.forEach { pt ->
@@ -890,7 +890,7 @@ private fun Level9Module4TopPerformingProductsView(onContinue: () -> Unit) {
     }
 }
 
-private data class ProductCategory(val title: String, val desc: String, val action: String, val icon: ImageVector)
+private data class AnalyticsProductCategory(val title: String, val desc: String, val action: String, val icon: ImageVector)
 
 /**
  * MODULE 5: Income Planning

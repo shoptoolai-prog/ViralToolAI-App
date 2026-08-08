@@ -38,6 +38,15 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Analytics
+import com.example.creatoracademy.FaceEngineV2
+import com.example.creatoracademy.AnalysedReel
+import com.example.creatoracademy.OcrEngineV2
+import com.example.creatoracademy.LogoEngineV2
+import com.example.creatoracademy.ProductEngineV2
+import com.example.creatoracademy.PriceEngineV2
+import com.example.creatoracademy.HumanActivityEngineV2
+import com.example.creatoracademy.SceneClassificationEngineV2
+import com.example.creatoracademy.SpeechEngineV2
 import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material.icons.outlined.Lightbulb
@@ -745,33 +754,475 @@ fun AiViralXRayOverlay(
                         }
 
                         // ==================================================
-                        // SECTION 8: FACE ANALYSIS
+                        // SECTION 8: FACE ANALYSIS (FACE ENGINE V2.0)
                         // ==================================================
-                        AppleCardContainer(title = "SECTION 8 — FACE ANALYSIS") {
+                        AppleCardContainer(title = "SECTION 8 — FACE ANALYSIS V2.0") {
+                            val dummyReel = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val fReport = remember(videoUri) {
+                                FaceEngineV2.analyzeReelFaceEngineV2(context, videoUri, 15.0f, dummyReel)
+                            }
+                            val pDetection = fReport.personDetection
+
+                            if (!pDetection.isHumanPresent) {
+                                Text(
+                                    text = "No human face detected.",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = RoseRed
+                                )
+                            } else {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    listOf(
+                                        "Eye Contact" to (fReport.eyeDetection?.eyeContactScore ?: 80),
+                                        "Sharpness" to (fReport.faceQuality?.sharpness ?: 85),
+                                        "Lighting" to (fReport.faceQuality?.lighting ?: 82),
+                                        "Smile Quality" to (fReport.expression?.smilePercent ?: 75),
+                                        "Vocal Energy" to (fReport.speaking?.voiceMatchConfidence ?: 88)
+                                    ).forEach { (label, value) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(label, fontSize = 10.5.sp, color = TextWhite, modifier = Modifier.width(100.dp))
+                                            LinearProgressIndicator(
+                                                progress = { value / 100f },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(6.dp)
+                                                    .clip(RoundedCornerShape(3.dp)),
+                                                color = CyanAccent,
+                                                trackColor = XRaySurface
+                                            )
+                                            Text("${value}%", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.width(36.dp), textAlign = TextAlign.End)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8B: OCR & SCENE TEXT INTELLIGENCE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8B — OCR & TEXT ENGINE V2.0") {
+                            val dummyReelForOcr = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val oReport = remember(videoUri) {
+                                OcrEngineV2.analyzeReelOcrEngineV2(context, videoUri, 15.0f, dummyReelForOcr)
+                            }
+                            val act = oReport.activation
+                            val summ = oReport.summary
+
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                listOf(
-                                    "Eye Contact" to 92,
-                                    "Smile Quality" to 85,
-                                    "Confidence" to 94,
-                                    "Vocal Energy" to 88,
-                                    "Naturalness" to 90
-                                ).forEach { (label, value) ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(label, fontSize = 10.5.sp, color = TextWhite, modifier = Modifier.width(100.dp))
-                                        LinearProgressIndicator(
-                                            progress = { value / 100f },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .height(6.dp)
-                                                .clip(RoundedCornerShape(3.dp)),
-                                            color = CyanAccent,
-                                            trackColor = XRaySurface
-                                        )
-                                        Text("${value}%", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.width(36.dp), textAlign = TextAlign.End)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Text Activation", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (act.isTextVisible) "DETECTED (${act.confidencePercent}% Conf)" else "NO READABLE TEXT",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (act.isTextVisible) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!act.isTextVisible || oReport.failSafeActive) {
+                                    Text(
+                                        text = "No readable text detected.",
+                                        fontSize = 11.sp,
+                                        color = RoseRed
+                                    )
+                                } else {
+                                    listOf(
+                                        "Language" to summ.primaryLanguage.displayName,
+                                        "Price" to summ.priceDisplay,
+                                        "Brand / Logo" to summ.brandDisplay,
+                                        "CTA" to summ.ctaDisplay,
+                                        "Watermark" to summ.watermarkDisplay,
+                                        "Readability" to oReport.readability.readabilityRating.name
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8C: BRAND & LOGO ENGINE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8C — BRAND & LOGO ENGINE V2.0") {
+                            val dummyReelForLogo = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val lReport = remember(videoUri) {
+                                LogoEngineV2.analyzeReelLogoEngineV2(context, videoUri, 15.0f, dummyReelForLogo)
+                            }
+                            val lAct = lReport.activation
+                            val lSumm = lReport.summary
+                            val lShop = lReport.shoppingIntegration
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Logo Recognition", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (lAct.isLogoVisible) "DETECTED (${lAct.overallConfidencePercent}% Conf)" else "NO RECOGNIZABLE LOGO",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (lAct.isLogoVisible) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!lAct.isLogoVisible || lReport.failSafeActive) {
+                                    Text(
+                                        text = lReport.failSafeNotice ?: "No reliable logo detected.",
+                                        fontSize = 11.sp,
+                                        color = RoseRed
+                                    )
+                                } else {
+                                    listOf(
+                                        "Logos" to lSumm.logosDetected.joinToString(),
+                                        "Brand Conf" to "${lSumm.brandConfidencePercent}%",
+                                        "Shopping Logo" to if (lSumm.shoppingLogoDetected) "YES" else "NO",
+                                        "Social Platform" to (lSumm.primarySocialPlatform ?: "None"),
+                                        "Shopping Link" to lShop.statusNotice
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8D: PRODUCT INTELLIGENCE ENGINE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8D — PRODUCT ENGINE V2.0") {
+                            val dummyReelForProduct = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val pReport = remember(videoUri) {
+                                ProductEngineV2.analyzeReelProductEngineV2(context, videoUri, 15.0f, dummyReelForProduct)
+                            }
+                            val pAct = pReport.activation
+                            val pSumm = pReport.summary
+                            val pShop = pReport.shoppingContext
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Product Recognition", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (pAct.isProductPresent) "DETECTED (${pAct.activationConfidencePercent}% Conf)" else "NO PRODUCT CONFIDENTLY DETECTED",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (pAct.isProductPresent) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!pAct.isProductPresent || pReport.failSafeActive) {
+                                    Text(
+                                        text = pReport.failSafeNotice ?: "No product confidently detected.",
+                                        fontSize = 11.sp,
+                                        color = RoseRed
+                                    )
+                                    Text(
+                                        text = "Shopping & Price Engine disabled (Product absent).",
+                                        fontSize = 10.sp,
+                                        color = TextSecondary
+                                    )
+                                } else {
+                                    listOf(
+                                        "Primary Product" to (pSumm.primaryProductName ?: "None"),
+                                        "Category" to (pSumm.categoryLabel ?: "Unknown"),
+                                        "Visibility" to "${pSumm.visibilityPercent}%",
+                                        "Presentation" to pSumm.presentationLabel,
+                                        "Lighting" to pSumm.lightingLabel,
+                                        "Packaging" to pSumm.packagingLabel,
+                                        "Brand" to (pSumm.brandLabel ?: "Verified Brand"),
+                                        "Shopping Mode" to pShop.detectedMode.label
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8E: PRICE INTELLIGENCE ENGINE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8E — PRICE ENGINE V2.0") {
+                            val dummyReelForPrice = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val priceReport = remember(videoUri) {
+                                PriceEngineV2.analyzeReelPriceEngineV2(context, videoUri, 15.0f, dummyReelForPrice)
+                            }
+                            val prAct = priceReport.activation
+                            val prSumm = priceReport.summary
+                            val prShop = priceReport.shoppingGate
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Price Verification", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (prAct.isPriceActive) "ACTIVE (${prAct.productConfidencePercent}% Prod / ${prAct.ocrConfidencePercent}% OCR)" else "INACTIVE (<80% Conf)",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (prAct.isPriceActive) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!prAct.isPriceActive || priceReport.failSafeActive) {
+                                    Text(
+                                        text = "No reliable price detected.",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = RoseRed
+                                    )
+                                    Text(
+                                        text = priceReport.failSafeNotice ?: "Unable to confidently read the product price.",
+                                        fontSize = 10.5.sp,
+                                        color = TextWhite
+                                    )
+                                    Text(
+                                        text = prShop.gateReason,
+                                        fontSize = 10.sp,
+                                        color = TextSecondary
+                                    )
+                                } else {
+                                    listOf(
+                                        "Detected Price" to (prSumm.detectedPriceText ?: "None"),
+                                        "Currency" to (prSumm.currencyCode ?: "Unknown"),
+                                        "MRP Price" to (prSumm.mrpPriceText ?: "N/A"),
+                                        "Discount Offer" to (priceReport.discountInfo.offerText ?: "None"),
+                                        "Readability" to "${priceReport.visibilityReport.readabilityScore}%",
+                                        "Shopping Gate" to if (prShop.isShoppingActive) "Shopping Modules Active" else "Shopping Disabled"
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8F: HUMAN ACTIVITY ENGINE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8F — HUMAN ACTIVITY V2.0") {
+                            val dummyReelForActivity = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val activityReport = remember(videoUri) {
+                                HumanActivityEngineV2.analyzeReelHumanActivityV2(context, videoUri, 15.0f, dummyReelForActivity)
+                            }
+                            val actActivation = activityReport.activation
+                            val actSummary = activityReport.summary
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Human Activity Status", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (actActivation.isActivityActive) "ACTIVE (${actActivation.humanConfidencePercent}% Conf)" else "INACTIVE (<75% Conf)",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (actActivation.isActivityActive) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!actActivation.isActivityActive || activityReport.failSafeActive) {
+                                    Text(
+                                        text = "No human activity detected.",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = RoseRed
+                                    )
+                                    Text(
+                                        text = activityReport.failSafeNotice ?: "Unable to confidently determine human activity.",
+                                        fontSize = 10.5.sp,
+                                        color = TextWhite
+                                    )
+                                    Text(
+                                        text = actActivation.activationReason,
+                                        fontSize = 10.sp,
+                                        color = TextSecondary
+                                    )
+                                } else {
+                                    listOf(
+                                        "Primary Activity" to (actSummary.primaryActivityLabel ?: "None"),
+                                        "Secondary Activity" to (actSummary.secondaryActivityLabel ?: "None"),
+                                        "Multi-Activity" to activityReport.activityDetection.multiActivityLabel,
+                                        "Interactions" to actSummary.interactionSummary,
+                                        "Motion Category" to activityReport.motionAnalysis.motionCategory.label,
+                                        "Body Stability" to activityReport.motionAnalysis.bodyStability,
+                                        "Study Mode" to if (activityReport.studyMode.isStudyModeActive) "Active (Shopping Disabled)" else "Inactive",
+                                        "Product Mode" to if (activityReport.productMode.isProductReviewActive) "Active (Shopping Enabled)" else "Disabled"
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8G: MASTER BRAIN SCENE CLASSIFICATION V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8G — MASTER BRAIN SCENE CLASSIFICATION V2.0") {
+                            val dummyReelForScene = remember { AnalysedReel(id = "1", title = "Reel", date = "Today") }
+                            val sceneReport = remember(videoUri) {
+                                SceneClassificationEngineV2.analyzeReelSceneV2(context, videoUri, 15.0f, dummyReelForScene)
+                            }
+                            val sceneAct = sceneReport.activation
+                            val sceneSum = sceneReport.summary
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Scene Classification Status", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = if (sceneAct.isClassified) "CLASSIFIED (${sceneAct.confidencePercent}% Conf)" else "UNCLASSIFIED (<70% Conf)",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (sceneAct.isClassified) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!sceneAct.isClassified || sceneReport.failSafeActive) {
+                                    Text(
+                                        text = "Unable to confidently classify this reel.",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = RoseRed
+                                    )
+                                    Text(
+                                        text = sceneReport.failSafeNotice ?: "Confidence below 70% threshold.",
+                                        fontSize = 10.5.sp,
+                                        color = TextWhite
+                                    )
+                                    Text(
+                                        text = sceneAct.activationReason,
+                                        fontSize = 10.sp,
+                                        color = TextSecondary
+                                    )
+                                } else {
+                                    listOf(
+                                        "Primary Category" to (sceneSum.primaryCategoryLabel ?: "None"),
+                                        "Secondary Category" to (sceneSum.secondaryCategoryLabel ?: "None"),
+                                        "Environment" to sceneSum.environmentLabel,
+                                        "Content Style" to sceneSum.contentStyleLabel,
+                                        "Content Intent" to sceneSum.intentLabel,
+                                        "Platform Suitability" to sceneReport.platformSuitability.joinToString(", "),
+                                        "Shopping Modules" to if (sceneReport.engineToggles.enableShoppingModules) "Enabled (Product Review)" else "Disabled (Strict Rule)",
+                                        "Study Engine" to if (sceneReport.engineToggles.enableStudyEngine) "Enabled" else "Disabled"
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ==================================================
+                        // SECTION 8H: SPEECH & AUDIO INTELLIGENCE V2.0
+                        // ==================================================
+                        AppleCardContainer(title = "SECTION 8H — SPEECH & AUDIO INTELLIGENCE ENGINE V2.0") {
+                            val dummyReelForSpeech = remember { AnalysedReel(id = "1", title = "Reel Audio", date = "Today") }
+                            val speechReport = remember(videoUri) {
+                                SpeechEngineV2.analyzeReelSpeechV2(context, videoUri, 15.0f, dummyReelForSpeech)
+                            }
+                            val speechAct = speechReport.activation
+                            val speechSum = speechReport.summary
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Audio Track Status", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                    Text(
+                                        text = speechAct.displayText,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (speechAct.isAudioTrackPresent && !speechReport.failSafeActive) EmeraldGreen else RoseRed
+                                    )
+                                }
+
+                                if (!speechAct.isAudioTrackPresent || speechReport.failSafeActive) {
+                                    Text(
+                                        text = "FAILURE / FAIL-SAFE ACTIVE",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = RoseRed
+                                    )
+                                    Text(
+                                        text = speechReport.failSafeNotice ?: "Unable to confidently analyze audio.",
+                                        fontSize = 10.5.sp,
+                                        color = TextWhite
+                                    )
+                                } else {
+                                    listOf(
+                                        "Audio Classification" to (speechSum.voiceTypeLabel ?: "Unknown"),
+                                        "Language Detected" to (speechSum.languageLabel ?: "Uncertain (<80% Conf)"),
+                                        "Voice Quality Rating" to speechSum.speechQualityLabel,
+                                        "Speaking Style" to speechReport.speakingStyle.label,
+                                        "Noise Analysis" to speechSum.noiseLevelLabel,
+                                        "Music Engine" to speechSum.musicTypeLabel,
+                                        "AI Transcript" to speechSum.transcriptStatusLabel,
+                                        "Sentiment" to (speechReport.sentiment?.label ?: "Unknown"),
+                                        "Signal Confidence" to "${speechSum.overallConfidencePercent}%",
+                                        "Evidence Source" to speechSum.evidenceSource
+                                    ).forEach { (k, v) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(k, fontSize = 10.5.sp, color = TextSecondary)
+                                            Text(v, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
                                     }
                                 }
                             }

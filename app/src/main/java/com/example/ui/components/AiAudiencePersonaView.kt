@@ -1,9 +1,6 @@
 package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,31 +18,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,22 +39,15 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,14 +61,16 @@ import com.example.creatoracademy.AiAudiencePersonaReport
 import com.example.creatoracademy.AnalysedReel
 import com.example.creatoracademy.AudienceCardData
 import com.example.creatoracademy.AudienceEmotionData
-import com.example.creatoracademy.BuyerIntentReason
+import com.example.creatoracademy.BuyerIntentData
+import com.example.creatoracademy.ContentIntentData
 import com.example.creatoracademy.ContentMatchData
+import com.example.creatoracademy.FaceAnalyticsData
 import com.example.creatoracademy.PlatformMatchData
 import com.example.creatoracademy.PlatformRating
+import com.example.creatoracademy.ProductAnalyticsData
 import com.example.creatoracademy.RadarCategoryData
 import com.example.ui.theme.AmoledBlack
 import com.example.ui.theme.CyanAccent
-import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.EmeraldGlow
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -98,7 +78,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 // ==================================================
-// FULL DIALOG: DS-28 AI AUDIENCE PERSONA ENGINE
+// FULL DIALOG: DS-32 AI AUDIENCE PERSONA ENGINE V5
 // ==================================================
 @Composable
 fun AiAudiencePersonaDialog(
@@ -134,7 +114,7 @@ fun AiAudiencePersonaDialog(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(
-                                text = "👥 AI Audience Persona",
+                                text = "👥 AI Audience Persona V5",
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Black,
                                 color = TextPrimary
@@ -155,7 +135,7 @@ fun AiAudiencePersonaDialog(
                             }
                         }
                         Text(
-                            text = "Know exactly who your reel is made for • ${report.reelTitle}",
+                            text = "Real evidence analysis • ${report.reelTitle}",
                             fontSize = 11.5.sp,
                             color = TextSecondary,
                             maxLines = 1,
@@ -187,19 +167,31 @@ fun AiAudiencePersonaDialog(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    // SECTION 12 (CONFIDENCE NOTICE IF <70%)
+                    // SECTION 12 — LOW CONFIDENCE NOTICE (<70%)
                     if (report.isLowConfidence) {
-                        LowConfidenceNoticeBanner()
+                        LowConfidenceNoticeBanner(notice = report.confidenceNotice ?: "Not enough visual evidence.")
                     }
 
-                    // SECTION 11 — VIRI AI RECOMMENDATION
+                    // SECTION 11 — VIRI AI COACH RECOMMENDATION
                     ViriRecommendationCard(recommendation = report.viriRecommendation)
 
                     // SECTION 1 — PRIMARY AUDIENCE
                     PrimaryAudienceSection(primary = report.primaryAudience)
 
-                    // SECTION 2 — AUDIENCE CARDS
-                    AudienceCardsSection(cards = report.audienceCards)
+                    // SECTION 1B — FACE ANALYTICS (MODULAR)
+                    if (report.faceAnalytics != null) {
+                        FaceAnalyticsSection(face = report.faceAnalytics)
+                    }
+
+                    // SECTION 1C — PRODUCT ANALYTICS (MODULAR)
+                    if (report.productAnalytics != null) {
+                        ProductAnalyticsSection(product = report.productAnalytics)
+                    }
+
+                    // SECTION 2 — DYNAMIC AUDIENCE PERSONAS
+                    if (report.audienceCards.isNotEmpty()) {
+                        AudienceCardsSection(cards = report.audienceCards, hasProduct = report.hasProduct)
+                    }
 
                     // SECTION 3 — INTEREST RADAR
                     InterestRadarSection(radarData = report.interestRadar)
@@ -207,8 +199,12 @@ fun AiAudiencePersonaDialog(
                     // SECTION 4 — PLATFORM MATCH
                     PlatformMatchSection(platforms = report.platformMatches)
 
-                    // SECTION 5 — BUYER INTENT
-                    BuyerIntentSection(buyerIntent = report.buyerIntent)
+                    // SECTION 5 — BUYER INTENT vs CONTENT INTENT
+                    if (report.buyerIntent != null) {
+                        BuyerIntentSection(buyerIntent = report.buyerIntent)
+                    } else if (report.contentIntent != null) {
+                        ContentIntentSection(contentIntent = report.contentIntent)
+                    }
 
                     // SECTION 6 — WATCH BEHAVIOUR
                     WatchBehaviourSection(watch = report.watchBehaviour)
@@ -253,7 +249,7 @@ fun AiAudiencePersonaDialog(
 // SECTION 12 — LOW CONFIDENCE NOTICE
 // ==================================================
 @Composable
-private fun LowConfidenceNoticeBanner() {
+private fun LowConfidenceNoticeBanner(notice: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -272,8 +268,8 @@ private fun LowConfidenceNoticeBanner() {
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Audience prediction may be inaccurate because the reel does not contain enough visual or audio information.",
-                fontSize = 11.5.sp,
+                text = notice,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFFFCA5A5)
             )
@@ -301,7 +297,7 @@ private fun ViriRecommendationCard(recommendation: String) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Viri AI Audience Strategist",
+                    text = "Viri AI Coach (Real Analysis)",
                     fontSize = 10.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = CyanAccent
@@ -340,7 +336,6 @@ private fun PrimaryAudienceSection(primary: com.example.creatoracademy.PrimaryAu
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Header badge
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -369,15 +364,16 @@ private fun PrimaryAudienceSection(primary: com.example.creatoracademy.PrimaryAu
 
                 Divider(color = Color(0x1AFFFFFF))
 
-                // Grid of audience attributes
-                val items = listOf(
+                val items = mutableListOf(
                     "Gender" to primary.genderDistribution,
                     "Language" to primary.language,
                     "Region" to primary.region,
                     "City Tier" to primary.cityTier,
-                    "Shopping" to primary.shoppingBehaviour,
                     "Experience" to primary.experienceLevel
                 )
+                if (primary.shoppingBehaviour != null) {
+                    items.add("Shopping" to primary.shoppingBehaviour)
+                }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items.chunked(2).forEach { rowItems ->
@@ -420,10 +416,112 @@ private fun PrimaryAudienceSection(primary: com.example.creatoracademy.PrimaryAu
 }
 
 // ==================================================
+// SECTION 1B — FACE ANALYTICS
+// ==================================================
+@Composable
+private fun FaceAnalyticsSection(face: FaceAnalyticsData) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFF161B26),
+        border = BorderStroke(1.dp, Color(0xFF262E40))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(Icons.Default.Face, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(20.dp))
+                Text("Face Detection Analytics", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Spacer(modifier = Modifier.weight(1f))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (face.isPartialFace) Color(0x33EF4444) else Color(0x3322D3EE)
+                ) {
+                    Text(
+                        text = face.faceTypeLabel,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (face.isPartialFace) Color(0xFFEF4444) else CyanAccent,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Eye Contact Score: ${face.eyeContactScore}%", fontSize = 11.5.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("Emotion: ${face.dominantEmotion}", fontSize = 11.5.sp, color = CyanAccent, fontWeight = FontWeight.SemiBold)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Angle: ${face.headAngle}", fontSize = 11.sp, color = TextSecondary)
+                Text("Posture: ${face.bodyPosture}", fontSize = 11.sp, color = TextSecondary)
+            }
+        }
+    }
+}
+
+// ==================================================
+// SECTION 1C — PRODUCT ANALYTICS
+// ==================================================
+@Composable
+private fun ProductAnalyticsSection(product: ProductAnalyticsData) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFF161B26),
+        border = BorderStroke(1.dp, Color(0xFF262E40))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = EmeraldGlow, modifier = Modifier.size(20.dp))
+                Text("Product Engine Analytics", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Spacer(modifier = Modifier.weight(1f))
+                Text("${product.visibilityPercent}% Visibility", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = EmeraldGlow)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Category: ${product.category ?: "General"}", fontSize = 11.5.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("Size: ${product.sizeCategory}", fontSize = 11.5.sp, color = TextSecondary)
+            }
+
+            if (product.priceDetected != null || product.brandDetected != null || product.offerDetected != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    product.priceDetected?.let { Text("Price: $it", fontSize = 11.sp, color = EmeraldGlow, fontWeight = FontWeight.Bold) }
+                    product.brandDetected?.let { Text("Brand: $it", fontSize = 11.sp, color = CyanAccent, fontWeight = FontWeight.Bold) }
+                    product.offerDetected?.let { Text("Offer: $it", fontSize = 11.sp, color = Color(0xFFFFB703), fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    }
+}
+
+// ==================================================
 // SECTION 2 — AUDIENCE CARDS
 // ==================================================
 @Composable
-private fun AudienceCardsSection(cards: List<AudienceCardData>) {
+private fun AudienceCardsSection(cards: List<AudienceCardData>, hasProduct: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "2. Audience Personas",
@@ -468,37 +566,31 @@ private fun AudienceCardsSection(cards: List<AudienceCardData>) {
                                 )
                             }
 
-                            if (card.reason.isNotBlank()) {
-                                Text(
-                                    text = card.reason,
-                                    fontSize = 11.sp,
-                                    color = TextSecondary
-                                )
-                            } else {
-                                Text(
-                                    text = "Interests: ${card.interests.joinToString(" • ")}",
-                                    fontSize = 11.sp,
-                                    color = TextSecondary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                            Text(
+                                text = "Interests: ${card.interests.joinToString(" • ")}",
+                                fontSize = 11.sp,
+                                color = TextSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
 
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (hasProduct && card.buyingPower != null) {
                                     Text(
                                         text = "Buying Power: ${card.buyingPower}",
                                         fontSize = 10.5.sp,
                                         color = CyanAccent,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    Text(
-                                        text = "Activity: ${card.activityLevel}",
-                                        fontSize = 10.5.sp,
-                                        color = TextSecondary
-                                    )
                                 }
+                                Text(
+                                    text = "Activity: ${card.activityLevel}",
+                                    fontSize = 10.5.sp,
+                                    color = TextSecondary
+                                )
                             }
                         }
                     }
@@ -538,7 +630,6 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                     color = TextSecondary
                 )
 
-                // Canvas Radar Web
                 Box(
                     modifier = Modifier
                         .size(220.dp)
@@ -551,7 +642,6 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                         val numCategories = radarData.size
                         val angleStep = (2 * Math.PI / numCategories).toFloat()
 
-                        // Concentric Polygon Grid Lines (0.25, 0.5, 0.75, 1.0)
                         listOf(0.25f, 0.50f, 0.75f, 1.0f).forEach { scale ->
                             val gridPath = Path()
                             for (i in 0 until numCategories) {
@@ -568,7 +658,6 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                             )
                         }
 
-                        // Spokes from center
                         for (i in 0 until numCategories) {
                             val angle = i * angleStep - (Math.PI / 2).toFloat()
                             val endX = center.x + radius * cos(angle)
@@ -581,7 +670,6 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                             )
                         }
 
-                        // Active Radar Polygon
                         val dataPath = Path()
                         radarData.forEachIndexed { i, item ->
                             val angle = i * angleStep - (Math.PI / 2).toFloat()
@@ -592,19 +680,9 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                         }
                         dataPath.close()
 
-                        // Fill
-                        drawPath(
-                            path = dataPath,
-                            color = Color(0x6622D3EE)
-                        )
-                        // Stroke
-                        drawPath(
-                            path = dataPath,
-                            color = CyanAccent,
-                            style = Stroke(width = 2.5.dp.toPx())
-                        )
+                        drawPath(path = dataPath, color = Color(0x6622D3EE))
+                        drawPath(path = dataPath, color = CyanAccent, style = Stroke(width = 2.5.dp.toPx()))
 
-                        // Data Points
                         radarData.forEachIndexed { i, item ->
                             val angle = i * angleStep - (Math.PI / 2).toFloat()
                             val r = radius * item.value.coerceIn(0.1f, 1.0f)
@@ -619,12 +697,11 @@ private fun InterestRadarSection(radarData: List<RadarCategoryData>) {
                     }
                 }
 
-                // Top Categories Tags Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    radarData.filter { it.value >= 0.75f }.take(4).forEach { item ->
+                    radarData.filter { it.value >= 0.70f }.take(4).forEach { item ->
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
@@ -729,7 +806,7 @@ private fun PlatformMatchSection(platforms: List<PlatformMatchData>) {
 // SECTION 5 — BUYER INTENT
 // ==================================================
 @Composable
-private fun BuyerIntentSection(buyerIntent: com.example.creatoracademy.BuyerIntentData) {
+private fun BuyerIntentSection(buyerIntent: BuyerIntentData) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "5. Buyer Intent Prediction",
@@ -800,7 +877,66 @@ private fun BuyerIntentSection(buyerIntent: com.example.creatoracademy.BuyerInte
 }
 
 // ==================================================
-// SECTION 6 — WATCH BEHAVIOUR CIRCULAR METERS
+// SECTION 5B — CONTENT INTENT (WHEN NO PRODUCT)
+// ==================================================
+@Composable
+private fun ContentIntentSection(contentIntent: ContentIntentData) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = "5. Content Intent Analysis",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
+        )
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = Color(0xFF161B26),
+            border = BorderStroke(1.dp, Color(0xFF262E40))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "Primary Content Intent", fontSize = 12.sp, color = TextSecondary)
+                        Text(
+                            text = contentIntent.primaryIntent,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = CyanAccent
+                        )
+                    }
+
+                    Text(
+                        text = "${contentIntent.score}% Confidence",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = EmeraldGlow
+                    )
+                }
+
+                Divider(color = Color(0x1AFFFFFF))
+
+                Text(
+                    text = contentIntent.explanation,
+                    fontSize = 12.sp,
+                    color = TextPrimary,
+                    lineHeight = 17.sp
+                )
+            }
+        }
+    }
+}
+
+// ==================================================
+// SECTION 6 — WATCH BEHAVIOUR
 // ==================================================
 @Composable
 private fun WatchBehaviourSection(watch: com.example.creatoracademy.WatchBehaviourData) {
@@ -822,7 +958,6 @@ private fun WatchBehaviourSection(watch: com.example.creatoracademy.WatchBehavio
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Top Highlight: Avg Watch Time
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -855,7 +990,6 @@ private fun WatchBehaviourSection(watch: com.example.creatoracademy.WatchBehavio
 
                 Divider(color = Color(0x1AFFFFFF))
 
-                // Circular meters grid
                 val meters = listOf(
                     "Replay" to watch.replayChancePercent,
                     "Share" to watch.shareChancePercent,
