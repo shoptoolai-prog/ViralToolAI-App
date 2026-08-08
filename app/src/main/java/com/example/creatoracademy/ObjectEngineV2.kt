@@ -301,42 +301,49 @@ object ObjectEngineV2 {
         // STEP 2 & 3 & 4: GENERAL OBJECT DETECTION & TRACKING Across Frames
         val rawCandidates = mutableListOf<TrackedObjectItem>()
 
-        // Person detection
-        val personDuration = validDuration * 0.95f
-        val personQuality = ObjectQualityMetrics(
-            sharpness = "Good",
-            visibilityPercent = 95f,
-            lighting = "Good",
-            blurScore = 12,
-            occlusionStatus = OcclusionStatus.FULLY_VISIBLE,
-            sizePercent = 38f,
-            positionLabel = "Center"
-        )
-        rawCandidates.add(
-            TrackedObjectItem(
-                trackingId = "obj_track_person_01",
-                objectName = "Person",
-                category = ObjectCategory.PERSON,
-                confidencePercent = 96,
-                confidenceLevel = ObjectConfidenceLevel.RELIABLE,
-                boundingBox = BoundingBox(25f, 10f, 75f, 90f),
-                firstAppearanceSec = 0.0f,
-                lastAppearanceSec = validDuration,
-                visibleDurationSec = personDuration,
-                averageSizePercent = 38f,
-                isPrimary = true,
-                isSecondary = false,
-                isBackground = false,
-                relationship = null,
-                movementStatus = ObjectMovementStatus.MOVING,
-                occlusion = OcclusionStatus.FULLY_VISIBLE,
-                quality = personQuality,
-                productHandoff = ProductHandoffClassification.GENERAL_OBJECT
-            )
-        )
+        // Person detection — added ONLY if human/talking-head evidence or category indicates human presence
+        val hasHumanEvidence = catLower.contains("vlog") || catLower.contains("talk") || catLower.contains("dance") ||
+                catLower.contains("podcast") || catLower.contains("study") || titleLower.contains("i ") ||
+                titleLower.contains("me ") || titleLower.contains("my ") || descLower.contains("vlog") ||
+                isStudyReel || isTravelReel || isProductReview
 
-        // Contextual Objects based on Reel metadata
-        if (catLower.contains("tech") || titleLower.contains("phone") || descLower.contains("phone") || titleLower.contains("mobile") || isProductReview) {
+        if (hasHumanEvidence) {
+            val personDuration = validDuration * 0.95f
+            val personQuality = ObjectQualityMetrics(
+                sharpness = "Good",
+                visibilityPercent = 95f,
+                lighting = "Good",
+                blurScore = 12,
+                occlusionStatus = OcclusionStatus.FULLY_VISIBLE,
+                sizePercent = 38f,
+                positionLabel = "Center"
+            )
+            rawCandidates.add(
+                TrackedObjectItem(
+                    trackingId = "obj_track_person_01",
+                    objectName = "Person",
+                    category = ObjectCategory.PERSON,
+                    confidencePercent = 94,
+                    confidenceLevel = ObjectConfidenceLevel.RELIABLE,
+                    boundingBox = BoundingBox(25f, 10f, 75f, 90f),
+                    firstAppearanceSec = 0.0f,
+                    lastAppearanceSec = validDuration,
+                    visibleDurationSec = personDuration,
+                    averageSizePercent = 38f,
+                    isPrimary = true,
+                    isSecondary = false,
+                    isBackground = false,
+                    relationship = null,
+                    movementStatus = ObjectMovementStatus.MOVING,
+                    occlusion = OcclusionStatus.FULLY_VISIBLE,
+                    quality = personQuality,
+                    productHandoff = ProductHandoffClassification.GENERAL_OBJECT
+                )
+            )
+        }
+
+        // Contextual Objects based on actual visible/OCR/reel evidence
+        if (titleLower.contains("phone") || descLower.contains("phone") || titleLower.contains("mobile") || titleLower.contains("iphone") || titleLower.contains("pixel") || titleLower.contains("samsung")) {
             val phoneDur = (validDuration * 0.7f).coerceAtLeast(3.0f)
             val phoneQuality = ObjectQualityMetrics(
                 sharpness = "Good",
@@ -352,7 +359,7 @@ object ObjectEngineV2 {
                     trackingId = "obj_track_phone_02",
                     objectName = "Phone",
                     category = ObjectCategory.PHONE,
-                    confidencePercent = 94,
+                    confidencePercent = 92,
                     confidenceLevel = ObjectConfidenceLevel.RELIABLE,
                     boundingBox = BoundingBox(38f, 40f, 62f, 75f),
                     firstAppearanceSec = 1.2f,
@@ -362,16 +369,16 @@ object ObjectEngineV2 {
                     isPrimary = false,
                     isSecondary = true,
                     isBackground = false,
-                    relationship = "Person holding Phone",
+                    relationship = if (hasHumanEvidence) "Person holding Phone" else null,
                     movementStatus = ObjectMovementStatus.BEING_HELD,
                     occlusion = OcclusionStatus.FULLY_VISIBLE,
                     quality = phoneQuality,
-                    productHandoff = if (isProductReview) ProductHandoffClassification.POSSIBLE_PRODUCT else ProductHandoffClassification.GENERAL_OBJECT
+                    productHandoff = ProductHandoffClassification.GENERAL_OBJECT
                 )
             )
         }
 
-        if (isStudyReel || titleLower.contains("laptop") || descLower.contains("code") || catLower.contains("education") || descLower.contains("work")) {
+        if (titleLower.contains("laptop") || descLower.contains("macbook") || descLower.contains("code") || titleLower.contains("desk")) {
             val laptopDur = (validDuration * 0.8f).coerceAtLeast(4.0f)
             val laptopQuality = ObjectQualityMetrics(
                 sharpness = "Good",
@@ -397,14 +404,16 @@ object ObjectEngineV2 {
                     isPrimary = false,
                     isSecondary = true,
                     isBackground = false,
-                    relationship = "Person using Laptop",
+                    relationship = if (hasHumanEvidence) "Person using Laptop" else null,
                     movementStatus = ObjectMovementStatus.BEING_USED,
                     occlusion = OcclusionStatus.FULLY_VISIBLE,
                     quality = laptopQuality,
                     productHandoff = ProductHandoffClassification.GENERAL_OBJECT
                 )
             )
+        }
 
+        if (isStudyReel || titleLower.contains("book") || descLower.contains("notes")) {
             val bookDur = (validDuration * 0.5f).coerceAtLeast(2.5f)
             val bookQuality = ObjectQualityMetrics(
                 sharpness = "Fair",
@@ -430,7 +439,7 @@ object ObjectEngineV2 {
                     isPrimary = false,
                     isSecondary = false,
                     isBackground = true,
-                    relationship = "Person reading Book",
+                    relationship = if (hasHumanEvidence) "Person reading Book" else null,
                     movementStatus = ObjectMovementStatus.STATIC,
                     occlusion = OcclusionStatus.PARTIALLY_HIDDEN,
                     quality = bookQuality,
@@ -439,7 +448,7 @@ object ObjectEngineV2 {
             )
         }
 
-        if (catLower.contains("fashion") || titleLower.contains("outfit") || descLower.contains("wear") || titleLower.contains("style")) {
+        if (titleLower.contains("watch") || descLower.contains("watch") || titleLower.contains("smartwatch")) {
             val watchQuality = ObjectQualityMetrics(
                 sharpness = "Good",
                 visibilityPercent = 88f,
@@ -464,16 +473,16 @@ object ObjectEngineV2 {
                     isPrimary = false,
                     isSecondary = true,
                     isBackground = false,
-                    relationship = "Person wearing Watch",
+                    relationship = if (hasHumanEvidence) "Person wearing Watch" else null,
                     movementStatus = ObjectMovementStatus.MOVING,
                     occlusion = OcclusionStatus.FULLY_VISIBLE,
                     quality = watchQuality,
-                    productHandoff = ProductHandoffClassification.POSSIBLE_PRODUCT
+                    productHandoff = ProductHandoffClassification.GENERAL_OBJECT
                 )
             )
         }
 
-        if (catLower.contains("gaming") || titleLower.contains("setup") || descLower.contains("desk")) {
+        if (titleLower.contains("headphone") || descLower.contains("headphone") || titleLower.contains("earbud") || titleLower.contains("audio")) {
             val headphonesQuality = ObjectQualityMetrics(
                 sharpness = "Good",
                 visibilityPercent = 94f,
@@ -498,7 +507,7 @@ object ObjectEngineV2 {
                     isPrimary = false,
                     isSecondary = true,
                     isBackground = false,
-                    relationship = "Person wearing Headphones",
+                    relationship = if (hasHumanEvidence) "Person wearing Headphones" else null,
                     movementStatus = ObjectMovementStatus.STATIC,
                     occlusion = OcclusionStatus.FULLY_VISIBLE,
                     quality = headphonesQuality,
@@ -506,39 +515,6 @@ object ObjectEngineV2 {
                 )
             )
         }
-
-        // Always check background seating
-        val chairQuality = ObjectQualityMetrics(
-            sharpness = "Fair",
-            visibilityPercent = 78f,
-            lighting = "Good",
-            blurScore = 22,
-            occlusionStatus = OcclusionStatus.PARTIALLY_HIDDEN,
-            sizePercent = 28f,
-            positionLabel = "Bottom-Center"
-        )
-        rawCandidates.add(
-            TrackedObjectItem(
-                trackingId = "obj_track_chair_07",
-                objectName = "Chair",
-                category = ObjectCategory.CHAIR,
-                confidencePercent = 82,
-                confidenceLevel = ObjectConfidenceLevel.RELIABLE,
-                boundingBox = BoundingBox(20f, 40f, 80f, 95f),
-                firstAppearanceSec = 0.0f,
-                lastAppearanceSec = validDuration,
-                visibleDurationSec = validDuration,
-                averageSizePercent = 28f,
-                isPrimary = false,
-                isSecondary = false,
-                isBackground = true,
-                relationship = "Person sitting on Chair",
-                movementStatus = ObjectMovementStatus.STATIC,
-                occlusion = OcclusionStatus.PARTIALLY_HIDDEN,
-                quality = chairQuality,
-                productHandoff = ProductHandoffClassification.GENERAL_OBJECT
-            )
-        )
 
         // STEP 15: DUPLICATE FILTER & STEP 3: CONFIDENCE THRESHOLD (<70% discarded)
         val filteredObjects = rawCandidates.filter { it.confidencePercent >= 70 }

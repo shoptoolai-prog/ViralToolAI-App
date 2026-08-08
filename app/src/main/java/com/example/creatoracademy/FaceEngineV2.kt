@@ -35,7 +35,8 @@ data class SingleFaceDetail(
     val positionLabel: String, // "Centered Upper Third", "Left Third", etc.
     val visiblePercent: Int,
     val occlusionPercent: Int,
-    val orientation: String // "Front Face", "Side Face", "Half Face", "Tiny Face", "Back Face"
+    val orientation: String, // "Front Face", "Side Face", "Half Face", "Tiny Face", "Back Face"
+    val partialFace: Boolean = false
 )
 
 /**
@@ -62,7 +63,8 @@ data class FaceQualityMetrics(
 data class FaceVisibilityState(
     val visibilityType: String, // "Full Face", "Half Face", "Only Eyes", "Only Forehead", "Only Mouth", "Only Body", "Only Hands", "No Face"
     val faceVisiblePercent: Int,
-    val isDetailsEligible: Boolean // True ONLY if faceVisiblePercent >= 50 && visibilityType in ("Full Face", "Half Face")
+    val isDetailsEligible: Boolean, // True ONLY if faceVisiblePercent >= 50 && visibilityType in ("Full Face", "Half Face")
+    val partialFace: Boolean = false
 )
 
 /**
@@ -178,7 +180,14 @@ data class FaceEngineV2Report(
     val multiplePeople: MultiplePeopleResult?,
     val demographics: DemographicPrediction,
     val overallFaceScore: OverallFaceScoreResult?,
-    val aiCoach: FaceAiCoachResult
+    val aiCoach: FaceAiCoachResult,
+    val evidence: EngineEvidence = EngineEvidence(
+        detected = personDetection.isHumanPresent && personDetection.numberOfHumans > 0,
+        confidence = if (personDetection.isHumanPresent) (personDetection.confidencePercent / 100f) else 0.0f,
+        evidenceFrames = if (personDetection.isHumanPresent) listOf(0) else emptyList(),
+        timestamps = if (personDetection.isHumanPresent) listOf(1.5f) else emptyList(),
+        reason = if (personDetection.isHumanPresent) "${personDetection.numberOfHumans} human face(s) detected in sampled video frame." else "No human face detected in video frames."
+    )
 )
 
 object FaceEngineV2 {
@@ -190,7 +199,15 @@ object FaceEngineV2 {
         bitmap: Bitmap,
         safeRegion: SafeFrameRegion
     ): PersonDetectionResult {
-        val rect = safeRegion.contentBounds
+        val width = bitmap.width
+        val height = bitmap.height
+        val rawRect = safeRegion.contentBounds
+        val rect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
+        )
         val sampleStep = maxOf(2, minOf(rect.width(), rect.height()) / 90)
 
         var skinPixelCount = 0
@@ -199,10 +216,18 @@ object FaceEngineV2 {
         // Horizontal & Vertical skin distribution clusters to identify multiple face heads
         val skinClusterX = IntArray(20)
 
-        for (y in rect.top until rect.bottom step sampleStep) {
-            for (x in rect.left until rect.right step sampleStep) {
-                val pixel = bitmap.getPixel(x, y)
-                val r = Color.red(pixel)
+        val minY = rect.top.coerceIn(0, height)
+        val maxY = rect.bottom.coerceIn(0, height)
+        val minX = rect.left.coerceIn(0, width)
+        val maxX = rect.right.coerceIn(0, width)
+
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx = x.coerceIn(0, width - 1)
+                    val cy = y.coerceIn(0, height - 1)
+                    val pixel = bitmap.getPixel(cx, cy)
+                    val r = Color.red(pixel)
                 val g = Color.green(pixel)
                 val b = Color.blue(pixel)
 
@@ -218,6 +243,7 @@ object FaceEngineV2 {
                 }
                 totalSampledPixels++
             }
+        }
         }
 
         val total = totalSampledPixels.coerceAtLeast(1)
@@ -303,18 +329,37 @@ object FaceEngineV2 {
     ): FaceQualityMetrics? {
         if (!person.isHumanPresent) return null
 
-        val rect = safeRegion.contentBounds
+        val width = bitmap.width
+        val height = bitmap.height
+        val rawRect = safeRegion.contentBounds
+        val rect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
+        )
         val sampleStep = maxOf(2, minOf(rect.width(), rect.height()) / 80)
 
         var totalGrad = 0.0
         var totalLum = 0L
         var samples = 0
 
-        for (y in rect.top + sampleStep until rect.bottom - sampleStep step sampleStep) {
-            for (x in rect.left + sampleStep until rect.right - sampleStep step sampleStep) {
-                val p = bitmap.getPixel(x, y)
-                val pRight = bitmap.getPixel(x + sampleStep, y)
-                val pDown = bitmap.getPixel(x, y + sampleStep)
+        val minY = (rect.top + sampleStep).coerceIn(0, height)
+        val maxY = (rect.bottom - sampleStep - 1).coerceIn(0, height)
+        val minX = (rect.left + sampleStep).coerceIn(0, width)
+        val maxX = (rect.right - sampleStep - 1).coerceIn(0, width)
+
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx = x.coerceIn(0, width - 1)
+                    val cy = y.coerceIn(0, height - 1)
+                    val cxRight = (x + sampleStep).coerceIn(0, width - 1)
+                    val cyDown = (y + sampleStep).coerceIn(0, height - 1)
+
+                    val p = bitmap.getPixel(cx, cy)
+                    val pRight = bitmap.getPixel(cxRight, cy)
+                    val pDown = bitmap.getPixel(cx, cyDown)
 
                 val lumP = 0.299f * Color.red(p) + 0.587f * Color.green(p) + 0.114f * Color.blue(p)
                 val lumRight = 0.299f * Color.red(pRight) + 0.587f * Color.green(pRight) + 0.114f * Color.blue(pRight)
@@ -326,6 +371,7 @@ object FaceEngineV2 {
                 totalLum += lumP.toLong()
                 samples++
             }
+        }
         }
 
         val total = samples.coerceAtLeast(1)
@@ -732,15 +778,9 @@ object FaceEngineV2 {
             val canvas = android.graphics.Canvas(bitmap)
             val paint = android.graphics.Paint()
 
-            // Background canvas
+            // Clean dark canvas without fake skin pixels
             paint.color = Color.parseColor("#0B0F19")
             canvas.drawRect(0f, 0f, 1080f, 1920f, paint)
-
-            // Draw face avatar oval if voice or face score exists
-            if (reel.voiceScore > 0 || reel.lightingScore > 0) {
-                paint.color = Color.parseColor("#E0AC69") // Skin color tone
-                canvas.drawOval(390f, 300f, 690f, 700f, paint)
-            }
         }
 
         val (blackBars, safeRegion) = FrameQualityEngine.detectBlackBarsAndSafeRegion(bitmap)

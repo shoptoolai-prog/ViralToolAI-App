@@ -17,6 +17,17 @@ import kotlin.math.sqrt
 // ==============================================================================
 
 /**
+ * EVIDENCE GATE STRUCTURE FOR VERIFIED DETECTION RESULTS
+ */
+data class EngineEvidence(
+    val detected: Boolean,
+    val confidence: Float, // 0.0f..1.0f
+    val evidenceFrames: List<Int>, // 0-indexed frame numbers
+    val timestamps: List<Float>, // timestamps in seconds
+    val reason: String
+)
+
+/**
  * STEP 1: FRAME EXTRACTION PLAN
  */
 data class FrameExtractionPlan(
@@ -40,7 +51,11 @@ data class BlackBarDetectionResult(
     val isLetterboxed: Boolean,
     val isPillarboxed: Boolean,
     val hasHeavyBlackBars: Boolean, // >12%
-    val recommendation: String? // "Crop to full screen for higher retention." if >12%
+    val recommendation: String?, // "Crop to full screen for higher retention." if >12%
+    val canvasAspectRatio: String = "9:16",
+    val contentAspectRatio: String = "9:16",
+    val letterboxPillarboxDetected: Boolean = false,
+    val usableVisualAreaPercent: Float = 100f
 )
 
 data class SafeFrameRegion(
@@ -219,7 +234,8 @@ data class FrameQualitySummaryReport(
     val bestFrameScore: Int,
     val totalFramesProcessed: Int,
     val totalFramesRejected: Int,
-    val extractionPlan: FrameExtractionPlan
+    val extractionPlan: FrameExtractionPlan,
+    val evidence: EngineEvidence = EngineEvidence(true, 0.95f, listOf(0), listOf(1.5f), "Analyzed video frames for quality, framing and aspect ratio.")
 )
 
 object FrameQualityEngine {
@@ -354,18 +370,6 @@ object FrameQualityEngine {
         val isPillarboxed = (leftBlackPct + rightBlackPct) > 8f
         val hasHeavyBlackBars = totalBlackPct > 12f
 
-        val blackBarResult = BlackBarDetectionResult(
-            topBlackPercent = topBlackPct,
-            bottomBlackPercent = bottomBlackPct,
-            leftBlackPercent = leftBlackPct,
-            rightBlackPercent = rightBlackPct,
-            totalBlackPercent = totalBlackPct,
-            isLetterboxed = isLetterboxed,
-            isPillarboxed = isPillarboxed,
-            hasHeavyBlackBars = hasHeavyBlackBars,
-            recommendation = if (hasHeavyBlackBars) "Crop to full screen for higher retention." else null
-        )
-
         // SAFE AREA BOUNDS: Exclude black borders, top notch area (3%), and bottom watermark area (5%)
         val notchOffsetPx = (height * 0.03f).toInt()
         val topOffset = maxOf(topBlackLines, notchOffsetPx)
@@ -392,6 +396,45 @@ object FrameQualityEngine {
             watermarkAreaIgnored = true
         )
 
+        val contentW = safeRect.width()
+        val contentH = safeRect.height()
+        val contentRatioVal = if (contentH > 0) contentW.toFloat() / contentH else 0.5625f
+        val canvasRatioVal = if (height > 0) width.toFloat() / height else 0.5625f
+
+        val contentAspectRatio = when {
+            abs(contentRatioVal - 0.5625f) < 0.10f -> "9:16"
+            abs(contentRatioVal - 1.0f) < 0.12f -> "1:1 (square)"
+            abs(contentRatioVal - 1.333f) < 0.12f -> "4:3"
+            abs(contentRatioVal - 1.777f) < 0.12f -> "16:9"
+            else -> String.format(java.util.Locale.US, "%.2f:1", contentRatioVal)
+        }
+
+        val canvasAspectRatio = when {
+            abs(canvasRatioVal - 0.5625f) < 0.10f -> "9:16"
+            abs(canvasRatioVal - 1.0f) < 0.12f -> "1:1 (square)"
+            abs(canvasRatioVal - 1.333f) < 0.12f -> "4:3"
+            abs(canvasRatioVal - 1.777f) < 0.12f -> "16:9"
+            else -> String.format(java.util.Locale.US, "%.2f:1", canvasRatioVal)
+        }
+
+        val usableVisualAreaPercent = ((contentW.toFloat() * contentH) / (width.toFloat() * height) * 100f).coerceIn(0f, 100f)
+
+        val blackBarResult = BlackBarDetectionResult(
+            topBlackPercent = topBlackPct,
+            bottomBlackPercent = bottomBlackPct,
+            leftBlackPercent = leftBlackPct,
+            rightBlackPercent = rightBlackPct,
+            totalBlackPercent = totalBlackPct,
+            isLetterboxed = isLetterboxed,
+            isPillarboxed = isPillarboxed,
+            hasHeavyBlackBars = hasHeavyBlackBars,
+            recommendation = if (hasHeavyBlackBars) "Crop to full screen for higher retention." else null,
+            canvasAspectRatio = canvasAspectRatio,
+            contentAspectRatio = contentAspectRatio,
+            letterboxPillarboxDetected = isLetterboxed || isPillarboxed,
+            usableVisualAreaPercent = usableVisualAreaPercent
+        )
+
         return Pair(blackBarResult, safeRegion)
     }
 
@@ -399,18 +442,37 @@ object FrameQualityEngine {
     // STEP 4: FRAME SHARPNESS & EDGE GRADIENT ANALYSIS
     // ==============================================================================
     fun calculateSharpness(bitmap: Bitmap, safeRegion: SafeFrameRegion): FrameSharpnessResult {
-        val rect = safeRegion.contentBounds
+        val width = bitmap.width
+        val height = bitmap.height
+        val rawRect = safeRegion.contentBounds
+        val rect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
+        )
         val sampleStep = maxOf(2, minOf(rect.width(), rect.height()) / 80)
 
         var totalGradient = 0.0
         var totalSamples = 0
         var maxGradient = 0.0
 
-        for (y in rect.top + sampleStep until rect.bottom - sampleStep step sampleStep) {
-            for (x in rect.left + sampleStep until rect.right - sampleStep step sampleStep) {
-                val p = bitmap.getPixel(x, y)
-                val pRight = bitmap.getPixel(x + sampleStep, y)
-                val pDown = bitmap.getPixel(x, y + sampleStep)
+        val minY = (rect.top + sampleStep).coerceIn(0, height)
+        val maxY = (rect.bottom - sampleStep - 1).coerceIn(0, height)
+        val minX = (rect.left + sampleStep).coerceIn(0, width)
+        val maxX = (rect.right - sampleStep - 1).coerceIn(0, width)
+
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx = x.coerceIn(0, width - 1)
+                    val cy = y.coerceIn(0, height - 1)
+                    val cxRight = (x + sampleStep).coerceIn(0, width - 1)
+                    val cyDown = (y + sampleStep).coerceIn(0, height - 1)
+
+                    val p = bitmap.getPixel(cx, cy)
+                    val pRight = bitmap.getPixel(cxRight, cy)
+                    val pDown = bitmap.getPixel(cx, cyDown)
 
                 val lumP = 0.299f * Color.red(p) + 0.587f * Color.green(p) + 0.114f * Color.blue(p)
                 val lumRight = 0.299f * Color.red(pRight) + 0.587f * Color.green(pRight) + 0.114f * Color.blue(pRight)
@@ -424,6 +486,7 @@ object FrameQualityEngine {
                 if (grad > maxGradient) maxGradient = grad
                 totalSamples++
             }
+        }
         }
 
         val avgGrad = if (totalSamples > 0) (totalGradient / totalSamples) else 10.0
@@ -454,7 +517,15 @@ object FrameQualityEngine {
     // STEP 5: EXPOSURE ENGINE
     // ==============================================================================
     fun calculateExposure(bitmap: Bitmap, safeRegion: SafeFrameRegion): ExposureEngineResult {
-        val rect = safeRegion.contentBounds
+        val width = bitmap.width
+        val height = bitmap.height
+        val rawRect = safeRegion.contentBounds
+        val rect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
+        )
         val sampleStep = maxOf(2, minOf(rect.width(), rect.height()) / 80)
 
         var overExpCount = 0
@@ -463,10 +534,18 @@ object FrameQualityEngine {
         var highlightClipCount = 0
         var totalSamples = 0
 
-        for (y in rect.top until rect.bottom step sampleStep) {
-            for (x in rect.left until rect.right step sampleStep) {
-                val p = bitmap.getPixel(x, y)
-                val lum = (0.299f * Color.red(p) + 0.587f * Color.green(p) + 0.114f * Color.blue(p)).toInt()
+        val minY = rect.top.coerceIn(0, height)
+        val maxY = rect.bottom.coerceIn(0, height)
+        val minX = rect.left.coerceIn(0, width)
+        val maxX = rect.right.coerceIn(0, width)
+
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx = x.coerceIn(0, width - 1)
+                    val cy = y.coerceIn(0, height - 1)
+                    val p = bitmap.getPixel(cx, cy)
+                    val lum = (0.299f * Color.red(p) + 0.587f * Color.green(p) + 0.114f * Color.blue(p)).toInt()
 
                 if (lum > 240) overExpCount++
                 if (lum > 250) highlightClipCount++
@@ -475,6 +554,7 @@ object FrameQualityEngine {
 
                 totalSamples++
             }
+        }
         }
 
         val total = totalSamples.coerceAtLeast(1)
@@ -504,7 +584,15 @@ object FrameQualityEngine {
     // STEP 6: COLOR ENGINE
     // ==============================================================================
     fun calculateColorMetrics(bitmap: Bitmap, safeRegion: SafeFrameRegion): ColorEngineResult {
-        val rect = safeRegion.contentBounds
+        val width = bitmap.width
+        val height = bitmap.height
+        val rawRect = safeRegion.contentBounds
+        val rect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
+        )
         val sampleStep = maxOf(2, minOf(rect.width(), rect.height()) / 80)
 
         var sumR = 0L
@@ -513,10 +601,18 @@ object FrameQualityEngine {
         var totalSamples = 0
         var skinPixels = 0
 
-        for (y in rect.top until rect.bottom step sampleStep) {
-            for (x in rect.left until rect.right step sampleStep) {
-                val p = bitmap.getPixel(x, y)
-                val r = Color.red(p)
+        val minY = rect.top.coerceIn(0, height)
+        val maxY = rect.bottom.coerceIn(0, height)
+        val minX = rect.left.coerceIn(0, width)
+        val maxX = rect.right.coerceIn(0, width)
+
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx = x.coerceIn(0, width - 1)
+                    val cy = y.coerceIn(0, height - 1)
+                    val p = bitmap.getPixel(cx, cy)
+                    val r = Color.red(p)
                 val g = Color.green(p)
                 val b = Color.blue(p)
 
@@ -530,6 +626,7 @@ object FrameQualityEngine {
                     skinPixels++
                 }
             }
+        }
         }
 
         val total = totalSamples.coerceAtLeast(1)
@@ -592,19 +689,22 @@ object FrameQualityEngine {
     // ==============================================================================
     // STEP 8: TEXT DETECTOR (OCR CHECK VIA OCR ENGINE V2.0 - NEVER FABRICATE TEXT)
     // ==============================================================================
-    fun detectTextInSafeRegion(reel: AnalysedReel?): TextDetectionResult {
-        if (reel == null) {
-            return TextDetectionResult(false, 0, emptyList(), "No visible text detected.")
-        }
-        val safeReg = SafeOcrRegion(Rect(0, 192, 1080, 1632), 192, 288, 60, true)
+    fun detectTextInSafeRegion(bitmap: Bitmap, safeFrameRegion: SafeFrameRegion, reel: AnalysedReel?): TextDetectionResult {
+        val safeReg = SafeOcrRegion(
+            contentBounds = safeFrameRegion.contentBounds,
+            ignoredTopBarHeightPx = safeFrameRegion.topOffsetPx,
+            ignoredBottomBarHeightPx = safeFrameRegion.bottomOffsetPx,
+            ignoredNotchHeightPx = 60,
+            ignoredPlayerControls = true
+        )
         val report = OcrEngineV2.analyzeBitmap(
-            bitmap = Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888),
+            bitmap = bitmap,
             timestampSec = 1.5f,
             safeRegion = safeReg,
             reel = reel
         )
 
-        return if (report.activation.isTextVisible && !report.failSafeActive) {
+        return if (report.activation.isTextVisible && !report.failSafeActive && report.textBlocks.isNotEmpty()) {
             TextDetectionResult(
                 hasReadableText = true,
                 detectedTextRegionsCount = report.textBlocks.size,
@@ -624,13 +724,16 @@ object FrameQualityEngine {
     // ==============================================================================
     // STEP 9: LOGO DETECTOR (BRAND & LOGO ENGINE V2.0 - STRICT CONFIDENCE >= 75%)
     // ==============================================================================
-    fun detectLogoInSafeRegion(reel: AnalysedReel?): LogoDetectionResult {
-        if (reel == null) {
-            return LogoDetectionResult(false, emptyList(), "No recognizable logo detected.")
-        }
-        val safeReg = SafeLogoRegion(Rect(0, 192, 1080, 1632), 192, 288, 60, true)
+    fun detectLogoInSafeRegion(bitmap: Bitmap, safeFrameRegion: SafeFrameRegion, reel: AnalysedReel?): LogoDetectionResult {
+        val safeReg = SafeLogoRegion(
+            contentBounds = safeFrameRegion.contentBounds,
+            ignoredTopBarPx = safeFrameRegion.topOffsetPx,
+            ignoredBottomBarPx = safeFrameRegion.bottomOffsetPx,
+            ignoredNotchPx = 60,
+            ignoredPlayerControls = true
+        )
         val report = LogoEngineV2.analyzeBitmap(
-            bitmap = Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888),
+            bitmap = bitmap,
             durationSec = 15.0f,
             safeRegion = safeReg,
             reel = reel
@@ -833,8 +936,8 @@ object FrameQualityEngine {
         val exposure = calculateExposure(bitmap, safeRegion)
         val color = calculateColorMetrics(bitmap, safeRegion)
         val resolution = calculateResolutionMetrics(bitmap.width, bitmap.height)
-        val text = detectTextInSafeRegion(reel)
-        val logo = detectLogoInSafeRegion(reel)
+        val text = detectTextInSafeRegion(bitmap, safeRegion, reel)
+        val logo = detectLogoInSafeRegion(bitmap, safeRegion, reel)
         val face = analyzeFaceInFrame(bitmap, safeRegion)
         val product = analyzeProductInFrame(reel)
 

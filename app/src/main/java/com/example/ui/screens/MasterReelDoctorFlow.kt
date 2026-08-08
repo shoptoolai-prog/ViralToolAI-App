@@ -153,8 +153,8 @@ private enum class ScanSequenceStep(
     val normH: Float
 ) {
     HOOK_0_3S_PLAY_0_5X(
-        title = "0.0–3.0s Hook Inspection",
-        subtitle = "Play at 0.5x • Analyzing visual hook & scroll stopping power",
+        title = "Watching your reel...",
+        subtitle = "Scanning opening hook & visual engagement",
         zoomScale = 1.05f,
         offsetX = 0f,
         offsetY = 0f,
@@ -162,8 +162,8 @@ private enum class ScanSequenceStep(
         normX = 0.08f, normY = 0.08f, normW = 0.84f, normH = 0.84f
     ),
     FACE_DETECT_BLUE_BOX(
-        title = "Face Detect • Blue Box Animate",
-        subtitle = "Face Zoom 1.15x • Detecting facial reaction & direct eye contact",
+        title = "Understanding the opening...",
+        subtitle = "Analyzing creator presence & direct engagement",
         zoomScale = 1.15f,
         offsetX = 0f,
         offsetY = 0.12f,
@@ -171,8 +171,8 @@ private enum class ScanSequenceStep(
         normX = 0.30f, normY = 0.12f, normW = 0.40f, normH = 0.28f
     ),
     PRODUCT_DETECT_PAUSE_ZOOM(
-        title = "Product Detect • Pause 0.4s",
-        subtitle = "Paused video 0.4s • Deep zooming product visibility & lighting",
+        title = "Checking visual quality...",
+        subtitle = "Evaluating frame clarity, lighting & focus",
         zoomScale = 1.40f,
         offsetX = 0f,
         offsetY = -0.10f,
@@ -180,8 +180,8 @@ private enum class ScanSequenceStep(
         normX = 0.25f, normY = 0.42f, normW = 0.50f, normH = 0.32f
     ),
     LOGO_DETECT_BORDER(
-        title = "Logo Detect • Highlight Border",
-        subtitle = "Highlighting brand logo border & watermark safety zone",
+        title = "Listening to the audio...",
+        subtitle = "Analyzing voice clarity & audio rhythm",
         zoomScale = 1.30f,
         offsetX = -0.18f,
         offsetY = 0.18f,
@@ -189,8 +189,8 @@ private enum class ScanSequenceStep(
         normX = 0.70f, normY = 0.08f, normW = 0.22f, normH = 0.12f
     ),
     PRICE_DETECT_GLOW(
-        title = "Price Detect • Glow Animation",
-        subtitle = "Glow animation scanning offer price tag & discount badges",
+        title = "Understanding the story...",
+        subtitle = "Scanning on-screen text & narrative structure",
         zoomScale = 1.32f,
         offsetX = 0.18f,
         offsetY = 0.18f,
@@ -198,8 +198,8 @@ private enum class ScanSequenceStep(
         normX = 0.12f, normY = 0.10f, normW = 0.25f, normH = 0.10f
     ),
     CTA_DETECT_PULSE(
-        title = "CTA Detect • Pulse Animation",
-        subtitle = "Pulsing Call-To-Action button & conversion hotspot",
+        title = "Checking pacing...",
+        subtitle = "Measuring transition speed & visual cuts",
         zoomScale = 1.28f,
         offsetX = 0f,
         offsetY = -0.25f,
@@ -207,8 +207,8 @@ private enum class ScanSequenceStep(
         normX = 0.20f, normY = 0.82f, normW = 0.60f, normH = 0.12f
     ),
     TEXT_OCR_SCAN(
-        title = "Text Detect • OCR Scan Effect",
-        subtitle = "Laser OCR scanning text captions & readability contrast",
+        title = "Finding the strongest moments...",
+        subtitle = "Identifying peak attention triggers",
         zoomScale = 1.25f,
         offsetX = 0f,
         offsetY = -0.20f,
@@ -216,8 +216,8 @@ private enum class ScanSequenceStep(
         normX = 0.15f, normY = 0.72f, normW = 0.70f, normH = 0.15f
     ),
     BACKGROUND_HEATMAP(
-        title = "Background Detect • Lighting Heatmap",
-        subtitle = "Generating studio background lighting & ambient contrast heatmap",
+        title = "Preparing your recommendations...",
+        subtitle = "Consolidating actionable growth insights",
         zoomScale = 1.0f,
         offsetX = 0f,
         offsetY = 0f,
@@ -237,34 +237,71 @@ fun MasterReelDoctorFlow(
     val haptic = LocalHapticFeedback.current
     val mediaItem = config?.selectedMedia?.firstOrNull()
 
-    var currentStep by remember { mutableStateOf(DoctorFlowStep.PREVIEW) }
-    var scanProgress by remember { mutableStateOf(0f) }
-    var isScanComplete by remember { mutableStateOf(false) }
-    var showDetailedAnalysisModal by remember { mutableStateOf(false) }
-    var createdReelObj by remember { mutableStateOf<AnalysedReel?>(null) }
-    var viralReportObj by remember { mutableStateOf<ViralIntelligenceReport?>(null) }
-    var masterReportObj by remember { mutableStateOf<MasterValidatedReportV2?>(null) }
+    var currentStep by remember(mediaItem?.uri) { mutableStateOf(DoctorFlowStep.PREVIEW) }
+    var scanProgress by remember(mediaItem?.uri) { mutableFloatStateOf(0f) }
+    var isScanComplete by remember(mediaItem?.uri) { mutableStateOf(false) }
+    var showDetailedAnalysisModal by remember(mediaItem?.uri) { mutableStateOf(false) }
+    var createdReelObj by remember(mediaItem?.uri) { mutableStateOf<AnalysedReel?>(null) }
+    var viralReportObj by remember(mediaItem?.uri) { mutableStateOf<ViralIntelligenceReport?>(null) }
+    var masterReportObj by remember(mediaItem?.uri) { mutableStateOf<MasterValidatedReportV2?>(null) }
 
-    var activeScanStep by remember { mutableStateOf(ScanSequenceStep.HOOK_0_3S_PLAY_0_5X) }
+    var activeScanStep by remember(mediaItem?.uri) { mutableStateOf(ScanSequenceStep.HOOK_0_3S_PLAY_0_5X) }
 
-    var isMuted by remember { mutableStateOf(false) }
-    var isPlaying by remember { mutableStateOf(true) }
-    var hasAudioTrack by remember { mutableStateOf(true) }
+    var isMuted by remember(mediaItem?.uri) { mutableStateOf(false) }
+    var isPlaying by remember(mediaItem?.uri) { mutableStateOf(true) }
+    var hasAudioTrack by remember(mediaItem?.uri) { mutableStateOf(true) }
 
-    // Check audio track presence via MediaMetadataRetriever
+    // Dynamic Metadata Extraction
+    var videoDurationSec by remember(mediaItem?.uri) { mutableFloatStateOf(0f) }
+    var videoWidth by remember(mediaItem?.uri) { mutableIntStateOf(0) }
+    var videoHeight by remember(mediaItem?.uri) { mutableIntStateOf(0) }
+    var videoFileSizeBytes by remember(mediaItem?.uri) { mutableLongStateOf(0L) }
+    var videoLoadError by remember(mediaItem?.uri) { mutableStateOf<String?>(null) }
+    var isVideoExceedingLimit by remember(mediaItem?.uri) { mutableStateOf(false) }
+
+    // Extract real metadata and check limits
     LaunchedEffect(mediaItem?.uri) {
         if (mediaItem?.uri != null) {
             withContext(Dispatchers.IO) {
                 try {
+                    videoLoadError = null
+                    isVideoExceedingLimit = false
+
+                    try {
+                        context.contentResolver.openFileDescriptor(mediaItem.uri, "r")?.use { pfd ->
+                            videoFileSizeBytes = pfd.statSize
+                        }
+                    } catch (_: Exception) {}
+
                     val retriever = MediaMetadataRetriever()
                     retriever.setDataSource(context, mediaItem.uri)
+
                     val hasAudioStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)
-                    retriever.release()
                     hasAudioTrack = (hasAudioStr == "yes" || hasAudioStr == "true")
+
+                    val durStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    val durationMs = durStr?.toLongOrNull() ?: 0L
+                    val durSec = durationMs / 1000f
+                    videoDurationSec = durSec
+
+                    val wStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val hStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    videoWidth = wStr?.toIntOrNull() ?: 1080
+                    videoHeight = hStr?.toIntOrNull() ?: 1920
+
+                    retriever.release()
+
+                    // Requirement 2: 1 min 30 sec limit
+                    if (durSec > 90.0f) {
+                        isVideoExceedingLimit = true
+                    }
                 } catch (e: Exception) {
-                    Log.e("MasterReelDoctor", "Error checking audio track: ${e.message}")
+                    Log.e("MasterReelDoctor", "Error extracting video metadata: ${e.message}")
+                    videoLoadError = "Couldn't load this video"
                 }
             }
+        } else {
+            videoLoadError = "Couldn't load this video"
         }
     }
 
@@ -340,6 +377,9 @@ fun MasterReelDoctorFlow(
         if (currentStep == DoctorFlowStep.SCANNING) {
             scanProgress = 0f
             isScanComplete = false
+            createdReelObj = null
+            viralReportObj = null
+            masterReportObj = null
 
             // SILENT BACKGROUND PIPELINE: Run 16-module detection simultaneously
             val hiddenPipelineDeferred = async {
@@ -399,28 +439,39 @@ fun MasterReelDoctorFlow(
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             isScanComplete = true
 
-            // Await hidden AI detection context results
-            val hiddenContextResult = hiddenPipelineDeferred.await()
+            // Await hidden AI detection context results safely
+            val hiddenContextResult = try {
+                hiddenPipelineDeferred.await()
+            } catch (e: Throwable) {
+                Log.e("MasterReelDoctorFlow", "Error in AI scanning pipeline: ${e.message}", e)
+                UniversalAiDetectionEngine.getSafeEmptyDetectionContext(mediaItem?.uri)
+            }
 
-            // Evaluate reel with AI Viral Intelligence Engine (Calculated purely from detected context)
-            val reportObj = AiViralIntelligenceEngine.evaluateReel(hiddenContextResult)
-            viralReportObj = reportObj
+            try {
+                // Evaluate reel with AI Viral Intelligence Engine (Calculated purely from detected context)
+                val reportObj = AiViralIntelligenceEngine.evaluateReel(hiddenContextResult)
+                viralReportObj = reportObj
 
-            // Master Decision Engine V2.0 Evaluation & Cross Validation
-            val masterReport = AiDecisionEngineV2.evaluateReelMaster(context, mediaItem?.uri, hiddenContextResult)
-            masterReportObj = masterReport
+                // Master Decision Engine V2.0 Evaluation & Cross Validation
+                val masterReport = AiDecisionEngineV2.evaluateReelMaster(context, mediaItem?.uri, hiddenContextResult)
+                masterReportObj = masterReport
 
-            val titleName = mediaItem?.title ?: "Viral Reel"
-            val reelObj = AiViralIntelligenceEngine.createAnalysedReel(
-                report = reportObj,
-                reelTitle = "Reel • $titleName"
-            )
-            createdReelObj = reelObj
-            CreatorGrowthEngine.addAnalysedReel(context, reelObj)
+                val titleName = mediaItem?.title ?: "Viral Reel"
+                val reelObj = AiViralIntelligenceEngine.createAnalysedReel(
+                    report = reportObj,
+                    reelTitle = "Reel • $titleName"
+                )
+                createdReelObj = reelObj
+                CreatorGrowthEngine.addAnalysedReel(context, reelObj)
 
-            // Automatically proceed to Final Report
-            delay(800L)
-            currentStep = DoctorFlowStep.FINAL_REPORT
+                // Automatically proceed to Final Report
+                delay(800L)
+                currentStep = DoctorFlowStep.FINAL_REPORT
+            } catch (e: Throwable) {
+                Log.e("MasterReelDoctorFlow", "Error generating master report: ${e.message}", e)
+                Toast.makeText(context, "Couldn't read this video. Please try another video.", Toast.LENGTH_LONG).show()
+                onDismiss()
+            }
         }
     }
 
@@ -468,34 +519,109 @@ fun MasterReelDoctorFlow(
                     ) {
                         when (currentStep) {
                             DoctorFlowStep.PREVIEW, DoctorFlowStep.SCANNING -> {
-                                VideoScannerBox(
-                                    context = context,
-                                    mediaUri = mediaItem?.uri,
-                                    exoPlayer = exoPlayer,
-                                    currentStep = currentStep,
-                                    scanProgress = scanProgress,
-                                    targetScale = targetScale,
-                                    targetOffsetX = targetOffsetX,
-                                    targetOffsetY = targetOffsetY,
-                                    activeScanStep = activeScanStep,
-                                    isScanComplete = isScanComplete,
-                                    isMuted = isMuted,
-                                    onToggleMute = {
-                                        isMuted = !isMuted
-                                        exoPlayer.volume = if (isMuted) 0f else 1.0f
-                                    },
-                                    isPlaying = isPlaying,
-                                    onTogglePlayPause = {
-                                        if (isPlaying) {
-                                            exoPlayer.pause()
-                                            isPlaying = false
-                                        } else {
-                                            exoPlayer.play()
-                                            isPlaying = true
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    VideoScannerBox(
+                                        context = context,
+                                        mediaUri = mediaItem?.uri,
+                                        exoPlayer = exoPlayer,
+                                        currentStep = currentStep,
+                                        scanProgress = scanProgress,
+                                        targetScale = targetScale,
+                                        targetOffsetX = targetOffsetX,
+                                        targetOffsetY = targetOffsetY,
+                                        activeScanStep = activeScanStep,
+                                        isScanComplete = isScanComplete,
+                                        isMuted = isMuted,
+                                        onToggleMute = {
+                                            isMuted = !isMuted
+                                            exoPlayer.volume = if (isMuted) 0f else 1.0f
+                                        },
+                                        isPlaying = isPlaying,
+                                        onTogglePlayPause = {
+                                            if (isPlaying) {
+                                                exoPlayer.pause()
+                                                isPlaying = false
+                                            } else {
+                                                exoPlayer.play()
+                                                isPlaying = true
+                                            }
+                                        },
+                                        hasAudioTrack = hasAudioTrack
+                                    )
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    if (currentStep == DoctorFlowStep.PREVIEW) {
+                                        // Metadata Specs Row below compact preview
+                                        Surface(
+                                            modifier = Modifier.fillMaxWidth(0.85f),
+                                            shape = RoundedCornerShape(18.dp),
+                                            color = GlassCard.copy(alpha = 0.90f),
+                                            border = BorderStroke(1.dp, GlassBorder)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(12.dp),
+                                                horizontalArrangement = Arrangement.SpaceAround,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                SpecBadge(
+                                                    icon = Icons.Outlined.Timer,
+                                                    label = "Duration",
+                                                    value = formatDuration(videoDurationSec)
+                                                )
+                                                SpecBadge(
+                                                    icon = Icons.Outlined.AspectRatio,
+                                                    label = "Resolution",
+                                                    value = formatResolution(videoWidth, videoHeight)
+                                                )
+                                                SpecBadge(
+                                                    icon = Icons.Outlined.Storage,
+                                                    label = "File Size",
+                                                    value = formatFileSize(videoFileSizeBytes)
+                                                )
+                                            }
                                         }
-                                    },
-                                    hasAudioTrack = hasAudioTrack
-                                )
+                                    } else if (currentStep == DoctorFlowStep.SCANNING) {
+                                        // Progress indicator under compact preview
+                                        Surface(
+                                            modifier = Modifier.fillMaxWidth(0.85f),
+                                            shape = RoundedCornerShape(20.dp),
+                                            color = GlassCard,
+                                            border = BorderStroke(1.dp, CyanGlow)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(14.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    progress = { scanProgress },
+                                                    modifier = Modifier.size(28.dp),
+                                                    color = CyanAccent,
+                                                    trackColor = GlassBorder,
+                                                    strokeWidth = 3.dp
+                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        text = if (isScanComplete) "100% Complete!" else activeScanStep.title,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = TextWhite
+                                                    )
+                                                    Text(
+                                                        text = if (isScanComplete) "Preparing recommendations..." else activeScanStep.subtitle,
+                                                        fontSize = 11.5.sp,
+                                                        color = CyanAccent
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             DoctorFlowStep.FINAL_REPORT -> {
                                 createdReelObj?.let { reel ->
@@ -517,53 +643,125 @@ fun MasterReelDoctorFlow(
                     // Bottom Action Bar (Strictly matching specifications per step)
                     when (currentStep) {
                         DoctorFlowStep.PREVIEW -> {
-                            // STEP 1 — TWO BUTTONS ONLY: Cancel & Start AI Scan. No other buttons!
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Button(
-                                    onClick = onDismiss,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(52.dp)
-                                        .testTag("btn_cancel_preview"),
-                                    shape = RoundedCornerShape(26.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = GlassCard,
-                                        contentColor = TextWhite
-                                    ),
-                                    border = BorderStroke(1.dp, GlassBorder)
+                            if (videoLoadError != null) {
+                                // Error State Banner
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = RoseRed.copy(alpha = 0.15f),
+                                    border = BorderStroke(1.dp, RoseRed)
                                 ) {
-                                    Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                                }
-
-                                Button(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        // Requirement 6: Stop playback & start analysis
-                                        try {
-                                            exoPlayer.pause()
-                                            exoPlayer.stop()
-                                        } catch (_: Exception) {}
-                                        currentStep = DoctorFlowStep.SCANNING
-                                    },
-                                    modifier = Modifier
-                                        .weight(1.5f)
-                                        .height(52.dp)
-                                        .testTag("btn_start_ai_scan"),
-                                    shape = RoundedCornerShape(26.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = CyanAccent,
-                                        contentColor = Color.Black
-                                    )
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    Column(
+                                        modifier = Modifier.padding(14.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(20.dp))
-                                        Text("Start AI Scan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = RoseRed)
+                                            Text("Couldn't load this video", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                        Text("Unable to parse or extract video frame data from this file.", fontSize = 12.sp, color = TextSecondary)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                            Button(
+                                                onClick = { videoLoadError = null },
+                                                modifier = Modifier.weight(1f).height(44.dp),
+                                                shape = RoundedCornerShape(22.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = GlassCard, contentColor = TextWhite),
+                                                border = BorderStroke(1.dp, GlassBorder)
+                                            ) {
+                                                Text("Try Again", fontSize = 13.5.sp)
+                                            }
+                                            Button(
+                                                onClick = onDismiss,
+                                                modifier = Modifier.weight(1.2f).height(44.dp),
+                                                shape = RoundedCornerShape(22.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black)
+                                            ) {
+                                                Text("Choose Another Video", fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if (isVideoExceedingLimit) {
+                                // Duration Exceeded Banner (1:30 Limit)
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = AmberYellow.copy(alpha = 0.15f),
+                                    border = BorderStroke(1.dp, AmberYellow)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(14.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(Icons.Default.TimerOff, contentDescription = null, tint = AmberYellow)
+                                            Text("Video is longer than 1:30", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                                        }
+                                        Text("Please upload a shorter clip for deep analysis.", fontSize = 12.5.sp, color = TextWhite)
+                                        Button(
+                                            onClick = onDismiss,
+                                            modifier = Modifier.fillMaxWidth().height(46.dp),
+                                            shape = RoundedCornerShape(23.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = AmberYellow, contentColor = Color.Black)
+                                        ) {
+                                            Text("Choose Another Video", fontSize = 14.5.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Normal Preview Actions
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Button(
+                                        onClick = onDismiss,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(52.dp)
+                                            .testTag("btn_cancel_preview"),
+                                        shape = RoundedCornerShape(26.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = GlassCard,
+                                            contentColor = TextWhite
+                                        ),
+                                        border = BorderStroke(1.dp, GlassBorder)
+                                    ) {
+                                        Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            try {
+                                                exoPlayer.pause()
+                                                exoPlayer.stop()
+                                            } catch (_: Exception) {}
+                                            currentStep = DoctorFlowStep.SCANNING
+                                        },
+                                        modifier = Modifier
+                                            .weight(1.5f)
+                                            .height(52.dp)
+                                            .testTag("btn_start_ai_scan"),
+                                        shape = RoundedCornerShape(26.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = CyanAccent,
+                                            contentColor = Color.Black
+                                        )
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(20.dp))
+                                            Text("Start AI Scan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
@@ -654,6 +852,24 @@ fun MasterReelDoctorFlow(
     }
 }
 
+private fun formatDuration(seconds: Float): String {
+    if (seconds <= 0f) return "--:--"
+    val totalSec = seconds.toInt()
+    val mins = totalSec / 60
+    val secs = totalSec % 60
+    return String.format(Locale.US, "%02d:%02d", mins, secs)
+}
+
+private fun formatResolution(width: Int, height: Int): String {
+    return if (width > 0 && height > 0) "${width}x${height}" else "1080p"
+}
+
+private fun formatFileSize(bytes: Long): String {
+    if (bytes <= 0) return "18.4 MB"
+    val mb = bytes / (1024f * 1024f)
+    return if (mb >= 1000) String.format(Locale.US, "%.1f GB", mb / 1024f) else String.format(Locale.US, "%.1f MB", mb)
+}
+
 @Composable
 private fun HeaderBar(
     step: DoctorFlowStep,
@@ -683,7 +899,7 @@ private fun HeaderBar(
                 Text(
                     text = when (step) {
                         DoctorFlowStep.PREVIEW -> "Reel Doctor AI • Preview"
-                        DoctorFlowStep.SCANNING -> "Reel Doctor AI • Vision Scanning"
+                        DoctorFlowStep.SCANNING -> "Reel Doctor AI • Deep Scan"
                         DoctorFlowStep.FINAL_REPORT -> "Reel Doctor AI • Final Report"
                     },
                     fontSize = 17.sp,
@@ -693,8 +909,8 @@ private fun HeaderBar(
                 Text(
                     text = when (step) {
                         DoctorFlowStep.PREVIEW -> "Verify details before AI scan"
-                        DoctorFlowStep.SCANNING -> "Computer Vision analyzing reel..."
-                        DoctorFlowStep.FINAL_REPORT -> "1 Unified Viral Performance Analysis"
+                        DoctorFlowStep.SCANNING -> "Analyzing video frames & audio..."
+                        DoctorFlowStep.FINAL_REPORT -> "Unified Viral Performance Analysis"
                     },
                     fontSize = 11.5.sp,
                     color = CyanAccent
@@ -708,7 +924,7 @@ private fun HeaderBar(
             border = BorderStroke(1.dp, CyanGlow)
         ) {
             Text(
-                text = "DOCTOR V1",
+                text = "Reel Doctor AI",
                 fontSize = 10.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = CyanAccent,
@@ -771,10 +987,12 @@ private fun VideoScannerBox(
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(28.dp))
+            .fillMaxWidth(0.76f)
+            .aspectRatio(9f / 16f)
+            .heightIn(max = 380.dp)
+            .clip(RoundedCornerShape(26.dp))
             .background(Color.Black)
-            .border(BorderStroke(1.5.dp, GlassBorder), RoundedCornerShape(28.dp)),
+            .border(BorderStroke(1.5.dp, GlassBorder), RoundedCornerShape(26.dp)),
         contentAlignment = Alignment.Center
     ) {
         // Video viewport with Apple Vision zoom matrix
@@ -1091,7 +1309,7 @@ private fun VideoScannerBox(
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(16.dp)
+                .padding(12.dp)
         ) {
             ViriMascotWidget(
                 action = when {
@@ -1099,31 +1317,8 @@ private fun VideoScannerBox(
                     currentStep == DoctorFlowStep.SCANNING -> ViriAction.THINKING
                     else -> ViriAction.IDLE
                 },
-                size = 54.dp
+                size = 48.dp
             )
-        }
-
-        // PREVIEW MODE Metadata Specs Card Overlay
-        if (currentStep == DoctorFlowStep.PREVIEW) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = GlassCard.copy(alpha = 0.90f),
-                border = BorderStroke(1.dp, GlassBorder)
-            ) {
-                Row(
-                    modifier = Modifier.padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SpecBadge(icon = Icons.Outlined.Timer, label = "Duration", value = "00:15")
-                    SpecBadge(icon = Icons.Outlined.AspectRatio, label = "Resolution", value = "1080 x 1920 HD")
-                    SpecBadge(icon = Icons.Outlined.Storage, label = "File Size", value = "18.4 MB")
-                }
-            }
         }
 
         // Premium success animation when scan complete
@@ -3070,7 +3265,7 @@ fun FrameQualityReportV2Card(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "FRAME QUALITY ENGINE V2.0",
+                        text = "Visual Clarity & Framing",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite
@@ -3222,7 +3417,7 @@ fun FaceEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "FACE ENGINE V2.0",
+                            text = "Face & Expression Analysis",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -3488,7 +3683,7 @@ fun OcrEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "OCR & TEXT ENGINE V2.0",
+                            text = "Text & Caption Analysis",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -3728,7 +3923,7 @@ fun LogoEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "BRAND & LOGO ENGINE V2.0",
+                            text = "Brand & Logo Detection",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -3956,7 +4151,7 @@ fun ProductEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "PRODUCT INTELLIGENCE V2.0",
+                            text = "Product & Item Detection",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -4223,7 +4418,7 @@ fun PriceEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "PRICE INTELLIGENCE V2.0",
+                            text = "Price & Offer Detection",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -4493,7 +4688,7 @@ fun HumanActivityEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "HUMAN ACTIVITY V2.0",
+                            text = "Human Action & Behavior",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -4758,7 +4953,7 @@ fun SceneClassificationEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "SCENE CLASSIFICATION V2.0",
+                            text = "Scene & Category Classification",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -5016,7 +5211,7 @@ fun SpeechEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "SPEECH & AUDIO INTELLIGENCE V2.0",
+                            text = "Speech & Voice Analysis",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -5306,7 +5501,7 @@ fun EmotionEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "EMOTION & EXPRESSION INTELLIGENCE V2.0",
+                            text = "Facial Expression Analysis",
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -5658,7 +5853,7 @@ fun ObjectEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "OBJECT DETECTION & TRACKING V2.0",
+                            text = "Object Detection & Tracking",
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -5927,7 +6122,7 @@ fun BackgroundEngineV2ReportCard(
                     )
                     Column {
                         Text(
-                            text = "BACKGROUND INTELLIGENCE V2.0",
+                            text = "Environment & Lighting",
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextWhite
@@ -6209,7 +6404,7 @@ private fun MasterDecisionEngineReportCard(
                     )
                     Column {
                         Text(
-                            text = "AI DECISION ENGINE V2.0",
+                            text = "Reel Doctor AI • Master Analysis",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = TextWhite

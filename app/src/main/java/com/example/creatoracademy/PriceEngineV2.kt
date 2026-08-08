@@ -144,7 +144,8 @@ data class PriceEngineV2Report(
     val timeline: PriceTimeline,
     val summary: PriceEngineV2Summary,
     val failSafeActive: Boolean,
-    val failSafeNotice: String?
+    val failSafeNotice: String?,
+    val evidence: EngineEvidence = EngineEvidence(false, 0f, emptyList(), emptyList(), "No price detected.")
 )
 
 object PriceEngineV2 {
@@ -185,33 +186,14 @@ object PriceEngineV2 {
         reel: AnalysedReel
     ): PriceEngineV2Report {
 
-        // STEP 1 — Run Product Engine V2.0 & OCR Engine V2.0 to check Activation prerequisites
+        // STEP 1 — Run Product Engine V2.0 & OCR Engine V2.0 to check Activation context
         val productReport = ProductEngineV2.analyzeReelProductEngineV2(context, mediaUri, durationSec, reel)
         val ocrReport = OcrEngineV2.analyzeReelOcrEngineV2(context, mediaUri, durationSec, reel)
 
         val productConf = productReport.activation.activationConfidencePercent
-        val isProductOk = productReport.activation.isProductPresent && productConf >= 80
-
         val ocrConf = ocrReport.activation.confidencePercent
-        val isOcrOk = ocrReport.activation.isTextVisible && ocrConf >= 80
 
-        // STEP 1 SMART ACTIVATION CHECK
-        if (!isProductOk || !isOcrOk) {
-            val activationReason = when {
-                !isProductOk -> "Disabled: Product Confidence ($productConf%) < 80% threshold."
-                !isOcrOk -> "Disabled: OCR Confidence ($ocrConf%) < 80% threshold."
-                else -> "Disabled: Prerequisites not met."
-            }
-
-            return buildDisabledPriceReport(
-                productConf = productConf,
-                ocrConf = ocrConf,
-                activationReason = activationReason,
-                displayText = "No reliable price detected."
-            )
-        }
-
-        // STEP 2 & 3 — Real Extraction from video frame or OCR text
+        // Extract frame if available for OCR scanning
         var extractedBitmap: Bitmap? = null
         if (mediaUri != null && mediaUri.toString().isNotEmpty()) {
             try {
@@ -316,8 +298,8 @@ object PriceEngineV2 {
             return buildDisabledPriceReport(
                 productConf = productConf,
                 ocrConf = ocrConf,
-                activationReason = "Unable to confidently read the product price (No valid currency format found).",
-                displayText = "No reliable price detected."
+                activationReason = "Price: Not detected",
+                displayText = "Price: Not detected"
             )
         }
 
@@ -410,7 +392,7 @@ object PriceEngineV2 {
                 isOcrVerified = true,
                 ocrConfidencePercent = ocrConf,
                 isPriceActive = true,
-                activationReason = "Product detected ($productConf% Conf) & Price OCR verified ($ocrConf% Conf).",
+                activationReason = "Price '${sellingPriceTag.rawText}' detected via OCR.",
                 displayText = "${sellingPriceTag.currencySymbol}${sellingPriceTag.amount.toInt()} (${sellingPriceTag.currency.code})"
             ),
             primaryPriceTag = sellingPriceTag,
@@ -425,7 +407,14 @@ object PriceEngineV2 {
             timeline = timeline,
             summary = summary,
             failSafeActive = false,
-            failSafeNotice = null
+            failSafeNotice = null,
+            evidence = EngineEvidence(
+                detected = true,
+                confidence = sellingPriceTag.confidencePercent / 100f,
+                evidenceFrames = listOf(0),
+                timestamps = listOf(sellingPriceTag.timestampSec),
+                reason = "Visible price '${sellingPriceTag.rawText}' detected in OCR frame."
+            )
         )
     }
 
@@ -452,14 +441,14 @@ object PriceEngineV2 {
             allDetectedPrices = emptyList(),
             discountInfo = DiscountInfoV2(false, null, null, null, 0),
             visibilityReport = PriceVisibilityReport(0f, 0, 0, 0, 0, 0, 0),
-            consistencyReport = PriceConsistencyReport(false, null, null, null, "Price detection disabled."),
+            consistencyReport = PriceConsistencyReport(false, null, null, null, "Price: Not detected"),
             shoppingGate = ShoppingContextGate(
                 isShoppingActive = false,
                 buyerIntentEnabled = false,
                 salesPredictionEnabled = false,
                 shoppingPersonaEnabled = false,
                 conversionSuggestionsEnabled = false,
-                gateReason = "Shopping modules disabled: $activationReason"
+                gateReason = "Shopping price gate: $activationReason"
             ),
             timeline = PriceTimeline(0f, 0f, 0f, emptyList()),
             summary = PriceEngineV2Summary(
@@ -471,7 +460,14 @@ object PriceEngineV2 {
                 summaryDisplayText = displayText
             ),
             failSafeActive = true,
-            failSafeNotice = "Price Detection Skipped — Reason: $activationReason"
+            failSafeNotice = "Price Detection — $activationReason",
+            evidence = EngineEvidence(
+                detected = false,
+                confidence = 0f,
+                evidenceFrames = emptyList(),
+                timestamps = emptyList(),
+                reason = "No visible price or currency tag detected in frame."
+            )
         )
     }
 }

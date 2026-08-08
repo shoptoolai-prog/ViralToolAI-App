@@ -202,6 +202,7 @@ data class SmartHumanActivityActivation(
     val isHumanDetected: Boolean,
     val humanConfidencePercent: Int,
     val isActivityActive: Boolean, // True ONLY if human detected AND activity confidence >= 75%
+    val humanState: String = "no_person", // no_person, partial_person, face_visible, person_visible, multiple_people
     val activationReason: String,
     val displayText: String // "Talking & Presenting (92% Conf)" or "No human activity detected."
 )
@@ -231,7 +232,8 @@ data class HumanActivityV2Report(
     val productMode: ProductModeReport,
     val summary: HumanActivityV2Summary,
     val failSafeActive: Boolean,
-    val failSafeNotice: String?
+    val failSafeNotice: String?,
+    val evidence: EngineEvidence = EngineEvidence(false, 0f, emptyList(), emptyList(), "No human activity detected.")
 )
 
 object HumanActivityEngineV2 {
@@ -566,11 +568,18 @@ object HumanActivityEngineV2 {
             summaryDisplayText = "${primaryAct.label} (${primaryAct.confidencePercent}% Conf) • Interaction: ${objectInteractionReport.primaryInteractionText}"
         )
 
+        val humanState = when {
+            personCount > 1 -> "multiple_people"
+            personCount == 1 -> "face_visible"
+            else -> "person_visible"
+        }
+
         return HumanActivityV2Report(
             activation = SmartHumanActivityActivation(
                 isHumanDetected = true,
                 humanConfidencePercent = humanConf,
                 isActivityActive = true,
+                humanState = humanState,
                 activationReason = "Human subject detected ($humanConf% Conf) with active activity pattern.",
                 displayText = "${primaryAct.label} (${primaryAct.confidencePercent}% Conf)"
             ),
@@ -583,7 +592,14 @@ object HumanActivityEngineV2 {
             productMode = productModeReport,
             summary = summary,
             failSafeActive = false,
-            failSafeNotice = null
+            failSafeNotice = null,
+            evidence = EngineEvidence(
+                detected = true,
+                confidence = primaryAct.confidencePercent / 100f,
+                evidenceFrames = listOf(0),
+                timestamps = listOf(1.5f),
+                reason = "Human activity '${primaryAct.label}' detected."
+            )
         )
     }
 
@@ -597,6 +613,7 @@ object HumanActivityEngineV2 {
                 isHumanDetected = humanConf >= 75,
                 humanConfidencePercent = humanConf,
                 isActivityActive = false,
+                humanState = "no_person",
                 activationReason = reason,
                 displayText = displayText
             ),
@@ -641,7 +658,14 @@ object HumanActivityEngineV2 {
                 summaryDisplayText = displayText
             ),
             failSafeActive = true,
-            failSafeNotice = reason
+            failSafeNotice = reason,
+            evidence = EngineEvidence(
+                detected = false,
+                confidence = 0f,
+                evidenceFrames = emptyList(),
+                timestamps = emptyList(),
+                reason = reason
+            )
         )
     }
 }

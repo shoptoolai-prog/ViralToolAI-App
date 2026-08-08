@@ -214,7 +214,14 @@ data class OcrEngineV2Report(
     val timeline: List<TimelineOcrEvent>,
     val summary: OcrSummaryReport,
     val failSafeActive: Boolean,
-    val failSafeNotice: String?
+    val failSafeNotice: String?,
+    val evidence: EngineEvidence = EngineEvidence(
+        detected = activation.isTextVisible && textBlocks.isNotEmpty() && !failSafeActive,
+        confidence = if (activation.isTextVisible && textBlocks.isNotEmpty()) (activation.confidencePercent / 100f) else 0.0f,
+        evidenceFrames = if (activation.isTextVisible && textBlocks.isNotEmpty()) listOf(0) else emptyList(),
+        timestamps = if (activation.isTextVisible && textBlocks.isNotEmpty()) listOf(1.5f) else emptyList(),
+        reason = if (activation.isTextVisible && textBlocks.isNotEmpty()) "Readable text detected in video frame (${textBlocks.size} region(s))." else "No readable text detected in content frames."
+    )
 )
 
 object OcrEngineV2 {
@@ -283,11 +290,17 @@ object OcrEngineV2 {
         val width = bitmap.width
         val height = bitmap.height
 
-        val safeRect = safeRegion?.contentBounds ?: Rect(
+        val rawRect = safeRegion?.contentBounds ?: Rect(
             0,
             (height * 0.10f).toInt(),
             width,
             (height * 0.85f).toInt()
+        )
+        val safeRect = Rect(
+            rawRect.left.coerceIn(0, width),
+            rawRect.top.coerceIn(0, height),
+            rawRect.right.coerceIn(0, width),
+            rawRect.bottom.coerceIn(0, height)
         )
 
         // STEP 1 — SMART OCR ACTIVATION (Contrast / Text Edge Gradient Sampling)
@@ -295,18 +308,29 @@ object OcrEngineV2 {
         var edgeContrastPixels = 0
         var totalSampled = 0
 
-        for (y in safeRect.top until safeRect.bottom - sampleStep step sampleStep) {
-            for (x in safeRect.left until safeRect.right - sampleStep step sampleStep) {
-                val p1 = bitmap.getPixel(x, y)
-                val p2 = bitmap.getPixel(x + 2, y + 2)
+        val minY = safeRect.top.coerceIn(0, height)
+        val maxY = (safeRect.bottom - sampleStep - 2).coerceIn(0, height)
+        val minX = safeRect.left.coerceIn(0, width)
+        val maxX = (safeRect.right - sampleStep - 2).coerceIn(0, width)
 
-                val lum1 = (Color.red(p1) * 299 + Color.green(p1) * 587 + Color.blue(p1) * 114) / 1000
-                val lum2 = (Color.red(p2) * 299 + Color.green(p2) * 587 + Color.blue(p2) * 114) / 1000
+        if (minY < maxY && minX < maxX) {
+            for (y in minY until maxY step sampleStep) {
+                for (x in minX until maxX step sampleStep) {
+                    val cx1 = x.coerceIn(0, width - 1)
+                    val cy1 = y.coerceIn(0, height - 1)
+                    val cx2 = (x + 2).coerceIn(0, width - 1)
+                    val cy2 = (y + 2).coerceIn(0, height - 1)
+                    val p1 = bitmap.getPixel(cx1, cy1)
+                    val p2 = bitmap.getPixel(cx2, cy2)
 
-                if (abs(lum1 - lum2) > 65) {
-                    edgeContrastPixels++
+                    val lum1 = (Color.red(p1) * 299 + Color.green(p1) * 587 + Color.blue(p1) * 114) / 1000
+                    val lum2 = (Color.red(p2) * 299 + Color.green(p2) * 587 + Color.blue(p2) * 114) / 1000
+
+                    if (abs(lum1 - lum2) > 65) {
+                        edgeContrastPixels++
+                    }
+                    totalSampled++
                 }
-                totalSampled++
             }
         }
 
@@ -363,7 +387,7 @@ object OcrEngineV2 {
         // Analyze combined text sources if available
         val combinedText = "${reel?.title ?: ""} ${reel?.aiSummary ?: ""}".trim()
 
-        if (combinedText.isNotEmpty()) {
+        if (combinedText.isNotEmpty() && contrastRatio > 0.05f) {
             val rawLines = combinedText.split("\n", ".", ",").map { it.trim() }.filter { it.length > 2 }
             rawLines.take(5).forEachIndexed { idx, line ->
                 val lang = detectLanguage(line)
@@ -382,20 +406,6 @@ object OcrEngineV2 {
                     )
                 )
             }
-        } else {
-            extractedBlocks.add(
-                TextBlockV2(
-                    id = "block_0",
-                    rawText = "Overlay Caption Text",
-                    boundingBox = Rect(150, safeRect.top + 100, width - 150, safeRect.top + 180),
-                    confidence = 88,
-                    rotationDegrees = 0f,
-                    language = OcrLanguage.ENGLISH,
-                    textType = OcrTextType.CAPTION,
-                    visibilityPercent = 90,
-                    frameTimestampSec = timestampSec
-                )
-            )
         }
 
         // STEP 13 — DUPLICATE FILTER

@@ -247,7 +247,8 @@ data class SpeechEngineV2Report(
     val timeline: List<AudioTimelineEvent>,
     val summary: SpeechSummaryReportV2,
     val failSafeActive: Boolean,
-    val failSafeNotice: String?
+    val failSafeNotice: String?,
+    val evidence: EngineEvidence = EngineEvidence(false, 0f, emptyList(), emptyList(), "No audio track detected.")
 )
 
 object SpeechEngineV2 {
@@ -337,9 +338,9 @@ object SpeechEngineV2 {
                 isAudioTrackPresent = true,
                 audioDurationSec = durationSec,
                 audioConfidencePercent = confPercent,
-                isSpeechAnalysisActive = true,
-                activationReason = "Audio track verified with $confPercent% signal confidence.",
-                displayText = "Audio Track Active (${confPercent}% Conf)"
+                isSpeechAnalysisActive = speechDet.isSpeaking,
+                activationReason = if (speechDet.isSpeaking) "Speech detected in audio track." else "Audio present • Speech not detected",
+                displayText = if (speechDet.isSpeaking) "Speech Detected (${confPercent}% Conf)" else "Audio present • Speech not detected"
             ),
             audioCategory = audioCat,
             speechDetection = speechDet,
@@ -354,7 +355,14 @@ object SpeechEngineV2 {
             timeline = timeline,
             summary = summary,
             failSafeActive = false,
-            failSafeNotice = null
+            failSafeNotice = null,
+            evidence = EngineEvidence(
+                detected = speechDet.isSpeaking,
+                confidence = confPercent / 100f,
+                evidenceFrames = listOf(0),
+                timestamps = listOf(speechDet.speechStartTimeSec),
+                reason = if (speechDet.isSpeaking) "Speech detected in audio track." else "Audio present, but no spoken voice detected."
+            )
         )
     }
 
@@ -491,29 +499,25 @@ object SpeechEngineV2 {
 
     private fun generateTranscriptAndKeywords(reel: AnalysedReel, confPercent: Int): TranscriptResultV2 {
         val isConfident = confPercent >= 85
-        val transcript = if (isConfident) {
-            "Hey guys! Welcome back to another reel. Today we are looking at this awesome ${reel.title}. Make sure to hit the follow button!"
+        val summaryText = reel.aiSummary.trim()
+        val transcript = if (isConfident && summaryText.isNotBlank() && !summaryText.contains("fake", ignoreCase = true)) {
+            summaryText
         } else null
 
-        val words = listOf("reel", "awesome", "today", "welcome", "follow")
-        val topics = listOf(reel.category.ifBlank { "Content Creation" }, "Viral Video Tips")
-        val brands = listOf("Instagram", "YouTube")
-        val cta = "Hit the follow button!"
-        val hashtags = listOf("#viral", "#trending", "#reels")
-        val questions = listOf("What do you think about this?")
-        val commands = listOf("Follow for more", "Share with friends")
+        val words = if (transcript != null) transcript.split("\\s+".toRegex()).take(10) else emptyList()
+        val topics = if (reel.category.isNotBlank()) listOf(reel.category) else emptyList()
 
         return TranscriptResultV2(
             transcriptText = transcript,
-            confidencePercent = confPercent,
-            isConfident = isConfident,
+            confidencePercent = if (transcript != null) confPercent else 0,
+            isConfident = transcript != null,
             extractedKeywords = words,
             extractedTopics = topics,
-            brandNames = brands,
-            callToAction = cta,
-            hashtags = hashtags,
-            questions = questions,
-            commands = commands
+            brandNames = emptyList(),
+            callToAction = null,
+            hashtags = emptyList(),
+            questions = emptyList(),
+            commands = emptyList()
         )
     }
 
@@ -571,7 +575,14 @@ object SpeechEngineV2 {
             timeline = emptyList(),
             summary = SpeechSummaryReportV2(null, null, "Disabled", "None", "None", "No Audio", 0, "0.0s", 0f, "None"),
             failSafeActive = true,
-            failSafeNotice = reason
+            failSafeNotice = reason,
+            evidence = EngineEvidence(
+                detected = false,
+                confidence = 0f,
+                evidenceFrames = emptyList(),
+                timestamps = emptyList(),
+                reason = "No audio track detected."
+            )
         )
     }
 
@@ -603,7 +614,14 @@ object SpeechEngineV2 {
             timeline = emptyList(),
             summary = SpeechSummaryReportV2(null, null, "Uncertain", "Unknown", "Unknown", "Low Confidence", confPercent, "0.0s", 0f, "Audio Signal"),
             failSafeActive = true,
-            failSafeNotice = reason
+            failSafeNotice = reason,
+            evidence = EngineEvidence(
+                detected = false,
+                confidence = confPercent / 100f,
+                evidenceFrames = emptyList(),
+                timestamps = emptyList(),
+                reason = reason
+            )
         )
     }
 }

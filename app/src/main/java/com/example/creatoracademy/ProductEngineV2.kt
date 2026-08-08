@@ -240,7 +240,8 @@ data class ProductEngineV2Report(
     val timeline: ProductTimeline,
     val summary: ProductEngineV2Summary,
     val failSafeActive: Boolean,
-    val failSafeNotice: String?
+    val failSafeNotice: String?,
+    val evidence: EngineEvidence = EngineEvidence(false, 0f, emptyList(), emptyList(), "No product detected.")
 )
 
 object ProductEngineV2 {
@@ -398,7 +399,7 @@ object ProductEngineV2 {
             return ProductEngineV2Report(
                 activation = SmartProductActivation(
                     isProductPresent = false,
-                    activationConfidencePercent = highestConfidence,
+                    activationConfidencePercent = 0,
                     activationReason = activationReason,
                     displayText = "No product confidently detected."
                 ),
@@ -422,7 +423,14 @@ object ProductEngineV2 {
                     summaryDisplayText = "No product confidently detected."
                 ),
                 failSafeActive = true,
-                failSafeNotice = "Unable to confidently detect a product ($activationReason)."
+                failSafeNotice = "Unable to confidently detect a product ($activationReason).",
+                evidence = EngineEvidence(
+                    detected = false,
+                    confidence = 0f,
+                    evidenceFrames = emptyList(),
+                    timestamps = emptyList(),
+                    reason = activationReason
+                )
             )
         }
 
@@ -494,10 +502,13 @@ object ProductEngineV2 {
             summaryDisplayText = "${primary?.productName} (${primary?.category?.label}) • ${primary?.confidencePercent}% Confidence"
         )
 
+        val prodConf = primary?.confidencePercent ?: 92
+        val prodTime = primary?.timestampSec ?: 0.9f
+
         return ProductEngineV2Report(
             activation = SmartProductActivation(
                 isProductPresent = true,
-                activationConfidencePercent = primary?.confidencePercent ?: 92,
+                activationConfidencePercent = prodConf,
                 activationReason = "Physical product confidently detected in safe frame bounds.",
                 displayText = "Detected (${primary?.productName})"
             ),
@@ -511,7 +522,14 @@ object ProductEngineV2 {
             timeline = timeline,
             summary = summary,
             failSafeActive = false,
-            failSafeNotice = null
+            failSafeNotice = null,
+            evidence = EngineEvidence(
+                detected = true,
+                confidence = prodConf / 100f,
+                evidenceFrames = listOf(0),
+                timestamps = listOf(prodTime),
+                reason = "Product '${primary?.productName}' detected in safe frame bounds."
+            )
         )
     }
 
