@@ -369,14 +369,15 @@ object SpeechEngineV2 {
     private fun checkAudioTrackExists(context: Context, mediaUri: Uri?, durationSec: Float): Boolean {
         if (durationSec <= 0f) return false
         if (mediaUri == null) return true // Default fallback if uri empty in test model
+        val retriever = MediaMetadataRetriever()
         return try {
-            val retriever = MediaMetadataRetriever()
             retriever.setDataSource(context, mediaUri)
             val hasAudio = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)
-            retriever.release()
             hasAudio.equals("true", ignoreCase = true) || hasAudio == "1"
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             true // Fail-safe to allow analysis if retriever unavailable
+        } finally {
+            try { retriever.release() } catch (_: Throwable) {}
         }
     }
 

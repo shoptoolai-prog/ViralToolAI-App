@@ -318,8 +318,8 @@ class CopyrightChecker {
             retriever.setDataSource(fileUri)
             val sr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)
             if (sr != null) sampleRate = sr.toInt()
-        } catch (_: Exception) {} finally {
-            try { retriever.release() } catch (_: Exception) {}
+        } catch (_: Throwable) {} finally {
+            try { retriever.release() } catch (_: Throwable) {}
         }
 
         return AudioCopyrightResult(

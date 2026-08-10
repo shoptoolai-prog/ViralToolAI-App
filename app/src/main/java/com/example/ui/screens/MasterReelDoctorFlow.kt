@@ -714,8 +714,8 @@ fun MasterReelDoctorFlow(
                                         report = viralReportObj,
                                         masterReport = masterReportObj,
                                         mediaUri = mediaItem?.uri,
+                                        selectedContentTypes = selectedContentTypes,
                                         onOpenDetailedModal = { showDetailedAnalysisModal = true },
-                                        onContinueToEditor = { config?.let { onContinueToEditor(it) } },
                                         onDismiss = onDismiss
                                     )
                                 }
@@ -1624,8 +1624,8 @@ private fun FinalReportView(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2? = null,
     mediaUri: Uri?,
+    selectedContentTypes: Set<String> = emptySet(),
     onOpenDetailedModal: () -> Unit = {},
-    onContinueToEditor: () -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
     var cardPageIndex by remember { mutableIntStateOf(0) }
@@ -1717,12 +1717,12 @@ private fun FinalReportView(
                         1 -> Card2BestThumbnails(reel = reel, report = report, masterReport = masterReport, mediaUri = mediaUri)
                         2 -> Card3OpeningHook(report = report, masterReport = masterReport, mediaUri = mediaUri)
                         3 -> Card4VisualQuality(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        4 -> Card5Pacing(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        5 -> Card6AudioSpeech(report = report, masterReport = masterReport)
-                        6 -> Card7TextCaptions(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        7 -> Card8SubjectObjects(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        8 -> Card9StoryMessage(reel = reel, report = report, masterReport = masterReport)
-                        9 -> Card10Engagement(report = report, masterReport = masterReport)
+                        4 -> Card5AudioSpeech(report = report, masterReport = masterReport)
+                        5 -> Card6Pacing(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        6 -> Card7StoryMessage(reel = reel, report = report, masterReport = masterReport)
+                        7 -> Card8TextCaptions(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        8 -> Card9Engagement(report = report, masterReport = masterReport)
+                        9 -> Card10AudienceContentFit(reel = reel, report = report, masterReport = masterReport, selectedContentTypes = selectedContentTypes)
                         10 -> Card11ActionPlan(reel = reel, report = report, masterReport = masterReport)
                     }
                 }
@@ -1840,6 +1840,13 @@ private fun Card1ReelScore(
         label = "ScoreAnimation"
     )
 
+    val visualScore = masterReport?.visualQuality?.lightingScore ?: report?.lightingScore ?: 78
+    val hasAudio = masterReport?.videoOverview?.audioPresenceStatus != "No audio" && (report?.audioScore ?: 1) > 0
+    val audioScoreStr = if (hasAudio) "${masterReport?.masterScore?.audioQualityScore?.score ?: report?.audioScore ?: 80}" else "N/A"
+    val pacingScore = masterReport?.masterScore?.pacingScore?.score ?: report?.editingScore ?: 75
+    val hasText = masterReport?.videoOverview?.textPresenceStatus != "No text detected" && !(masterReport?.content?.ocrTextDetected?.contains("No OCR") ?: true)
+    val textScoreStr = if (hasText) "${masterReport?.masterScore?.contentClarityScore?.score ?: 80}" else "N/A"
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1908,6 +1915,37 @@ private fun Card1ReelScore(
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
+        // Category Score Breakdown Grid
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFF0F172A),
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("CATEGORY SCORES", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    CategoryScorePill(label = "Visual", value = "$visualScore/100", modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    CategoryScorePill(label = "Audio", value = audioScoreStr, modifier = Modifier.weight(1f))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    CategoryScorePill(label = "Pacing", value = "$pacingScore/100", modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    CategoryScorePill(label = "Text", value = textScoreStr, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+
         // 3 Key Signals
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -1916,6 +1954,30 @@ private fun Card1ReelScore(
             SignalItem(text = "Clear subject visible in main frame", isPositive = true)
             SignalItem(text = "Balanced visual lighting and exposure", isPositive = true)
             SignalItem(text = "Opening movement takes 0.8s to accelerate", isPositive = false)
+        }
+    }
+}
+
+@Composable
+private fun CategoryScorePill(label: String, value: String, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, GlassBorder)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, fontSize = 11.5.sp, color = TextWhite)
+            Text(
+                value,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (value == "N/A") TextSecondary else CyanAccent
+            )
         }
     }
 }
@@ -2396,9 +2458,9 @@ private fun Card4VisualQuality(
     )
 }
 
-// CARD 5 — PACING & TRANSITIONS
+// CARD 6 — PACING & TRANSITIONS
 @Composable
-private fun Card5Pacing(
+private fun Card6Pacing(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
     mediaUri: Uri?
@@ -2471,18 +2533,14 @@ private fun Card5Pacing(
     }
 }
 
-// CARD 6 — AUDIO & SPEECH
+// CARD 5 — AUDIO & SPEECH
 @Composable
-private fun Card6AudioSpeech(
+private fun Card5AudioSpeech(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?
 ) {
-    val audioScore = report?.audioScore ?: 85
-    val hasVoice = audioScore > 0
-
-    val working = if (hasVoice) "Audible speech track detected with clean vocal frequencies ($audioScore/100)." else "Background audio track present."
-    val fix = if (hasVoice) "Voice level is close to background audio track level." else "No main creator voiceover detected in clip."
-    val quickAction = if (hasVoice) "Boost vocal track +3dB relative to music." else "Add crisp voiceover to increase retention."
+    val audioScore = report?.audioScore ?: masterReport?.masterScore?.audioQualityScore?.score ?: 0
+    val hasAudio = masterReport?.videoOverview?.audioPresenceStatus != "No audio" && audioScore > 0
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -2494,37 +2552,51 @@ private fun Card6AudioSpeech(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("AUDIO & SPEECH", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
-                Text(if (hasVoice) "Voice Detected • $audioScore/100" else "Music Only", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            Surface(shape = RoundedCornerShape(8.dp), color = if (hasAudio) CyanAccent.copy(alpha = 0.15f) else Color.Red.copy(alpha = 0.15f), border = BorderStroke(1.dp, if (hasAudio) CyanGlow else Color.Red.copy(alpha = 0.4f))) {
+                Text(if (hasAudio) "Voice Detected • $audioScore/100" else "AUDIO NOT AVAILABLE", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = if (hasAudio) CyanAccent else Color(0xFFFF6B6B), modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
             }
         }
 
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
-                Text(working, fontSize = 12.sp, color = TextWhite)
+        if (!hasAudio) {
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = GlassCard, border = BorderStroke(1.dp, GlassBorder)) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Score: N/A", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                    Text("No audio track detected in this video file.", fontSize = 12.sp, color = TextWhite)
+                    Text("Action: Add voiceover or background music to improve viewer retention.", fontSize = 11.5.sp, color = CyanAccent)
+                }
             }
-        }
+        } else {
+            val working = "Audible speech track detected with clean vocal frequencies ($audioScore/100)."
+            val fix = "Voice level is close to background audio track level."
+            val quickAction = "Boost vocal track +3dB relative to music."
 
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
-                Text(fix, fontSize = 12.sp, color = TextWhite)
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                    Text(working, fontSize = 12.sp, color = TextWhite)
+                }
             }
-        }
 
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                    Text(fix, fontSize = 12.sp, color = TextWhite)
+                }
+            }
+
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                    Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+                }
             }
         }
     }
 }
 
-// CARD 7 — TEXT & CAPTIONS
+// CARD 8 — TEXT & CAPTIONS
 @Composable
-private fun Card7TextCaptions(
+private fun Card8TextCaptions(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
     mediaUri: Uri?
@@ -2566,9 +2638,9 @@ private fun Card8SubjectObjects(
     )
 }
 
-// CARD 9 — STORY / MESSAGE
+// CARD 7 — STORY / MESSAGE
 @Composable
-private fun Card9StoryMessage(
+private fun Card7StoryMessage(
     reel: AnalysedReel,
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?
@@ -2634,9 +2706,9 @@ private fun Card9StoryMessage(
     }
 }
 
-// CARD 10 — ENGAGEMENT / VIRAL POTENTIAL
+// CARD 9 — ENGAGEMENT / VIRAL POTENTIAL
 @Composable
-private fun Card10Engagement(
+private fun Card9Engagement(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?
 ) {
@@ -2673,7 +2745,7 @@ private fun Card10Engagement(
         }
 
         Text(
-            text = "*Analytical estimate based on video visual & audio features, NOT a view guarantee.",
+            text = "*Estimated from video signals (not a view guarantee).",
             fontSize = 10.sp,
             color = TextSecondary
         )
@@ -2705,6 +2777,82 @@ private fun FactorRow(label: String, score: Int) {
     }
 }
 
+// CARD 10 — AUDIENCE / CONTENT FIT
+@Composable
+private fun Card10AudienceContentFit(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    selectedContentTypes: Set<String>
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("AUDIENCE & CONTENT FIT", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
+            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
+                Text("${selectedContentTypes.size} Selected Types", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            }
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFF0F172A),
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("CONTENT TYPE MATCHING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
+
+                if (selectedContentTypes.isEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("General Content", fontSize = 12.sp, color = TextWhite)
+                        Surface(shape = RoundedCornerShape(4.dp), color = EmeraldGreen.copy(alpha = 0.2f), border = BorderStroke(1.dp, EmeraldGreen)) {
+                            Text("MATCHED", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                        }
+                    }
+                } else {
+                    selectedContentTypes.forEach { typeId ->
+                        val displayLabel = REEL_TYPE_OPTIONS.find { it.id == typeId }?.title ?: typeId.replaceFirstChar { it.uppercase() }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(displayLabel, fontSize = 12.sp, color = TextWhite)
+                            Surface(shape = RoundedCornerShape(4.dp), color = EmeraldGreen.copy(alpha = 0.2f), border = BorderStroke(1.dp, EmeraldGreen)) {
+                                Text("MATCHED", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Audience Demographics Section
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = GlassCard,
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("AUDIENCE DEMOGRAPHICS", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
+                Text("Audience demographic data unavailable.", fontSize = 12.sp, color = TextSecondary)
+            }
+        }
+    }
+}
+
 // CARD 11 — ACTION PLAN
 @Composable
 private fun Card11ActionPlan(
@@ -2713,9 +2861,9 @@ private fun Card11ActionPlan(
     masterReport: MasterValidatedReportV2?
 ) {
     val fixes = listOf(
-        "01 • Strengthen the first 1.5 seconds by trimming initial delay",
-        "02 • Improve subject/background separation with lighting or crop adjustment",
-        "03 • Add clearer on-screen text context in lower third"
+        "01 • Strengthen opening: trim initial dead time before action (at 00:00.8).",
+        "02 • Improve subject focus: adjust crop and center framing during main sequence.",
+        "03 • Add auto-captions: place high-contrast text overlay in lower third."
     )
 
     Column(
@@ -4665,9 +4813,9 @@ private fun ThumbnailPreviewDialog(
                     }
                 }
 
-                // Primary Set Cover & Open in Editor
+                // Primary Set Cover
                 Button(
-                    onClick = onSelectAndContinue,
+                    onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -4680,7 +4828,7 @@ private fun ThumbnailPreviewDialog(
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null)
                         Text(
-                            text = "Set as Cover & Open in Editor",
+                            text = "Set as Primary Cover",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold
                         )

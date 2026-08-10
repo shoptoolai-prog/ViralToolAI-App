@@ -229,14 +229,15 @@ object LogoEngineV2 {
 
         var extractedBitmap: Bitmap? = null
         if (mediaUri != null && mediaUri.toString().isNotEmpty()) {
+            val retriever = MediaMetadataRetriever()
             try {
-                val retriever = MediaMetadataRetriever()
                 retriever.setDataSource(context, mediaUri)
                 val frameTimeUs = (durationSec * 0.35f * 1_000_000f).toLong()
                 extractedBitmap = retriever.getFrameAtTime(frameTimeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                retriever.release()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 extractedBitmap = null
+            } finally {
+                try { retriever.release() } catch (_: Throwable) {}
             }
         }
 

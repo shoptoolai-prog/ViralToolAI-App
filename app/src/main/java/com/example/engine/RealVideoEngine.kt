@@ -149,10 +149,10 @@ class MediaLoader(private val context: Context) {
                 height = hStr?.toIntOrNull() ?: 1920
 
                 thumb = retriever.getFrameAtTime(1000000L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 thumb = createPlaceholderThumbnail(name)
             } finally {
-                try { retriever.release() } catch (_: Exception) {}
+                try { retriever.release() } catch (_: Throwable) {}
             }
         }
 
@@ -215,10 +215,10 @@ class MediaLoader(private val context: Context) {
             } else {
                 createPlaceholderFrame(mediaItem, timeMs)
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             createPlaceholderFrame(mediaItem, timeMs)
         } finally {
-            try { retriever.release() } catch (_: Exception) {}
+            try { retriever.release() } catch (_: Throwable) {}
         }
     }
 

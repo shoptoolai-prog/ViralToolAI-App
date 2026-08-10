@@ -142,7 +142,7 @@ class HardwareCodecManager {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             // Fallback gracefully
         }
         return supported

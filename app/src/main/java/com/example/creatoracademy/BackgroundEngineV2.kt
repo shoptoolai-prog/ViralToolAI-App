@@ -247,10 +247,10 @@ object BackgroundEngineV2 {
                 val hStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
                 if (!wStr.isNullOrEmpty()) width = wStr.toInt()
                 if (!hStr.isNullOrEmpty()) height = hStr.toInt()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 // Ignore metadata failures gracefully
             } finally {
-                try { retriever.release() } catch (_: Exception) {}
+                try { retriever.release() } catch (_: Throwable) {}
             }
         }
 

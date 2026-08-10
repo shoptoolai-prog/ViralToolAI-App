@@ -239,6 +239,131 @@ data class ObservationLedger(
     fun getByCategory(cat: String): List<Observation> = getVerifiedObservations().filter { it.category.equals(cat, ignoreCase = true) }
 }
 
+enum class AnalysisJobStatus {
+    CREATED,
+    PREPARING,
+    DECODING,
+    SAMPLING,
+    ANALYZING,
+    VALIDATING,
+    SCORING,
+    GENERATING_REPORT,
+    COMPLETE,
+    FAILED,
+    PARTIAL
+}
+
+data class AnalysisJob(
+    val jobId: String = "job_${System.currentTimeMillis()}",
+    val videoUri: Uri?,
+    val durationMs: Long = 0L,
+    val width: Int = 0,
+    val height: Int = 0,
+    val fps: Float = 30f,
+    val fileSize: Long = 0L,
+    val selectedContentTypes: List<String> = emptyList(),
+    var status: AnalysisJobStatus = AnalysisJobStatus.CREATED,
+    var progress: Float = 0f,
+    var currentStage: String = "Initializing",
+    val startedAt: Long = System.currentTimeMillis(),
+    var completedAt: Long = 0L,
+    val observations: MutableList<Observation> = mutableListOf(),
+    var metrics: Map<String, Any> = emptyMap(),
+    var report: UniversalDetectionContext? = null,
+    val errors: MutableList<String> = mutableListOf(),
+    val warnings: MutableList<String> = mutableListOf()
+)
+
+object FrameValidator {
+    fun isFrameBlackOrInvalid(bm: Bitmap): Boolean {
+        if (bm.width <= 0 || bm.height <= 0 || bm.isRecycled) return true
+        val stepX = (bm.width / 8).coerceAtLeast(1)
+        val stepY = (bm.height / 8).coerceAtLeast(1)
+        var totalLum = 0L
+        var count = 0
+        for (x in 0 until bm.width step stepX) {
+            for (y in 0 until bm.height step stepY) {
+                val pixel = bm.getPixel(x, y)
+                val r = (pixel shr 16) and 0xFF
+                val g = (pixel shr 8) and 0xFF
+                val b = pixel and 0xFF
+                val lum = (0.299f * r + 0.587f * g + 0.114f * b).toInt()
+                totalLum += lum
+                count++
+            }
+        }
+        if (count == 0) return true
+        val avgLum = totalLum / count
+        return avgLum < 6
+    }
+}
+
+class FrameCache(private val maxCapacity: Int = 30) {
+    private val cache = LinkedHashMap<Long, Bitmap>(maxCapacity, 0.75f, true)
+
+    @Synchronized
+    fun get(timeUs: Long): Bitmap? = cache[timeUs]
+
+    @Synchronized
+    fun put(timeUs: Long, bitmap: Bitmap) {
+        if (cache.size >= maxCapacity) {
+            val oldestKey = cache.keys.firstOrNull()
+            if (oldestKey != null) cache.remove(oldestKey)
+        }
+        cache[timeUs] = bitmap
+    }
+
+    @Synchronized
+    fun clear() {
+        cache.clear()
+    }
+}
+
+object EventDeduplicator {
+    fun deduplicateAndMerge(observations: List<Observation>): List<Observation> {
+        val merged = mutableListOf<Observation>()
+        val grouped = observations.groupBy { "${it.category}_${it.subcategory}_${it.detectedPerson ?: it.detectedProduct ?: it.detectedText ?: it.detectedAction ?: ""}" }
+
+        for ((_, list) in grouped) {
+            if (list.size == 1) {
+                merged.add(list.first())
+            } else {
+                val sorted = list.sortedBy { it.timestampStart }
+                var current = sorted.first()
+                for (i in 1 until sorted.size) {
+                    val next = sorted[i]
+                    if (next.timestampStart <= current.timestampEnd + 1.5f) {
+                        current = current.copy(
+                            timestampEnd = maxOf(current.timestampEnd, next.timestampEnd),
+                            confidence = maxOf(current.confidence, next.confidence),
+                            persistence = "persistent"
+                        )
+                    } else {
+                        merged.add(current)
+                        current = next
+                    }
+                }
+                merged.add(current)
+            }
+        }
+        return merged
+    }
+}
+
+object EngineRegistry {
+    val activeEngines = listOf(
+        "VisionEngine",
+        "ObjectEngine",
+        "FaceEngine",
+        "OcrEngine",
+        "AudioEngine",
+        "SpeechEngine",
+        "SceneEngine",
+        "MotionEngine",
+        "ContentTypeEngine"
+    )
+}
+
 data class ThumbnailCandidate(
     val timestampSec: Float,
     val formattedTimestamp: String,
@@ -316,7 +441,7 @@ object UniversalAiDetectionEngine {
                 }
                 hasVideoTrack = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) == "yes"
                 hasAudioTrack = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) == "yes"
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.e(TAG, "Metadata extraction failed", e)
             } finally {
                 try { retriever.release() } catch (_: Exception) {}
@@ -919,12 +1044,14 @@ object UniversalAiDetectionEngine {
             )
         )
 
+        val deduplicatedObservations = EventDeduplicator.deduplicateAndMerge(structuredObservations)
+
         val finalContext = UniversalDetectionContext(
             videoUri = mediaUri,
             durationSeconds = durationSec,
             selectedVideoTypes = selectedCategories,
             timestampedObservations = verifiedObservations,
-            observationLedger = ObservationLedger(structuredObservations),
+            observationLedger = ObservationLedger(deduplicatedObservations),
             thumbnailCandidates = thumbCandidates,
             intentClassification = intentClassification,
             category = ReelCategoryResult(primaryIntent.displayName, intentClassification.confidencePercent),
@@ -1125,17 +1252,52 @@ object UniversalAiDetectionEngine {
             if (timestamps.isEmpty()) timestamps.add(0.5f)
 
             var prevFrame: TimestampedFrame? = null
+            val frameCache = FrameCache(30)
+
             for (sec in timestamps) {
                 try {
                     val timeUs = (sec * 1_000_000L).toLong()
-                    val bm = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                    var bm = frameCache.get(timeUs)
+                    if (bm == null) {
+                        val extractedBm = try {
+                            retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                        } catch (e: Throwable) {
+                            null
+                        }
+                        if (extractedBm != null) {
+                            if (FrameValidator.isFrameBlackOrInvalid(extractedBm)) {
+                                // Retry slight offset (+0.2s) if frame is black/invalid
+                                val retryUs = ((sec + 0.2f) * 1_000_000L).toLong()
+                                val retryBm = try {
+                                    retriever.getFrameAtTime(retryUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                } catch (e: Throwable) {
+                                    null
+                                }
+                                if (retryBm != null && !FrameValidator.isFrameBlackOrInvalid(retryBm)) {
+                                    bm = retryBm
+                                }
+                            } else {
+                                bm = extractedBm
+                            }
+                        }
+                        if (bm != null && !FrameValidator.isFrameBlackOrInvalid(bm)) {
+                            frameCache.put(timeUs, bm)
+                        } else {
+                            bm = null // Discard invalid black frame
+                        }
+                    }
+
                     if (bm != null) {
                         if (prevFrame != null && isSceneChangeDetected(prevFrame.bitmap, bm)) {
                             val midSec = sec - (step / 2f)
                             if (midSec > 0f) {
                                 val midUs = (midSec * 1_000_000L).toLong()
-                                val midBm = retriever.getFrameAtTime(midUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                                if (midBm != null) {
+                                val midBm = try {
+                                    retriever.getFrameAtTime(midUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                } catch (e: Throwable) {
+                                    null
+                                }
+                                if (midBm != null && !FrameValidator.isFrameBlackOrInvalid(midBm)) {
                                     frames.add(TimestampedFrame(midSec, midBm))
                                 }
                             }
@@ -1152,6 +1314,19 @@ object UniversalAiDetectionEngine {
             Log.e(TAG, "MediaMetadataRetriever setDataSource failed: ${e.message}")
         } finally {
             try { retriever.release() } catch (_: Throwable) {}
+        }
+
+        if (frames.isEmpty()) {
+            try {
+                val fallbackBm = Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888)
+                val canvas = android.graphics.Canvas(fallbackBm)
+                val paint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.DKGRAY
+                    style = android.graphics.Paint.Style.FILL
+                }
+                canvas.drawRect(0f, 0f, 1080f, 1920f, paint)
+                frames.add(TimestampedFrame(0.5f, fallbackBm))
+            } catch (_: Throwable) {}
         }
         return frames
     }

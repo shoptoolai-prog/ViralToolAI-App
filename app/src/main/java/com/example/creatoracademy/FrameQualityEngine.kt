@@ -1011,9 +1011,9 @@ object FrameQualityEngine {
             try {
                 retriever.setDataSource(context, videoUri)
                 bitmap = retriever.getFrameAtTime(1500000L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
             } finally {
-                try { retriever.release() } catch (_: Exception) {}
+                try { retriever.release() } catch (_: Throwable) {}
             }
         }
 
