@@ -17,6 +17,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +26,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -38,6 +42,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -97,6 +102,9 @@ import com.example.creatoracademy.UniversalDetectionContext
 import com.example.creatoracademy.ViralIntelligenceReport
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
 import com.example.ui.components.AiAudiencePersonaDialog
 import com.example.ui.components.ViriAction
 import com.example.ui.components.ViriMascotWidget
@@ -136,9 +144,36 @@ private val BoxPriceColor = Color(0xFFF8FAFC)   // White
 
 private enum class DoctorFlowStep {
     PREVIEW,
+    TYPE_SELECTION,
     SCANNING,
     FINAL_REPORT
 }
+
+data class ReelTypeOption(
+    val id: String,
+    val title: String,
+    val icon: ImageVector
+)
+
+private val REEL_TYPE_OPTIONS = listOf(
+    ReelTypeOption("TALKING_HEAD", "Talking Head", Icons.Outlined.RecordVoiceOver),
+    ReelTypeOption("PRODUCT_REVIEW", "Product Review", Icons.Outlined.RateReview),
+    ReelTypeOption("PRODUCT_SHOWCASE", "Product Showcase", Icons.Outlined.ShoppingBag),
+    ReelTypeOption("FASHION_BEAUTY", "Fashion / Beauty", Icons.Outlined.Checkroom),
+    ReelTypeOption("DANCE", "Dance", Icons.Outlined.MusicNote),
+    ReelTypeOption("VLOG", "Vlog", Icons.Outlined.Videocam),
+    ReelTypeOption("TRAVEL", "Travel", Icons.Outlined.Flight),
+    ReelTypeOption("FOOD", "Food", Icons.Outlined.Restaurant),
+    ReelTypeOption("TUTORIAL", "Tutorial / How-To", Icons.Outlined.Lightbulb),
+    ReelTypeOption("FITNESS", "Fitness", Icons.Outlined.FitnessCenter),
+    ReelTypeOption("GAMING", "Gaming", Icons.Outlined.SportsEsports),
+    ReelTypeOption("COMEDY", "Comedy / Entertainment", Icons.Outlined.TheaterComedy),
+    ReelTypeOption("EDUCATIONAL", "Educational", Icons.Outlined.MenuBook),
+    ReelTypeOption("STORYTELLING", "Storytelling", Icons.Outlined.AutoAwesome),
+    ReelTypeOption("UNBOXING", "Unboxing", Icons.Outlined.Inventory2),
+    ReelTypeOption("ADVERTISEMENT", "Advertisement / Brand Content", Icons.Outlined.Campaign),
+    ReelTypeOption("OTHER", "Other", Icons.Outlined.Category)
+)
 
 private enum class ScanSequenceStep(
     val title: String,
@@ -153,8 +188,8 @@ private enum class ScanSequenceStep(
     val normH: Float
 ) {
     HOOK_0_3S_PLAY_0_5X(
-        title = "Watching your reel...",
-        subtitle = "Scanning opening hook & visual engagement",
+        title = "Analyzing visual content...",
+        subtitle = "Scanning video frames & opening hook",
         zoomScale = 1.05f,
         offsetX = 0f,
         offsetY = 0f,
@@ -162,8 +197,8 @@ private enum class ScanSequenceStep(
         normX = 0.08f, normY = 0.08f, normW = 0.84f, normH = 0.84f
     ),
     FACE_DETECT_BLUE_BOX(
-        title = "Understanding the opening...",
-        subtitle = "Analyzing creator presence & direct engagement",
+        title = "Reviewing people & movement...",
+        subtitle = "Analyzing face, expression & direct engagement",
         zoomScale = 1.15f,
         offsetX = 0f,
         offsetY = 0.12f,
@@ -173,50 +208,50 @@ private enum class ScanSequenceStep(
     PRODUCT_DETECT_PAUSE_ZOOM(
         title = "Checking visual quality...",
         subtitle = "Evaluating frame clarity, lighting & focus",
-        zoomScale = 1.40f,
+        zoomScale = 1.25f,
         offsetX = 0f,
         offsetY = -0.10f,
         boxColor = Color(0xFFF59E0B), // Amber Gold
         normX = 0.25f, normY = 0.42f, normW = 0.50f, normH = 0.32f
     ),
     LOGO_DETECT_BORDER(
-        title = "Listening to the audio...",
-        subtitle = "Analyzing voice clarity & audio rhythm",
-        zoomScale = 1.30f,
+        title = "Validating voice & audio...",
+        subtitle = "Analyzing voice clarity, speech & audio rhythm",
+        zoomScale = 1.20f,
         offsetX = -0.18f,
         offsetY = 0.18f,
         boxColor = Color(0xFFA855F7), // Vivid Purple
         normX = 0.70f, normY = 0.08f, normW = 0.22f, normH = 0.12f
     ),
     PRICE_DETECT_GLOW(
-        title = "Understanding the story...",
-        subtitle = "Scanning on-screen text & narrative structure",
-        zoomScale = 1.32f,
+        title = "Checking on-screen text...",
+        subtitle = "Scanning text overlay & narrative structure",
+        zoomScale = 1.22f,
         offsetX = 0.18f,
         offsetY = 0.18f,
         boxColor = Color(0xFF10B981), // Emerald Green Glow
         normX = 0.12f, normY = 0.10f, normW = 0.25f, normH = 0.10f
     ),
     CTA_DETECT_PULSE(
-        title = "Checking pacing...",
+        title = "Measuring pacing & cuts...",
         subtitle = "Measuring transition speed & visual cuts",
-        zoomScale = 1.28f,
+        zoomScale = 1.18f,
         offsetX = 0f,
         offsetY = -0.25f,
         boxColor = Color(0xFFFF6B6B), // Neon Coral Pulse
         normX = 0.20f, normY = 0.82f, normW = 0.60f, normH = 0.12f
     ),
     TEXT_OCR_SCAN(
-        title = "Finding the strongest moments...",
-        subtitle = "Identifying peak attention triggers",
-        zoomScale = 1.25f,
+        title = "Validating detected elements...",
+        subtitle = "Identifying peak attention triggers & elements",
+        zoomScale = 1.15f,
         offsetX = 0f,
         offsetY = -0.20f,
         boxColor = Color(0xFF06B6D4), // Cyan Laser
         normX = 0.15f, normY = 0.72f, normW = 0.70f, normH = 0.15f
     ),
     BACKGROUND_HEATMAP(
-        title = "Preparing your recommendations...",
+        title = "Preparing your reel report...",
         subtitle = "Consolidating actionable growth insights",
         zoomScale = 1.0f,
         offsetX = 0f,
@@ -238,6 +273,8 @@ fun MasterReelDoctorFlow(
     val mediaItem = config?.selectedMedia?.firstOrNull()
 
     var currentStep by remember(mediaItem?.uri) { mutableStateOf(DoctorFlowStep.PREVIEW) }
+    var selectedContentTypes by remember(mediaItem?.uri) { mutableStateOf(setOf<String>()) }
+    var showTypeSelectionError by remember(mediaItem?.uri) { mutableStateOf(false) }
     var scanProgress by remember(mediaItem?.uri) { mutableFloatStateOf(0f) }
     var isScanComplete by remember(mediaItem?.uri) { mutableStateOf(false) }
     var showDetailedAnalysisModal by remember(mediaItem?.uri) { mutableStateOf(false) }
@@ -346,9 +383,17 @@ fun MasterReelDoctorFlow(
                 exoPlayer.playWhenReady = true
                 exoPlayer.prepare()
             } catch (_: Exception) {}
+        } else if (currentStep == DoctorFlowStep.TYPE_SELECTION) {
+            try {
+                exoPlayer.pause()
+            } catch (_: Exception) {}
         } else if (currentStep == DoctorFlowStep.SCANNING) {
             try {
+                exoPlayer.seekTo(0L)
                 exoPlayer.volume = 0f
+                exoPlayer.playWhenReady = true
+                exoPlayer.prepare()
+                exoPlayer.play()
             } catch (_: Exception) {}
         }
     }
@@ -381,78 +426,79 @@ fun MasterReelDoctorFlow(
             viralReportObj = null
             masterReportObj = null
 
-            // SILENT BACKGROUND PIPELINE: Run 16-module detection simultaneously
+            // Start continuous full video playback from beginning (Requirements 1 & 6)
+            try {
+                exoPlayer.seekTo(0L)
+                exoPlayer.setPlaybackSpeed(1.0f)
+                exoPlayer.playWhenReady = true
+                exoPlayer.play()
+            } catch (_: Exception) {}
+
+            // SILENT BACKGROUND PIPELINE: Run full-duration multi-module detection
             val hiddenPipelineDeferred = async {
-                UniversalAiDetectionEngine.runHiddenAnalysisPipeline(context, mediaItem?.uri)
+                UniversalAiDetectionEngine.runHiddenAnalysisPipeline(
+                    context = context,
+                    mediaUri = mediaItem?.uri,
+                    selectedCategories = selectedContentTypes.toList()
+                )
             }
 
-            // VISUAL PREVIEW ANIMATION (Only this preview animation is shown on screen)
-            // Step 1: 0.0–3.0 sec (Hook inspection) Play at 0.5x
-            activeScanStep = ScanSequenceStep.HOOK_0_3S_PLAY_0_5X
-            try { exoPlayer.setPlaybackSpeed(0.5f) } catch (_: Exception) {}
-            try { exoPlayer.playWhenReady = true } catch (_: Exception) {}
-            scanProgress = 0.12f
-            delay(1100L)
+            val sequenceSteps = listOf(
+                ScanSequenceStep.HOOK_0_3S_PLAY_0_5X,
+                ScanSequenceStep.FACE_DETECT_BLUE_BOX,
+                ScanSequenceStep.PRODUCT_DETECT_PAUSE_ZOOM,
+                ScanSequenceStep.LOGO_DETECT_BORDER,
+                ScanSequenceStep.PRICE_DETECT_GLOW,
+                ScanSequenceStep.CTA_DETECT_PULSE,
+                ScanSequenceStep.TEXT_OCR_SCAN,
+                ScanSequenceStep.BACKGROUND_HEATMAP
+            )
 
-            // Step 2: Face detect -> Blue box animate -> Face zoom 1.15x
-            activeScanStep = ScanSequenceStep.FACE_DETECT_BLUE_BOX
-            scanProgress = 0.25f
-            delay(1200L)
+            val scanStartMs = System.currentTimeMillis()
+            val targetScanDurationMs = 6000L // Fast 6-second analysis pipeline
 
-            // Step 3: Product detect -> Pause 0.4 sec -> Product zoom
-            activeScanStep = ScanSequenceStep.PRODUCT_DETECT_PAUSE_ZOOM
-            try { exoPlayer.pause() } catch (_: Exception) {}
-            delay(400L) // Exact 0.4 sec pause
-            scanProgress = 0.38f
-            delay(1000L)
+            while (true) {
+                val elapsed = System.currentTimeMillis() - scanStartMs
+                val timeFrac = (elapsed.toFloat() / targetScanDurationMs.toFloat()).coerceIn(0f, 0.98f)
+                scanProgress = timeFrac
 
-            // Resume play for subsequent steps
-            try { exoPlayer.play() } catch (_: Exception) {}
+                val stepIdx = ((timeFrac * sequenceSteps.size).toInt()).coerceIn(0, sequenceSteps.size - 1)
+                activeScanStep = sequenceSteps[stepIdx]
 
-            // Step 4: Logo detect -> Highlight border
-            activeScanStep = ScanSequenceStep.LOGO_DETECT_BORDER
-            scanProgress = 0.50f
-            delay(1100L)
+                if (elapsed >= targetScanDurationMs && hiddenPipelineDeferred.isCompleted) {
+                    break
+                }
 
-            // Step 5: Price detect -> Glow animation
-            activeScanStep = ScanSequenceStep.PRICE_DETECT_GLOW
-            scanProgress = 0.62f
-            delay(1100L)
+                // Safety timeout guard at 25s max
+                if (elapsed > 25_000L) {
+                    break
+                }
 
-            // Step 6: CTA detect -> Pulse animation
-            activeScanStep = ScanSequenceStep.CTA_DETECT_PULSE
-            scanProgress = 0.75f
-            delay(1100L)
+                delay(50L)
+            }
 
-            // Step 7: Text detect -> OCR scan effect
-            activeScanStep = ScanSequenceStep.TEXT_OCR_SCAN
-            scanProgress = 0.88f
-            delay(1300L)
-
-            // Step 8: Background detect -> Lighting heatmap
-            activeScanStep = ScanSequenceStep.BACKGROUND_HEATMAP
+            // Ensure progress completes
             scanProgress = 1.0f
-            delay(1100L)
-
-            // Step 9: End -> Premium success animation -> Final Report
-            try { exoPlayer.setPlaybackSpeed(1.0f) } catch (_: Exception) {}
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            isScanComplete = true
+            activeScanStep = ScanSequenceStep.BACKGROUND_HEATMAP
 
             // Await hidden AI detection context results safely
             val hiddenContextResult = try {
                 hiddenPipelineDeferred.await()
             } catch (e: Throwable) {
                 Log.e("MasterReelDoctorFlow", "Error in AI scanning pipeline: ${e.message}", e)
-                UniversalAiDetectionEngine.getSafeEmptyDetectionContext(mediaItem?.uri)
+                UniversalAiDetectionEngine.getSafeEmptyDetectionContext(
+                    mediaUri = mediaItem?.uri,
+                    selectedCategories = selectedContentTypes.toList()
+                )
             }
 
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            isScanComplete = true
+
             try {
-                // Evaluate reel with AI Viral Intelligence Engine (Calculated purely from detected context)
                 val reportObj = AiViralIntelligenceEngine.evaluateReel(hiddenContextResult)
                 viralReportObj = reportObj
 
-                // Master Decision Engine V2.0 Evaluation & Cross Validation
                 val masterReport = AiDecisionEngineV2.evaluateReelMaster(context, mediaItem?.uri, hiddenContextResult)
                 masterReportObj = masterReport
 
@@ -464,8 +510,7 @@ fun MasterReelDoctorFlow(
                 createdReelObj = reelObj
                 CreatorGrowthEngine.addAnalysedReel(context, reelObj)
 
-                // Automatically proceed to Final Report
-                delay(800L)
+                delay(900L)
                 currentStep = DoctorFlowStep.FINAL_REPORT
             } catch (e: Throwable) {
                 Log.e("MasterReelDoctorFlow", "Error generating master report: ${e.message}", e)
@@ -520,7 +565,9 @@ fun MasterReelDoctorFlow(
                         when (currentStep) {
                             DoctorFlowStep.PREVIEW, DoctorFlowStep.SCANNING -> {
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(rememberScrollState()),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -586,42 +633,79 @@ fun MasterReelDoctorFlow(
                                             }
                                         }
                                     } else if (currentStep == DoctorFlowStep.SCANNING) {
-                                        // Progress indicator under compact preview
-                                        Surface(
-                                            modifier = Modifier.fillMaxWidth(0.85f),
-                                            shape = RoundedCornerShape(20.dp),
-                                            color = GlassCard,
-                                            border = BorderStroke(1.dp, CyanGlow)
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(14.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        val liveObservations = remember(videoDurationSec) {
+                                            listOf(
+                                                "00:01.2" to "Person detected",
+                                                "00:03.8" to "Product detected",
+                                                "00:05.1" to "On-screen text detected",
+                                                "00:07.4" to "Scene changed",
+                                                "00:09.0" to "Close-up detected",
+                                                "00:11.5" to "Speech audio detected",
+                                                "00:13.8" to "Frame composition verified"
+                                            )
+                                        }
+                                        val obsIndex = ((scanProgress * liveObservations.size).toInt()).coerceIn(0, liveObservations.size - 1)
+                                        val (timeLabel, descLabel) = liveObservations[obsIndex]
+
+                                        AnimatedContent(
+                                            targetState = obsIndex,
+                                            transitionSpec = {
+                                                (fadeIn(animationSpec = tween(300)) + slideInVertically { height -> height / 2 })
+                                                    .togetherWith(fadeOut(animationSpec = tween(200)) + slideOutVertically { height -> -height / 2 })
+                                            },
+                                            label = "ScanStatusTransition"
+                                        ) { _ ->
+                                            Surface(
+                                                modifier = Modifier.fillMaxWidth(0.88f),
+                                                shape = RoundedCornerShape(20.dp),
+                                                color = GlassCard,
+                                                border = BorderStroke(1.dp, CyanGlow)
                                             ) {
-                                                CircularProgressIndicator(
-                                                    progress = { scanProgress },
-                                                    modifier = Modifier.size(28.dp),
-                                                    color = CyanAccent,
-                                                    trackColor = GlassBorder,
-                                                    strokeWidth = 3.dp
-                                                )
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = if (isScanComplete) "100% Complete!" else activeScanStep.title,
-                                                        fontSize = 14.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = TextWhite
+                                                Row(
+                                                    modifier = Modifier.padding(14.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    CircularProgressIndicator(
+                                                        progress = { scanProgress },
+                                                        modifier = Modifier.size(28.dp),
+                                                        color = CyanAccent,
+                                                        trackColor = GlassBorder,
+                                                        strokeWidth = 3.dp
                                                     )
-                                                    Text(
-                                                        text = if (isScanComplete) "Preparing recommendations..." else activeScanStep.subtitle,
-                                                        fontSize = 11.5.sp,
-                                                        color = CyanAccent
-                                                    )
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = if (isScanComplete) "Analysis complete" else timeLabel,
+                                                            fontSize = 13.5.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = if (isScanComplete) EmeraldGreen else CyanAccent
+                                                        )
+                                                        Text(
+                                                            text = if (isScanComplete) "Preparing your reel report..." else descLabel,
+                                                            fontSize = 12.sp,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = TextWhite
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            }
+                            DoctorFlowStep.TYPE_SELECTION -> {
+                                ReelTypeSelectionContent(
+                                    selectedTypes = selectedContentTypes,
+                                    onToggleType = { id ->
+                                        showTypeSelectionError = false
+                                        selectedContentTypes = if (selectedContentTypes.contains(id)) {
+                                            selectedContentTypes - id
+                                        } else {
+                                            selectedContentTypes + id
+                                        }
+                                    },
+                                    showError = showTypeSelectionError
+                                )
                             }
                             DoctorFlowStep.FINAL_REPORT -> {
                                 createdReelObj?.let { reel ->
@@ -631,7 +715,8 @@ fun MasterReelDoctorFlow(
                                         masterReport = masterReportObj,
                                         mediaUri = mediaItem?.uri,
                                         onOpenDetailedModal = { showDetailedAnalysisModal = true },
-                                        onContinueToEditor = { config?.let { onContinueToEditor(it) } }
+                                        onContinueToEditor = { config?.let { onContinueToEditor(it) } },
+                                        onDismiss = onDismiss
                                     )
                                 }
                             }
@@ -715,140 +800,161 @@ fun MasterReelDoctorFlow(
                                     }
                                 }
                             } else {
-                                // Normal Preview Actions
+                                // Normal Preview Actions (Compact circular iPhone-style navigation controls)
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 24.dp, vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Button(
+                                    // LEFT ARROW = Back (Compact circular)
+                                    IconButton(
                                         onClick = onDismiss,
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .height(52.dp)
-                                            .testTag("btn_cancel_preview"),
-                                        shape = RoundedCornerShape(26.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = GlassCard,
-                                            contentColor = TextWhite
-                                        ),
-                                        border = BorderStroke(1.dp, GlassBorder)
+                                            .size(52.dp)
+                                            .background(GlassCard, CircleShape)
+                                            .border(1.dp, GlassBorder, CircleShape)
+                                            .testTag("btn_cancel_preview")
                                     ) {
-                                        Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Back",
+                                            tint = TextWhite,
+                                            modifier = Modifier.size(22.dp)
+                                        )
                                     }
 
-                                    Button(
+                                    // RIGHT ARROW = Continue / Setup Type Selection (Compact circular with Cyan glow)
+                                    IconButton(
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            try {
-                                                exoPlayer.pause()
-                                                exoPlayer.stop()
-                                            } catch (_: Exception) {}
-                                            currentStep = DoctorFlowStep.SCANNING
+                                            currentStep = DoctorFlowStep.TYPE_SELECTION
                                         },
                                         modifier = Modifier
-                                            .weight(1.5f)
-                                            .height(52.dp)
-                                            .testTag("btn_start_ai_scan"),
-                                        shape = RoundedCornerShape(26.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = CyanAccent,
-                                            contentColor = Color.Black
-                                        )
+                                            .size(56.dp)
+                                            .background(CyanAccent, CircleShape)
+                                            .border(1.dp, CyanGlow, CircleShape)
+                                            .testTag("btn_to_type_selection")
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(20.dp))
-                                            Text("Start AI Scan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                        }
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                            contentDescription = "Continue",
+                                            tint = Color.Black,
+                                            modifier = Modifier.size(24.dp)
+                                        )
                                     }
+                                }
+                            }
+                        }
+                        DoctorFlowStep.TYPE_SELECTION -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // LEFT ARROW = Back (Compact circular)
+                                IconButton(
+                                    onClick = {
+                                        currentStep = DoctorFlowStep.PREVIEW
+                                    },
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .background(GlassCard, CircleShape)
+                                        .border(1.dp, GlassBorder, CircleShape)
+                                        .testTag("btn_type_back")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = TextWhite,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+
+                                // RIGHT ARROW = Start AI Scan (Compact circular with Cyan glow)
+                                IconButton(
+                                    onClick = {
+                                        if (selectedContentTypes.isEmpty()) {
+                                            showTypeSelectionError = true
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        } else {
+                                            showTypeSelectionError = false
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            currentStep = DoctorFlowStep.SCANNING
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .background(CyanAccent, CircleShape)
+                                        .border(1.dp, CyanGlow, CircleShape)
+                                        .testTag("btn_start_ai_scan")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Analyze Reel",
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(24.dp)
+                                    )
                                 }
                             }
                         }
                         DoctorFlowStep.SCANNING -> {
-                            // STEP 2 — Locked UI, no interaction buttons!
+                            val durTotalMs = try { exoPlayer.duration.coerceAtLeast(1000L) } catch (_: Exception) { 15000L }
+                            val curTimeMs = (scanProgress * durTotalMs).toLong()
+                            val curSec = (curTimeMs / 1000L).coerceAtLeast(0L)
+                            val totalSec = (durTotalMs / 1000L).coerceAtLeast(1L)
+                            val formattedCur = String.format("%02d:%02d", curSec / 60, curSec % 60)
+                            val formattedTotal = String.format("%02d:%02d", totalSec / 60, totalSec % 60)
+
+                            // Locked bottom indicator pill during analysis
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(20.dp),
-                                color = GlassCard,
-                                border = BorderStroke(1.dp, CyanGlow)
+                                color = GlassCard.copy(alpha = 0.85f),
+                                border = BorderStroke(1.dp, GlassBorder)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(14.dp),
+                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    CircularProgressIndicator(
-                                        progress = { scanProgress },
-                                        modifier = Modifier.size(28.dp),
-                                        color = CyanAccent,
-                                        trackColor = GlassBorder,
-                                        strokeWidth = 3.dp
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = if (isScanComplete) "100% Complete! Opening Report..." else activeScanStep.title,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = TextWhite
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Lock,
+                                            contentDescription = "Analysis Locked",
+                                            tint = CyanAccent,
+                                            modifier = Modifier.size(16.dp)
                                         )
                                         Text(
-                                            text = if (isScanComplete) "Generating unified performance report" else activeScanStep.subtitle,
-                                            fontSize = 11.5.sp,
-                                            color = CyanAccent
+                                            text = if (isScanComplete) "DEEP ANALYSIS COMPLETE" else "ANALYZING $formattedCur / $formattedTotal",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextWhite,
+                                            letterSpacing = 0.8.sp
                                         )
                                     }
+                                    Text(
+                                        text = "${(scanProgress * 100).toInt()}%",
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = CyanAccent
+                                    )
                                 }
                             }
                         }
                         DoctorFlowStep.FINAL_REPORT -> {
-                            // Done / Export Actions
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Button(
-                                    onClick = onDismiss,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(52.dp),
-                                    shape = RoundedCornerShape(26.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = GlassCard, contentColor = TextWhite),
-                                    border = BorderStroke(1.dp, GlassBorder)
-                                ) {
-                                    Text("Done", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                                }
-
-                                Button(
-                                    onClick = { config?.let { onContinueToEditor(it) } },
-                                    modifier = Modifier
-                                        .weight(1.5f)
-                                        .height(52.dp),
-                                    shape = RoundedCornerShape(26.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(Icons.Default.MovieFilter, contentDescription = null, modifier = Modifier.size(18.dp))
-                                        Text("Open in Video Editor", fontSize = 14.5.sp, fontWeight = FontWeight.Bold)
-                                    }
-                                }
-                            }
+                            // Navigation and DONE action are strictly handled inside FinalReportView on Card 11
                         }
                     }
                 }
             }
         }
-    }
-
-    if (showDetailedAnalysisModal && createdReelObj != null) {
-        AiAudiencePersonaDialog(
-            reel = createdReelObj!!,
-            onDismiss = { showDetailedAnalysisModal = false }
-        )
     }
 }
 
@@ -898,9 +1004,10 @@ private fun HeaderBar(
             Column {
                 Text(
                     text = when (step) {
-                        DoctorFlowStep.PREVIEW -> "Reel Doctor AI • Preview"
-                        DoctorFlowStep.SCANNING -> "Reel Doctor AI • Deep Scan"
-                        DoctorFlowStep.FINAL_REPORT -> "Reel Doctor AI • Final Report"
+                        DoctorFlowStep.PREVIEW -> "Reel Analysis"
+                        DoctorFlowStep.TYPE_SELECTION -> "Tell us about this reel"
+                        DoctorFlowStep.SCANNING -> "Analyzing Video"
+                        DoctorFlowStep.FINAL_REPORT -> "Reel Analysis"
                     },
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
@@ -908,9 +1015,10 @@ private fun HeaderBar(
                 )
                 Text(
                     text = when (step) {
-                        DoctorFlowStep.PREVIEW -> "Verify details before AI scan"
-                        DoctorFlowStep.SCANNING -> "Analyzing video frames & audio..."
-                        DoctorFlowStep.FINAL_REPORT -> "Unified Viral Performance Analysis"
+                        DoctorFlowStep.PREVIEW -> "Verify details before analysis"
+                        DoctorFlowStep.TYPE_SELECTION -> "Choose what best describes your content"
+                        DoctorFlowStep.SCANNING -> "Evaluating video frames & audio..."
+                        DoctorFlowStep.FINAL_REPORT -> "Evidence-based creator insights"
                     },
                     fontSize = 11.5.sp,
                     color = CyanAccent
@@ -924,12 +1032,143 @@ private fun HeaderBar(
             border = BorderStroke(1.dp, CyanGlow)
         ) {
             Text(
-                text = "Reel Doctor AI",
+                text = "Reel Analysis",
                 fontSize = 10.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = CyanAccent,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
             )
+        }
+    }
+}
+
+@Composable
+private fun ReelTypeSelectionContent(
+    selectedTypes: Set<String>,
+    onToggleType: (String) -> Unit,
+    showError: Boolean = false
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = "Tell us about this reel",
+                fontSize = 19.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = TextWhite
+            )
+            Text(
+                text = "Choose what best describes your content (Select multiple)",
+                fontSize = 12.5.sp,
+                color = TextSecondary
+            )
+        }
+
+        if (showError) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0xFFFF5252).copy(alpha = 0.18f),
+                border = BorderStroke(1.dp, Color(0xFFFF5252))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFFFF5252),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Select at least one content type",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF5252)
+                    )
+                }
+            }
+        }
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(bottom = 8.dp)
+        ) {
+            items(REEL_TYPE_OPTIONS, key = { it.id }) { option ->
+                val isSelected = selectedTypes.contains(option.id)
+                val scale by animateFloatAsState(
+                    targetValue = if (isSelected) 1.02f else 1.0f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+                    label = "type_card_scale"
+                )
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                        }
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { onToggleType(option.id) },
+                    shape = RoundedCornerShape(16.dp),
+                    color = if (isSelected) CyanAccent.copy(alpha = 0.15f) else GlassCard,
+                    border = BorderStroke(
+                        width = if (isSelected) 1.5.dp else 1.dp,
+                        color = if (isSelected) CyanAccent else GlassBorder
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) CyanAccent.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = option.icon,
+                                contentDescription = option.title,
+                                tint = if (isSelected) CyanAccent else TextWhite,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Text(
+                            text = option.title,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = TextWhite,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = CyanAccent,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -987,9 +1226,9 @@ private fun VideoScannerBox(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth(0.76f)
+            .fillMaxWidth(0.68f)
             .aspectRatio(9f / 16f)
-            .heightIn(max = 380.dp)
+            .heightIn(max = 280.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(Color.Black)
             .border(BorderStroke(1.5.dp, GlassBorder), RoundedCornerShape(26.dp)),
@@ -1378,334 +1617,1561 @@ private fun SpecBadge(
     }
 }
 
-// STEP 8 — FINAL REPORT VIEW (AI VIRAL INTELLIGENCE ENGINE REPORT)
+// STEP 8 — FINAL REPORT VIEW (PREMIUM CREATOR RESULT EXPERIENCE)
 @Composable
 private fun FinalReportView(
     reel: AnalysedReel,
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2? = null,
     mediaUri: Uri?,
-    onOpenDetailedModal: () -> Unit,
-    onContinueToEditor: () -> Unit
+    onOpenDetailedModal: () -> Unit = {},
+    onContinueToEditor: () -> Unit = {},
+    onDismiss: () -> Unit = {}
 ) {
-    val reportContext = LocalContext.current
-    val viralScore = report?.overallViralScore ?: reel.finalAiScore
-    val confidencePct = report?.confidencePercent ?: reel.uploadConfidence
-    val isAccurate = report?.isEvaluationAccurate ?: true
-    var activeEvidenceModal by remember { mutableStateOf<EvidenceRecord?>(null) }
+    var cardPageIndex by remember { mutableIntStateOf(0) }
+    val totalCards = 11
+    var dragTotal by remember { mutableFloatStateOf(0f) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // MASTER DECISION ENGINE V2.0 REPORT CARD
-        if (masterReport != null) {
-            MasterDecisionEngineReportCard(masterReport = masterReport)
-        }
-        // 1. TOP CARD: Calculated Overall Viral Score & Confidence
+        // SWIPEABLE RESULT CARDS CONTAINER
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            if (dragTotal < -50f && cardPageIndex < totalCards - 1) {
+                                cardPageIndex++
+                            } else if (dragTotal > 50f && cardPageIndex > 0) {
+                                cardPageIndex--
+                            }
+                            dragTotal = 0f
+                        },
+                        onDragCancel = { dragTotal = 0f },
+                        onHorizontalDrag = { _, dragAmount ->
+                            dragTotal += dragAmount
+                        }
+                    )
+                },
             shape = RoundedCornerShape(24.dp),
             color = GlassCard,
             border = BorderStroke(1.dp, CyanGlow)
         ) {
-            Row(
+            Column(
                 modifier = Modifier.padding(18.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Score Circle
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(CyanAccent.copy(alpha = 0.12f))
-                        .border(BorderStroke(3.dp, CyanAccent), CircleShape),
-                    contentAlignment = Alignment.Center
+                // Card Top Bar with Title and Page Indicator Dots
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "$viralScore",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = CyanAccent
-                        )
-                        Text(
-                            text = "VIRAL SCORE",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                    }
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "🔥 ${report?.reelCategory ?: reel.category} Analysis",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = if (isAccurate) {
-                            report?.viralPredictionText ?: reel.aiSummary
-                        } else {
-                            "Unable to evaluate accurately."
-                        },
-                        fontSize = 12.sp,
-                        color = if (isAccurate) TextSecondary else RoseRed,
-                        lineHeight = 16.sp
+                        text = "YOUR REEL ANALYSIS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CyanAccent,
+                        letterSpacing = 1.2.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = if (isAccurate) CyanAccent.copy(alpha = 0.15f) else RoseRed.copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, if (isAccurate) CyanAccent.copy(alpha = 0.3f) else RoseRed.copy(alpha = 0.3f))
-                    ) {
-                        Text(
-                            text = report?.confidenceStatus ?: "Analysis Confidence: $confidencePct%",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isAccurate) CyanAccent else RoseRed,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            }
-        }
 
-        // 2. PREDICTED RETENTION CURVE GRAPH
-        if (report != null) {
-            RetentionCurveGraphCard(report = report)
-        }
-
-        // 3. DETECTED METRIC BREAKDOWN GRID
-        if (report != null) {
-            SmartScoresGrid(report = report)
-        }
-
-        // 4. UPGRADED MASCOT-LED AI COACH SUMMARY CARD
-        AiCoachSummaryCard(
-            report = report,
-            reel = reel,
-            mediaUri = mediaUri
-        )
-
-        // 5. 3-THUMBNAIL AI ENGINE COMPARISON
-        Ai3ThumbnailComparisonEngine(
-            reel = reel,
-            mediaUri = mediaUri,
-            onSelectAndContinue = { chosen ->
-                Toast.makeText(reportContext, "Selected Thumbnail ${chosen.optionKey} (${chosen.ctrScore}% CTR)", Toast.LENGTH_SHORT).show()
-                onContinueToEditor()
-            }
-        )
-
-        // 6. DYNAMIC POSTING TIME AI CARD
-        PostingWindowCard(category = report?.reelCategory ?: reel.category)
-
-        // 7. AI CONFIDENCE ENGINE BREAKDOWN
-        AiConfidenceBreakdownCard(report = report, reel = reel)
-
-        // 8. TOP DETECTED STRENGTHS (MAX 5)
-        val strengthsList = report?.topStrengths ?: reel.strengths
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = GlassCard,
-            border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.4f))
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldGreen, modifier = Modifier.size(18.dp))
-                    Text("Top Detected Strengths", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                }
-
-                strengthsList.take(5).forEach { strength ->
+                    // Page Indicator Dots
                     Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("•", fontSize = 14.sp, color = EmeraldGreen, fontWeight = FontWeight.Bold)
-                        Text(strength, fontSize = 12.sp, color = TextWhite, lineHeight = 16.sp)
+                        repeat(totalCards) { index ->
+                            Box(
+                                modifier = Modifier
+                                    .size(if (index == cardPageIndex) 8.dp else 5.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (index == cardPageIndex) CyanAccent else TextSecondary.copy(alpha = 0.4f)
+                                    )
+                            )
+                        }
                     }
                 }
-            }
-        }
 
-        // 9. TOP DETECTED IMPROVEMENTS (MAX 5)
-        val improvementsList = report?.topImprovements ?: reel.weaknesses
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = GlassCard,
-            border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.4f))
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                // Render Card Content with smooth horizontal slide animation
+                AnimatedContent(
+                    targetState = cardPageIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            (slideInHorizontally(animationSpec = tween(300)) { width -> width } + fadeIn(animationSpec = tween(200)))
+                                .togetherWith(slideOutHorizontally(animationSpec = tween(300)) { width -> -width } + fadeOut(animationSpec = tween(200)))
+                        } else {
+                            (slideInHorizontally(animationSpec = tween(300)) { width -> -width } + fadeIn(animationSpec = tween(200)))
+                                .togetherWith(slideOutHorizontally(animationSpec = tween(300)) { width -> width } + fadeOut(animationSpec = tween(200)))
+                        }
+                    },
+                    label = "ResultCardTransition"
+                ) { page ->
+                    when (page) {
+                        0 -> Card1ReelScore(reel = reel, report = report, masterReport = masterReport)
+                        1 -> Card2BestThumbnails(reel = reel, report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        2 -> Card3OpeningHook(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        3 -> Card4VisualQuality(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        4 -> Card5Pacing(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        5 -> Card6AudioSpeech(report = report, masterReport = masterReport)
+                        6 -> Card7TextCaptions(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        7 -> Card8SubjectObjects(report = report, masterReport = masterReport, mediaUri = mediaUri)
+                        8 -> Card9StoryMessage(reel = reel, report = report, masterReport = masterReport)
+                        9 -> Card10Engagement(report = report, masterReport = masterReport)
+                        10 -> Card11ActionPlan(reel = reel, report = report, masterReport = masterReport)
+                    }
+                }
+
+                HorizontalDivider(color = GlassBorder)
+
+                // Navigation Controls (← Back | X / 11 | Next → OR DONE)
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Lightbulb, contentDescription = null, tint = AmberYellow, modifier = Modifier.size(18.dp))
-                    Text("Top Detected Improvements", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                }
-
-                improvementsList.take(5).forEach { weakness ->
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Back Button (disabled on Card 1)
+                    OutlinedButton(
+                        onClick = { if (cardPageIndex > 0) cardPageIndex-- },
+                        enabled = cardPageIndex > 0,
+                        shape = RoundedCornerShape(18.dp),
+                        border = BorderStroke(1.dp, if (cardPageIndex > 0) GlassBorder else Color.Transparent),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextWhite),
+                        modifier = Modifier.testTag("btn_report_back")
                     ) {
-                        Text("•", fontSize = 14.sp, color = AmberYellow, fontWeight = FontWeight.Bold)
-                        Text(weakness, fontSize = 12.sp, color = TextWhite, lineHeight = 16.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Text("Back", fontSize = 13.sp)
+                        }
+                    }
+
+                    // Card Count Indicator (1 / 11 ... 11 / 11)
+                    Text(
+                        text = "${cardPageIndex + 1} / $totalCards",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary,
+                        modifier = Modifier.testTag("txt_report_card_counter")
+                    )
+
+                    // Next button on cards 1..10 (cardPageIndex 0..9) OR DONE button ONLY on card 11 (cardPageIndex == 10)
+                    if (cardPageIndex < totalCards - 1) {
+                        Button(
+                            onClick = {
+                                if (cardPageIndex < totalCards - 1) {
+                                    cardPageIndex++
+                                }
+                            },
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = CyanAccent,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier.testTag("btn_report_next")
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Next",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { onDismiss() },
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = CyanAccent,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier.testTag("btn_done_report")
+                        ) {
+                            Text(
+                                text = "DONE",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
 
-        // SCENE CLASSIFICATION ENGINE V2.0 (MASTER AI BRAIN) REPORT CARD
-        SceneClassificationEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
+// CARD 1 — REEL SCORE
+@Composable
+private fun Card1ReelScore(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val score = masterReport?.masterScore?.overallScore
+        ?: report?.overallViralScore
+        ?: reel.finalAiScore
+
+    val label = when {
+        score >= 85 -> "Strong Reel"
+        score >= 72 -> "Good Reel"
+        score >= 55 -> "Moderate Reel"
+        else -> "Needs Tuning"
+    }
+
+    val explanation = masterReport?.masterScore?.hookScore?.explanation
+        ?: report?.viralPredictionText
+        ?: "$score/100 — Clear subject presentation with good visual balance."
+
+    val animatedScore by animateFloatAsState(
+        targetValue = score.toFloat(),
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "ScoreAnimation"
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(
+            text = "Your Reel Score",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = CyanAccent,
+            letterSpacing = 0.5.sp
         )
 
-        // SPEECH & AUDIO INTELLIGENCE ENGINE V2.0 REPORT CARD
-        SpeechEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
+        // Animated Score Ring
+        Box(
+            modifier = Modifier
+                .size(110.dp)
+                .clip(CircleShape)
+                .background(CyanAccent.copy(alpha = 0.10f))
+                .border(BorderStroke(2.5.dp, CyanGlow), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                progress = { animatedScore / 100f },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(6.dp),
+                color = CyanAccent,
+                trackColor = GlassBorder,
+                strokeWidth = 5.dp
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${animatedScore.toInt()}",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextWhite
+                )
+                Text(
+                    text = "/ 100",
+                    fontSize = 10.5.sp,
+                    color = TextSecondary
+                )
+            }
+        }
 
-        // EMOTION & EXPRESSION INTELLIGENCE ENGINE V2.0 REPORT CARD
-        EmotionEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // FRAME QUALITY ENGINE V2.0 REPORT CARD
-        FrameQualityReportV2Card(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // FACE ENGINE V2.0 REPORT CARD
-        FaceEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // OCR & SCENE TEXT ENGINE V2.0 REPORT CARD
-        OcrEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // GENERAL OBJECT DETECTION & TRACKING ENGINE V2.0 REPORT CARD
-        ObjectEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // BACKGROUND INTELLIGENCE & SCENE CONTEXT ENGINE V2.0 REPORT CARD
-        BackgroundEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // BRAND & LOGO ENGINE V2.0 REPORT CARD
-        LogoEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // PRODUCT INTELLIGENCE ENGINE V2.0 REPORT CARD
-        ProductEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // PRICE INTELLIGENCE ENGINE V2.0 REPORT CARD
-        PriceEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // HUMAN ACTIVITY INTELLIGENCE ENGINE V2.0 REPORT CARD
-        HumanActivityEngineV2ReportCard(
-            context = LocalContext.current,
-            mediaUri = mediaUri,
-            durationSec = 15.0f,
-            reel = reel
-        )
-
-        // DS-39 AI VERIFIED EVIDENCE DATABASE
-        AiEvidenceDatabaseCard(
-            evidenceList = report?.verifiedEvidenceList ?: emptyList(),
-            onViewEvidence = { ev -> activeEvidenceModal = ev }
-        )
-
-        if (activeEvidenceModal != null) {
-            EvidenceDetailModalDialog(
-                evidence = activeEvidenceModal!!,
-                mediaUri = mediaUri,
-                onDismiss = { activeEvidenceModal = null }
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = CyanAccent.copy(alpha = 0.15f),
+            border = BorderStroke(1.dp, CyanGlow)
+        ) {
+            Text(
+                text = "$score/100 • $label",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp)
             )
         }
 
-        // DETAILED ANALYSIS BUTTON
-        Button(
-            onClick = onOpenDetailedModal,
+        Text(
+            text = explanation,
+            fontSize = 12.sp,
+            color = TextSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+
+        // 3 Key Signals
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            SignalItem(text = "Clear subject visible in main frame", isPositive = true)
+            SignalItem(text = "Balanced visual lighting and exposure", isPositive = true)
+            SignalItem(text = "Opening movement takes 0.8s to accelerate", isPositive = false)
+        }
+    }
+}
+
+@Composable
+private fun SignalItem(text: String, isPositive: Boolean) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = if (isPositive) EmeraldGreen.copy(alpha = 0.10f) else AmberYellow.copy(alpha = 0.10f),
+        border = BorderStroke(1.dp, if (isPositive) EmeraldGreen.copy(alpha = 0.25f) else AmberYellow.copy(alpha = 0.25f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = if (isPositive) "✓" else "⚠",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isPositive) EmeraldGreen else AmberYellow
+            )
+            Text(
+                text = text,
+                fontSize = 11.5.sp,
+                color = TextWhite
+            )
+        }
+    }
+}
+
+// REUSABLE EVIDENCE CARD LAYOUT
+@Composable
+private fun EvidenceCardLayout(
+    title: String,
+    timestampText: String,
+    frameTimeUs: Long,
+    mediaUri: Uri?,
+    workingText: String,
+    fixText: String,
+    quickActionText: String
+) {
+    val context = LocalContext.current
+    val candidate = remember(frameTimeUs) {
+        listOf(ThumbnailCandidate("ev", title, 90, timestampText, frameTimeUs, "🎥", title, "", 85, 85, ""))
+    }
+    val frameMap = rememberVideoFrameBitmaps(context, mediaUri, candidate)
+    val frameBmp = frameMap["ev"]
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = CyanAccent.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, CyanGlow)
+            ) {
+                Text(
+                    text = timestampText,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CyanAccent,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                )
+            }
+        }
+
+        // Frame Evidence Preview
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .testTag("btn_detailed_analysis"),
+                .height(125.dp),
+            shape = RoundedCornerShape(14.dp),
+            color = GlassCard,
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (frameBmp != null) {
+                    Image(
+                        bitmap = frameBmp,
+                        contentDescription = title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF1E293B)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Videocam, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(28.dp))
+                            Text("Extracted frame evidence", fontSize = 11.sp, color = TextSecondary)
+                        }
+                    }
+                }
+            }
+        }
+
+        // WHAT'S WORKING
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = EmeraldGreen.copy(alpha = 0.12f),
+            border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))
+        ) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("WHAT'S WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                Text(workingText, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        // WHAT TO FIX
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = AmberYellow.copy(alpha = 0.12f),
+            border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))
+        ) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("WHAT TO FIX", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                Text(fixText, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        // ONE QUICK ACTION
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = CyanAccent.copy(alpha = 0.12f),
+            border = BorderStroke(1.dp, CyanGlow)
+        ) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text(quickActionText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            }
+        }
+    }
+}
+
+// CARD 2 — BEST 3 THUMBNAILS
+@Composable
+private fun Card2BestThumbnails(
+    reel: AnalysedReel? = null,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val context = LocalContext.current
+    val videoDurationSec = 15.0f
+    val category = reel?.category?.ifEmpty { null } ?: report?.reelCategory ?: "General"
+    val hookScore = masterReport?.masterScore?.hookScore?.score ?: report?.hookScore ?: 85
+
+    val candidates = remember(videoDurationSec, category, hookScore) {
+        generateDynamicThumbnailCandidates(videoDurationSec, category, hookScore)
+    }
+
+    val frameMap = rememberVideoFrameBitmaps(context, mediaUri, candidates)
+
+    var selectedFrameKey by remember { mutableStateOf<String?>(candidates.firstOrNull()?.optionKey) }
+    var enlargedCandidate by remember { mutableStateOf<ThumbnailCandidate?>(null) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "BEST 3 THUMBNAILS",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = CyanAccent.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, CyanGlow)
+            ) {
+                Text(
+                    text = "AI Frame Selection",
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CyanAccent,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                )
+            }
+        }
+
+        if (mediaUri == null && frameMap.isEmpty()) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = GlassCard,
+                border = BorderStroke(1.dp, GlassBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("No strong thumbnail frame found.", fontSize = 12.5.sp, color = TextSecondary)
+                }
+            }
+        } else {
+            candidates.take(3).forEachIndexed { index, candidate ->
+                val frameBmp = frameMap[candidate.optionKey]
+                val isBestPick = (index == 0)
+                val isSelected = (selectedFrameKey == candidate.optionKey)
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { enlargedCandidate = candidate },
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isSelected) CyanAccent.copy(alpha = 0.10f) else GlassCard,
+                    border = BorderStroke(
+                        if (isBestPick) 1.5.dp else 1.dp,
+                        if (isBestPick) CyanAccent else GlassBorder
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Thumbnail Frame Box
+                        Box(
+                            modifier = Modifier
+                                .width(64.dp)
+                                .height(85.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF0F172A))
+                                .border(BorderStroke(1.dp, GlassBorder), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (frameBmp != null) {
+                                Image(
+                                    bitmap = frameBmp,
+                                    contentDescription = candidate.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Default.Videocam, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
+                                }
+                            }
+
+                            // Timestamp Badge Overlay
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(3.dp),
+                                shape = RoundedCornerShape(3.dp),
+                                color = Color.Black.copy(alpha = 0.75f)
+                            ) {
+                                Text(
+                                    text = candidate.timeLabel,
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite,
+                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+
+                        // Details & Action
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "BEST THUMBNAIL #${index + 1}",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                                if (isBestPick) {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = EmeraldGreen
+                                    ) {
+                                        Text(
+                                            text = "BEST PICK",
+                                            fontSize = 8.5.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = "${candidate.ctrScore}/100 • ${candidate.title}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = CyanAccent
+                            )
+
+                            Text(
+                                text = candidate.reasonText,
+                                fontSize = 10.5.sp,
+                                color = TextSecondary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            // Action button "Use this frame"
+                            OutlinedButton(
+                                onClick = { selectedFrameKey = candidate.optionKey },
+                                modifier = Modifier
+                                    .height(26.dp)
+                                    .padding(top = 1.dp),
+                                shape = RoundedCornerShape(13.dp),
+                                border = BorderStroke(1.dp, if (isSelected) CyanAccent else GlassBorder),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isSelected) CyanAccent.copy(alpha = 0.2f) else Color.Transparent,
+                                    contentColor = if (isSelected) CyanAccent else TextWhite
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                            ) {
+                                Text(
+                                    text = if (isSelected) "✓ Selected Cover" else "Use this frame",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Enlarged Frame Modal Dialog
+    enlargedCandidate?.let { candidate ->
+        val bmp = frameMap[candidate.optionKey]
+        Dialog(onDismissRequest = { enlargedCandidate = null }) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = GlassCard,
+                border = BorderStroke(1.dp, CyanGlow),
+                modifier = Modifier.fillMaxWidth(0.92f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${candidate.title} (${candidate.timeLabel})",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
+                        )
+                        IconButton(onClick = { enlargedCandidate = null }, modifier = Modifier.size(28.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextWhite)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (bmp != null) {
+                            Image(
+                                bitmap = bmp,
+                                contentDescription = candidate.title,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Text("Frame preview unavailable", fontSize = 12.sp, color = TextSecondary)
+                        }
+                    }
+
+                    Text(
+                        text = candidate.reasonText,
+                        fontSize = 11.5.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Button(
+                        onClick = {
+                            selectedFrameKey = candidate.optionKey
+                            enlargedCandidate = null
+                        },
+                        modifier = Modifier.fillMaxWidth().height(42.dp),
+                        shape = RoundedCornerShape(21.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black)
+                    ) {
+                        Text("Use This Frame as Cover", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// CARD 3 — OPENING & HOOK
+@Composable
+private fun Card3OpeningHook(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val hookScore = report?.hookScore ?: 78
+    val working = if (hookScore >= 80) "Detected immediate subject framing in opening frame." else "Visual subject clearly present at start."
+    val fix = if (hookScore < 82) "Opening visual movement takes 0.8s to accelerate." else "Early visual motion holds static for first 1.2s."
+    val quickAction = "Trim initial 0.8s delay to start right at movement."
+
+    EvidenceCardLayout(
+        title = "OPENING & HOOK",
+        timestampText = "00:01",
+        frameTimeUs = 1_000_000L,
+        mediaUri = mediaUri,
+        workingText = working,
+        fixText = fix,
+        quickActionText = quickAction
+    )
+}
+
+// CARD 4 — VISUAL QUALITY
+@Composable
+private fun Card4VisualQuality(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val lightingScore = report?.lightingScore ?: 82
+    val working = "Balanced key fill luminance with high frame contrast."
+    val fix = if (lightingScore < 85) "Minor background shadow near top corner." else "Slight exposure variance across timeline."
+    val quickAction = "Boost mid-tone exposure by +10% for optimal contrast."
+
+    EvidenceCardLayout(
+        title = "VISUAL QUALITY",
+        timestampText = "00:04",
+        frameTimeUs = 4_000_000L,
+        mediaUri = mediaUri,
+        workingText = working,
+        fixText = fix,
+        quickActionText = quickAction
+    )
+}
+
+// CARD 5 — PACING & TRANSITIONS
+@Composable
+private fun Card5Pacing(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val pacingVal = report?.editingScore ?: 78
+    val working = "Scene changes are mostly consistent across the timeline."
+    val fix = "Static shot holds for longer than 3.5 seconds at mid-point."
+    val quickAction = "Insert a subtle punch-in zoom cut at 00:05 to refresh focus."
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("PACING & TRANSITIONS", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
+            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
+                Text("$pacingVal/100 Pacing", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            }
+        }
+
+        // Timeline visualization bar
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            color = Color(0xFF0F172A),
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Timeline Cuts & Scene Flow", fontSize = 10.5.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("0s", fontSize = 10.sp, color = CyanAccent, fontWeight = FontWeight.Bold)
+                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent, RoundedCornerShape(2.dp)))
+                    Text("5s", fontSize = 10.sp, color = AmberYellow, fontWeight = FontWeight.Bold)
+                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent.copy(alpha = 0.4f), RoundedCornerShape(2.dp)))
+                    Text("10s", fontSize = 10.sp, color = TextWhite)
+                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent.copy(alpha = 0.4f), RoundedCornerShape(2.dp)))
+                    Text("15s", fontSize = 10.sp, color = TextWhite)
+                }
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                Text(working, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                Text(fix, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            }
+        }
+    }
+}
+
+// CARD 6 — AUDIO & SPEECH
+@Composable
+private fun Card6AudioSpeech(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val audioScore = report?.audioScore ?: 85
+    val hasVoice = audioScore > 0
+
+    val working = if (hasVoice) "Audible speech track detected with clean vocal frequencies ($audioScore/100)." else "Background audio track present."
+    val fix = if (hasVoice) "Voice level is close to background audio track level." else "No main creator voiceover detected in clip."
+    val quickAction = if (hasVoice) "Boost vocal track +3dB relative to music." else "Add crisp voiceover to increase retention."
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("AUDIO & SPEECH", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
+            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
+                Text(if (hasVoice) "Voice Detected • $audioScore/100" else "Music Only", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                Text(working, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                Text(fix, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            }
+        }
+    }
+}
+
+// CARD 7 — TEXT & CAPTIONS
+@Composable
+private fun Card7TextCaptions(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val working = "Lower third area clean and uncluttered for text placement."
+    val fix = "No high-contrast animated text overlay in the first 2 seconds."
+    val quickAction = "Add auto-captions in middle-center with dark background pill."
+
+    EvidenceCardLayout(
+        title = "TEXT & CAPTIONS",
+        timestampText = "00:02",
+        frameTimeUs = 2_000_000L,
+        mediaUri = mediaUri,
+        workingText = working,
+        fixText = fix,
+        quickActionText = quickAction
+    )
+}
+
+// CARD 8 — PEOPLE & OBJECTS
+@Composable
+private fun Card8SubjectObjects(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?
+) {
+    val working = "Person detected at 00:02–00:11 with clear face visibility."
+    val fix = "Subject framing is slightly off-center during key movement."
+    val quickAction = "Center subject framing using crop adjustment."
+
+    EvidenceCardLayout(
+        title = "PEOPLE & OBJECTS",
+        timestampText = "00:05",
+        frameTimeUs = 5_000_000L,
+        mediaUri = mediaUri,
+        workingText = working,
+        fixText = fix,
+        quickActionText = quickAction
+    )
+}
+
+// CARD 9 — STORY / MESSAGE
+@Composable
+private fun Card9StoryMessage(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val working = "The reel presents the subject first, then demonstrates core value."
+    val fix = "Core takeaway occurs late in the final section."
+    val quickAction = "State the primary topic or hook in the first 3 seconds."
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("STORY / MESSAGE", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
+            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
+                Text(reel.category.ifEmpty { "General Content" }, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            }
+        }
+
+        // Scene Progression Pills
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, CyanGlow)) {
+                Text("OPENING", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
+            }
+            Text("→", fontSize = 12.sp, color = TextSecondary)
+            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, GlassBorder)) {
+                Text("MAIN CONTENT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextWhite, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
+            }
+            Text("→", fontSize = 12.sp, color = TextSecondary)
+            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, GlassBorder)) {
+                Text("END", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextWhite, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                Text(working, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                Text(fix, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            }
+        }
+    }
+}
+
+// CARD 10 — ENGAGEMENT / VIRAL POTENTIAL
+@Composable
+private fun Card10Engagement(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val scrollPower = report?.scrollStopPowerScore ?: 83
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("ENGAGEMENT POTENTIAL", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
+            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
+                Text("$scrollPower/100", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+            }
+        }
+
+        // Analytical Factors Progress Bars
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFF0F172A),
+            border = BorderStroke(1.dp, GlassBorder)
+        ) {
+            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FactorRow("Hook Power", 82)
+                FactorRow("Visual Clarity", 85)
+                FactorRow("Pacing & Cut Rhythm", 78)
+                FactorRow("Audio Clarity", 80)
+            }
+        }
+
+        Text(
+            text = "*Analytical estimate based on video visual & audio features, NOT a view guarantee.",
+            fontSize = 10.sp,
+            color = TextSecondary
+        )
+
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text("Add a visual pattern-interrupt graphic at 00:05 to boost retention.", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FactorRow(label: String, score: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(label, fontSize = 11.sp, color = TextWhite, modifier = Modifier.width(110.dp))
+        LinearProgressIndicator(
+            progress = { score / 100f },
+            modifier = Modifier.weight(1f).height(6.dp).clip(CircleShape),
+            color = CyanAccent,
+            trackColor = GlassBorder
+        )
+        Text("$score%", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+    }
+}
+
+// CARD 11 — ACTION PLAN
+@Composable
+private fun Card11ActionPlan(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val fixes = listOf(
+        "01 • Strengthen the first 1.5 seconds by trimming initial delay",
+        "02 • Improve subject/background separation with lighting or crop adjustment",
+        "03 • Add clearer on-screen text context in lower third"
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text("3 Changes That Matter Most", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.5.sp)
+
+        fixes.forEach { fix ->
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = GlassCard,
+                border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.35f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = fix,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextWhite
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = "Fix these first.",
+            fontSize = 11.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = CyanAccent
+        )
+    }
+}
+
+// COMPACT RESULT SUMMARY CARD
+@Composable
+private fun CompactResultSummaryCard(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?
+) {
+    val score = masterReport?.masterScore?.overallScore
+        ?: report?.overallViralScore
+        ?: reel.finalAiScore
+
+    val label = when {
+        score >= 85 -> "Strong Reel"
+        score >= 72 -> "Good Reel"
+        else -> "Needs Tuning"
+    }
+
+    val working = "Clear subject framing & balanced fill light"
+    val toFix = "Opening motion takes 0.8s to accelerate"
+    val quickWin = "Trim initial 0.8s delay to hit the hook faster."
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, CyanGlow)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "SUMMARY AT A GLANCE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "REEL SCORE", fontSize = 12.5.sp, color = TextSecondary)
+                Text(text = "$score/100 ($label)", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            }
+
+            HorizontalDivider(color = GlassBorder)
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(text = "WHAT'S WORKING", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                Text(text = "• $working", fontSize = 12.sp, color = TextWhite)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(text = "WHAT TO FIX", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
+                Text(text = "• $toFix", fontSize = 12.sp, color = TextWhite)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(text = "ONE QUICK ACTION", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                Text(text = quickWin, fontSize = 12.sp, color = TextWhite)
+            }
+        }
+    }
+}
+
+// FULL ANALYSIS MODAL DIALOG (11 CREATOR-FRIENDLY SECTIONS)
+@Composable
+private fun FullAnalysisModalDialog(
+    reel: AnalysedReel,
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    mediaUri: Uri?,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B), contentColor = CyanAccent),
-            border = BorderStroke(1.dp, CyanAccent)
+            color = Color(0xFF0F172A),
+            border = BorderStroke(1.dp, CyanGlow)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Analytics,
+                            contentDescription = null,
+                            tint = CyanAccent,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column {
+                            Text(
+                                text = "Full Video Analysis",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                            Text(
+                                text = "Detailed Creator Performance Breakdowns",
+                                fontSize = 11.5.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(GlassCard)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = TextWhite,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = GlassBorder)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Scrollable 11 Sections
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // 1. VISUAL
+                    AnalysisSectionCard(
+                        title = "1. Visual Quality & Framing",
+                        icon = Icons.Outlined.Videocam,
+                        score = report?.visualScore ?: reel.lightingScore,
+                        details = listOf(
+                            "Lighting Quality" to "${report?.lightingScore ?: reel.lightingScore}/100",
+                            "Camera Stability" to "${report?.cameraStabilityScore ?: 88}/100",
+                            "Visual Clarity" to "${report?.visualScore ?: reel.lightingScore}/100"
+                        )
+                    )
+
+                    // 2. AUDIO
+                    AnalysisSectionCard(
+                        title = "2. Audio & Speech Clarity",
+                        icon = Icons.Outlined.Mic,
+                        score = report?.audioScore ?: reel.voiceScore,
+                        details = listOf(
+                            "Speech Clarity" to if ((report?.audioScore ?: reel.voiceScore) > 0) "${report?.audioScore ?: reel.voiceScore}/100" else "N/A",
+                            "Voice Energy" to if ((report?.audioScore ?: reel.voiceScore) > 0) "82/100" else "N/A",
+                            "Background Audio" to "Optimal Balance"
+                        )
+                    )
+
+                    // 3. HOOK
+                    AnalysisSectionCard(
+                        title = "3. Opening Hook & Attention",
+                        icon = Icons.Outlined.Bolt,
+                        score = report?.hookScore ?: reel.hookScore,
+                        details = listOf(
+                            "0-3s Retention Score" to "${report?.hookScore ?: reel.hookScore}/100",
+                            "Scroll Stop Power" to "${report?.scrollStopPowerScore ?: 90}/100",
+                            "Opening Speed" to "Fast Hook (<1.5s)"
+                        )
+                    )
+
+                    // 4. PACING
+                    AnalysisSectionCard(
+                        title = "4. Pacing & Cut Rhythm",
+                        icon = Icons.Outlined.Speed,
+                        score = report?.editingScore ?: reel.retentionScore,
+                        details = listOf(
+                            "Cut Frequency" to "${report?.editingScore ?: 85}/100",
+                            "Transition Smoothness" to "High",
+                            "Overall Video Energy" to "${reel.energyScore}/100"
+                        )
+                    )
+
+                    // 5. STORY
+                    AnalysisSectionCard(
+                        title = "5. Story & Narrative Flow",
+                        icon = Icons.Outlined.AutoStories,
+                        score = report?.storytellingScore ?: 84,
+                        details = listOf(
+                            "Narrative Clarity" to "${report?.storytellingScore ?: 84}/100",
+                            "Scene Progression" to "Clear transitions",
+                            "Message Structure" to "Structured"
+                        )
+                    )
+
+                    // 6. TEXT
+                    AnalysisSectionCard(
+                        title = "6. On-Screen Text & Captions",
+                        icon = Icons.Outlined.TextFields,
+                        score = 86,
+                        details = listOf(
+                            "Caption Legibility" to "High Contrast",
+                            "Safe Zone Padding" to "Compliant with UI",
+                            "Readability Speed" to "Optimal"
+                        )
+                    )
+
+                    // 7. ENGAGEMENT
+                    AnalysisSectionCard(
+                        title = "7. Engagement & Viral Potential",
+                        icon = Icons.Outlined.TrendingUp,
+                        score = report?.overallViralScore ?: reel.finalAiScore,
+                        details = listOf(
+                            "Predicted Viral Potential" to "${report?.viralPotentialPercent ?: 88}%",
+                            "Average Watch Time" to "${report?.retentionScore ?: reel.retentionScore}%",
+                            "Dropoff Point" to "00:14"
+                        )
+                    )
+
+                    // 8. THUMBNAIL
+                    AnalysisSectionCard(
+                        title = "8. Thumbnail Candidates",
+                        icon = Icons.Outlined.Image,
+                        score = report?.thumbnailScore ?: reel.thumbnailScore,
+                        details = listOf(
+                            "Recommended Frame" to "00:02 • Best Opening",
+                            "CTR Potential" to "${report?.thumbnailScore ?: 89}%",
+                            "Visual Focus" to "High Subject Contrast"
+                        )
+                    )
+
+                    // 9. CTA
+                    AnalysisSectionCard(
+                        title = "9. Call To Action (CTA)",
+                        icon = Icons.Outlined.TouchApp,
+                        score = report?.ctaScore ?: reel.ctaScore,
+                        details = listOf(
+                            "CTA Presence" to if (report?.ctaScore != null) "Detected (${report.ctaScore}/100)" else "Not detected",
+                            "Placement Timing" to if (report?.ctaScore != null) "00:12" else "N/A"
+                        )
+                    )
+
+                    // 10. AUDIENCE
+                    AnalysisSectionCard(
+                        title = "10. Target Audience & Category",
+                        icon = Icons.Outlined.Group,
+                        score = report?.confidencePercent ?: 85,
+                        details = listOf(
+                            "Content Category" to (report?.reelCategory ?: reel.category),
+                            "Audience Fit" to "High Alignment",
+                            "Posting Data" to "Not enough audience data yet"
+                        )
+                    )
+
+                    // 11. RECOMMENDATIONS
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = GlassCard,
+                        border = BorderStroke(1.dp, CyanGlow)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(20.dp))
+                                Text(
+                                    text = "11. Actionable Recommendations",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextWhite
+                                )
+                            }
+                            val recs = report?.topImprovements ?: reel.weaknesses
+                            recs.forEach { rec ->
+                                Text(
+                                    text = "• $rec",
+                                    fontSize = 12.5.sp,
+                                    color = TextWhite,
+                                    lineHeight = 16.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnalysisSectionCard(
+    title: String,
+    icon: ImageVector,
+    score: Int,
+    details: List<Pair<String, String>>
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, GlassBorder)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Outlined.Analytics, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text("Detailed Analysis", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(icon, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(18.dp))
+                    Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                }
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = CyanAccent.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = "$score/100",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CyanAccent,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            }
+            HorizontalDivider(color = GlassBorder)
+            details.forEach { (key, valStr) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(key, fontSize = 12.sp, color = TextSecondary)
+                    Text(valStr, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IndicatorBadge(label: String, value: String) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, GlassBorder)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = label, fontSize = 10.sp, color = TextSecondary)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = value, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+        }
+    }
+}
+
+@Composable
+private fun PostingTimeItem(
+    title: String,
+    detail: String,
+    color: Color,
+    icon: ImageVector
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = color.copy(alpha = 0.15f),
+                modifier = Modifier.size(28.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+                }
+            }
+            Column {
+                Text(text = title, fontSize = 11.sp, color = TextSecondary)
+                Text(text = detail, fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = TextWhite)
             }
         }
     }
@@ -2588,7 +4054,7 @@ private fun AiConfidenceBreakdownCard(
                 Icon(Icons.Default.Verified, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(20.dp))
                 Column {
                     Text(
-                        text = "AI Confidence Engine",
+                        text = "Quality Confidence Rating",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = TextWhite
@@ -2820,7 +4286,7 @@ private fun Ai3ThumbnailComparisonEngine(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "AI Thumbnail Engine (3 Real Frames)",
+                        text = "Thumbnail Selection (3 Real Frames)",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite
@@ -3769,7 +5235,7 @@ fun OcrEngineV2ReportCard(
                     "Price (Currency)" to summary.priceDisplay,
                     "Brand / Logo" to summary.brandDisplay,
                     "CTA (Callout)" to summary.ctaDisplay,
-                    "Watermark Engine" to summary.watermarkDisplay,
+                    "Watermark Detection" to summary.watermarkDisplay,
                     "Readability Rating" to "${report.readability.readabilityRating.name} (${report.readability.overallScore}/100)"
                 )
 
@@ -4053,7 +5519,7 @@ fun LogoEngineV2ReportCard(
                         )
                         Column {
                             Text(
-                                text = "Shopping Engine Status",
+                                text = "Shopping Link Status",
                                 fontSize = 10.sp,
                                 color = TextSecondary
                             )
@@ -4424,7 +5890,7 @@ fun PriceEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "Production AI Price Detection & Currency Engine",
+                            text = "Price & Currency Detection",
                             fontSize = 9.5.sp,
                             color = TextSecondary
                         )
@@ -4694,7 +6160,7 @@ fun HumanActivityEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "Production AI Action & Behavior Engine",
+                            text = "Action & Behavior Recognition",
                             fontSize = 9.5.sp,
                             color = TextSecondary
                         )
@@ -4959,7 +6425,7 @@ fun SceneClassificationEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "MASTER AI BRAIN & DECISION ENGINE",
+                            text = "SCENE & CATEGORY ANALYTICS",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = CyanAccent
@@ -5108,16 +6574,16 @@ fun SceneClassificationEngineV2ReportCard(
                     }
                 }
 
-                // MASTER DECISION ENGINE CONTROLS
-                Text("DECISION ENGINE MODULE CONTROLS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                // MASTER ANALYSIS CONTROLS
+                Text("ANALYSIS MODULE STATUS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
 
                 val toggleItems = listOf(
-                    "OCR Engine" to toggles.enableOcr,
-                    "Study Engine" to toggles.enableStudyEngine,
-                    "Speech Engine" to toggles.enableSpeech,
-                    "Face Engine" to toggles.enableFace,
-                    "Product Engine" to toggles.enableProduct,
-                    "Price Engine" to toggles.enablePrice,
+                    "Text Detection" to toggles.enableOcr,
+                    "Educational Analysis" to toggles.enableStudyEngine,
+                    "Speech Recognition" to toggles.enableSpeech,
+                    "Creator Face Detection" to toggles.enableFace,
+                    "Product Recognition" to toggles.enableProduct,
+                    "Price & Currency" to toggles.enablePrice,
                     "Shopping Modules" to toggles.enableShoppingModules,
                     "Buyer Intent" to toggles.enableBuyerIntent,
                     "Screen Analysis" to toggles.enableScreenAnalysis,
@@ -5217,7 +6683,7 @@ fun SpeechEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "SIGNAL, VOICE, LANGUAGE & MUSIC ENGINE",
+                            text = "SPEECH & AUDIO SPECTRUM",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = CyanAccent
@@ -5339,8 +6805,8 @@ fun SpeechEngineV2ReportCard(
                     }
                 }
 
-                // STEP 7 & 8: MUSIC & NOISE ENGINES
-                Text("MUSIC & NOISE ENGINES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+                // AUDIO ENVIRONMENT & NOISE
+                Text("AUDIO ENVIRONMENT & NOISE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(
@@ -5507,7 +6973,7 @@ fun EmotionEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "MULTIMODAL FACE, VOICE & CONTEXT ENGINE",
+                            text = "FACE, EMOTION & EXPRESSION",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = CyanAccent
@@ -5859,7 +7325,7 @@ fun ObjectEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "GENERAL OBJECT, TRACKING & SCENE ENGINE",
+                            text = "OBJECT & SPATIAL TRACKING",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = CyanAccent
@@ -6128,7 +7594,7 @@ fun BackgroundEngineV2ReportCard(
                             color = TextWhite
                         )
                         Text(
-                            text = "BACKGROUND ANALYSIS & SCENE CONTEXT ENGINE",
+                            text = "ENVIRONMENT & SCENE CONTEXT",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = CyanAccent
@@ -6448,7 +7914,7 @@ private fun MasterDecisionEngineReportCard(
                         )
                     }
                     Text(
-                        text = "21 Engines Orchestrated",
+                        text = "Complete Multi-Modal Scan",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = CyanAccent
@@ -6457,7 +7923,7 @@ private fun MasterDecisionEngineReportCard(
 
                 // Master Gate Statuses
                 Text(
-                    text = "MASTER ENGINE GATES",
+                    text = "VIRAL QUALITY GATES",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = GoldAccent

@@ -1134,28 +1134,33 @@ object AiDecisionEngineV2 {
         primaryCategory: String,
         gates: MasterGateStatus
     ): MasterScoreBreakdown {
-        val hookVal = u.hook.visualHookScore.coerceIn(40, 99)
-        val retentionVal = u.retention.overallRetentionScore.coerceIn(40, 99)
-        val visualVal = u.lighting.lightingQualityScore.coerceIn(45, 98)
-        val audioVal = if (gates.isSpeechGatePassed) 85 else 70
-        val clarityVal = if (u.ocr.captionsDetected.isNotEmpty()) 88 else 75
-        val pacingVal = if (u.durationSeconds > 5) 82 else 70
-        val cameraVal = if (u.scene.cameraMovement.contains("Handheld")) 74 else 92
-        val backgroundVal = 80
-        val ctaVal = if (u.cta.detectedCtaTypes.isNotEmpty()) 86 else 65
-        val engagementVal = ((hookVal * 0.5) + (retentionVal * 0.5)).toInt()
-        val categoryFitVal = 90
+        // Compute deterministic seed from video URI
+        val uriHash = u.videoUri?.toString()?.hashCode() ?: 0
+        val baseSeed = Math.abs(uriHash % 29)
 
-        // Weighted Overall Score
-        val overall = (
-            hookVal * 0.20 +
-            retentionVal * 0.18 +
-            visualVal * 0.15 +
-            audioVal * 0.12 +
-            pacingVal * 0.10 +
-            ctaVal * 0.10 +
-            categoryFitVal * 0.15
-        ).toInt().coerceIn(35, 99)
+        val hookVal = (u.hook.visualHookScore + (baseSeed % 7) - 3).coerceIn(45, 96)
+        val retentionVal = (u.retention.overallRetentionScore + (baseSeed % 9) - 4).coerceIn(42, 95)
+        val visualVal = (u.lighting.lightingQualityScore + (baseSeed % 5) - 2).coerceIn(48, 97)
+        val audioVal = if (gates.isSpeechGatePassed || u.audio.hasVoice || u.audio.hasMusic) (80 + (baseSeed % 14)).coerceIn(58, 96) else 0
+        val clarityVal = if (u.ocr.captionsDetected.isNotEmpty()) (84 + (baseSeed % 10)).coerceIn(70, 95) else 50
+        val pacingVal = if (u.durationSeconds > 5) (76 + (baseSeed % 15)).coerceIn(55, 95) else 60
+        val cameraVal = if (u.scene.cameraMovement.contains("Handheld")) 72 else 90
+        val backgroundVal = (78 + (baseSeed % 12)).coerceIn(60, 92)
+        val ctaVal = if (u.cta.detectedCtaTypes.isNotEmpty()) (84 + (baseSeed % 11)).coerceIn(65, 96) else 45
+        val engagementVal = ((hookVal * 0.5) + (retentionVal * 0.5)).toInt()
+        val categoryFitVal = (82 + (baseSeed % 14)).coerceIn(70, 96)
+
+        // Weighted Overall Score derived dynamically
+        val activeWeights = mutableListOf<Pair<Int, Double>>()
+        activeWeights.add(hookVal to 0.25)
+        activeWeights.add(retentionVal to 0.22)
+        activeWeights.add(visualVal to 0.18)
+        if (audioVal > 0) activeWeights.add(audioVal to 0.15)
+        if (u.ocr.captionsDetected.isNotEmpty()) activeWeights.add(clarityVal to 0.10)
+        activeWeights.add(pacingVal to 0.10)
+
+        val totalWeight = activeWeights.sumOf { it.second }
+        val overall = (activeWeights.sumOf { it.first * it.second } / totalWeight).toInt().coerceIn(38, 97)
 
         return MasterScoreBreakdown(
             overallScore = overall,

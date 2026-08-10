@@ -39,6 +39,36 @@ object AiEvidenceEngine {
         val verifiedList = mutableListOf<EvidenceRecord>()
         val overallConf = c.confidence.overallConfidence
 
+        // 0. OBSERVER LEDGER INTEGRATION (Evidence First, AI Second)
+        c.observationLedger.getVerifiedObservations().forEach { obs ->
+            val confPct = (obs.confidence * 100).toInt()
+            if (confPct >= MIN_CONFIDENCE_THRESHOLD && obs.verified) {
+                val issueTitle = when (obs.category) {
+                    "face" -> if (obs.detectedPerson?.contains("No human face") == true) "No Human Face Found" else "Creator Face Verified"
+                    "product" -> if (obs.detectedProduct?.contains("No commercial product") == true) "No Product Found" else "Product Verified"
+                    "text" -> if (obs.detectedText?.contains("No verified") == true) "No On-Screen Text" else "Text Overlay Verified"
+                    else -> obs.subcategory.ifEmpty { obs.category }.replace("_", " ")
+                }
+                verifiedList.add(
+                    EvidenceRecord(
+                        id = obs.id,
+                        issueTitle = issueTitle,
+                        category = obs.category,
+                        timestampSec = obs.timestampStart,
+                        timestampFormatted = obs.formatTimestampRange(),
+                        frameIndex = (obs.timestampStart * 30).toInt(),
+                        confidencePercent = confPct,
+                        confidenceBadge = getConfidenceBadge(confPct),
+                        observedValueText = obs.detectedPerson ?: obs.detectedProduct ?: obs.detectedText ?: obs.detectedAction ?: "Observation recorded",
+                        reasonExplanation = "Observation [${obs.getClaimPrefix()}] recorded via ${obs.source} engine at ${obs.formatTimestampRange()}.",
+                        expectedImpactText = "Verified proof recorded in observation ledger",
+                        hasVerifiedProof = obs.verified,
+                        cropNormX = obs.cropNormX, cropNormY = obs.cropNormY, cropNormW = obs.cropNormW, cropNormH = obs.cropNormH
+                    )
+                )
+            }
+        }
+
         // 1. HOOK EVIDENCE: Initial motion & visual delay
         if (overallConf >= MIN_CONFIDENCE_THRESHOLD) {
             val isWeakHook = c.hook.visualHookScore < 85 || c.hook.movementScore < 80
