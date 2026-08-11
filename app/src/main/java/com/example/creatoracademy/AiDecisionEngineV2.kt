@@ -18,28 +18,28 @@ import kotlin.math.min
 /**
  * 2 — ENGINE ENUMERATION (21 Core Engines)
  */
-enum class EngineType(val displayName: String) {
-    FRAME_QUALITY("Frame Quality Engine"),
-    FACE("Face Engine"),
-    OCR_TEXT("OCR / Text Engine"),
-    LOGO("Logo Engine"),
-    PRODUCT("Product Engine"),
-    PRICE("Price Engine"),
-    HUMAN_ACTIVITY("Human Activity Engine"),
-    OBJECT("Object Engine"),
-    BACKGROUND("Background Engine"),
-    MOTION("Motion Engine"),
-    SPEECH("Speech Engine"),
-    EMOTION("Emotion Engine"),
-    SCENE_CLASSIFICATION("Scene Classification Engine"),
-    AUDIO("Audio Analysis Engine"),
-    THUMBNAIL("Thumbnail Analysis Engine"),
-    HOOK("Hook Analysis Engine"),
-    CAPTION("Caption Analysis Engine"),
-    CTA("CTA Analysis Engine"),
-    CAMERA("Camera Analysis Engine"),
-    EDITING("Editing Analysis Engine"),
-    RETENTION("Retention Analysis Engine")
+enum class EngineType(val displayName: String, val userFacingName: String) {
+    FRAME_QUALITY("Frame Quality Engine", "Visual quality analysis"),
+    FACE("Face Engine", "Face framing analysis"),
+    OCR_TEXT("OCR / Text Engine", "On-screen text analysis"),
+    LOGO("Logo Engine", "Brand logo analysis"),
+    PRODUCT("Product Engine", "Product detection analysis"),
+    PRICE("Price Engine", "Pricing text analysis"),
+    HUMAN_ACTIVITY("Human Activity Engine", "Human movement analysis"),
+    OBJECT("Object Engine", "Object analysis"),
+    BACKGROUND("Background Engine", "Background analysis"),
+    MOTION("Motion Engine", "Motion analysis"),
+    SPEECH("Speech Engine", "Speech analysis"),
+    EMOTION("Emotion Engine", "Facial expression analysis"),
+    SCENE_CLASSIFICATION("Scene Classification Engine", "Scene analysis"),
+    AUDIO("Audio Analysis Engine", "Audio analysis"),
+    THUMBNAIL("Thumbnail Analysis Engine", "Cover frame analysis"),
+    HOOK("Hook Analysis Engine", "Hook analysis"),
+    CAPTION("Caption Analysis Engine", "Caption analysis"),
+    CTA("CTA Analysis Engine", "Call-to-Action analysis"),
+    CAMERA("Camera Analysis Engine", "Camera movement analysis"),
+    EDITING("Editing Analysis Engine", "Cut rhythm analysis"),
+    RETENTION("Retention Analysis Engine", "Retention analysis")
 }
 
 /**
@@ -229,6 +229,74 @@ data class EditingSection(
     val deadMomentsText: String
 )
 
+// ==============================================================================
+// PART 6C — AI DECISION RESULT DATA STRUCTURES
+// ==============================================================================
+
+enum class FindingClassification {
+    POSITIVE,
+    NEGATIVE,
+    NEUTRAL,
+    UNCERTAIN,
+    NOT_AVAILABLE
+}
+
+enum class FindingSeverity {
+    CRITICAL,
+    HIGH,
+    MEDIUM,
+    LOW
+}
+
+data class DecisionFinding(
+    val title: String,
+    val description: String,
+    val classification: FindingClassification,
+    val severity: FindingSeverity,
+    val timestampSec: Float?,
+    val formattedTimestamp: String?,
+    val evidenceText: String,
+    val engineSource: String, // User-facing display name e.g. "Visual analysis"
+    val confidencePercent: Int,
+    val recommendedAction: String?
+)
+
+data class PerformanceDiagnosis(
+    val strongestSignal: String,
+    val weakestSignal: String,
+    val biggestRisk: String,
+    val biggestOpportunity: String,
+    val topThreeChanges: List<TopImpactChange>
+)
+
+data class ReportCardData(
+    val cardIndex: Int, // 1 to 11
+    val title: String,
+    val statusLabel: String,
+    val scoreValue: Int?,
+    val positiveFinding: String?,
+    val negativeFinding: String?,
+    val recommendedAction: String?,
+    val timestampSec: Float?,
+    val formattedTimestamp: String?,
+    val evidenceText: String?
+)
+
+data class AIDecisionResult(
+    val overallDiagnosis: PerformanceDiagnosis,
+    val strongestSignal: String,
+    val weakestSignal: String,
+    val positiveFindings: List<DecisionFinding>,
+    val negativeFindings: List<DecisionFinding>,
+    val uncertainFindings: List<DecisionFinding>,
+    val attentionRisks: List<MetaAttentionRisk>,
+    val topThreeActions: List<TopImpactChange>,
+    val cardData: List<ReportCardData>,
+    val evidence: List<MetaIntelligenceEvidence>,
+    val confidence: Int,
+    val dataAvailability: Map<String, DataCategory>
+)
+
 /**
  * 20 — FINAL MASTER VALIDATED REPORT
  */
@@ -266,7 +334,12 @@ data class MasterValidatedReportV2(
     
     // RAW VALIDATED EVIDENCE
     val validatedEvidence: List<EvidenceObject>,
-    val rejectedDetections: List<String>
+    val rejectedDetections: List<String>,
+
+    // PART 6C & 6D: FINAL REASONING LAYER & REALITY CHECK RESULT
+    val aiDecisionResult: AIDecisionResult? = null,
+    val realityCheckResult: RealityCheckResult? = null,
+    val contentTypeVerification: ContentTypeVerificationResult? = null
 )
 
 /**
@@ -283,7 +356,8 @@ object AiDecisionEngineV2 {
     fun evaluateReelMaster(
         context: Context,
         videoUri: Uri?,
-        universalContext: UniversalDetectionContext
+        universalContext: UniversalDetectionContext,
+        instagramInsights: InstagramInsightsInput? = null
     ): MasterValidatedReportV2 {
         Log.d(TAG, "Initializing Master AI Decision Engine V2.0...")
 
@@ -404,7 +478,7 @@ object AiDecisionEngineV2 {
         // STEP 12 — USER TRUST CLAIMS (WHAT, WHEN, CONFIDENCE, WHY)
         val userTrustClaims = buildUserTrustClaims(crossValidatedEvidence)
 
-        return MasterValidatedReportV2(
+        val initialReport = MasterValidatedReportV2(
             metadata = metadata,
             activationPlan = activationPlan,
             gates = gates,
@@ -420,6 +494,438 @@ object AiDecisionEngineV2 {
             validatedEvidence = crossValidatedEvidence,
             rejectedDetections = rejectedList
         )
+
+        // STEP 13 — FINAL REASONING LAYER (META INTELLIGENCE + AI DECISION RESULT + REALITY CHECK)
+        val metaResult = MetaReelIntelligenceEngine.analyze(
+            detectionContext = u,
+            masterReport = initialReport,
+            instagramInsights = instagramInsights
+        )
+
+        val rawDecisionResult = buildAiDecisionResult(u, initialReport, metaResult, instagramInsights)
+
+        // STEP 14 — REALITY CHECK & ANTI-HALLUCINATION PASS
+        val (approvedDecisionResult, realityCheck) = RealityCheckEngine.verify(
+            u = u,
+            report = initialReport,
+            decisionResult = rawDecisionResult,
+            insights = instagramInsights
+        )
+
+        return initialReport.copy(
+            aiDecisionResult = approvedDecisionResult,
+            realityCheckResult = realityCheck
+        )
+    }
+
+    private fun formatTime(sec: Float): String {
+        val totalSec = sec.coerceAtLeast(0f).toInt()
+        val minutes = totalSec / 60
+        val seconds = totalSec % 60
+        val millis = ((sec - totalSec) * 10).toInt().coerceIn(0, 9)
+        return String.format(Locale.US, "%02d:%02d.%d", minutes, seconds, millis)
+    }
+
+    private fun buildAiDecisionResult(
+        u: UniversalDetectionContext,
+        report: MasterValidatedReportV2,
+        meta: MetaReelIntelligenceResult,
+        insights: InstagramInsightsInput?
+    ): AIDecisionResult {
+        val positiveFindings = mutableListOf<DecisionFinding>()
+        val negativeFindings = mutableListOf<DecisionFinding>()
+        val uncertainFindings = mutableListOf<DecisionFinding>()
+
+        // 1. Hook finding
+        if (meta.hookAnalysis.hookStrength == "STRONG") {
+            positiveFindings.add(
+                DecisionFinding(
+                    title = "Strong Opening Hook",
+                    description = meta.hookAnalysis.strongestOpeningEvidence,
+                    classification = FindingClassification.POSITIVE,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = meta.hookAnalysis.timeToFirstEventSec,
+                    formattedTimestamp = meta.hookAnalysis.timeToFirstEventSec?.let { formatTime(it) },
+                    evidenceText = meta.hookAnalysis.strongestOpeningEvidence,
+                    engineSource = "Hook analysis",
+                    confidencePercent = 90,
+                    recommendedAction = meta.hookAnalysis.recommendedImprovement
+                )
+            )
+        } else {
+            negativeFindings.add(
+                DecisionFinding(
+                    title = "Opening Static Delay",
+                    description = meta.hookAnalysis.weakestOpeningEvidence,
+                    classification = FindingClassification.NEGATIVE,
+                    severity = if (meta.hookAnalysis.hookStrength == "WEAK") FindingSeverity.CRITICAL else FindingSeverity.MEDIUM,
+                    timestampSec = 0.0f,
+                    formattedTimestamp = "00:00.0",
+                    evidenceText = meta.hookAnalysis.weakestOpeningEvidence,
+                    engineSource = "Hook analysis",
+                    confidencePercent = 85,
+                    recommendedAction = meta.hookAnalysis.recommendedImprovement
+                )
+            )
+        }
+
+        // 2. Creator presence finding
+        if (u.human.faceType != FaceDetectionType.NO_FACE) {
+            positiveFindings.add(
+                DecisionFinding(
+                    title = "Creator Presence Verified",
+                    description = "Creator face framing detected with ${u.human.eyeContactScore}/100 eye contact score",
+                    classification = FindingClassification.POSITIVE,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = 0.5f,
+                    formattedTimestamp = "00:00.5",
+                    evidenceText = "Face framed: ${u.human.faceType.name.replace("_", " ")}",
+                    engineSource = "Face framing analysis",
+                    confidencePercent = 92,
+                    recommendedAction = null
+                )
+            )
+        }
+
+        // 3. Product finding
+        if (u.product.productExists) {
+            positiveFindings.add(
+                DecisionFinding(
+                    title = "Product Focal Point Confirmed",
+                    description = "Verified product (${u.product.productCategory ?: "Product"}) in main composition",
+                    classification = FindingClassification.POSITIVE,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = 0.8f,
+                    formattedTimestamp = "00:00.8",
+                    evidenceText = "Product detection confirmed (${u.product.sizeCategory})",
+                    engineSource = "Product detection analysis",
+                    confidencePercent = 88,
+                    recommendedAction = null
+                )
+            )
+        }
+
+        // 4. Text / Captions finding
+        if (meta.textAnalysis.hasText) {
+            positiveFindings.add(
+                DecisionFinding(
+                    title = "On-Screen Captions Detected",
+                    description = meta.textAnalysis.readabilitySummary,
+                    classification = FindingClassification.POSITIVE,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = meta.textAnalysis.firstTextTimeSec,
+                    formattedTimestamp = meta.textAnalysis.firstTextTimeSec?.let { formatTime(it) },
+                    evidenceText = meta.textAnalysis.rawTextFound.joinToString("; "),
+                    engineSource = "On-screen text analysis",
+                    confidencePercent = 90,
+                    recommendedAction = null
+                )
+            )
+        } else {
+            negativeFindings.add(
+                DecisionFinding(
+                    title = "Missing On-Screen Captions",
+                    description = "No verified text overlays found for silent feed viewers",
+                    classification = FindingClassification.NEGATIVE,
+                    severity = FindingSeverity.MEDIUM,
+                    timestampSec = 0.5f,
+                    formattedTimestamp = "00:00.5",
+                    evidenceText = "Zero OCR captions detected in frame sampling",
+                    engineSource = "On-screen text analysis",
+                    confidencePercent = 95,
+                    recommendedAction = "Add lower-third caption text to improve comprehension on mute"
+                )
+            )
+        }
+
+        // 5. CTA finding
+        if (meta.ctaAnalysis.hasVerifiedCta) {
+            positiveFindings.add(
+                DecisionFinding(
+                    title = "Call-To-Action Verified",
+                    description = meta.ctaAnalysis.ctaTiming ?: "CTA present at conclusion",
+                    classification = FindingClassification.POSITIVE,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = u.cta.ctaTimingSecond,
+                    formattedTimestamp = formatTime(u.cta.ctaTimingSecond),
+                    evidenceText = "CTA types: ${meta.ctaAnalysis.detectedCtaTypes.joinToString(", ")}",
+                    engineSource = "Call-to-Action analysis",
+                    confidencePercent = 85,
+                    recommendedAction = meta.ctaAnalysis.recommendation
+                )
+            )
+        } else {
+            negativeFindings.add(
+                DecisionFinding(
+                    title = "No Explicit Call-To-Action",
+                    description = "Video concludes without a verified CTA overlay or verbal request",
+                    classification = FindingClassification.NEGATIVE,
+                    severity = FindingSeverity.MEDIUM,
+                    timestampSec = (u.durationSeconds - 2.0f).coerceAtLeast(0.0f),
+                    formattedTimestamp = formatTime((u.durationSeconds - 2.0f).coerceAtLeast(0.0f)),
+                    evidenceText = "Zero CTA signals detected in final 3 seconds",
+                    engineSource = "Call-to-Action analysis",
+                    confidencePercent = 90,
+                    recommendedAction = meta.ctaAnalysis.recommendation
+                )
+            )
+        }
+
+        // 6. Uncertain findings
+        if (u.ocr.priceText != null && !u.product.productExists) {
+            uncertainFindings.add(
+                DecisionFinding(
+                    title = "Unassociated Price Text",
+                    description = "Price text '${u.ocr.priceText}' detected without clear product association",
+                    classification = FindingClassification.UNCERTAIN,
+                    severity = FindingSeverity.LOW,
+                    timestampSec = 1.0f,
+                    formattedTimestamp = "00:01.0",
+                    evidenceText = "OCR price detected: ${u.ocr.priceText}",
+                    engineSource = "Pricing text analysis",
+                    confidencePercent = 65,
+                    recommendedAction = "Frame product directly alongside price text"
+                )
+            )
+        }
+
+        // Top 3 Changes
+        val top3Changes = meta.retentionAnalysis?.top3Changes ?: emptyList()
+
+        val strongestSignal = meta.performanceSignals.attentionStrengthSignal
+        val weakestSignal = meta.performanceSignals.claritySignal
+        val biggestRisk = meta.attentionRisks.firstOrNull()?.reason ?: "Mid-video visual pacing hold"
+        val biggestOpportunity = top3Changes.firstOrNull()?.action ?: "Add clear lower-third title overlay"
+
+        val overallDiagnosis = PerformanceDiagnosis(
+            strongestSignal = strongestSignal,
+            weakestSignal = weakestSignal,
+            biggestRisk = biggestRisk,
+            biggestOpportunity = biggestOpportunity,
+            topThreeChanges = top3Changes
+        )
+
+        val cardData = build11ReportCards(u, report, meta)
+
+        val dataAvailability = mapOf(
+            "Subject Visibility" to (if (u.human.faceType != FaceDetectionType.NO_FACE || u.product.productExists) DataCategory.OBSERVED else DataCategory.UNAVAILABLE),
+            "Product Presence" to (if (u.product.productExists) DataCategory.OBSERVED else DataCategory.UNAVAILABLE),
+            "On-Screen Text" to (if (meta.textAnalysis.hasText) DataCategory.OBSERVED else DataCategory.UNAVAILABLE),
+            "Spoken Audio" to (if (u.speech.hasSpeech) DataCategory.OBSERVED else DataCategory.UNAVAILABLE),
+            "Shot Durations" to DataCategory.CALCULATED,
+            "Opening Dead Time" to DataCategory.CALCULATED,
+            "Retention Drop Risk" to DataCategory.INFERRED,
+            "Instagram Insights" to (if (insights?.retentionPercent != null || insights?.views != null) DataCategory.OBSERVED else DataCategory.UNAVAILABLE)
+        )
+
+        return AIDecisionResult(
+            overallDiagnosis = overallDiagnosis,
+            strongestSignal = strongestSignal,
+            weakestSignal = weakestSignal,
+            positiveFindings = positiveFindings,
+            negativeFindings = negativeFindings,
+            uncertainFindings = uncertainFindings,
+            attentionRisks = meta.attentionRisks,
+            topThreeActions = top3Changes,
+            cardData = cardData,
+            evidence = meta.evidenceList,
+            confidence = report.masterScore.overallScore,
+            dataAvailability = dataAvailability
+        )
+    }
+
+    private fun build11ReportCards(
+        u: UniversalDetectionContext,
+        report: MasterValidatedReportV2,
+        meta: MetaReelIntelligenceResult
+    ): List<ReportCardData> {
+        val list = mutableListOf<ReportCardData>()
+
+        // Card 1: Overall Score
+        list.add(
+            ReportCardData(
+                cardIndex = 1,
+                title = "Overall Score",
+                statusLabel = "Score: ${report.masterScore.overallScore}/100",
+                scoreValue = report.masterScore.overallScore,
+                positiveFinding = "Strongest Dimension: ${report.masterScore.hookScore.dimensionName} (${report.masterScore.hookScore.score}/100)",
+                negativeFinding = "Improvement Area: ${report.masterScore.retentionScore.dimensionName} (${report.masterScore.retentionScore.score}/100)",
+                recommendedAction = meta.recommendations.firstOrNull() ?: "Optimize hook and pacing.",
+                timestampSec = 0.0f,
+                formattedTimestamp = "00:00.0",
+                evidenceText = "Calculated from visual, audio, pacing, and hook signals."
+            )
+        )
+
+        // Card 2: Best 3 Thumbnails
+        val topCand = meta.thumbnailEvaluations.firstOrNull()
+        list.add(
+            ReportCardData(
+                cardIndex = 2,
+                title = "Best 3 Thumbnails",
+                statusLabel = "${meta.thumbnailEvaluations.size} Cover Frame Candidates",
+                scoreValue = topCand?.clarityScore ?: 70,
+                positiveFinding = topCand?.reasoning ?: "Candidates selected based on composition & subject clarity",
+                negativeFinding = topCand?.textReadability ?: "Clean cover frame",
+                recommendedAction = "Select Cover #${topCand?.rank ?: 1} at ${topCand?.formattedTime ?: "00:01.0"} for optimal feed visual hierarchy.",
+                timestampSec = topCand?.timestampSec ?: 1.0f,
+                formattedTimestamp = topCand?.formattedTime ?: "00:01.0",
+                evidenceText = topCand?.hierarchySummary ?: "Thumbnails extracted from frame analysis."
+            )
+        )
+
+        // Card 3: Opening Hook & Attention
+        list.add(
+            ReportCardData(
+                cardIndex = 3,
+                title = "Opening Hook & Attention",
+                statusLabel = meta.hookAnalysis.hookStrength,
+                scoreValue = u.hook.visualHookScore,
+                positiveFinding = meta.hookAnalysis.strongestOpeningEvidence,
+                negativeFinding = meta.hookAnalysis.weakestOpeningEvidence,
+                recommendedAction = meta.hookAnalysis.recommendedImprovement,
+                timestampSec = meta.hookAnalysis.timeToFirstEventSec ?: 0.0f,
+                formattedTimestamp = meta.hookAnalysis.timeToFirstEventSec?.let { formatTime(it) } ?: "00:00.0",
+                evidenceText = "First visual event at ${meta.hookAnalysis.timeToFirstEventSec?.let { formatTime(it) } ?: "00:00.0"}"
+            )
+        )
+
+        // Card 4: Visual Quality
+        list.add(
+            ReportCardData(
+                cardIndex = 4,
+                title = "Visual Quality",
+                statusLabel = report.visualQuality.frameQualityText,
+                scoreValue = report.visualQuality.lightingScore,
+                positiveFinding = meta.visualAttention.attractsAttention.firstOrNull() ?: "Centered framing",
+                negativeFinding = meta.visualAttention.distractsAttention.firstOrNull(),
+                recommendedAction = "Maintain bright, high-contrast key lighting on central subject.",
+                timestampSec = 0.5f,
+                formattedTimestamp = "00:00.5",
+                evidenceText = "Lighting type: ${u.lighting.lightingType}"
+            )
+        )
+
+        // Card 5: Audio & Speech
+        list.add(
+            ReportCardData(
+                cardIndex = 5,
+                title = "Audio & Speech",
+                statusLabel = meta.audioAnalysis.speechClarity,
+                scoreValue = if (u.speech.hasSpeech) u.speech.speechConfidence else null,
+                positiveFinding = meta.audioAnalysis.speechTimingSummary,
+                negativeFinding = meta.audioAnalysis.alignmentSummary,
+                recommendedAction = if (!u.speech.hasSpeech) "Consider adding voiceover narration or speech audio." else "Voice track is crisp and audible.",
+                timestampSec = meta.hookAnalysis.timeToFirstSpeechSec ?: 0.0f,
+                formattedTimestamp = meta.hookAnalysis.timeToFirstSpeechSec?.let { formatTime(it) } ?: "00:00.0",
+                evidenceText = meta.audioAnalysis.transcriptSnippet ?: "Audio track analyzed"
+            )
+        )
+
+        // Card 6: Pacing & Cut Rhythm
+        list.add(
+            ReportCardData(
+                cardIndex = 6,
+                title = "Pacing & Cut Rhythm",
+                statusLabel = meta.pacingAnalysis.pacingStatus,
+                scoreValue = report.masterScore.pacingScore.score,
+                positiveFinding = meta.pacingAnalysis.explanation,
+                negativeFinding = meta.retentionAnalysis?.pacingRisks?.firstOrNull(),
+                recommendedAction = "Keep shot durations between 1.5s and 3.5s for optimal short-form flow.",
+                timestampSec = 2.0f,
+                formattedTimestamp = "00:02.0",
+                evidenceText = "Average scene length: ${String.format(Locale.US, "%.1fs", meta.pacingAnalysis.avgShotDurationSec)}"
+            )
+        )
+
+        // Card 7: Story / Narrative Flow
+        val storyBench = meta.benchmarkAnalysis?.story
+        list.add(
+            ReportCardData(
+                cardIndex = 7,
+                title = "Story / Narrative Flow",
+                statusLabel = storyBench?.status ?: "ALIGNED",
+                scoreValue = null,
+                positiveFinding = storyBench?.evidence ?: "Smooth scene progression",
+                negativeFinding = if (u.retention.deadMomentsCount > 0) "${u.retention.deadMomentsCount} static hold(s) detected" else null,
+                recommendedAction = storyBench?.action ?: "Ensure narrative setup leads directly to payoff.",
+                timestampSec = u.durationSeconds / 2.0f,
+                formattedTimestamp = formatTime(u.durationSeconds / 2.0f),
+                evidenceText = "Scene count: ${u.scene.sceneCount}"
+            )
+        )
+
+        // Card 8: On-Screen Text & Captions
+        list.add(
+            ReportCardData(
+                cardIndex = 8,
+                title = "On-Screen Text & Captions",
+                statusLabel = if (meta.textAnalysis.hasText) "Captions Verified" else "No Text Overlay",
+                scoreValue = if (meta.textAnalysis.hasText) 90 else 40,
+                positiveFinding = meta.textAnalysis.readabilitySummary,
+                negativeFinding = if (!meta.textAnalysis.hasText) "No on-screen captions detected for mute feed viewers" else null,
+                recommendedAction = if (!meta.textAnalysis.hasText) "Add lower-third caption text in opening 1.5s." else "Caption placement aligns with feed standards.",
+                timestampSec = meta.textAnalysis.firstTextTimeSec ?: 0.5f,
+                formattedTimestamp = meta.textAnalysis.firstTextTimeSec?.let { formatTime(it) } ?: "00:00.5",
+                evidenceText = meta.textAnalysis.rawTextFound.take(2).joinToString(", ")
+            )
+        )
+
+        // Card 9: Engagement & Viral Potential
+        list.add(
+            ReportCardData(
+                cardIndex = 9,
+                title = "Engagement & Viral Potential",
+                statusLabel = meta.performanceSignals.attentionStrengthSignal,
+                scoreValue = report.masterScore.engagementScore.score,
+                positiveFinding = meta.performanceSignals.shareabilitySignal,
+                negativeFinding = meta.performanceSignals.engagementOpportunitySignal,
+                recommendedAction = meta.ctaAnalysis.recommendation,
+                timestampSec = (u.durationSeconds - 2.0f).coerceAtLeast(0.0f),
+                formattedTimestamp = formatTime((u.durationSeconds - 2.0f).coerceAtLeast(0.0f)),
+                evidenceText = "Rewatch potential: ${meta.performanceSignals.rewatchPotentialSignal}"
+            )
+        )
+
+        // Card 10: Audience / Content Fit
+        list.add(
+            ReportCardData(
+                cardIndex = 10,
+                title = "Audience / Content Fit",
+                statusLabel = meta.contentFit.fitStatus,
+                scoreValue = report.masterScore.categoryFitScore.score,
+                positiveFinding = meta.contentFit.matchedCharacteristics.firstOrNull() ?: "Aligned with short-form structure",
+                negativeFinding = meta.contentFit.mismatchedCharacteristics.firstOrNull(),
+                recommendedAction = "Align subject framing and audio narration with chosen format.",
+                timestampSec = 1.0f,
+                formattedTimestamp = "00:01.0",
+                evidenceText = "Selected formats: ${meta.contentFit.selectedTypes.joinToString(", ")}"
+            )
+        )
+
+        // Card 11: 3 Changes That Matter Most
+        val top3 = meta.retentionAnalysis?.top3Changes ?: emptyList()
+        val actionsSummary = if (top3.isNotEmpty()) {
+            top3.joinToString("\n") { "${it.priority} (${it.formattedTime}): ${it.action}" }
+        } else {
+            "1. Trim opening static delay\n2. Add lower-third captions\n3. Include clear end-screen CTA"
+        }
+        list.add(
+            ReportCardData(
+                cardIndex = 11,
+                title = "3 Changes That Matter Most",
+                statusLabel = "${top3.size} High-Impact Actions",
+                scoreValue = null,
+                positiveFinding = "Actionable edit list prioritized by frame & audio evidence.",
+                negativeFinding = top3.firstOrNull()?.problem ?: "Visual pacing friction",
+                recommendedAction = actionsSummary,
+                timestampSec = top3.firstOrNull()?.timestampSec ?: 0.0f,
+                formattedTimestamp = top3.firstOrNull()?.formattedTime ?: "00:00.0",
+                evidenceText = top3.firstOrNull()?.evidence ?: "Frame evidence verified"
+            )
+        )
+
+        return list
     }
 
     // ==============================================================================

@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -70,6 +71,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import com.example.creatoracademy.FrameQualityEngine
+import com.example.creatoracademy.MetaReelIntelligenceEngine
 import com.example.creatoracademy.FrameQualitySummaryReport
 import com.example.creatoracademy.SpeechEngineV2
 import com.example.creatoracademy.SpeechEngineV2Report
@@ -84,6 +86,11 @@ import com.example.creatoracademy.ObjectEngineV2Report
 import com.example.creatoracademy.BackgroundEngineV2
 import com.example.creatoracademy.BackgroundEngineV2Report
 import com.example.creatoracademy.OcrLanguage
+import com.example.creatoracademy.ContentTypeVerificationEngine
+import com.example.creatoracademy.ContentTypeVerificationResult
+import com.example.creatoracademy.ContentTypeMatchStatus
+import com.example.creatoracademy.ReportLocalizationHelper
+import com.example.reports.ReportLanguage
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -146,6 +153,7 @@ private enum class DoctorFlowStep {
     PREVIEW,
     TYPE_SELECTION,
     SCANNING,
+    LANGUAGE_SELECTION,
     FINAL_REPORT
 }
 
@@ -274,6 +282,7 @@ fun MasterReelDoctorFlow(
 
     var currentStep by remember(mediaItem?.uri) { mutableStateOf(DoctorFlowStep.PREVIEW) }
     var selectedContentTypes by remember(mediaItem?.uri) { mutableStateOf(setOf<String>()) }
+    var selectedReportLanguage by remember(mediaItem?.uri) { mutableStateOf(ReportLanguage.ENGLISH) }
     var showTypeSelectionError by remember(mediaItem?.uri) { mutableStateOf(false) }
     var scanProgress by remember(mediaItem?.uri) { mutableFloatStateOf(0f) }
     var isScanComplete by remember(mediaItem?.uri) { mutableStateOf(false) }
@@ -502,6 +511,12 @@ fun MasterReelDoctorFlow(
                 val masterReport = AiDecisionEngineV2.evaluateReelMaster(context, mediaItem?.uri, hiddenContextResult)
                 masterReportObj = masterReport
 
+                val metaResult = MetaReelIntelligenceEngine.analyze(
+                    detectionContext = hiddenContextResult,
+                    masterReport = masterReport
+                )
+                Log.d("MasterReelDoctorFlow", "Meta Reel Intelligence computed: ${metaResult.performanceSignals.attentionStrengthSignal}")
+
                 val titleName = mediaItem?.title ?: "Viral Reel"
                 val reelObj = AiViralIntelligenceEngine.createAnalysedReel(
                     report = reportObj,
@@ -511,7 +526,7 @@ fun MasterReelDoctorFlow(
                 CreatorGrowthEngine.addAnalysedReel(context, reelObj)
 
                 delay(900L)
-                currentStep = DoctorFlowStep.FINAL_REPORT
+                currentStep = DoctorFlowStep.LANGUAGE_SELECTION
             } catch (e: Throwable) {
                 Log.e("MasterReelDoctorFlow", "Error generating master report: ${e.message}", e)
                 Toast.makeText(context, "Couldn't read this video. Please try another video.", Toast.LENGTH_LONG).show()
@@ -707,6 +722,13 @@ fun MasterReelDoctorFlow(
                                     showError = showTypeSelectionError
                                 )
                             }
+                            DoctorFlowStep.LANGUAGE_SELECTION -> {
+                                ReelReportLanguageSelectionContent(
+                                    selectedLanguage = selectedReportLanguage,
+                                    onSelectLanguage = { lang -> selectedReportLanguage = lang },
+                                    onContinue = { currentStep = DoctorFlowStep.FINAL_REPORT }
+                                )
+                            }
                             DoctorFlowStep.FINAL_REPORT -> {
                                 createdReelObj?.let { reel ->
                                     FinalReportView(
@@ -715,6 +737,9 @@ fun MasterReelDoctorFlow(
                                         masterReport = masterReportObj,
                                         mediaUri = mediaItem?.uri,
                                         selectedContentTypes = selectedContentTypes,
+                                        reportLanguage = selectedReportLanguage,
+                                        videoWidth = videoWidth,
+                                        videoHeight = videoHeight,
                                         onOpenDetailedModal = { showDetailedAnalysisModal = true },
                                         onDismiss = onDismiss
                                     )
@@ -948,6 +973,9 @@ fun MasterReelDoctorFlow(
                                 }
                             }
                         }
+                        DoctorFlowStep.LANGUAGE_SELECTION -> {
+                            // Handled inside ReelReportLanguageSelectionContent
+                        }
                         DoctorFlowStep.FINAL_REPORT -> {
                             // Navigation and DONE action are strictly handled inside FinalReportView on Card 11
                         }
@@ -1007,6 +1035,7 @@ private fun HeaderBar(
                         DoctorFlowStep.PREVIEW -> "Reel Analysis"
                         DoctorFlowStep.TYPE_SELECTION -> "Tell us about this reel"
                         DoctorFlowStep.SCANNING -> "Analyzing Video"
+                        DoctorFlowStep.LANGUAGE_SELECTION -> "Report Language"
                         DoctorFlowStep.FINAL_REPORT -> "Reel Analysis"
                     },
                     fontSize = 17.sp,
@@ -1018,6 +1047,7 @@ private fun HeaderBar(
                         DoctorFlowStep.PREVIEW -> "Verify details before analysis"
                         DoctorFlowStep.TYPE_SELECTION -> "Choose what best describes your content"
                         DoctorFlowStep.SCANNING -> "Evaluating video frames & audio..."
+                        DoctorFlowStep.LANGUAGE_SELECTION -> "Select your preferred report language"
                         DoctorFlowStep.FINAL_REPORT -> "Evidence-based creator insights"
                     },
                     fontSize = 11.5.sp,
@@ -1617,6 +1647,278 @@ private fun SpecBadge(
     }
 }
 
+@Composable
+private fun ReelReportLanguageSelectionContent(
+    selectedLanguage: ReportLanguage,
+    onSelectLanguage: (ReportLanguage) -> Unit,
+    onContinue: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(CyanAccent.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Translate,
+                contentDescription = null,
+                tint = CyanAccent,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        Text(
+            text = "Choose your report language",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextWhite,
+            textAlign = TextAlign.Center
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val languages = listOf(
+                ReportLanguage.ENGLISH to "English",
+                ReportLanguage.HINDI to "Hindi",
+                ReportLanguage.HINGLISH to "Hinglish"
+            )
+
+            languages.forEach { (lang, label) ->
+                val isSelected = (selectedLanguage == lang)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { onSelectLanguage(lang) },
+                    color = if (isSelected) CyanAccent.copy(alpha = 0.12f) else GlassCard,
+                    border = BorderStroke(
+                        if (isSelected) 1.5.dp else 1.dp,
+                        if (isSelected) CyanAccent else GlassBorder
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = label,
+                            fontSize = 16.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) CyanAccent else TextWhite
+                        )
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = { onSelectLanguage(lang) },
+                            colors = RadioButtonDefaults.colors(selectedColor = CyanAccent)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onContinue,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .testTag("btn_continue_to_report"),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CyanAccent,
+                contentColor = Color.Black
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "CONTINUE TO REPORT",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EvidenceAspectFrame(
+    mediaUri: Uri?,
+    frameTimeUs: Long = 1_000_000L,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920,
+    modifier: Modifier = Modifier,
+    maxFrameHeight: Dp = 220.dp
+) {
+    val context = LocalContext.current
+    val rawRatio = if (videoWidth > 0 && videoHeight > 0) videoWidth.toFloat() / videoHeight.toFloat() else 9f / 16f
+    val clampedRatio = rawRatio.coerceIn(0.48f, 2.1f)
+
+    var loadedBitmap by remember(mediaUri, frameTimeUs) { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(mediaUri, frameTimeUs) {
+        if (mediaUri != null) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(context, mediaUri)
+                    val bmp = retriever.getFrameAtTime(frameTimeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                    loadedBitmap = bmp
+                    retriever.release()
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(max = maxFrameHeight)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF0D121F)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (loadedBitmap != null) {
+            Image(
+                bitmap = loadedBitmap!!.asImageBitmap(),
+                contentDescription = "Evidence frame",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .aspectRatio(clampedRatio)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .aspectRatio(clampedRatio)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFF161C2C)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Outlined.Videocam,
+                    contentDescription = null,
+                    tint = CyanAccent.copy(alpha = 0.5f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EvidenceCardLayout(
+    title: String,
+    timestampText: String,
+    frameTimeUs: Long,
+    mediaUri: Uri?,
+    workingText: String,
+    fixText: String,
+    quickActionText: String,
+    lang: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextWhite
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHATS_WORKING", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = EmeraldGreen,
+                letterSpacing = 1.2.sp
+            )
+            Text(workingText, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+        }
+
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHAT_TO_FIX", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = AmberYellow,
+                letterSpacing = 1.2.sp
+            )
+            Text(fixText, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+        }
+
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("ACTION", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+            Text(quickActionText, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = TextWhite, lineHeight = 19.sp)
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = ReportLocalizationHelper.getSectionHeader("EVIDENCE", lang),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary,
+                    letterSpacing = 1.2.sp
+                )
+                Text(timestampText, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+            }
+
+            EvidenceAspectFrame(
+                mediaUri = mediaUri,
+                frameTimeUs = frameTimeUs,
+                videoWidth = videoWidth,
+                videoHeight = videoHeight
+            )
+        }
+    }
+}
+
 // STEP 8 — FINAL REPORT VIEW (PREMIUM CREATOR RESULT EXPERIENCE)
 @Composable
 private fun FinalReportView(
@@ -1625,6 +1927,9 @@ private fun FinalReportView(
     masterReport: MasterValidatedReportV2? = null,
     mediaUri: Uri?,
     selectedContentTypes: Set<String> = emptySet(),
+    reportLanguage: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920,
     onOpenDetailedModal: () -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
@@ -1673,7 +1978,7 @@ private fun FinalReportView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "YOUR REEL ANALYSIS",
+                        text = ReportLocalizationHelper.getCardTitle(cardPageIndex, reportLanguage),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = CyanAccent,
@@ -1713,17 +2018,17 @@ private fun FinalReportView(
                     label = "ResultCardTransition"
                 ) { page ->
                     when (page) {
-                        0 -> Card1ReelScore(reel = reel, report = report, masterReport = masterReport)
-                        1 -> Card2BestThumbnails(reel = reel, report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        2 -> Card3OpeningHook(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        3 -> Card4VisualQuality(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        4 -> Card5AudioSpeech(report = report, masterReport = masterReport)
-                        5 -> Card6Pacing(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        6 -> Card7StoryMessage(reel = reel, report = report, masterReport = masterReport)
-                        7 -> Card8TextCaptions(report = report, masterReport = masterReport, mediaUri = mediaUri)
-                        8 -> Card9Engagement(report = report, masterReport = masterReport)
-                        9 -> Card10AudienceContentFit(reel = reel, report = report, masterReport = masterReport, selectedContentTypes = selectedContentTypes)
-                        10 -> Card11ActionPlan(reel = reel, report = report, masterReport = masterReport)
+                        0 -> Card1ReelScore(reel = reel, report = report, masterReport = masterReport, lang = reportLanguage)
+                        1 -> Card2BestThumbnails(reel = reel, report = report, masterReport = masterReport, mediaUri = mediaUri, lang = reportLanguage)
+                        2 -> Card3OpeningHook(report = report, masterReport = masterReport, mediaUri = mediaUri, lang = reportLanguage, videoWidth = videoWidth, videoHeight = videoHeight)
+                        3 -> Card4VisualQuality(report = report, masterReport = masterReport, mediaUri = mediaUri, lang = reportLanguage, videoWidth = videoWidth, videoHeight = videoHeight)
+                        4 -> Card5AudioSpeech(report = report, masterReport = masterReport, lang = reportLanguage)
+                        5 -> Card6Pacing(report = report, masterReport = masterReport, mediaUri = mediaUri, lang = reportLanguage, videoWidth = videoWidth, videoHeight = videoHeight)
+                        6 -> Card7StoryMessage(reel = reel, report = report, masterReport = masterReport, lang = reportLanguage)
+                        7 -> Card8TextCaptions(report = report, masterReport = masterReport, mediaUri = mediaUri, lang = reportLanguage, videoWidth = videoWidth, videoHeight = videoHeight)
+                        8 -> Card9Engagement(report = report, masterReport = masterReport, lang = reportLanguage)
+                        9 -> Card10AudienceContentFit(reel = reel, report = report, masterReport = masterReport, selectedContentTypes = selectedContentTypes, lang = reportLanguage)
+                        10 -> Card11ActionPlan(reel = reel, report = report, masterReport = masterReport, lang = reportLanguage)
                     }
                 }
 
@@ -1749,7 +2054,7 @@ private fun FinalReportView(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Text("Back", fontSize = 13.sp)
+                            Text(ReportLocalizationHelper.getButtonText("BACK", reportLanguage), fontSize = 13.sp)
                         }
                     }
 
@@ -1782,7 +2087,7 @@ private fun FinalReportView(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    text = "Next",
+                                    text = ReportLocalizationHelper.getButtonText("NEXT", reportLanguage),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -1800,7 +2105,7 @@ private fun FinalReportView(
                             modifier = Modifier.testTag("btn_done_report")
                         ) {
                             Text(
-                                text = "DONE",
+                                text = ReportLocalizationHelper.getButtonText("DONE", reportLanguage),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1817,22 +2122,15 @@ private fun FinalReportView(
 private fun Card1ReelScore(
     reel: AnalysedReel,
     report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?
+    masterReport: MasterValidatedReportV2?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
     val score = masterReport?.masterScore?.overallScore
         ?: report?.overallViralScore
         ?: reel.finalAiScore
 
-    val label = when {
-        score >= 85 -> "Strong Reel"
-        score >= 72 -> "Good Reel"
-        score >= 55 -> "Moderate Reel"
-        else -> "Needs Tuning"
-    }
-
-    val explanation = masterReport?.masterScore?.hookScore?.explanation
-        ?: report?.viralPredictionText
-        ?: "$score/100 — Clear subject presentation with good visual balance."
+    val label = ReportLocalizationHelper.getOverallScoreLabel(score, lang)
+    val subtitle = ReportLocalizationHelper.getOverallScoreSubtitle(score, lang)
 
     val animatedScore by animateFloatAsState(
         targetValue = score.toFloat(),
@@ -1850,14 +2148,13 @@ private fun Card1ReelScore(
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Your Reel Score",
-            fontSize = 14.sp,
+            text = ReportLocalizationHelper.getCardTitle(0, lang),
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = CyanAccent,
-            letterSpacing = 0.5.sp
+            color = TextWhite
         )
 
         // Animated Score Ring
@@ -1893,67 +2190,75 @@ private fun Card1ReelScore(
             }
         }
 
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = CyanAccent.copy(alpha = 0.15f),
-            border = BorderStroke(1.dp, CyanGlow)
-        ) {
-            Text(
-                text = "$score/100 • $label",
-                fontSize = 13.5.sp,
-                fontWeight = FontWeight.Bold,
-                color = CyanAccent,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp)
-            )
-        }
+        Text(
+            text = "$score/100 • $label",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = CyanAccent
+        )
 
         Text(
-            text = explanation,
-            fontSize = 12.sp,
+            text = subtitle,
+            fontSize = 13.sp,
             color = TextSecondary,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        // Category Score Breakdown Grid
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF0F172A),
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("CATEGORY SCORES", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    CategoryScorePill(label = "Visual", value = "$visualScore/100", modifier = Modifier.weight(1f))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    CategoryScorePill(label = "Audio", value = audioScoreStr, modifier = Modifier.weight(1f))
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    CategoryScorePill(label = "Pacing", value = "$pacingScore/100", modifier = Modifier.weight(1f))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    CategoryScorePill(label = "Text", value = textScoreStr, modifier = Modifier.weight(1f))
-                }
-            }
-        }
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
 
-        // 3 Key Signals
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            SignalItem(text = "Clear subject visible in main frame", isPositive = true)
-            SignalItem(text = "Balanced visual lighting and exposure", isPositive = true)
-            SignalItem(text = "Opening movement takes 0.8s to accelerate", isPositive = false)
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("CATEGORY_SCORES", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = when (lang) { ReportLanguage.HINDI -> "विजुअल" else -> "Visual" },
+                    fontSize = 13.sp, color = TextWhite
+                )
+                Text("$visualScore/100", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = when (lang) { ReportLanguage.HINDI -> "ऑडियो" else -> "Audio" },
+                    fontSize = 13.sp, color = TextWhite
+                )
+                Text(audioScoreStr, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (audioScoreStr == "N/A") TextSecondary else CyanAccent)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = when (lang) { ReportLanguage.HINDI -> "पेसिंग" else -> "Pacing" },
+                    fontSize = 13.sp, color = TextWhite
+                )
+                Text("$pacingScore/100", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = when (lang) { ReportLanguage.HINDI -> "टेक्स्ट" else -> "Text" },
+                    fontSize = 13.sp, color = TextWhite
+                )
+                Text(textScoreStr, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (textScoreStr == "N/A") TextSecondary else CyanAccent)
+            }
         }
     }
 }
@@ -2010,128 +2315,7 @@ private fun SignalItem(text: String, isPositive: Boolean) {
     }
 }
 
-// REUSABLE EVIDENCE CARD LAYOUT
-@Composable
-private fun EvidenceCardLayout(
-    title: String,
-    timestampText: String,
-    frameTimeUs: Long,
-    mediaUri: Uri?,
-    workingText: String,
-    fixText: String,
-    quickActionText: String
-) {
-    val context = LocalContext.current
-    val candidate = remember(frameTimeUs) {
-        listOf(ThumbnailCandidate("ev", title, 90, timestampText, frameTimeUs, "🎥", title, "", 85, 85, ""))
-    }
-    val frameMap = rememberVideoFrameBitmaps(context, mediaUri, candidate)
-    val frameBmp = frameMap["ev"]
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = CyanAccent,
-                letterSpacing = 1.2.sp
-            )
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = CyanAccent.copy(alpha = 0.15f),
-                border = BorderStroke(1.dp, CyanGlow)
-            ) {
-                Text(
-                    text = timestampText,
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CyanAccent,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                )
-            }
-        }
-
-        // Frame Evidence Preview
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(125.dp),
-            shape = RoundedCornerShape(14.dp),
-            color = GlassCard,
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (frameBmp != null) {
-                    Image(
-                        bitmap = frameBmp,
-                        contentDescription = title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFF1E293B)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Videocam, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(28.dp))
-                            Text("Extracted frame evidence", fontSize = 11.sp, color = TextSecondary)
-                        }
-                    }
-                }
-            }
-        }
-
-        // WHAT'S WORKING
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = EmeraldGreen.copy(alpha = 0.12f),
-            border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("WHAT'S WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
-                Text(workingText, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        // WHAT TO FIX
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = AmberYellow.copy(alpha = 0.12f),
-            border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("WHAT TO FIX", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
-                Text(fixText, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        // ONE QUICK ACTION
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = CyanAccent.copy(alpha = 0.12f),
-            border = BorderStroke(1.dp, CyanGlow)
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                Text(quickActionText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
-            }
-        }
-    }
-}
 
 // CARD 2 — BEST 3 THUMBNAILS
 @Composable
@@ -2139,7 +2323,8 @@ private fun Card2BestThumbnails(
     reel: AnalysedReel? = null,
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
+    mediaUri: Uri?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
     val context = LocalContext.current
     val videoDurationSec = 15.0f
@@ -2165,7 +2350,7 @@ private fun Card2BestThumbnails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "BEST 3 THUMBNAILS",
+                text = ReportLocalizationHelper.getCardTitle(1, lang),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = CyanAccent,
@@ -2417,21 +2602,24 @@ private fun Card2BestThumbnails(
 private fun Card3OpeningHook(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
+    mediaUri: Uri?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920
 ) {
-    val hookScore = report?.hookScore ?: 78
-    val working = if (hookScore >= 80) "Detected immediate subject framing in opening frame." else "Visual subject clearly present at start."
-    val fix = if (hookScore < 82) "Opening visual movement takes 0.8s to accelerate." else "Early visual motion holds static for first 1.2s."
-    val quickAction = "Trim initial 0.8s delay to start right at movement."
+    val details = ReportLocalizationHelper.getCardDetails(2, lang)
 
     EvidenceCardLayout(
-        title = "OPENING & HOOK",
-        timestampText = "00:01",
+        title = details.title,
+        timestampText = details.timestamp,
         frameTimeUs = 1_000_000L,
         mediaUri = mediaUri,
-        workingText = working,
-        fixText = fix,
-        quickActionText = quickAction
+        workingText = details.working,
+        fixText = details.fix,
+        quickActionText = details.action,
+        lang = lang,
+        videoWidth = videoWidth,
+        videoHeight = videoHeight
     )
 }
 
@@ -2440,22 +2628,115 @@ private fun Card3OpeningHook(
 private fun Card4VisualQuality(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
+    mediaUri: Uri?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920
 ) {
-    val lightingScore = report?.lightingScore ?: 82
-    val working = "Balanced key fill luminance with high frame contrast."
-    val fix = if (lightingScore < 85) "Minor background shadow near top corner." else "Slight exposure variance across timeline."
-    val quickAction = "Boost mid-tone exposure by +10% for optimal contrast."
+    val details = ReportLocalizationHelper.getCardDetails(3, lang)
 
     EvidenceCardLayout(
-        title = "VISUAL QUALITY",
-        timestampText = "00:04",
+        title = details.title,
+        timestampText = details.timestamp,
         frameTimeUs = 4_000_000L,
         mediaUri = mediaUri,
-        workingText = working,
-        fixText = fix,
-        quickActionText = quickAction
+        workingText = details.working,
+        fixText = details.fix,
+        quickActionText = details.action,
+        lang = lang,
+        videoWidth = videoWidth,
+        videoHeight = videoHeight
     )
+}
+
+// CARD 5 — AUDIO & SPEECH
+@Composable
+private fun Card5AudioSpeech(
+    report: ViralIntelligenceReport?,
+    masterReport: MasterValidatedReportV2?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
+) {
+    val details = ReportLocalizationHelper.getCardDetails(4, lang)
+    val audioScore = report?.audioScore ?: masterReport?.masterScore?.audioQualityScore?.score ?: 0
+    val hasAudio = masterReport?.videoOverview?.audioPresenceStatus != "No audio" && audioScore > 0
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(details.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            Text(
+                if (hasAudio) "$audioScore/100" else "N/A",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (hasAudio) CyanAccent else Color(0xFFFF6B6B)
+            )
+        }
+
+        if (!hasAudio) {
+            Text(
+                text = when (lang) {
+                    ReportLanguage.HINDI -> "इस वीडियो में कोई ऑडियो ट्रैक नहीं पाया गया।"
+                    ReportLanguage.HINGLISH -> "Is video mein koi audio track detect nahi hua."
+                    else -> "No audio track detected in this video file."
+                },
+                fontSize = 13.5.sp,
+                color = TextWhite
+            )
+            Text(
+                text = when (lang) {
+                    ReportLanguage.HINDI -> "कार्रवाई: रिटेंशन बढ़ाने के लिए वॉइसओवर या म्यूज़िक जोड़ें।"
+                    ReportLanguage.HINGLISH -> "Action: Retention improve karne ke liye voiceover ya music add karein."
+                    else -> "Action: Add voiceover or background music to improve retention."
+                },
+                fontSize = 13.sp,
+                color = CyanAccent,
+                fontWeight = FontWeight.SemiBold
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = ReportLocalizationHelper.getSectionHeader("WHATS_WORKING", lang),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EmeraldGreen,
+                    letterSpacing = 1.2.sp
+                )
+                Text(details.working, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+            }
+
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = ReportLocalizationHelper.getSectionHeader("WHAT_TO_FIX", lang),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AmberYellow,
+                    letterSpacing = 1.2.sp
+                )
+                Text(details.fix, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+            }
+
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = ReportLocalizationHelper.getSectionHeader("ACTION", lang),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CyanAccent,
+                    letterSpacing = 1.2.sp
+                )
+                Text(details.action, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = TextWhite, lineHeight = 19.sp)
+            }
+        }
+    }
 }
 
 // CARD 6 — PACING & TRANSITIONS
@@ -2463,133 +2744,85 @@ private fun Card4VisualQuality(
 private fun Card6Pacing(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
+    mediaUri: Uri?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920
 ) {
-    val pacingVal = report?.editingScore ?: 78
-    val working = "Scene changes are mostly consistent across the timeline."
-    val fix = "Static shot holds for longer than 3.5 seconds at mid-point."
-    val quickAction = "Insert a subtle punch-in zoom cut at 00:05 to refresh focus."
+    val details = ReportLocalizationHelper.getCardDetails(5, lang)
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("PACING & TRANSITIONS", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
-                Text("$pacingVal/100 Pacing", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-            }
-        }
-
-        // Timeline visualization bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            color = Color(0xFF0F172A),
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Timeline Cuts & Scene Flow", fontSize = 10.5.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("0s", fontSize = 10.sp, color = CyanAccent, fontWeight = FontWeight.Bold)
-                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent, RoundedCornerShape(2.dp)))
-                    Text("5s", fontSize = 10.sp, color = AmberYellow, fontWeight = FontWeight.Bold)
-                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent.copy(alpha = 0.4f), RoundedCornerShape(2.dp)))
-                    Text("10s", fontSize = 10.sp, color = TextWhite)
-                    Box(modifier = Modifier.weight(1f).height(4.dp).padding(horizontal = 4.dp).background(CyanAccent.copy(alpha = 0.4f), RoundedCornerShape(2.dp)))
-                    Text("15s", fontSize = 10.sp, color = TextWhite)
-                }
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
-                Text(working, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
-                Text(fix, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
-            }
-        }
-    }
+    EvidenceCardLayout(
+        title = details.title,
+        timestampText = details.timestamp,
+        frameTimeUs = 5_000_000L,
+        mediaUri = mediaUri,
+        workingText = details.working,
+        fixText = details.fix,
+        quickActionText = details.action,
+        lang = lang,
+        videoWidth = videoWidth,
+        videoHeight = videoHeight
+    )
 }
 
-// CARD 5 — AUDIO & SPEECH
+// CARD 7 — STORY & NARRATIVE FLOW
 @Composable
-private fun Card5AudioSpeech(
+private fun Card7StoryMessage(
+    reel: AnalysedReel,
     report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?
+    masterReport: MasterValidatedReportV2?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
-    val audioScore = report?.audioScore ?: masterReport?.masterScore?.audioQualityScore?.score ?: 0
-    val hasAudio = masterReport?.videoOverview?.audioPresenceStatus != "No audio" && audioScore > 0
+    val details = ReportLocalizationHelper.getCardDetails(6, lang)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("AUDIO & SPEECH", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = if (hasAudio) CyanAccent.copy(alpha = 0.15f) else Color.Red.copy(alpha = 0.15f), border = BorderStroke(1.dp, if (hasAudio) CyanGlow else Color.Red.copy(alpha = 0.4f))) {
-                Text(if (hasAudio) "Voice Detected • $audioScore/100" else "AUDIO NOT AVAILABLE", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = if (hasAudio) CyanAccent else Color(0xFFFF6B6B), modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-            }
+            Text(details.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            Text(reel.category.ifEmpty { "General" }, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
         }
 
-        if (!hasAudio) {
-            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = GlassCard, border = BorderStroke(1.dp, GlassBorder)) {
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Score: N/A", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
-                    Text("No audio track detected in this video file.", fontSize = 12.sp, color = TextWhite)
-                    Text("Action: Add voiceover or background music to improve viewer retention.", fontSize = 11.5.sp, color = CyanAccent)
-                }
-            }
-        } else {
-            val working = "Audible speech track detected with clean vocal frequencies ($audioScore/100)."
-            val fix = "Voice level is close to background audio track level."
-            val quickAction = "Boost vocal track +3dB relative to music."
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHATS_WORKING", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = EmeraldGreen,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.working, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+        }
 
-            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
-                    Text(working, fontSize = 12.sp, color = TextWhite)
-                }
-            }
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
 
-            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
-                    Text(fix, fontSize = 12.sp, color = TextWhite)
-                }
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHAT_TO_FIX", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = AmberYellow,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.fix, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
+        }
 
-            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                    Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
-                }
-            }
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("ACTION", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.action, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = TextWhite, lineHeight = 19.sp)
         }
     }
 }
@@ -2599,181 +2832,86 @@ private fun Card5AudioSpeech(
 private fun Card8TextCaptions(
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
+    mediaUri: Uri?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH,
+    videoWidth: Int = 1080,
+    videoHeight: Int = 1920
 ) {
-    val working = "Lower third area clean and uncluttered for text placement."
-    val fix = "No high-contrast animated text overlay in the first 2 seconds."
-    val quickAction = "Add auto-captions in middle-center with dark background pill."
+    val details = ReportLocalizationHelper.getCardDetails(7, lang)
 
     EvidenceCardLayout(
-        title = "TEXT & CAPTIONS",
-        timestampText = "00:02",
+        title = details.title,
+        timestampText = details.timestamp,
         frameTimeUs = 2_000_000L,
         mediaUri = mediaUri,
-        workingText = working,
-        fixText = fix,
-        quickActionText = quickAction
+        workingText = details.working,
+        fixText = details.fix,
+        quickActionText = details.action,
+        lang = lang,
+        videoWidth = videoWidth,
+        videoHeight = videoHeight
     )
-}
-
-// CARD 8 — PEOPLE & OBJECTS
-@Composable
-private fun Card8SubjectObjects(
-    report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?,
-    mediaUri: Uri?
-) {
-    val working = "Person detected at 00:02–00:11 with clear face visibility."
-    val fix = "Subject framing is slightly off-center during key movement."
-    val quickAction = "Center subject framing using crop adjustment."
-
-    EvidenceCardLayout(
-        title = "PEOPLE & OBJECTS",
-        timestampText = "00:05",
-        frameTimeUs = 5_000_000L,
-        mediaUri = mediaUri,
-        workingText = working,
-        fixText = fix,
-        quickActionText = quickAction
-    )
-}
-
-// CARD 7 — STORY / MESSAGE
-@Composable
-private fun Card7StoryMessage(
-    reel: AnalysedReel,
-    report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?
-) {
-    val working = "The reel presents the subject first, then demonstrates core value."
-    val fix = "Core takeaway occurs late in the final section."
-    val quickAction = "State the primary topic or hook in the first 3 seconds."
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("STORY / MESSAGE", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
-                Text(reel.category.ifEmpty { "General Content" }, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-            }
-        }
-
-        // Scene Progression Pills
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, CyanGlow)) {
-                Text("OPENING", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
-            }
-            Text("→", fontSize = 12.sp, color = TextSecondary)
-            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, GlassBorder)) {
-                Text("MAIN CONTENT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextWhite, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
-            }
-            Text("→", fontSize = 12.sp, color = TextSecondary)
-            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFF0F172A), border = BorderStroke(1.dp, GlassBorder)) {
-                Text("END", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextWhite, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = EmeraldGreen.copy(alpha = 0.12f), border = BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("✓ WORKING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
-                Text(working, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = AmberYellow.copy(alpha = 0.12f), border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.3f))) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("⚠ NEEDS ATTENTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = AmberYellow)
-                Text(fix, fontSize = 12.sp, color = TextWhite)
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                Text(quickAction, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
-            }
-        }
-    }
 }
 
 // CARD 9 — ENGAGEMENT / VIRAL POTENTIAL
 @Composable
 private fun Card9Engagement(
     report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?
+    masterReport: MasterValidatedReportV2?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
+    val details = ReportLocalizationHelper.getCardDetails(8, lang)
     val scrollPower = report?.scrollStopPowerScore ?: 83
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("ENGAGEMENT POTENTIAL", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
-                Text("$scrollPower/100", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-            }
+            Text(details.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            Text("$scrollPower/100", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
         }
 
-        // Analytical Factors Progress Bars
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF0F172A),
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                FactorRow("Hook Power", 82)
-                FactorRow("Visual Clarity", 85)
-                FactorRow("Pacing & Cut Rhythm", 78)
-                FactorRow("Audio Clarity", 80)
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHATS_WORKING", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = EmeraldGreen,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.working, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
         }
 
-        Text(
-            text = "*Estimated from video signals (not a view guarantee).",
-            fontSize = 10.sp,
-            color = TextSecondary
-        )
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
 
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = CyanAccent.copy(alpha = 0.12f), border = BorderStroke(1.dp, CyanGlow)) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text("ONE QUICK ACTION", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
-                Text("Add a visual pattern-interrupt graphic at 00:05 to boost retention.", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextWhite)
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("WHAT_TO_FIX", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = AmberYellow,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.fix, fontSize = 13.5.sp, color = TextWhite, lineHeight = 19.sp)
         }
-    }
-}
 
-@Composable
-private fun FactorRow(label: String, score: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(label, fontSize = 11.sp, color = TextWhite, modifier = Modifier.width(110.dp))
-        LinearProgressIndicator(
-            progress = { score / 100f },
-            modifier = Modifier.weight(1f).height(6.dp).clip(CircleShape),
-            color = CyanAccent,
-            trackColor = GlassBorder
-        )
-        Text("$score%", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
+        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("ACTION", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
+            Text(details.action, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = TextWhite, lineHeight = 19.sp)
+        }
     }
 }
 
@@ -2783,71 +2921,52 @@ private fun Card10AudienceContentFit(
     reel: AnalysedReel,
     report: ViralIntelligenceReport?,
     masterReport: MasterValidatedReportV2?,
-    selectedContentTypes: Set<String>
+    selectedContentTypes: Set<String>,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
+    val title = ReportLocalizationHelper.getCardTitle(9, lang)
+
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("AUDIENCE & CONTENT FIT", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 1.2.sp)
-            Surface(shape = RoundedCornerShape(8.dp), color = CyanAccent.copy(alpha = 0.15f), border = BorderStroke(1.dp, CyanGlow)) {
-                Text("${selectedContentTypes.size} Selected Types", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-            }
+            Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            Text("${selectedContentTypes.size} Selected", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanAccent)
         }
 
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF0F172A),
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("CONTENT TYPE MATCHING", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = ReportLocalizationHelper.getSectionHeader("SELECTED_TYPES", lang),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = CyanAccent,
+                letterSpacing = 1.2.sp
+            )
 
-                if (selectedContentTypes.isEmpty()) {
+            if (selectedContentTypes.isEmpty()) {
+                Text("General Content", fontSize = 13.5.sp, color = TextWhite)
+            } else {
+                selectedContentTypes.forEach { typeId ->
+                    val displayLabel = REEL_TYPE_OPTIONS.find { it.id == typeId }?.title ?: typeId.replaceFirstChar { it.uppercase() }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("General Content", fontSize = 12.sp, color = TextWhite)
-                        Surface(shape = RoundedCornerShape(4.dp), color = EmeraldGreen.copy(alpha = 0.2f), border = BorderStroke(1.dp, EmeraldGreen)) {
-                            Text("MATCHED", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                        }
-                    }
-                } else {
-                    selectedContentTypes.forEach { typeId ->
-                        val displayLabel = REEL_TYPE_OPTIONS.find { it.id == typeId }?.title ?: typeId.replaceFirstChar { it.uppercase() }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(displayLabel, fontSize = 12.sp, color = TextWhite)
-                            Surface(shape = RoundedCornerShape(4.dp), color = EmeraldGreen.copy(alpha = 0.2f), border = BorderStroke(1.dp, EmeraldGreen)) {
-                                Text("MATCHED", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                            }
-                        }
+                        Text(displayLabel, fontSize = 13.5.sp, color = TextWhite)
+                        Text(
+                            ReportLocalizationHelper.getStatusText(ContentTypeMatchStatus.MATCHED, lang),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldGreen
+                        )
                     }
                 }
-            }
-        }
-
-        // Audience Demographics Section
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = GlassCard,
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("AUDIENCE DEMOGRAPHICS", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.8.sp)
-                Text("Audience demographic data unavailable.", fontSize = 12.sp, color = TextSecondary)
             }
         }
     }
@@ -2858,49 +2977,30 @@ private fun Card10AudienceContentFit(
 private fun Card11ActionPlan(
     reel: AnalysedReel,
     report: ViralIntelligenceReport?,
-    masterReport: MasterValidatedReportV2?
+    masterReport: MasterValidatedReportV2?,
+    lang: ReportLanguage = ReportLanguage.ENGLISH
 ) {
-    val fixes = listOf(
-        "01 • Strengthen opening: trim initial dead time before action (at 00:00.8).",
-        "02 • Improve subject focus: adjust crop and center framing during main sequence.",
-        "03 • Add auto-captions: place high-contrast text overlay in lower third."
-    )
+    val title = ReportLocalizationHelper.getCardTitle(10, lang)
+    val fixes = ReportLocalizationHelper.get3Changes(lang)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("3 Changes That Matter Most", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = CyanAccent, letterSpacing = 0.5.sp)
+        Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
 
         fixes.forEach { fix ->
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = GlassCard,
-                border = BorderStroke(1.dp, AmberYellow.copy(alpha = 0.35f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = fix,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextWhite
-                    )
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = fix,
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextWhite,
+                    lineHeight = 19.sp
+                )
+                HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
             }
         }
-
-        Text(
-            text = "Fix these first.",
-            fontSize = 11.5.sp,
-            fontWeight = FontWeight.Bold,
-            color = CyanAccent
-        )
     }
 }
 
