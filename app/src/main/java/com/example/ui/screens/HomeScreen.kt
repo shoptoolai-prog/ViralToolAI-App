@@ -11,12 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,28 +30,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.graphicsLayer
 import com.example.core.MediaImportHelper
 import com.example.ui.components.CompactCreatorMissionsWidget
 import com.example.ui.components.CreatorMissionsDialog
@@ -62,7 +55,7 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 // ============================================================================
-// DS-9 APPLE HUMAN INTERFACE & MEESHO CREATOR PREMIUM DASHBOARD
+// VIRALTOOLAI PREMIUM IPHONE-INSPIRED CREATOR DASHBOARD
 // ============================================================================
 private val HomeBg = Color(0xFF0F1115) // Dark graphite background with depth
 private val CardSurface = Color(0xFF171A21) // Elevated dark surface
@@ -72,14 +65,6 @@ private val TextPrimary = Color(0xFFFFFFFF)
 private val TextSecondary = Color(0xFFA0AAB8)
 private val CyanAccent = Color(0xFF22D7E8)
 
-data class RecentProjectItem(
-    val id: String,
-    val title: String,
-    val duration: String,
-    val timeAgo: String,
-    val isReel: Boolean = true
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -88,6 +73,11 @@ fun HomeScreen(
     onNavigateToAcademy: (() -> Unit)? = null,
     onNavigateToMediaPicker: () -> Unit = {},
     onVideoImportedToEditor: (ProjectSetupConfig) -> Unit = {},
+    onNavigateToAiCreatorAssistant: () -> Unit = {},
+    onNavigateToThumbnailPicker: () -> Unit = {},
+    onNavigateToSubtitlesGenerator: () -> Unit = {},
+    onNavigateToVoiceCleaner: () -> Unit = {},
+    onNavigateToSmartVideoText: () -> Unit = {},
     initialSharedUrl: String? = null
 ) {
     val context = LocalContext.current
@@ -97,13 +87,6 @@ fun HomeScreen(
 
     var isImportingMedia by remember { mutableStateOf(false) }
     var showImportErrorDialog by remember { mutableStateOf(false) }
-
-    // Dialog & overlay states
-    var showSettingsDialog by remember { mutableStateOf(false) }
-    var showCreatorPlannerDialog by remember { mutableStateOf(false) }
-    var showHookLibraryDialog by remember { mutableStateOf(false) }
-    var showScriptBuilderDialog by remember { mutableStateOf(false) }
-    var showShoppingInsightsDialog by remember { mutableStateOf(false) }
     var showCreatorMissionsDialog by remember { mutableStateOf(false) }
 
     // Pending import config for AI Creator Wizard flow
@@ -119,14 +102,6 @@ fun HomeScreen(
 
     // Track mode for import: true for Reel Analysis, false for Direct Editor
     var isAnalysisMode by remember { mutableStateOf(true) }
-
-    // Dynamic greeting based on current hour
-    val currentHour = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
-    val greetingText = when (currentHour) {
-        in 5..11 -> "Good Morning, Creator 👋"
-        in 12..16 -> "Good Afternoon, Creator 👋"
-        else -> "Good Evening, Creator 👋"
-    }
 
     // Media Picker Launcher (Videos / Images)
     val mediaPickerLauncher = rememberLauncherForActivityResult(
@@ -176,16 +151,6 @@ fun HomeScreen(
                 }
             }
         }
-    }
-
-    // Sample Recent Projects (Meesho style horizontal list)
-    val recentProjects = remember {
-        listOf(
-            RecentProjectItem("1", "Viral Hook Reel #14", "0:45", "2 hrs ago"),
-            RecentProjectItem("2", "Product Review Shorts", "0:30", "Yesterday"),
-            RecentProjectItem("3", "Unboxing Affiliate", "1:12", "3 days ago"),
-            RecentProjectItem("4", "Outfit Aesthetic", "0:25", "5 days ago")
-        )
     }
 
     Box(
@@ -243,7 +208,7 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // Large Heading (DS-12 Prompt Exact Text)
+                    // Large Heading
                     Text(
                         text = "Ready to make today's viral reel?",
                         fontSize = 28.sp,
@@ -253,7 +218,7 @@ fun HomeScreen(
                         letterSpacing = (-0.5).sp
                     )
 
-                    // Small Subtitle (DS-12 Prompt Exact Text)
+                    // Small Subtitle
                     Text(
                         text = "Your AI creator assistant is online.",
                         fontSize = 14.5.sp,
@@ -262,12 +227,12 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // LIVE STATUS BAR (DS-12 Live Status Strip)
+                    // LIVE STATUS BAR
                     LiveStatusBar()
                 }
 
                 // ==================================================
-                // DS-27: AI CREATOR MISSIONS COMPACT HOME WIDGET
+                // AI CREATOR MISSIONS COMPACT HOME WIDGET
                 // ==================================================
                 CompactCreatorMissionsWidget(
                     onClick = {
@@ -276,7 +241,7 @@ fun HomeScreen(
                 )
 
                 // ==================================================
-                // PRIMARY TOOLS (2 Premium Glass Cards)
+                // PRIMARY TOOLS (AI Reel Analysis & AI Creator Assistant)
                 // ==================================================
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -296,23 +261,19 @@ fun HomeScreen(
                         }
                     )
 
-                    // RIGHT TILE: AI VIDEO EDITOR
-                    EditVideoAppleCard(
+                    // RIGHT TILE: AI CREATOR ASSISTANT
+                    AiCreatorAssistantAppleCard(
                         modifier = Modifier.weight(1f),
-                        testTag = "tile_edit_video",
+                        testTag = "tile_ai_creator_assistant",
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            isAnalysisMode = false
-                            Log.d("VIRI_DEBUG", "LOG: Gallery opened")
-                            mediaPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
-                            )
+                            onNavigateToAiCreatorAssistant()
                         }
                     )
                 }
 
                 // ==================================================
-                // RECENT PROJECTS (Horizontal Premium Glass Cards)
+                // CREATOR TOOLS SECTION (4 Premium Modern AI Creator Tools)
                 // ==================================================
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -324,167 +285,88 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Recent Projects",
-                            fontSize = 18.sp,
+                            text = "Creator Tools",
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
 
-                        Text(
-                            text = "View All",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = CyanAccent,
-                            modifier = Modifier.clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onNavigateToProjects()
-                            }
-                        )
-                    }
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(end = 8.dp)
-                    ) {
-                        items(recentProjects) { project ->
-                            RecentProjectCard(
-                                project = project,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToProjects()
-                                }
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = CyanAccent.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.3f))
+                        ) {
+                            Text(
+                                text = "4 AI Utilities",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = CyanAccent,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
-                }
-
-                // ==================================================
-                // QUICK TOOLS (2 Column Premium Grid with Distinct Colors)
-                // ==================================================
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(
-                        text = "Quick Creator Tools",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
 
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // ROW 1: Thumbnail Picker & Subtitles Generator
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            QuickToolTile(
-                                title = "Daily Planner",
-                                subtitle = "Tasks & Schedule",
-                                icon = Icons.Outlined.CalendarToday,
-                                iconColor = Color(0xFFFF9800), // Amber
+                            CreatorToolCard(
+                                title = "Thumbnail Picker",
+                                subtitle = "Find your best 2 frames",
+                                icon = Icons.Outlined.Image,
+                                iconColor = Color(0xFF22D7E8), // Cyan
+                                tag = "High CTR",
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showCreatorPlannerDialog = true
+                                    onNavigateToThumbnailPicker()
                                 }
                             )
 
-                            QuickToolTile(
-                                title = "100+ Viral Hooks",
-                                subtitle = "Scroll-stopping ideas",
-                                icon = Icons.Outlined.AutoAwesome,
-                                iconColor = Color(0xFFA855F7), // Purple
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showHookLibraryDialog = true
-                                }
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            QuickToolTile(
-                                title = "Caption AI",
-                                subtitle = "Instant viral captions",
+                            CreatorToolCard(
+                                title = "Subtitles Generator",
+                                subtitle = "Auto-captions with style",
                                 icon = Icons.Outlined.Subtitles,
                                 iconColor = Color(0xFF10B981), // Emerald
+                                tag = "Multi-Lang",
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showScriptBuilderDialog = true
-                                }
-                            )
-
-                            QuickToolTile(
-                                title = "Thumbnail AI",
-                                subtitle = "High CTR covers",
-                                icon = Icons.Outlined.Image,
-                                iconColor = Color(0xFFEC4899), // Pink
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showScriptBuilderDialog = true
+                                    onNavigateToSubtitlesGenerator()
                                 }
                             )
                         }
 
+                        // ROW 2: Voice Cleaner & Smart Video Text
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            QuickToolTile(
-                                title = "Trend Finder",
-                                subtitle = "Trending audio & topics",
-                                icon = Icons.Outlined.TrendingUp,
-                                iconColor = Color(0xFF3B82F6), // Blue
+                            CreatorToolCard(
+                                title = "Voice Cleaner",
+                                subtitle = "Noise reduction & boost",
+                                icon = Icons.Outlined.Mic,
+                                iconColor = Color(0xFFA855F7), // Purple
+                                tag = "Crisp Audio",
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToAiLab()
+                                    onNavigateToVoiceCleaner()
                                 }
                             )
 
-                            QuickToolTile(
-                                title = "Product Detector",
-                                subtitle = "Affiliate tag links",
-                                icon = Icons.Outlined.ShoppingBag,
-                                iconColor = Color(0xFFF59E0B), // Gold
+                            CreatorToolCard(
+                                title = "Smart Video Text",
+                                subtitle = "Auto-text overlays",
+                                icon = Icons.Outlined.TextFields,
+                                iconColor = Color(0xFFFF9800), // Orange
+                                tag = "Hook Banner",
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showShoppingInsightsDialog = true
-                                }
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            QuickToolTile(
-                                title = "Posting Time",
-                                subtitle = "Peak engagement slot",
-                                icon = Icons.Outlined.Schedule,
-                                iconColor = Color(0xFF06B6D4), // Cyan
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToAiLab()
-                                }
-                            )
-
-                            QuickToolTile(
-                                title = "Creator Notes",
-                                subtitle = "Scripts & ideas",
-                                icon = Icons.Outlined.EditNote,
-                                iconColor = Color(0xFF8B5CF6), // Violet
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToProjects()
+                                    onNavigateToSmartVideoText()
                                 }
                             )
                         }
@@ -553,154 +435,40 @@ fun HomeScreen(
             )
         }
 
-        if (showCreatorPlannerDialog) {
-            HomeToolModal(
-                title = "Daily Planner",
-                icon = Icons.Outlined.CalendarToday,
-                onDismiss = { showCreatorPlannerDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "Schedule today's reel posting and content goals.",
-                        fontSize = 14.sp,
-                        color = TextSecondary
-                    )
-                    Button(
-                        onClick = { showCreatorPlannerDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
-                    ) {
-                        Text("Open Full Planner", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
-        if (showHookLibraryDialog) {
-            HomeToolModal(
-                title = "100+ Viral Hooks",
-                icon = Icons.Outlined.AutoAwesome,
-                onDismiss = { showHookLibraryDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    val hooks = listOf(
-                        "Stop doing this if you want 10k followers...",
-                        "Nobody is talking about this secret hack...",
-                        "I tried this for 7 days and here is what happened...",
-                        "Save this before it gets deleted!"
-                    )
-                    hooks.forEach { hook ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = TileSurface,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "• \"$hook\"",
-                                fontSize = 13.sp,
-                                color = TextPrimary,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showScriptBuilderDialog) {
-            HomeToolModal(
-                title = "AI Captions & Script",
-                icon = Icons.Outlined.Subtitles,
-                onDismiss = { showScriptBuilderDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "Auto-generate engaging captions and spoken scripts.",
-                        fontSize = 14.sp,
-                        color = TextSecondary
-                    )
-                    Button(
-                        onClick = {
-                            showScriptBuilderDialog = false
-                            onNavigateToAiLab()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
-                    ) {
-                        Text("Generate AI Captions", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
-        if (showShoppingInsightsDialog) {
-            HomeToolModal(
-                title = "Product Detector",
-                icon = Icons.Outlined.ShoppingBag,
-                onDismiss = { showShoppingInsightsDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "Auto-detect products in your reel for Meesho/Amazon affiliate links.",
-                        fontSize = 14.sp,
-                        color = TextSecondary
-                    )
-                    Button(
-                        onClick = { showShoppingInsightsDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
-                    ) {
-                        Text("Detect Products Now", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
-        if (showSettingsDialog) {
-            HomeToolModal(
-                title = "Settings",
-                icon = Icons.Default.Settings,
-                onDismiss = { showSettingsDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("ViralToolAI Version 2.5 (Pro)", fontSize = 14.sp, color = TextPrimary, fontWeight = FontWeight.Bold)
-                    Text("Mascot Level: Lvl ${ViriPrefs.getLevel(context).levelNum}", fontSize = 13.sp, color = CyanAccent)
-                    Button(
-                        onClick = { showSettingsDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = TileSurface, contentColor = TextPrimary),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
-                    ) {
-                        Text("Close Settings")
-                    }
-                }
-            }
-        }
-
         if (showImportErrorDialog) {
-            HomeToolModal(
-                title = "Media Import Error",
-                icon = Icons.Default.ErrorOutline,
-                onDismiss = { showImportErrorDialog = false }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AlertDialog(
+                onDismissRequest = { showImportErrorDialog = false },
+                containerColor = CardSurface,
+                shape = RoundedCornerShape(24.dp),
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = CyanAccent)
+                        Text("Media Import Notice", fontWeight = FontWeight.Bold, color = TextPrimary)
+                    }
+                },
+                text = {
                     Text(
-                        text = "Unable to process the selected video file. Supported video formats: MP4, MOV, MKV, WEBM, AVI, MPEG.",
+                        text = "Unable to process the selected video file. Supported video formats: MP4, MOV, MKV, WEBM.",
                         fontSize = 14.sp,
                         color = TextSecondary
                     )
+                },
+                confirmButton = {
                     Button(
                         onClick = { showImportErrorDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black)
                     ) {
                         Text("OK", fontWeight = FontWeight.Bold)
                     }
                 }
-            }
+            )
         }
 
         // ==================================================
-        // AI REEL ANALYSIS — MASTER FLOW V1 REEL DOCTOR AI
+        // AI REEL ANALYSIS FLOW
         // ==================================================
         if (showAiWizard && pendingImportConfig != null) {
             MasterReelDoctorFlow(
@@ -807,8 +575,248 @@ fun HomeScreen(
 }
 
 // ============================================================================
-// HELPER COMPONENTS FOR MEESHO / APPLE WIDGET DASHBOARD
+// HELPER COMPONENTS FOR VIRALTOOLAI DASHBOARD
 // ============================================================================
+
+@Composable
+private fun CreatorToolCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    iconColor: Color,
+    tag: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.95f else 1f, label = "tool_press_scale")
+
+    val infiniteTransition = rememberInfiniteTransition(label = "tool_float")
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -2.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "tool_float_y"
+    )
+
+    Surface(
+        modifier = modifier
+            .height(138.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationY = floatOffset
+            }
+            .clip(RoundedCornerShape(26.dp))
+            .clickable(interactionSource = interactionSource, indication = null) { onClick() },
+        shape = RoundedCornerShape(26.dp),
+        color = CardSurface,
+        border = BorderStroke(1.dp, GlassBorder.copy(alpha = 0.35f)),
+        shadowElevation = 8.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(TileSurface.copy(alpha = 0.7f), CardSurface)
+                    )
+                )
+                .padding(14.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(iconColor.copy(alpha = 0.16f))
+                            .border(1.dp, iconColor.copy(alpha = 0.5f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = title,
+                            tint = iconColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = iconColor.copy(alpha = 0.12f),
+                        border = BorderStroke(0.5.dp, iconColor.copy(alpha = 0.3f))
+                    ) {
+                        Text(
+                            text = tag,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = iconColor,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = subtitle,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AiCreatorAssistantAppleCard(
+    modifier: Modifier = Modifier,
+    testTag: String = "tile_ai_creator_assistant",
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "press_scale_assistant")
+
+    val infiniteTransition = rememberInfiniteTransition(label = "assistant_pulse")
+    val buttonPulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "btn_pulse_assistant"
+    )
+
+    Surface(
+        modifier = modifier
+            .height(185.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(30.dp))
+            .clickable(interactionSource = interactionSource, indication = null) { onClick() }
+            .testTag(testTag),
+        shape = RoundedCornerShape(30.dp),
+        color = CardSurface,
+        border = BorderStroke(1.5.dp, GlassBorder),
+        shadowElevation = 10.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color(0xFF1C2232), Color(0xFF121622))
+                    )
+                )
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(CyanAccent.copy(alpha = 0.2f))
+                            .border(1.dp, CyanAccent, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = CyanAccent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(CyanAccent.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "AUTO PROCESS",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CyanAccent
+                        )
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "AI Creator Assistant",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "AI-powered video preparation",
+                        fontSize = 11.5.sp,
+                        color = TextSecondary,
+                        maxLines = 1
+                    )
+                }
+
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
+                    shape = RoundedCornerShape(20.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp)
+                        .graphicsLayer {
+                            scaleX = buttonPulseScale
+                            scaleY = buttonPulseScale
+                        }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text("Open Assistant →", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun AiReelsAppleCard(
@@ -902,7 +910,6 @@ private fun AiReelsAppleCard(
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val canvasW = size.width
                             val canvasH = size.height
-                            // Moving beam
                             drawRect(
                                 color = CyanAccent.copy(alpha = 0.5f),
                                 topLeft = Offset(0f, canvasH * scanLineY),
@@ -976,272 +983,12 @@ private fun AiReelsAppleCard(
 }
 
 @Composable
-private fun EditVideoAppleCard(
-    modifier: Modifier = Modifier,
-    testTag: String = "tile_edit_video",
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "press_scale")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "timeline_play")
-    val playheadX by infiniteTransition.animateFloat(
-        initialValue = 0.1f,
-        targetValue = 0.9f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2800, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "playhead"
-    )
-
-    // Card Floating Animation (Slightly phase offset from left card)
-    val cardFloatY by infiniteTransition.animateFloat(
-        initialValue = -4f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "card_float2"
-    )
-
-    // Live Waveform Pulse Animation
-    val waveHeightMult by infiniteTransition.animateFloat(
-        initialValue = 0.6f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "wave_anim"
-    )
-
-    Surface(
-        modifier = modifier
-            .height(185.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                translationY = cardFloatY
-            }
-            .clip(RoundedCornerShape(30.dp))
-            .clickable(interactionSource = interactionSource, indication = null) { onClick() }
-            .testTag(testTag),
-        shape = RoundedCornerShape(30.dp),
-        color = CardSurface,
-        border = BorderStroke(1.5.dp, GlassBorder),
-        shadowElevation = 10.dp
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1F2430), Color(0xFF141720))
-                    )
-                )
-                .padding(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start
-            ) {
-                // Top: Animated Timeline & Waveform Graphic
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF101216))
-                        .padding(horizontal = 8.dp, vertical = 6.dp)
-                ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val canvasW = size.width
-                        val canvasH = size.height
-                        // Track blocks
-                        drawRoundRect(
-                            color = Color(0xFF2A313F),
-                            topLeft = Offset(0f, 0f),
-                            size = Size(canvasW * 0.45f, canvasH * 0.45f),
-                            cornerRadius = CornerRadius(4.dp.toPx())
-                        )
-                        drawRoundRect(
-                            color = Color(0xFF2A313F),
-                            topLeft = Offset(canvasW * 0.5f, 0f),
-                            size = Size(canvasW * 0.45f, canvasH * 0.45f),
-                            cornerRadius = CornerRadius(4.dp.toPx())
-                        )
-                        // Audio Waveform Bars
-                        val barCount = 12
-                        val barW = (canvasW - (barCount - 1) * 2.dp.toPx()) / barCount
-                        for (i in 0 until barCount) {
-                            val hFactor = if (i % 2 == 0) waveHeightMult else (1.4f - waveHeightMult)
-                            val barH = (canvasH * 0.35f * hFactor).coerceIn(2.dp.toPx(), canvasH * 0.45f)
-                            drawRoundRect(
-                                color = CyanAccent.copy(alpha = 0.6f),
-                                topLeft = Offset(i * (barW + 2.dp.toPx()), canvasH * 0.55f + (canvasH * 0.45f - barH) / 2),
-                                size = Size(barW, barH),
-                                cornerRadius = CornerRadius(1.dp.toPx())
-                            )
-                        }
-                        // Moving Playhead
-                        drawLine(
-                            color = CyanAccent,
-                            start = Offset(canvasW * playheadX, 0f),
-                            end = Offset(canvasW * playheadX, canvasH),
-                            strokeWidth = 2.dp.toPx()
-                        )
-                    }
-                }
-
-                // Middle: Text Info
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = "AI Video Editor",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
-                    Text(
-                        text = "Trim • Caption • Auto Edit",
-                        fontSize = 10.5.sp,
-                        color = TextSecondary,
-                        maxLines = 1
-                    )
-                }
-
-                // Bottom: CTA Button
-                Surface(
-                    onClick = onClick,
-                    shape = RoundedCornerShape(20.dp),
-                    color = TileSurface,
-                    border = BorderStroke(1.dp, CyanAccent),
-                    modifier = Modifier.fillMaxWidth().height(36.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(Icons.Outlined.AutoFixHigh, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Open Editor", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecentProjectCard(
-    project: RecentProjectItem,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.95f else 1f, label = "proj_press")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "proj_float")
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "proj_y"
-    )
-
-    Surface(
-        modifier = Modifier
-            .width(160.dp)
-            .height(115.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                translationY = floatOffset
-            }
-            .clip(RoundedCornerShape(22.dp))
-            .clickable(interactionSource = interactionSource, indication = null) { onClick() },
-        shape = RoundedCornerShape(22.dp),
-        color = CardSurface,
-        border = BorderStroke(1.dp, GlassBorder.copy(alpha = 0.4f)),
-        shadowElevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(TileSurface)
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = "REEL",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CyanAccent
-                    )
-                }
-
-                Text(
-                    text = project.duration,
-                    fontSize = 11.sp,
-                    color = TextSecondary
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = project.title,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.PlayArrow,
-                        contentDescription = "Continue Editing",
-                        tint = CyanAccent,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = "Continue Editing",
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = CyanAccent
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun LiveStatusBar(modifier: Modifier = Modifier) {
     val statuses = remember {
         listOf(
             "🟢 AI Online",
             "⚡ Viral Engine Ready",
-            "🎯 Hook Database Loaded",
+            "🎯 Creator Tools Active",
             "📊 Trend Sync Complete"
         )
     }
@@ -1284,144 +1031,6 @@ private fun LiveStatusBar(modifier: Modifier = Modifier) {
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickToolTile(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.95f else 1f, label = "press_scale")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "float")
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float_y"
-    )
-
-    Surface(
-        modifier = modifier
-            .height(110.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                translationY = floatOffset
-            }
-            .clip(RoundedCornerShape(26.dp))
-            .clickable(interactionSource = interactionSource, indication = null) { onClick() },
-        shape = RoundedCornerShape(26.dp),
-        color = CardSurface,
-        border = BorderStroke(1.dp, GlassBorder.copy(alpha = 0.35f)),
-        shadowElevation = 6.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(iconColor.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = iconColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = title,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = TextSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomeToolModal(
-    title: String,
-    icon: ImageVector,
-    onDismiss: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .clip(RoundedCornerShape(24.dp)),
-            color = CardSurface,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(TileSurface),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(icon, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(18.dp))
-                        }
-                        Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    }
-
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary, modifier = Modifier.size(20.dp))
-                    }
-                }
-
-                content()
             }
         }
     }

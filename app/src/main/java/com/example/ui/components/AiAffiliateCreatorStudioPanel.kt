@@ -31,8 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.screens.StickerTrackItem
-import com.example.ui.screens.TextTrackItem
+import com.example.engine.*
 import kotlinx.coroutines.delay
 
 // Dark Luxury Apple Aesthetic Color Palette

@@ -26,14 +26,16 @@ enum class MediaType {
 
 data class MediaItem(
     val id: String = "media_${System.currentTimeMillis()}_${(100..999).random()}",
-    val fileUri: String,
-    val name: String,
-    val type: MediaType,
-    val durationMs: Long, // 0 for static images
-    val width: Int,
-    val height: Int,
+    val fileUri: String = "",
+    val name: String = "Media",
+    val type: MediaType = MediaType.VIDEO_MP4,
+    val durationMs: Long = 15000L, // 0 for static images
+    val width: Int = 1080,
+    val height: Int = 1920,
     val thumbnailBitmap: Bitmap? = null
-)
+) {
+    val uri: Uri? get() = try { Uri.parse(fileUri) } catch(e: Exception) { null }
+}
 
 data class ClipTransform(
     val scaleX: Float = 1.0f,
@@ -57,8 +59,8 @@ data class TextOverlay(
 
 data class TimelineClip(
     val id: String = "clip_${System.currentTimeMillis()}_${(100..999).random()}",
-    val mediaItem: MediaItem,
-    var startTimelineMs: Long,
+    val mediaItem: MediaItem = MediaItem(),
+    var startTimelineMs: Long = 0L,
     var inPointMs: Long = 0L,
     var outPointMs: Long = mediaItem.durationMs.coerceAtLeast(3000L),
     var speed: Float = 1.0f, // 0.1x to 10.0x
@@ -66,10 +68,23 @@ data class TimelineClip(
     var isMuted: Boolean = false,
     var transform: ClipTransform = ClipTransform(),
     var filterStack: List<FilterLayer> = emptyList(),
-    var textOverlays: List<TextOverlay> = emptyList()
+    var textOverlays: List<TextOverlay> = emptyList(),
+    var isSelected: Boolean = false
 ) {
     val durationOnTimelineMs: Long
         get() = ((outPointMs - inPointMs) / speed).toLong().coerceAtLeast(100L)
+
+    val name: String
+        get() = mediaItem.name
+
+    val uri: Uri?
+        get() = mediaItem.uri
+
+    val durationSec: Double
+        get() = durationOnTimelineMs / 1000.0
+
+    val startOffsetSec: Double
+        get() = inPointMs / 1000.0
 }
 
 data class VideoDiagnostics(

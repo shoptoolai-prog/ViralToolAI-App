@@ -10,6 +10,8 @@ import coil.util.DebugLogger
 
 class ViralApplication : Application(), ImageLoaderFactory {
 
+    private var customImageLoader: ImageLoader? = null
+
     override fun onCreate() {
         super.onCreate()
         // Initialize Live Cloud Management System (Firebase Remote Config, Firestore, Analytics, FCM, Offline Cache)
@@ -17,7 +19,7 @@ class ViralApplication : Application(), ImageLoaderFactory {
     }
 
     override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this)
+        val loader = ImageLoader.Builder(this)
             .memoryCache {
                 MemoryCache.Builder(this)
                     .maxSizePercent(0.25) // Max 25% app memory for bitmap cache
@@ -34,5 +36,17 @@ class ViralApplication : Application(), ImageLoaderFactory {
             .memoryCachePolicy(CachePolicy.ENABLED)
             .crossfade(true)
             .build()
+        customImageLoader = loader
+        return loader
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        customImageLoader?.memoryCache?.trimMemory(level)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        customImageLoader?.memoryCache?.clear()
     }
 }

@@ -60,7 +60,7 @@ fun ExportStudioSheet(
     var keepMetadata by remember { mutableStateOf(true) }
 
     val totalDurationMs = remember(clips) {
-        clips.maxOfOrNull { it.startTimelineMs + it.durationOnTimelineMs } ?: 3000L
+        clips.maxOfOrNull { clip: TimelineClip -> clip.startTimelineMs + clip.durationOnTimelineMs } ?: 3000L
     }
 
     val estimatedSizeMB = remember(totalDurationMs, selectedResolution, selectedFrameRate, selectedBitratePreset, customBitrateMbps) {

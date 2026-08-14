@@ -134,7 +134,7 @@ fun GPUTransitionsStudioSheet(
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "${clipA?.mediaItem?.name ?: "Clip A"} ➔ ${clipB?.mediaItem?.name ?: "Clip B"}",
+                    text = "${clipA?.name ?: "Clip A"} ➔ ${clipB?.name ?: "Clip B"}",
                     fontSize = 10.sp,
                     color = MutedText
                 )

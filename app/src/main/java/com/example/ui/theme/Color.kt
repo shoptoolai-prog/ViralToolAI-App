@@ -63,6 +63,9 @@ val AmberWarning = Color(0xFFF59E0B)
 
 val GlassCardBg = Color(0x1AFFFFFF) // bg-white/10
 val GlassCardBorder = Color(0x288B5CF6) // border-violet/15
+val CardSurface = Color(0xFF1A1F2C)
+val TileSurface = Color(0xFF141824)
+val GlassBorder = Color(0x3320D9E8)
 
 val DarkSurface = Color(0x10FFFFFF) // bg-white/6
 val TextWhite = Color(0xFFF8FAFC)

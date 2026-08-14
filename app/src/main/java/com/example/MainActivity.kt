@@ -164,7 +164,12 @@ enum class Screen {
     Analysis,
     Result,
     MediaPicker,
-    ProjectSetup
+    ProjectSetup,
+    AiCreatorAssistant,
+    ThumbnailPicker,
+    SubtitlesGenerator,
+    VoiceCleaner,
+    SmartVideoText
 }
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalSharedTransitionApi::class)
@@ -239,7 +244,12 @@ fun MainAppLayout(sharedUrl: String? = null) {
             currentScreen != Screen.Analysis &&
             currentScreen != Screen.MediaPicker &&
             currentScreen != Screen.ProjectSetup &&
-            currentScreen != Screen.VideoEditing
+            currentScreen != Screen.VideoEditing &&
+            currentScreen != Screen.AiCreatorAssistant &&
+            currentScreen != Screen.ThumbnailPicker &&
+            currentScreen != Screen.SubtitlesGenerator &&
+            currentScreen != Screen.VoiceCleaner &&
+            currentScreen != Screen.SmartVideoText
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -353,7 +363,37 @@ fun MainAppLayout(sharedUrl: String? = null) {
                                 currentProjectConfig = config
                                 currentScreen = Screen.VideoEditing
                             },
+                            onNavigateToAiCreatorAssistant = { currentScreen = Screen.AiCreatorAssistant },
+                            onNavigateToThumbnailPicker = { currentScreen = Screen.ThumbnailPicker },
+                            onNavigateToSubtitlesGenerator = { currentScreen = Screen.SubtitlesGenerator },
+                            onNavigateToVoiceCleaner = { currentScreen = Screen.VoiceCleaner },
+                            onNavigateToSmartVideoText = { currentScreen = Screen.SmartVideoText },
                             initialSharedUrl = sharedUrl
+                        )
+                    }
+                    Screen.ThumbnailPicker -> {
+                        com.example.ui.screens.tools.ThumbnailPickerScreen(
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
+                    Screen.SubtitlesGenerator -> {
+                        com.example.ui.screens.tools.SubtitlesGeneratorScreen(
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
+                    Screen.VoiceCleaner -> {
+                        com.example.ui.screens.tools.VoiceCleanerScreen(
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
+                    Screen.SmartVideoText -> {
+                        com.example.ui.screens.tools.SmartVideoTextScreen(
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
+                    Screen.AiCreatorAssistant -> {
+                        com.example.creatorassistant.ui.AiCreatorAssistantScreen(
+                            onNavigateToHome = { currentScreen = Screen.Home }
                         )
                     }
                     Screen.MediaPicker -> {

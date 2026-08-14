@@ -101,7 +101,7 @@ fun KeyframeStudioSheet(
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "${targetClip?.mediaItem?.name ?: "Selected Object"} • ${formatMs(relativeTimeMs)}",
+                    text = "${targetClip?.name ?: "Selected Object"} • ${formatMs(relativeTimeMs)}",
                     fontSize = 10.sp,
                     color = MutedText
                 )

@@ -55,7 +55,7 @@ fun AIVideoStudioSheet(
     var highlightMoments by remember { mutableStateOf<List<AIHighlightMoment>>(emptyList()) }
 
     val totalDurationMs = remember(clips) {
-        clips.maxOfOrNull { it.startTimelineMs + it.durationOnTimelineMs } ?: 5000L
+        clips.maxOfOrNull { clip: TimelineClip -> clip.startTimelineMs + clip.durationOnTimelineMs } ?: 5000L
     }
 
     Column(

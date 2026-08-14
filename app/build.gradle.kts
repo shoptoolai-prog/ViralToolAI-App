@@ -107,6 +107,8 @@ dependencies {
   implementation("io.coil-kt:coil-video:2.7.0")
   implementation("androidx.media3:media3-exoplayer:1.5.1")
   implementation("androidx.media3:media3-ui:1.5.1")
+  implementation("androidx.media3:media3-transformer:1.5.1")
+  implementation("androidx.media3:media3-effect:1.5.1")
   implementation(libs.converter.moshi)
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.auth)
