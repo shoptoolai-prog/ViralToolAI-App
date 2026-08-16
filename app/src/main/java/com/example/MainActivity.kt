@@ -169,7 +169,9 @@ enum class Screen {
     ThumbnailPicker,
     SubtitlesGenerator,
     VoiceCleaner,
-    SmartVideoText
+    SmartVideoText,
+    ShoppingAssistant,
+    RemoveBackground
 }
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalSharedTransitionApi::class)
@@ -249,7 +251,9 @@ fun MainAppLayout(sharedUrl: String? = null) {
             currentScreen != Screen.ThumbnailPicker &&
             currentScreen != Screen.SubtitlesGenerator &&
             currentScreen != Screen.VoiceCleaner &&
-            currentScreen != Screen.SmartVideoText
+            currentScreen != Screen.SmartVideoText &&
+            currentScreen != Screen.ShoppingAssistant &&
+            currentScreen != Screen.RemoveBackground
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -368,7 +372,19 @@ fun MainAppLayout(sharedUrl: String? = null) {
                             onNavigateToSubtitlesGenerator = { currentScreen = Screen.SubtitlesGenerator },
                             onNavigateToVoiceCleaner = { currentScreen = Screen.VoiceCleaner },
                             onNavigateToSmartVideoText = { currentScreen = Screen.SmartVideoText },
+                            onNavigateToShoppingAssistant = { currentScreen = Screen.ShoppingAssistant },
+                            onNavigateToRemoveBackground = { currentScreen = Screen.RemoveBackground },
                             initialSharedUrl = sharedUrl
+                        )
+                    }
+                    Screen.RemoveBackground -> {
+                        com.example.ui.screens.tools.RemoveBackgroundScreen(
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
+                    Screen.ShoppingAssistant -> {
+                        com.example.ui.screens.tools.ShoppingAssistantScreen(
+                            onBackClick = { currentScreen = Screen.Home }
                         )
                     }
                     Screen.ThumbnailPicker -> {

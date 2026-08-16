@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.app.Activity
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.ads.RewardedAdManager
 import com.example.creatoracademy.CreatorAcademyPrefs
 import com.example.ui.components.ViralToolAiLogo
 import com.example.ui.theme.*
@@ -69,6 +73,10 @@ fun ProfileScreen(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+
+    // AdMob Rewarded Ad States
+    val isAdReady by RewardedAdManager.isAdReady.collectAsStateWithLifecycle()
+    val isAdLoading by RewardedAdManager.isLoading.collectAsStateWithLifecycle()
 
     // Preferences & State
     val setupData = remember { CreatorAcademyPrefs.getSetupData(context) }
@@ -946,6 +954,90 @@ fun ProfileScreen(
                                         Icon(imageVector = Icons.Default.Campaign, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text("Official IG", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Phase 2: Google AdMob Rewarded Ad Engine Development Test Action
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayCircle,
+                                            contentDescription = null,
+                                            tint = if (isAdReady) EmeraldGlow else GoldPrimary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = "AdMob Rewarded Ad Engine",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextWhite
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = if (isAdLoading) "Ad status: Loading..." else if (isAdReady) "Ad status: Ready to test" else "Ad status: Standby",
+                                        fontSize = 10.5.sp,
+                                        color = if (isAdReady) EmeraldGlow else TextGray
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
+                                        val activity = context as? Activity
+                                        if (activity != null) {
+                                            if (!isAdReady) {
+                                                Toast.makeText(context, "Ad is loading…", Toast.LENGTH_SHORT).show()
+                                                RewardedAdManager.loadAd(context)
+                                            } else {
+                                                RewardedAdManager.showAd(
+                                                    activity = activity,
+                                                    onUserEarnedReward = { _ ->
+                                                        Toast.makeText(context, "Reward received successfully", Toast.LENGTH_SHORT).show()
+                                                    },
+                                                    onError = { errorMsg ->
+                                                        Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                                    }
+                                                )
+                                            }
+                                        } else {
+                                            Toast.makeText(context, "Activity not available", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isAdReady) EmeraldGlow else Color(0xFF1E2638)
+                                    ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.testTag("btn_test_rewarded_ad"),
+                                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (isAdLoading) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(12.dp),
+                                                color = Color.White,
+                                                strokeWidth = 1.5.dp
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                        }
+                                        Text(
+                                            text = "Test Rewarded Ad",
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isAdReady) Color.Black else TextWhite
+                                        )
                                     }
                                 }
                             }

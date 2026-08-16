@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.FirebaseApp
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -23,7 +21,7 @@ import org.json.JSONObject
 
 /**
  * Live Cloud Management System (PRE-PUBLISH)
- * Handles Remote Config, Firestore Collections, Analytics, Crashlytics, Storage, and Offline Fallbacks.
+ * Handles Remote Config, Firestore Collections, Storage, and Offline Fallbacks.
  */
 object LiveCloudManager {
 
@@ -36,8 +34,6 @@ object LiveCloudManager {
     private var isFirebaseInitialized = false
     private var remoteConfig: FirebaseRemoteConfig? = null
     private var firestore: FirebaseFirestore? = null
-    private var analytics: FirebaseAnalytics? = null
-    private var crashlytics: FirebaseCrashlytics? = null
     private var storage: FirebaseStorage? = null
     private var auth: FirebaseAuth? = null
 
@@ -134,8 +130,6 @@ object LiveCloudManager {
                 auth = runCatching { FirebaseAuth.getInstance() }.getOrNull()
                 remoteConfig = runCatching { FirebaseRemoteConfig.getInstance() }.getOrNull()
                 firestore = runCatching { FirebaseFirestore.getInstance() }.getOrNull()
-                analytics = runCatching { FirebaseAnalytics.getInstance(appContext) }.getOrNull()
-                crashlytics = runCatching { FirebaseCrashlytics.getInstance() }.getOrNull()
                 storage = runCatching { FirebaseStorage.getInstance() }.getOrNull()
 
                 // Configure Firestore persistence
@@ -585,63 +579,25 @@ object LiveCloudManager {
         return ToolStatus.fromString(statusStr)
     }
 
-    // Analytics & Crashlytics Event Tracking
+    // Event Tracking & Telemetry (Safe logging)
     fun logToolOpen(toolId: String, toolName: String) {
-        try {
-            val bundle = android.os.Bundle().apply {
-                putString("tool_id", toolId)
-                putString("tool_name", toolName)
-                putLong("timestamp", System.currentTimeMillis())
-            }
-            analytics?.logEvent("tool_opened", bundle)
-            crashlytics?.log("Tool opened: $toolId - $toolName")
-        } catch (e: Exception) {
-            Log.w(TAG, "Analytics log error", e)
-        }
+        Log.d(TAG, "Tool opened: $toolId - $toolName")
     }
 
     fun logCourseCompletion(courseId: String, courseTitle: String) {
-        try {
-            val bundle = android.os.Bundle().apply {
-                putString("course_id", courseId)
-                putString("course_title", courseTitle)
-            }
-            analytics?.logEvent("course_completed", bundle)
-        } catch (e: Exception) {
-            Log.w(TAG, "Analytics log error", e)
-        }
+        Log.d(TAG, "Course completed: $courseId - $courseTitle")
     }
 
     fun logSessionTime(durationSeconds: Long) {
-        try {
-            val bundle = android.os.Bundle().apply {
-                putLong("session_duration_sec", durationSeconds)
-            }
-            analytics?.logEvent("session_duration", bundle)
-        } catch (e: Exception) {
-            Log.w(TAG, "Analytics log error", e)
-        }
+        Log.d(TAG, "Session duration: $durationSeconds s")
     }
 
     fun logFeatureUsage(featureName: String, action: String) {
-        try {
-            val bundle = android.os.Bundle().apply {
-                putString("feature_name", featureName)
-                putString("action", action)
-            }
-            analytics?.logEvent("feature_used", bundle)
-        } catch (e: Exception) {
-            Log.w(TAG, "Analytics log error", e)
-        }
+        Log.d(TAG, "Feature used: $featureName - $action")
     }
 
     fun logCrashEvent(exception: Throwable, contextInfo: String) {
-        try {
-            crashlytics?.setCustomKey("context_info", contextInfo)
-            crashlytics?.recordException(exception)
-        } catch (e: Exception) {
-            Log.w(TAG, "Crashlytics log error", e)
-        }
+        Log.e(TAG, "Crash/Error logged: $contextInfo", exception)
     }
 
     private fun saveToPrefs(key: String, value: Any) {

@@ -12,6 +12,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -30,20 +32,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.core.MediaImportHelper
 import com.example.ui.components.CompactCreatorMissionsWidget
 import com.example.ui.components.CreatorMissionsDialog
@@ -52,18 +63,25 @@ import com.example.ui.components.ViriMascotWidget
 import com.example.ui.components.ViriPrefs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 // ============================================================================
-// VIRALTOOLAI PREMIUM IPHONE-INSPIRED CREATOR DASHBOARD
+// VIRALTOOLAI PREMIUM DESIGN TOKENS
 // ============================================================================
-private val HomeBg = Color(0xFF0F1115) // Dark graphite background with depth
-private val CardSurface = Color(0xFF171A21) // Elevated dark surface
-private val TileSurface = Color(0xFF1F2430) // Second level tile surface
-private val GlassBorder = Color(0xFF22D7E8).copy(alpha = 0.6f) // 1.5dp cyan border
+private val HomeBg = Color(0xFF0A0C10)
+private val CardSurface = Color(0xFF121620)
+private val CardSurfaceElevated = Color(0xFF181D2A)
+private val CardSurfaceGlass = Color(0xCC151A26)
+private val GlassBorder = Color(0xFF22D7E8).copy(alpha = 0.35f)
+private val GlassBorderSubtle = Color(0xFFFFFFFF).copy(alpha = 0.08f)
 private val TextPrimary = Color(0xFFFFFFFF)
-private val TextSecondary = Color(0xFFA0AAB8)
+private val TextSecondary = Color(0xFF94A3B8)
+private val TextTertiary = Color(0xFF64748B)
 private val CyanAccent = Color(0xFF22D7E8)
+private val CyanGlow = Color(0xFF00F0FF)
+private val ElectricBlue = Color(0xFF3B82F6)
+private val EmeraldAccent = Color(0xFF10B981)
+private val PurpleAccent = Color(0xFFA855F7)
+private val AmberAccent = Color(0xFFF59E0B)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +96,8 @@ fun HomeScreen(
     onNavigateToSubtitlesGenerator: () -> Unit = {},
     onNavigateToVoiceCleaner: () -> Unit = {},
     onNavigateToSmartVideoText: () -> Unit = {},
+    onNavigateToShoppingAssistant: () -> Unit = {},
+    onNavigateToRemoveBackground: () -> Unit = {},
     initialSharedUrl: String? = null
 ) {
     val context = LocalContext.current
@@ -113,8 +133,7 @@ fun HomeScreen(
         } else {
             Log.d("VIRI_DEBUG", "LOG: Video selected")
             Log.d("VIRI_DEBUG", "LOG: Uri received: $uri")
-            
-            // Persist Uri permission if supported
+
             try {
                 context.contentResolver.takePersistableUriPermission(
                     uri,
@@ -153,19 +172,43 @@ fun HomeScreen(
         }
     }
 
+    // Screen entrance animation state
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "content_alpha"
+    )
+    val contentOffsetY by animateFloatAsState(
+        targetValue = if (isVisible) 0f else 24f,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "content_offset_y"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(HomeBg),
         contentAlignment = Alignment.TopCenter
     ) {
-        // Soft Cyan Radial Light Overlay
+        // Ambient Cyber Glow in background
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(CyanAccent.copy(alpha = 0.12f), Color.Transparent),
-                    center = Offset(size.width * 0.5f, size.height * 0.18f),
-                    radius = size.width * 0.85f
+                    colors = listOf(CyanAccent.copy(alpha = 0.08f), Color.Transparent),
+                    center = Offset(size.width * 0.5f, size.height * 0.15f),
+                    radius = size.width * 0.9f
+                )
+            )
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(ElectricBlue.copy(alpha = 0.05f), Color.Transparent),
+                    center = Offset(size.width * 0.8f, size.height * 0.45f),
+                    radius = size.width * 0.7f
                 )
             )
         }
@@ -174,97 +217,105 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                .graphicsLayer {
+                    alpha = contentAlpha
+                    translationY = contentOffsetY
+                }
         ) {
             // Scrollable Main Content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 16.dp, bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(28.dp)
+                    .padding(horizontal = 18.dp)
+                    .padding(top = 12.dp, bottom = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
                 // ==================================================
-                // TOP HEADER SECTION (Apple Style Creator Dashboard)
+                // 1. TOP BRANDING / HEADER WITH ANIMATED "AI READY"
                 // ==================================================
-                Column(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Top Left: ViralToolAI Logo
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        ViralToolAiLogo(size = 32.dp)
-                        Text(
-                            text = "ViralToolAI",
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
-                            letterSpacing = (-0.3).sp
-                        )
+                        ViralToolAiLogo(size = 34.dp)
+                        Column {
+                            Text(
+                                text = "ViralToolAI",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                letterSpacing = (-0.4).sp
+                            )
+                            Text(
+                                text = "Creator Studio Pro",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TextTertiary,
+                                letterSpacing = 0.4.sp
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    // Large Heading
-                    Text(
-                        text = "Ready to make today's viral reel?",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                        lineHeight = 34.sp,
-                        letterSpacing = (-0.5).sp
-                    )
-
-                    // Small Subtitle
-                    Text(
-                        text = "Your AI creator assistant is online.",
-                        fontSize = 14.5.sp,
-                        color = TextSecondary
-                    )
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    // LIVE STATUS BAR
-                    LiveStatusBar()
+                    // Small Animated AI Status Indicator: "AI READY"
+                    AiReadyStatusBadge()
                 }
 
                 // ==================================================
-                // AI CREATOR MISSIONS COMPACT HOME WIDGET
+                // 2. TOP HERO (Parallax, Glowing Particles & Soft Gradients)
                 // ==================================================
-                CompactCreatorMissionsWidget(
-                    onClick = {
-                        showCreatorMissionsDialog = true
+                val heroParallax = (scrollState.value * 0.18f).coerceAtMost(40f)
+                HeroGlassmorphicCard(
+                    modifier = Modifier.graphicsLayer {
+                        translationY = -heroParallax
                     }
                 )
 
                 // ==================================================
-                // PRIMARY TOOLS (AI Reel Analysis & AI Creator Assistant)
+                // 3. TWO MAIN TOOLS — SIDE BY SIDE (Equal Dimension Square Cards)
                 // ==================================================
+                val cardsParallax = (scrollState.value * 0.08f).coerceAtMost(20f)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            translationY = -cardsParallax
+                        },
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // LEFT TILE: AI REEL ANALYSIS
-                    AiReelsAppleCard(
-                        modifier = Modifier.weight(1f),
+                    // CARD 1: AI Reel Analysis
+                    SquareFlagshipToolCard(
+                        title = "AI Reel Analysis",
+                        subtitle = "Analyze your Reel",
+                        imageRes = R.drawable.ai_reel_analysis,
+                        imageContentDescription = "AI Reel Analysis Visual",
+                        accentColor = CyanAccent,
                         testTag = "tile_ai_reels",
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             isAnalysisMode = true
-                            Log.d("VIRI_DEBUG", "LOG: Gallery opened")
+                            Log.d("VIRI_DEBUG", "LOG: Gallery opened for Reel Analysis")
                             mediaPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
                             )
                         }
                     )
 
-                    // RIGHT TILE: AI CREATOR ASSISTANT
-                    AiCreatorAssistantAppleCard(
-                        modifier = Modifier.weight(1f),
+                    // CARD 2: AI Creator Assistant
+                    SquareFlagshipToolCard(
+                        title = "AI Creator Assistant",
+                        subtitle = "Create your video",
+                        imageRes = R.drawable.ai_creator_assistant,
+                        imageContentDescription = "AI Creator Assistant Visual",
+                        accentColor = ElectricBlue,
                         testTag = "tile_ai_creator_assistant",
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onNavigateToAiCreatorAssistant()
@@ -273,105 +324,92 @@ fun HomeScreen(
                 }
 
                 // ==================================================
-                // CREATOR TOOLS SECTION (4 Premium Modern AI Creator Tools)
+                // 4. CREATOR TOOLS (Separate Independent Rectangular Cards)
                 // ==================================================
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Creator Tools",
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
+                    // Clean glowing heading with subtle animated underline
+                    CreatorToolsSectionHeader(
+                        title = "Creator Tools"
+                    )
 
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = CyanAccent.copy(alpha = 0.12f),
-                            border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.3f))
-                        ) {
-                            Text(
-                                text = "4 AI Utilities",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = CyanAccent,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
+                    // 1. Thumbnail Picker
+                    IndependentCreatorToolCard(
+                        title = "Thumbnail Picker",
+                        subtitle = "Find the best frame",
+                        imageRes = R.drawable.thumbnail_picker,
+                        accentColor = CyanAccent,
+                        testTag = "tile_thumbnail_picker",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToThumbnailPicker()
                         }
-                    }
+                    )
 
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // ROW 1: Thumbnail Picker & Subtitles Generator
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            CreatorToolCard(
-                                title = "Thumbnail Picker",
-                                subtitle = "Find your best 2 frames",
-                                icon = Icons.Outlined.Image,
-                                iconColor = Color(0xFF22D7E8), // Cyan
-                                tag = "High CTR",
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToThumbnailPicker()
-                                }
-                            )
-
-                            CreatorToolCard(
-                                title = "Subtitles Generator",
-                                subtitle = "Auto-captions with style",
-                                icon = Icons.Outlined.Subtitles,
-                                iconColor = Color(0xFF10B981), // Emerald
-                                tag = "Multi-Lang",
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToSubtitlesGenerator()
-                                }
-                            )
+                    // 2. Subtitles Generator
+                    IndependentCreatorToolCard(
+                        title = "Subtitles Generator",
+                        subtitle = "Auto-generate subtitles",
+                        imageRes = R.drawable.subtitles_generator,
+                        accentColor = EmeraldAccent,
+                        testTag = "tile_subtitles_generator",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToSubtitlesGenerator()
                         }
+                    )
 
-                        // ROW 2: Voice Cleaner & Smart Video Text
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            CreatorToolCard(
-                                title = "Voice Cleaner",
-                                subtitle = "Noise reduction & boost",
-                                icon = Icons.Outlined.Mic,
-                                iconColor = Color(0xFFA855F7), // Purple
-                                tag = "Crisp Audio",
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToVoiceCleaner()
-                                }
-                            )
-
-                            CreatorToolCard(
-                                title = "Smart Video Text",
-                                subtitle = "Auto-text overlays",
-                                icon = Icons.Outlined.TextFields,
-                                iconColor = Color(0xFFFF9800), // Orange
-                                tag = "Hook Banner",
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToSmartVideoText()
-                                }
-                            )
+                    // 3. Voice Cleaner
+                    IndependentCreatorToolCard(
+                        title = "Voice Cleaner",
+                        subtitle = "Clean noise & enhance voice",
+                        imageRes = R.drawable.voice_cleaner,
+                        accentColor = PurpleAccent,
+                        testTag = "tile_voice_cleaner",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToVoiceCleaner()
                         }
-                    }
+                    )
+
+                    // 4. Smart Video Text
+                    IndependentCreatorToolCard(
+                        title = "Smart Video Text",
+                        subtitle = "Add stylish text automatically",
+                        imageRes = R.drawable.smart_video_text,
+                        accentColor = AmberAccent,
+                        testTag = "tile_smart_video_text",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToSmartVideoText()
+                        }
+                    )
+
+                    // 5. Remove Background
+                    IndependentCreatorToolCard(
+                        title = "Remove Background",
+                        subtitle = "Remove image background",
+                        imageRes = R.drawable.remove_background,
+                        accentColor = Color(0xFF00E5FF),
+                        testTag = "tile_remove_background",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToRemoveBackground()
+                        }
+                    )
                 }
+
+                // ==================================================
+                // 5. AI SHOPPING ASSISTANT (Premium Flagship Card)
+                // ==================================================
+                AiShoppingAssistantCard(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateToShoppingAssistant()
+                    }
+                )
             }
         }
 
@@ -385,7 +423,7 @@ fun HomeScreen(
             contentAlignment = Alignment.BottomEnd
         ) {
             ViriMascotWidget(
-                size = 100.dp,
+                size = 96.dp,
                 onTapAction = {
                     ViriPrefs.addExp(context, 10)
                 }
@@ -427,7 +465,7 @@ fun HomeScreen(
         }
 
         // ==================================================
-        // DIALOGS & OVERLAYS
+        // DIALOGS & OVERLAYS (UNCHANGED ENGINE INTEGRATION)
         // ==================================================
         if (showCreatorMissionsDialog) {
             CreatorMissionsDialog(
@@ -468,7 +506,7 @@ fun HomeScreen(
         }
 
         // ==================================================
-        // AI REEL ANALYSIS FLOW
+        // AI REEL ANALYSIS FLOW (UNCHANGED)
         // ==================================================
         if (showAiWizard && pendingImportConfig != null) {
             MasterReelDoctorFlow(
@@ -575,47 +613,333 @@ fun HomeScreen(
 }
 
 // ============================================================================
-// HELPER COMPONENTS FOR VIRALTOOLAI DASHBOARD
+// ANIMATED "AI READY" STATUS BADGE
 // ============================================================================
-
 @Composable
-private fun CreatorToolCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconColor: Color,
-    tag: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.95f else 1f, label = "tool_press_scale")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "tool_float")
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -2.5f,
+private fun AiReadyStatusBadge(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "ai_ready_pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = FastOutSlowInEasing),
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "tool_float_y"
+        label = "beacon_pulse"
+    )
+
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = CardSurfaceElevated,
+        border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f)),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(CircleShape)
+                    .background(CyanAccent.copy(alpha = pulseAlpha))
+                    .border(0.5.dp, Color.White.copy(alpha = 0.8f), CircleShape)
+            )
+            Text(
+                text = "AI READY",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = CyanAccent,
+                letterSpacing = 0.8.sp
+            )
+        }
+    }
+}
+
+// ============================================================================
+// MAIN HERO GLASSMORPHIC CARD (Liquid Glass & Real Photorealistic Creator Image)
+// ============================================================================
+@Composable
+private fun HeroGlassmorphicCard(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "hero_glass_ambient")
+    // Subtle breathing glow on border
+    val borderGlow by infiniteTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 0.75f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "hero_border_glow"
+    )
+    // Smooth liquid glass light reflection sweep across surface
+    val sweepProgress by infiniteTransition.animateFloat(
+        initialValue = -0.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "hero_sweep"
     )
 
     Surface(
         modifier = modifier
-            .height(138.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        color = CardSurfaceGlass,
+        border = BorderStroke(
+            1.dp,
+            Brush.linearGradient(
+                colors = listOf(
+                    CyanAccent.copy(alpha = borderGlow * 0.8f),
+                    Color.White.copy(alpha = 0.25f),
+                    ElectricBlue.copy(alpha = borderGlow * 0.5f),
+                    Color.White.copy(alpha = 0.08f)
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(400f, 200f)
+            )
+        ),
+        shadowElevation = 8.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF101726),
+                            Color(0xFF090E17).copy(alpha = 0.96f),
+                            Color(0xFF0D1420)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(500f, 300f)
+                    )
+                )
+        ) {
+            // Subtle Liquid Glass Light Reflection Ray
+            Canvas(
+                modifier = Modifier.matchParentSize()
+            ) {
+                val w = size.width
+                val h = size.height
+                val sweepX = w * sweepProgress
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.045f),
+                            CyanAccent.copy(alpha = 0.07f),
+                            Color.White.copy(alpha = 0.045f),
+                            Color.Transparent
+                        ),
+                        start = Offset(sweepX - 80.dp.toPx(), 0f),
+                        end = Offset(sweepX + 80.dp.toPx(), h)
+                    )
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Left text column: Clean & Compact
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "Ready to make your next viral Reel?",
+                        fontSize = 17.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextPrimary,
+                        letterSpacing = (-0.3).sp,
+                        lineHeight = 22.sp
+                    )
+
+                    Text(
+                        text = "Create, enhance and transform your videos with AI.",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = TextSecondary,
+                        lineHeight = 15.5.sp
+                    )
+                }
+
+                // Right photo container: Real Photorealistic Creator Image in Liquid Glass Frame
+                Box(
+                    modifier = Modifier
+                        .size(width = 96.dp, height = 82.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF131C2D))
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(
+                                listOf(
+                                    CyanAccent.copy(alpha = 0.6f),
+                                    ElectricBlue.copy(alpha = 0.3f),
+                                    Color.White.copy(alpha = 0.15f)
+                                )
+                            ),
+                            RoundedCornerShape(14.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.hero_creator_banner),
+                        contentDescription = "Content Creator Recording Reel",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    // Subtle Glass Sheen on top of image
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.08f),
+                                        Color.Transparent,
+                                        Color(0xFF090E17).copy(alpha = 0.35f)
+                                    )
+                                )
+                            )
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// SECTION HEADER WITH GLOW & ANIMATED UNDERLINE
+// ============================================================================
+@Composable
+private fun CreatorToolsSectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "header_underline")
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2800, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "underline_shimmer"
+    )
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = TextPrimary,
+                letterSpacing = 0.5.sp
+            )
+
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = CyanAccent.copy(alpha = 0.12f),
+                border = BorderStroke(0.8.dp, CyanAccent.copy(alpha = 0.35f))
+            ) {
+                Text(
+                    text = "4 UTILITIES",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CyanAccent,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    letterSpacing = 0.4.sp
+                )
+            }
+        }
+
+        // Shimmering Animated Underline
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+        ) {
+            val width = size.width
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        CyanAccent.copy(alpha = 0.7f),
+                        ElectricBlue.copy(alpha = 0.8f),
+                        Color.Transparent
+                    ),
+                    startX = 0f,
+                    endX = width * 0.35f
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(width * 0.4f, 0f),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+            val dotX = width * 0.4f * shimmerOffset
+            drawCircle(
+                color = Color.White.copy(alpha = 0.8f),
+                radius = 1.5.dp.toPx(),
+                center = Offset(dotX, 0f)
+            )
+        }
+    }
+}
+
+// ============================================================================
+// SQUARE FLAGSHIP TOOL CARD (Equal Dimensions, Side-by-Side)
+// ============================================================================
+@Composable
+private fun SquareFlagshipToolCard(
+    title: String,
+    subtitle: String,
+    imageRes: Int,
+    imageContentDescription: String,
+    accentColor: Color,
+    testTag: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "square_tool_scale"
+    )
+
+    Surface(
+        modifier = modifier
+            .aspectRatio(0.85f)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                translationY = floatOffset
             }
-            .clip(RoundedCornerShape(26.dp))
-            .clickable(interactionSource = interactionSource, indication = null) { onClick() },
-        shape = RoundedCornerShape(26.dp),
-        color = CardSurface,
-        border = BorderStroke(1.dp, GlassBorder.copy(alpha = 0.35f)),
+            .clip(RoundedCornerShape(22.dp))
+            .clickable(interactionSource = interactionSource, indication = null) { onClick() }
+            .testTag(testTag),
+        shape = RoundedCornerShape(22.dp),
+        color = CardSurfaceElevated,
+        border = BorderStroke(
+            1.2.dp,
+            if (isPressed) accentColor else accentColor.copy(alpha = 0.45f)
+        ),
         shadowElevation = 8.dp
     ) {
         Box(
@@ -623,358 +947,455 @@ private fun CreatorToolCard(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(TileSurface.copy(alpha = 0.7f), CardSurface)
+                        colors = listOf(
+                            Color(0xFF19202F),
+                            Color(0xFF10141D)
+                        )
                     )
                 )
-                .padding(14.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
+                // Top: Cinematic Artwork Preview Frame
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF090D14))
+                        .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(14.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = imageContentDescription,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // Subtle soft cinematic vignette overlay at edges
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        Color(0xFF090D14).copy(alpha = 0.35f)
+                                    )
+                                )
+                            )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Bottom: Title & Subtitle + Launch Arrow
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = title,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = subtitle,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = TextSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(24.dp)
                             .clip(CircleShape)
-                            .background(iconColor.copy(alpha = 0.16f))
-                            .border(1.dp, iconColor.copy(alpha = 0.5f), CircleShape),
+                            .background(accentColor.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = icon,
-                            contentDescription = title,
-                            tint = iconColor,
-                            modifier = Modifier.size(20.dp)
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            tint = accentColor,
+                            modifier = Modifier.size(12.dp)
                         )
                     }
-
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = iconColor.copy(alpha = 0.12f),
-                        border = BorderStroke(0.5.dp, iconColor.copy(alpha = 0.3f))
-                    ) {
-                        Text(
-                            text = tag,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = iconColor,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = title,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = subtitle,
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
                 }
             }
         }
     }
 }
 
+// ============================================================================
+// INDEPENDENT RECTANGULAR CREATOR TOOL CARD
+// ============================================================================
 @Composable
-private fun AiCreatorAssistantAppleCard(
-    modifier: Modifier = Modifier,
-    testTag: String = "tile_ai_creator_assistant",
-    onClick: () -> Unit
+private fun IndependentCreatorToolCard(
+    title: String,
+    subtitle: String,
+    imageRes: Int,
+    accentColor: Color,
+    testTag: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "press_scale_assistant")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "assistant_pulse")
-    val buttonPulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "btn_pulse_assistant"
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "card_press"
+    )
+    val imgScale by animateFloatAsState(
+        targetValue = if (isPressed) 1.05f else 1f,
+        animationSpec = tween(durationMillis = 200),
+        label = "img_press"
     )
 
     Surface(
         modifier = modifier
-            .height(185.dp)
+            .fillMaxWidth()
+            .height(100.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(30.dp))
+            .clip(RoundedCornerShape(18.dp))
             .clickable(interactionSource = interactionSource, indication = null) { onClick() }
             .testTag(testTag),
-        shape = RoundedCornerShape(30.dp),
-        color = CardSurface,
-        border = BorderStroke(1.5.dp, GlassBorder),
-        shadowElevation = 10.dp
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFF131722),
+        border = BorderStroke(
+            1.dp,
+            if (isPressed) accentColor else Color(0x22FFFFFF)
+        ),
+        shadowElevation = 4.dp
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1C2232), Color(0xFF121622))
-                    )
-                )
-                .padding(16.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start
+            // LEFT SIDE: Real Photorealistic Human Image (approx 36% of card width)
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.36f)
+                    .clip(RoundedCornerShape(topStart = 18.dp, bottomStart = 18.dp))
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = imgScale
+                            scaleY = imgScale
+                        }
+                )
+
+                // Subtle inner right edge vignette to blend with dark card
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    Color(0x22131722),
+                                    Color(0xFF131722)
+                                )
+                            )
+                        )
+                )
+            }
+
+            // RIGHT SIDE: Tool name, short description, arrow action button
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.64f)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(CyanAccent.copy(alpha = 0.2f))
-                            .border(1.dp, CyanAccent, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Text(
+                        text = title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.5.sp,
+                        color = Color.White.copy(alpha = 0.65f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // Small Action Arrow in Circle
+                Surface(
+                    modifier = Modifier.size(34.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.08f),
+                    border = BorderStroke(1.dp, if (isPressed) accentColor else Color(0x22FFFFFF))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = CyanAccent,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Open $title",
+                            tint = if (isPressed) accentColor else Color.White.copy(alpha = 0.85f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(CyanAccent.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "AUTO PROCESS",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CyanAccent
-                        )
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = "AI Creator Assistant",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
-                    Text(
-                        text = "AI-powered video preparation",
-                        fontSize = 11.5.sp,
-                        color = TextSecondary,
-                        maxLines = 1
-                    )
-                }
-
-                Button(
-                    onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp)
-                        .graphicsLayer {
-                            scaleX = buttonPulseScale
-                            scaleY = buttonPulseScale
-                        }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text("Open Assistant →", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
-                    }
                 }
             }
         }
     }
 }
 
+// ============================================================================
+// AI SHOPPING ASSISTANT PREMIUM CARD (Liquid Glass & Real Photorealistic Asset)
+// ============================================================================
 @Composable
-private fun AiReelsAppleCard(
-    modifier: Modifier = Modifier,
-    testTag: String = "tile_ai_reels",
-    onClick: () -> Unit
+private fun AiShoppingAssistantCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "press_scale")
-
-    val infiniteTransition = rememberInfiniteTransition(label = "phone_scan")
-    val scanLineY by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+    val cardInteractionSource = remember { MutableInteractionSource() }
+    val isCardPressed by cardInteractionSource.collectIsPressedAsState()
+    val cardScale by animateFloatAsState(
+        targetValue = if (isCardPressed) 0.985f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
         ),
-        label = "scan"
+        label = "shopping_card_scale"
     )
 
-    // Card Floating Animation
-    val cardFloatY by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+    val buttonInteractionSource = remember { MutableInteractionSource() }
+    val isButtonPressed by buttonInteractionSource.collectIsPressedAsState()
+    val buttonScale by animateFloatAsState(
+        targetValue = if (isButtonPressed) 0.965f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         ),
-        label = "card_float"
-    )
-
-    // Button Pulse Animation
-    val buttonPulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "btn_pulse"
+        label = "shopping_btn_scale"
     )
 
     Surface(
         modifier = modifier
-            .height(185.dp)
+            .fillMaxWidth()
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                translationY = cardFloatY
+                scaleX = cardScale
+                scaleY = cardScale
             }
-            .clip(RoundedCornerShape(30.dp))
-            .clickable(interactionSource = interactionSource, indication = null) { onClick() }
-            .testTag(testTag),
-        shape = RoundedCornerShape(30.dp),
+            .clip(RoundedCornerShape(22.dp))
+            .clickable(interactionSource = cardInteractionSource, indication = null) { onClick() }
+            .testTag("card_ai_shopping_assistant"),
+        shape = RoundedCornerShape(22.dp),
         color = CardSurface,
-        border = BorderStroke(1.5.dp, GlassBorder),
-        shadowElevation = 10.dp
+        border = BorderStroke(
+            1.dp,
+            if (isCardPressed) CyanAccent.copy(alpha = 0.8f) else GlassBorderSubtle
+        ),
+        shadowElevation = 6.dp
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1F2430), Color(0xFF141720))
-                    )
-                )
-                .padding(16.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start
+            // Real Photorealistic AI Shopping Scene Image Banner
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(165.dp)
+                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
             ) {
-                // Top: 9:16 Phone Mockup with animated light reflection
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(28.dp)
-                            .height(44.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF101216))
-                            .border(1.dp, CyanAccent.copy(alpha = 0.8f), RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val canvasW = size.width
-                            val canvasH = size.height
-                            drawRect(
-                                color = CyanAccent.copy(alpha = 0.5f),
-                                topLeft = Offset(0f, canvasH * scanLineY),
-                                size = Size(canvasW, 2.dp.toPx())
+                Image(
+                    painter = painterResource(id = R.drawable.ai_shopping_assistant),
+                    contentDescription = "Real Person Shopping Online with Smartphone",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Cinematic Soft Depth & Contrast Gradient Overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0xFF090D14).copy(alpha = 0.35f),
+                                    Color(0xFF090D14).copy(alpha = 0.88f)
+                                )
                             )
-                        }
+                        )
+                )
+
+                // Subtle Glass Floating Badge Top-End
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xCC090D14),
+                    border = BorderStroke(0.8.dp, CyanAccent.copy(alpha = 0.5f)),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
+                            imageVector = Icons.Default.ShoppingBag,
                             contentDescription = null,
                             tint = CyanAccent,
                             modifier = Modifier.size(12.dp)
                         )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(CyanAccent.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
                         Text(
-                            text = "PREDICT",
-                            fontSize = 9.sp,
+                            text = "AI Shopping",
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = CyanAccent
                         )
                     }
                 }
+            }
 
-                // Middle: Text Info
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = "AI Reel Analysis",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
-                    Text(
-                        text = "Analyze & predict score",
-                        fontSize = 11.5.sp,
-                        color = TextSecondary,
-                        maxLines = 1
-                    )
+            // Text content & Premium Glass Action Button
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "AI Shopping Assistant",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "Find. Compare. Buy Smarter.",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = CyanAccent.copy(alpha = 0.9f)
+                        )
+                    }
                 }
 
-                // Bottom: Cyan Upload Button CTA with pulse
-                Button(
-                    onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent, contentColor = Color.Black),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                Text(
+                    text = "Scan a product, reel or screenshot and let AI find the best options.",
+                    fontSize = 12.5.sp,
+                    color = TextSecondary,
+                    lineHeight = 17.sp
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Premium Glass Interaction Button (iPhone-style depth & subtle cyan glow)
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(36.dp)
+                        .height(46.dp)
                         .graphicsLayer {
-                            scaleX = buttonPulseScale
-                            scaleY = buttonPulseScale
+                            scaleX = buttonScale
+                            scaleY = buttonScale
                         }
+                        .clip(RoundedCornerShape(13.dp))
+                        .clickable(
+                            interactionSource = buttonInteractionSource,
+                            indication = null
+                        ) { onClick() }
+                        .testTag("btn_open_shopping_assistant"),
+                    shape = RoundedCornerShape(13.dp),
+                    color = if (isButtonPressed) CyanAccent.copy(alpha = 0.28f) else Color(0xFF10192A),
+                    border = BorderStroke(
+                        1.dp,
+                        Brush.horizontalGradient(
+                            listOf(
+                                CyanAccent.copy(alpha = if (isButtonPressed) 0.9f else 0.65f),
+                                ElectricBlue.copy(alpha = if (isButtonPressed) 0.7f else 0.35f),
+                                Color.White.copy(alpha = 0.18f)
+                            )
+                        )
+                    ),
+                    shadowElevation = if (isButtonPressed) 2.dp else 4.dp
                 ) {
                     Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        CyanAccent.copy(alpha = 0.18f),
+                                        ElectricBlue.copy(alpha = 0.12f),
+                                        Color(0xFF0F1828)
+                                    )
+                                )
+                            )
+                            .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Text("Upload Reel", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp),
+                                tint = CyanAccent
+                            )
+                            Text(
+                                text = "Open Shopping Assistant",
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
+                            )
+                        }
+
+                        // Premium Action Arrow Indicator
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Open",
+                            tint = CyanAccent,
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
                 }
             }
@@ -982,56 +1403,3 @@ private fun AiReelsAppleCard(
     }
 }
 
-@Composable
-private fun LiveStatusBar(modifier: Modifier = Modifier) {
-    val statuses = remember {
-        listOf(
-            "🟢 AI Online",
-            "⚡ Viral Engine Ready",
-            "🎯 Creator Tools Active",
-            "📊 Trend Sync Complete"
-        )
-    }
-    var currentIndex by remember { mutableStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(3000)
-            currentIndex = (currentIndex + 1) % statuses.size
-        }
-    }
-
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = TileSurface,
-        border = BorderStroke(1.dp, GlassBorder.copy(alpha = 0.5f)),
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(CyanAccent)
-            )
-            AnimatedContent(
-                targetState = statuses[currentIndex],
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-                },
-                label = "status_anim"
-            ) { status ->
-                Text(
-                    text = status,
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
-                )
-            }
-        }
-    }
-}

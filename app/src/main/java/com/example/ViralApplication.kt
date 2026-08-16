@@ -16,6 +16,16 @@ class ViralApplication : Application(), ImageLoaderFactory {
         super.onCreate()
         // Initialize Live Cloud Management System (Firebase Remote Config, Firestore, Analytics, FCM, Offline Cache)
         com.example.cloud.LiveCloudManager.init(this)
+
+        // Initialize Google Mobile Ads SDK exactly once on app startup
+        try {
+            com.google.android.gms.ads.MobileAds.initialize(this) { initializationStatus ->
+                android.util.Log.d("AdMob", "Google Mobile Ads initialized: $initializationStatus")
+            }
+            com.example.ads.RewardedAdManager.init(this)
+        } catch (e: Throwable) {
+            android.util.Log.e("AdMob", "Failed to initialize Google Mobile Ads SDK: ${e.message}", e)
+        }
     }
 
     override fun newImageLoader(): ImageLoader {
